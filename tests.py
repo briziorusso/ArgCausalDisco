@@ -86,7 +86,7 @@ class TestCausalABA(unittest.TestCase):
         expected = set([
             frozenset({(0, 2), (1, 2)}),
         ])
-        models = CausalABA(num_of_nodes, "encodings/test_lps/collider.lp")
+        models = CausalABA(num_of_nodes, "encodings/test_lps/collider.lp", show=["arrow", "indep"])
         
         model_sets = set()
         for model in models:

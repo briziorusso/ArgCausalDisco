@@ -3,7 +3,7 @@ import networkx as nx
 from itertools import combinations
 from utils import powerset
 
-def CausalABA(num_of_nodes:int, facts_location:str=None, verbose:bool=False, print_models:bool=True)->list:     
+def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], print_models:bool=True, verbose:bool=False)->list:     
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
 
@@ -72,6 +72,27 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, verbose:bool=False, pri
         ctl.add("base", [], indep_rule)
         if verbose:
             print(indep_rule)
+
+    ### add show statements
+    if 'arrow' in show:
+        ctl.add("base", [], "#show arrow/2.")
+    if 'indep' in show:
+        ctl.add("base", [], "#show indep/3.")
+    if 'dep' in show:
+        ctl.add("base", [], "#show dep/3.")
+    if 'collider' in show:
+        ctl.add("base", [], "#show collider/3.")
+    if 'collider_desc' in show:
+        ctl.add("base", [], "#show collider_desc/4.")
+    if 'nb' in show:
+        ctl.add("base", [], "#show nb/4.")
+    if 'ap' in show:
+        ctl.add("base", [], "#show ap/3.")
+        ctl.add("base", [], "#show ap/4.")
+        ctl.add("base", [], "#show ap/5.")
+    if 'dpath' in show:
+        ctl.add("base", [], "#show dpath/2.")
+
 
     ### Ground & Solve
     ctl.ground([("base", [])])

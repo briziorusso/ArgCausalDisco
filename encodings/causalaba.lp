@@ -40,7 +40,7 @@ dep(X,Y,S) :- ap(X,Z,Y,S).
 %%% Active and Blocked path rules are in python, here only the one for edges that does not change with paths
 ap(X,Y,S) :- edge(X,Y), var(X),var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
 
-#show arrow/2.
+%#show arrow/2.
 %#show collider/3.
 %#show collider_desc/4.
 %#show dep/3. 
@@ -49,4 +49,4 @@ ap(X,Y,S) :- edge(X,Y), var(X),var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
 %#show ap/4.
 %#show ap/5.
 %#show dpath/2.
-%#show nonblocker/4.
+%#show nb/4.
