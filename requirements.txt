@@ -1,0 +1,15 @@
+networkx
+pandas
+numpy
+scikit-learn
+tqdm
+ipykernel
+igraph
+pydot
+clingo
+pgmpy
+causal-learn
+gcastle 
+### the below has to be run in the terminal
+#>>> conda create -n potassco -c conda-forge clingo
+#>>> conda activate potassco
