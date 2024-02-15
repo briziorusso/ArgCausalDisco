@@ -61,7 +61,6 @@ class TestCausalABA(unittest.TestCase):
             frozenset({(1, 0), (1, 2), (2, 0)})
         ])
         models = CausalABA(num_of_nodes)
-        
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -76,7 +75,6 @@ class TestCausalABA(unittest.TestCase):
             frozenset(),
         ])
         models = CausalABA(num_of_nodes, "encodings/test_lps/three_node_empty.lp")
-        
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -91,7 +89,6 @@ class TestCausalABA(unittest.TestCase):
             frozenset({(0, 2), (1, 2)}),
         ])
         models = CausalABA(num_of_nodes, "encodings/test_lps/collider.lp", show=["arrow", "indep"])
-        
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -110,7 +107,6 @@ class TestCausalABA(unittest.TestCase):
             frozenset({(2, 0), (2, 1)})
         ])
         models = CausalABA(num_of_nodes, "encodings/test_lps/chains_confounder.lp")
-        
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -126,7 +122,6 @@ class TestCausalABA(unittest.TestCase):
             frozenset({(1, 0)}),
         ])
         models = CausalABA(num_of_nodes, "encodings/test_lps/one_edge.lp")
-        
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -139,7 +134,6 @@ class TestCausalABA(unittest.TestCase):
         num_of_nodes = 3
         expected = set()
         models = CausalABA(num_of_nodes, "encodings/test_lps/incompatible_Is.lp")
-        
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -151,7 +145,6 @@ class TestCausalABA(unittest.TestCase):
         print("===============Running four_node_graph_full===============")
         num_of_nodes = 4
         models = CausalABA(num_of_nodes, print_models=False)
-        
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -184,7 +177,6 @@ class TestCausalABA(unittest.TestCase):
                 f.write(s + "\n")
 
         models = CausalABA(num_of_nodes, facts_location)
-
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -195,8 +187,7 @@ class TestCausalABA(unittest.TestCase):
     def five_node_all_graphs(self):
         print("===============Running five_node_all_graphs===============")
         num_of_nodes = 5
-        models = CausalABA(num_of_nodes, print_models=False)
-        
+        models = CausalABA(num_of_nodes, print_models=False) 
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -229,7 +220,6 @@ class TestCausalABA(unittest.TestCase):
                 f.write(s + "\n")
 
         models = CausalABA(num_of_nodes, facts_location)
-
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -241,7 +231,6 @@ class TestCausalABA(unittest.TestCase):
         print("===============Running six_node_all_graphs===============")
         num_of_nodes = 6
         models = CausalABA(num_of_nodes, print_models=False)
-        
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -277,7 +266,6 @@ class TestCausalABA(unittest.TestCase):
                 f.write(s + "\n")
 
         models = CausalABA(num_of_nodes, facts_location)
-
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
@@ -300,8 +288,7 @@ class TestCausalABA(unittest.TestCase):
         G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         print(G_true.edges)
 
-        inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
-        G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
+        expected = frozenset({(0, 2), (1, 2), (0, 4), (2, 4), (3, 4), (0, 3), (1, 4), (2, 3)})
 
         true_seplist = find_all_d_separations_sets(G_true)
 
@@ -322,10 +309,7 @@ class TestCausalABA(unittest.TestCase):
             for s in true_seplist:
                 f.write(s + "\n")
 
-        expected = frozenset({(0, 2), (1, 2), (0, 4), (2, 4), (3, 4), (0, 3), (1, 4), (2, 3)})
-
         models = CausalABA(num_of_nodes, facts_location)
-
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, num_of_nodes)
