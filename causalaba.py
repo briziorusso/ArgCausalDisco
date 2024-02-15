@@ -24,33 +24,26 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, verbose:bool=False, pri
 
     ### Create Control
     ctl = Control(["0"])
-    ### Load encodings
-    ctl.load("encodings/causalaba.lp")
-    ### Add facts
-    if facts_location:
-        ctl.load(facts_location)
     ### Add vars
     ctl.add("base", [], f"var(0..{num_of_nodes-1}).")
     if verbose:
         print(f"var(0..{num_of_nodes-1}).")
-    ### add indep rules
-    for (X,Y) in combinations(range(num_of_nodes),2):
-        G = nx.complete_graph(num_of_nodes)
-        paths = nx.all_simple_paths(G, source=X, target=Y)
-        indep_rule_body = []
-        for path in paths:
-            indep_rule_body.append(f" not ap({','.join([str(p) for p in path])},S)")
-        indep_rule = f"indep({X},{Y},S) :-" + ','.join(indep_rule_body) + f", not in({X},S), not in({Y},S), set(S)."
-        ctl.add("base", [], indep_rule)
-        if verbose:
-            print(indep_rule)
+    ### Add set definition
+    for S in powerset(range(num_of_nodes)):
+        for s in S:
+            ctl.add("base", [], f"in({s},{'s'+''.join([str(i) for i in S])}).")
+
+    ### Load main program and facts
+    ctl.load("encodings/causalaba.lp")
+    if facts_location:
+        ctl.load(facts_location)
+
     ### add nonblocker rules
     for Z in range(num_of_nodes):
         ctl.add("base", [], f"nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in({Z},S), collider_desc({Z},N,X,Y).")
         if verbose:
             print(f"nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in({Z},S), collider_desc({Z},N,X,Y).")
-    ### Active and blocked paths rules
-    bps = []
+    ### Active paths rules
     for path_len in range(2,num_of_nodes+1):
         if path_len>2:
             Xs = [f"X{idx}" for idx in range(path_len)]
@@ -68,14 +61,21 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, verbose:bool=False, pri
             ctl.add("base", [], f"ap({','.join(Xs)},S) :- {body}, not in({Xs[0]},S), not in({Xs[-1]},S), set(S).")
             if verbose:
                 print(f"ap({','.join(Xs)},S) :- {body}, not in({Xs[0]},S), not in({Xs[-1]},S), set(S).") 
-    for S in powerset(range(num_of_nodes)):
-        for s in S:
-            ctl.add("base", [], f"in({s},{'s'+''.join([str(i) for i in S])}).")
+    ### add indep rules
+    for (X,Y) in combinations(range(num_of_nodes),2):
+        G = nx.complete_graph(num_of_nodes)
+        paths = nx.all_simple_paths(G, source=X, target=Y)
+        indep_rule_body = []
+        for path in paths:
+            indep_rule_body.append(f" not ap({','.join([str(p) for p in path])},S)")
+        indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
+        ctl.add("base", [], indep_rule)
+        if verbose:
+            print(indep_rule)
 
     ### Ground & Solve
     ctl.ground([("base", [])])
     ctl.configuration.solve.models="0"
-
     models = []
     count_models = 0
     with ctl.solve(yield_=True) as handle:
@@ -84,6 +84,7 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, verbose:bool=False, pri
             if print_models:
                 count_models += 1
                 print(f"Answer {count_models}:", model)
+
     print("Number of models:", int(ctl.statistics['summary']['models']['enumerated']))
     print("Times:", {key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']})
 
