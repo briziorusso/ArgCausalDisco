@@ -80,5 +80,21 @@ class TestCausalABA(unittest.TestCase):
         
         self.assertEqual(model_sets, expected)
 
+    def collider(self):
+        print("===============Running collider===============")
+        num_of_nodes = 3
+        expected = set([
+            frozenset({(0, 2), (1, 2)}),
+        ])
+        models = CausalABA(num_of_nodes, "encodings/test_lps/collider.lp")
+        
+        model_sets = set()
+        for model in models:
+            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            model_sets.add(frozenset(arrows))            
+        
+        self.assertEqual(model_sets, expected)
+
 TestCausalABA().three_node_graph_full()
 TestCausalABA().three_node_graph_empty()
+TestCausalABA().collider()
