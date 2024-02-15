@@ -1,6 +1,18 @@
+import sys
 from itertools import chain, combinations
 import numpy as np
 import networkx as nx
+
+maxpc = False
+if maxpc:
+    sys.path.append("../causal-learn/")
+    from causallearn.search.ConstraintBased.PC import pc
+else:
+    sys.path.append("cd_algorithms/")
+    from PC import pc
+
+sys.path.append("../causal-learn/tests/")
+from utils_simulate_data import simulate_discrete_data, simulate_linear_continuous_data
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
@@ -20,6 +32,19 @@ def model_to_set_of_arrows(model:list, num_of_nodes:int)->set:
         if atom.name == 'arrow':
             arrows.add((atom.arguments[0].number,atom.arguments[1].number))
     return arrows
+
+def extract_test_elements_from_symbol(symbol:str)->list:
+    dep_type, elements = symbol.replace(").","").split("(")
+    
+    X, Y, condset = elements.split(",")
+    if condset == "empty":
+        S = set()
+    elif condset[0] == "s":
+        S = set([int(e) for e in condset[1:].split("y")])
+    else:
+        raise ValueError(f"Unknown element {condset}")
+
+    return int(X), S, int(Y), dep_type
 
 def find_all_d_separations_sets(G, verbose=True, debug=False):
     no_of_var = len(G.nodes)
@@ -41,7 +66,7 @@ def find_all_d_separations_sets(G, verbose=True, debug=False):
                     if debug:
                         print(S)
                     s = set([int(s.replace('X',''))-1 for s in S])
-                    s_str = 'empty' if len(S)==0 else 's'+''.join([str(i) for i in s])
+                    s_str = 'empty' if len(S)==0 else 's'+'y'.join([str(i) for i in s])
                     if nx.algorithms.d_separated(G, {f"X{x+1}"}, {f"X{y+1}"}, set(S)):
                         if verbose:
                             print(f"X{x+1} and X{y+1} are d-separated by {S}")
@@ -51,3 +76,29 @@ def find_all_d_separations_sets(G, verbose=True, debug=False):
                         septests.append(f"dep({x},{y},{s_str}).")
                 depth += 1
     return septests
+
+def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_priority:int=2):
+    """A function to simulate data and run PC algorithm
+
+    Args:
+        G_true (nx.DiGraph): the true graph
+        alpha (float): significance level
+        uc_rule (int, optional): unshielded collider rule. Defaults to 3.
+        uc_priority (int, optional): unshielded collider priority. Defaults to 2.
+
+    Returns:
+        causallearn.CausalGraph: the learned graph
+    """
+
+    num_of_nodes = len(G_true.nodes)
+    # num_of_nodes = max(sum(truth_DAG_directed_edges, ())) + 1
+
+    truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
+
+    print(f"Simulating data with {num_of_nodes} nodes, {10000} samples...")
+    data = simulate_discrete_data(num_of_nodes, 10000, truth_DAG_directed_edges, 42)
+
+    print(f"Running PC algorithm...")
+    cg = pc(data=data, alpha=alpha, ikb=True, uc_rule=uc_rule, uc_priority=uc_priority, verbose=False)
+    
+    return cg

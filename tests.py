@@ -21,7 +21,7 @@ from causalaba import CausalABA
 import networkx as nx
 import numpy as np
 import pandas as pd
-from utils import model_to_set_of_arrows, find_all_d_separations_sets
+from utils import model_to_set_of_arrows, find_all_d_separations_sets, simulate_data_and_run_PC, extract_test_elements_from_symbol
 
 
 class TestCausalABA(unittest.TestCase):
@@ -285,6 +285,54 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertEqual(model_sets, expected)
 
+    def five_node_colombo_PC_facts(self):
+        scenario = "five_node_colombo_PC_facts"
+        alpha = 0.05
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        print(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  0,  0,  0],
+                            [ 0,  0,  0,  0,  0],
+                            [ 1,  1,  0,  0,  0],
+                            [ 1,  0,  1,  0,  0],
+                            [ 1,  1,  1,  1,  0]])
+        num_of_nodes = B_true.shape[0]
+        print(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        print(G_true.edges)
+
+        inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
+        G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        cg = simulate_data_and_run_PC(G_true, alpha)
+
+        facts = []
+        for test in true_seplist:
+            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+
+            test_PC = [t for t in cg.sepset[X,Y] if set(t[0])==S]
+            if len(test_PC)==1:
+                p = test_PC[0][1]
+                dep_type_PC = "I" if p > alpha else "D" 
+                if dep_type == dep_type_PC:
+                    facts.append(test)
+
+        with open(facts_location, "w") as f:
+            for s in true_seplist:
+                f.write(s + "\n")
+
+        expected = frozenset({(0, 2), (1, 2), (0, 4), (2, 4), (3, 4), (0, 3), (1, 4), (2, 3)})
+
+        models = CausalABA(num_of_nodes, facts_location)
+
+        model_sets = set()
+        for model in models:
+            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            model_sets.add(frozenset(arrows))            
+
+        self.assertIn(expected, model_sets)
+
 TestCausalABA().three_node_all_graphs()
 TestCausalABA().three_node_graph_empty()
 TestCausalABA().collider()
@@ -295,5 +343,6 @@ TestCausalABA().four_node_all_graphs()
 TestCausalABA().four_node_example()
 TestCausalABA().five_node_all_graphs()
 TestCausalABA().five_node_colombo_example()
-# TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 TestCausalABA().six_node_example()
+TestCausalABA().five_node_colombo_PC_facts()
