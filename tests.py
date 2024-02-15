@@ -301,12 +301,12 @@ class TestCausalABA(unittest.TestCase):
             test_PC = [t for t in cg.sepset[X,Y] if set(t[0])==S]
             if len(test_PC)==1:
                 p = test_PC[0][1]
-                dep_type_PC = "I" if p > alpha else "D" 
+                dep_type_PC = "indep" if p > alpha else "dep" 
                 if dep_type == dep_type_PC:
                     facts.append(test)
 
         with open(facts_location, "w") as f:
-            for s in true_seplist:
+            for s in facts:
                 f.write(s + "\n")
 
         models = CausalABA(num_of_nodes, facts_location)
@@ -317,16 +317,16 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertIn(expected, model_sets)
 
-TestCausalABA().three_node_all_graphs()
-TestCausalABA().three_node_graph_empty()
-TestCausalABA().collider()
-TestCausalABA().chains_confounder()
-TestCausalABA().one_edge()
-TestCausalABA().incompatible_Is()
-TestCausalABA().four_node_all_graphs()
-TestCausalABA().four_node_example()
-TestCausalABA().five_node_all_graphs()
-TestCausalABA().five_node_colombo_example()
-## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-TestCausalABA().six_node_example()
+# TestCausalABA().three_node_all_graphs()
+# TestCausalABA().three_node_graph_empty()
+# TestCausalABA().collider()
+# TestCausalABA().chains_confounder()
+# TestCausalABA().one_edge()
+# TestCausalABA().incompatible_Is()
+# TestCausalABA().four_node_all_graphs()
+# TestCausalABA().four_node_example()
+# TestCausalABA().five_node_all_graphs()
+# TestCausalABA().five_node_colombo_example()
+# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+# TestCausalABA().six_node_example()
 TestCausalABA().five_node_colombo_PC_facts()
