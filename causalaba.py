@@ -31,7 +31,7 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     ### Add set definition
     for S in powerset(range(num_of_nodes)):
         for s in S:
-            ctl.add("base", [], f"in({s},{'s'+''.join([str(i) for i in S])}).")
+            ctl.add("base", [], f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
 
     ### Load main program and facts
     ctl.load("encodings/causalaba.lp")
