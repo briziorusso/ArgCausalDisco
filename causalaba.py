@@ -4,7 +4,7 @@ from clingo.control import Control
 import networkx as nx
 from itertools import combinations
 from datetime import datetime
-from utils import powerset, format_time
+from utils import powerset, extract_test_elements_from_symbol
 
 def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], print_models:bool=True, verbose:bool=False)->list:     
     """
@@ -65,13 +65,28 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
             logging.debug(f"dep({Xs[0]},{Xs[-1]},S) :- ap({','.join(Xs)},S).")
     
     indep_facts = set()
+    dep_facts = set()
+    if facts_location:
+        with open(facts_location, 'r') as file:
+            for line in file:
+                if 'indep' in line:
+                    X, _, Y, _ = extract_test_elements_from_symbol(line.replace("\n",""))
+                    indep_facts.add((X,Y))
+                elif 'dep' in line and 'in' not in line:
+                    X, _, Y, _ = extract_test_elements_from_symbol(line.replace("\n",""))
+                    dep_facts.add((X,Y))
+
     ### add indep rules
-    for (X,Y) in combinations(range(num_of_nodes),2):
+    for (X,Y) in dep_facts:
         G = nx.complete_graph(num_of_nodes)
         paths = nx.all_simple_paths(G, source=X, target=Y)
         indep_rule_body = []
         for path in paths:
-            indep_rule_body.append(f" not ap({','.join([str(p) for p in path])},S)")
+            for idx in range(len(path)-1):
+                idx1 = path[idx]
+                idx2 = path[idx+1]
+                if (idx1,idx2) not in indep_facts:
+                    indep_rule_body.append(f" not ap({','.join([str(p) for p in path])},S)")
         indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
         ctl.add("base", [], indep_rule)
         logging.debug(indep_rule)
