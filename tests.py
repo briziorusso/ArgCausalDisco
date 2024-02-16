@@ -369,16 +369,8 @@ class TestCausalABA(unittest.TestCase):
         self.assertIn(expected, model_sets)
 
 start = datetime.now()
-TestCausalABA().three_node_all_graphs()
-TestCausalABA().three_node_graph_empty()
-TestCausalABA().collider()
-TestCausalABA().chains_confounder()
-TestCausalABA().one_edge()
-TestCausalABA().incompatible_Is()
-TestCausalABA().four_node_all_graphs()
-TestCausalABA().four_node_example()
-TestCausalABA().five_node_all_graphs()
-TestCausalABA().five_node_colombo_example()
+# TestCausalABA().four_node_example2()
+# TestCausalABA().five_node_all_graphs()
 # ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 # TestCausalABA().six_node_example()
 # TestCausalABA().five_node_colombo_PC_facts()
