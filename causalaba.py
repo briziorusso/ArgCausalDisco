@@ -59,7 +59,12 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
                 body = f"{','.join(edges)}, {','.join(vars)}, {','.join(uneq_const)}"
             ### Active paths
             ctl.add("base", [], f"ap({','.join(Xs)},S) :- {body}, not in({Xs[0]},S), not in({Xs[-1]},S), set(S).")
-            logging.debug(f"ap({','.join(Xs)},S) :- {body}, not in({Xs[0]},S), not in({Xs[-1]},S), set(S).") 
+            logging.debug(f"ap({','.join(Xs)},S) :- {body}, not in({Xs[0]},S), not in({Xs[-1]},S), set(S).")
+            ## add dep rules
+            ctl.add("base", [], f"dep({Xs[0]},{Xs[-1]},S) :- ap({','.join(Xs)},S).")
+            logging.debug(f"dep({Xs[0]},{Xs[-1]},S) :- ap({','.join(Xs)},S).")
+    
+    indep_facts = set()
     ### add indep rules
     for (X,Y) in combinations(range(num_of_nodes),2):
         G = nx.complete_graph(num_of_nodes)

@@ -37,6 +37,7 @@ nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in(Z,S), c
 
 %%% Active and Blocked path rules are in python, here only the one for edges that does not change with paths
 ap(X,Y,S) :- edge(X,Y), var(X),var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
+dep(X,Y,S) :- ap(X,Y,S).
 
 %#show arrow/2.
 %#show collider/3.
