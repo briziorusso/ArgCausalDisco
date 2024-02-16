@@ -185,6 +185,21 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertEqual(set(model_sets), expected)
 
+    def four_node_example2(self):
+        scenario = "four_node_example2"
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        logging.info(f"===============Running {scenario}===============")
+        n_nodes = 4
+        expected = set()
+
+        models = CausalABA(n_nodes, facts_location)
+        model_sets = set()
+        for model in models:
+            arrows = model_to_set_of_arrows(model, n_nodes)
+            model_sets.add(frozenset(arrows))            
+
+        self.assertEqual(set(model_sets), expected)
+
     def five_node_all_graphs(self):
         logging.info("===============Running five_node_all_graphs===============")
         n_nodes = 5
@@ -200,19 +215,17 @@ class TestCausalABA(unittest.TestCase):
         scenario = "five_node_colombo_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  0,  0],
-                            [ 0,  0,  0,  0],
-                            [ 1,  1,  0,  0],
-                            [ 0,  1,  1,  0],
-                            ])
+        B_true = np.array( [[ 0,  0,  0,  0,  0],
+                            [ 0,  0,  0,  0,  0],
+                            [ 1,  1,  0,  0,  0],
+                            [ 1,  0,  1,  0,  0],
+                            [ 1,  1,  1,  1,  0]])
         n_nodes = B_true.shape[0]
         logging.debug(B_true)
         G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
 
-        expected = set([
-            frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
-        ])
+        expected = {frozenset({(0, 2), (1, 2), (0, 4), (2, 4), (3, 4), (0, 3), (1, 4), (2, 3)})}
 
         true_seplist = find_all_d_separations_sets(G_true)
 
@@ -238,7 +251,6 @@ class TestCausalABA(unittest.TestCase):
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(len(model_sets), 3781503)
-
 
     def six_node_example(self):
         scenario = "six_node_example"
@@ -318,13 +330,46 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertIn(expected, model_sets)
 
-    def ten_node_randomG_PC_facts(self):
-        scenario = "ten_node_randomG_PC_facts"
+    def randomG(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024):
+        scenario = "randomG"
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        logging.info(f"===============Running {scenario}===============")
+        print(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
+        s0 = int(n_nodes*edge_per_node)
+        if s0 > int(n_nodes*(n_nodes-1)/2):
+            logging.info(f'{s0} is too many edges, setting s0 to the max:', int(n_nodes*(n_nodes-1)/2))
+            s0 = int(n_nodes*(n_nodes-1)/2)
+        random_stability(seed)
+        B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=graph_type)
+        logging.debug(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.debug(G_true.edges)
+
+        inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
+        G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
+        expected = frozenset(set(G_true1.edges()))
+
+        true_seplist = find_all_d_separations_sets(G_true, verbose=False)
+
+        with open(facts_location, "w") as f:
+            for s in true_seplist:
+                f.write(s + "\n")
+
+        models = CausalABA(n_nodes, facts_location)
+        model_sets = set()
+        for model in models:
+            arrows = model_to_set_of_arrows(model, n_nodes)
+            model_sets.add(frozenset(arrows))            
+
+        self.assertIn(expected, model_sets)
+
+    def randomG_PC_facts(self):
+        scenario = "randomG_PC_facts"
         alpha = 0.05
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
 
-        n_nodes = 8
+        n_nodes = 7
         edge_per_node = 2
         graph_type = "ER"
         s0 = int(n_nodes*edge_per_node)
@@ -369,10 +414,20 @@ class TestCausalABA(unittest.TestCase):
         self.assertIn(expected, model_sets)
 
 start = datetime.now()
+# TestCausalABA().three_node_all_graphs()
+# TestCausalABA().three_node_graph_empty()
+# TestCausalABA().collider()
+# TestCausalABA().chains_confounder()
+# TestCausalABA().one_edge()
+# TestCausalABA().incompatible_Is()
+# TestCausalABA().four_node_all_graphs()
+# TestCausalABA().four_node_example()
 # TestCausalABA().four_node_example2()
 # TestCausalABA().five_node_all_graphs()
+# TestCausalABA().five_node_colombo_example()
 # ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 # TestCausalABA().six_node_example()
 # TestCausalABA().five_node_colombo_PC_facts()
-# TestCausalABA().ten_node_randomG_PC_facts()
+# TestCausalABA().randomG_PC_facts()
+TestCausalABA().randomG(8, 1, "ER", 2024)
 logging.info(f"Total time={str(datetime.now()-start)}")
