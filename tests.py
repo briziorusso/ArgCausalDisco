@@ -309,10 +309,59 @@ class TestCausalABA(unittest.TestCase):
             for s in facts:
                 f.write(s + "\n")
 
-        models = CausalABA(num_of_nodes, facts_location)
+        models = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
+            model_sets.add(frozenset(arrows))            
+
+        self.assertIn(expected, model_sets)
+
+    def ten_node_randomG_PC_facts(self):
+        scenario = "ten_node_randomG_PC_facts"
+        alpha = 0.05
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        logging.info(f"===============Running {scenario}===============")
+
+        n_nodes = 6
+        edge_per_node = 2
+        graph_type = "ER"
+        s0 = int(n_nodes*edge_per_node)
+        if s0 > int(n_nodes*(n_nodes-1)/2):
+            logging.info(f'{s0} is too many edges, setting s0 to the max:', int(n_nodes*(n_nodes-1)/2))
+            s0 = int(n_nodes*(n_nodes-1)/2)
+        B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=graph_type)
+        logging.debug(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.debug(G_true.edges)
+
+        inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
+        G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
+        expected = frozenset(set(G_true1.edges()))
+
+        true_seplist = find_all_d_separations_sets(G_true, verbose=False)
+
+        cg = simulate_data_and_run_PC(G_true, alpha)
+
+        facts = []
+        for test in true_seplist:
+            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+
+            test_PC = [t for t in cg.sepset[X,Y] if set(t[0])==S]
+            if len(test_PC)==1:
+                p = test_PC[0][1]
+                dep_type_PC = "indep" if p > alpha else "dep" 
+                if dep_type == dep_type_PC:
+                    facts.append(test)
+
+        with open(facts_location, "w") as f:
+            for s in facts:
+                f.write(s + "\n")
+
+        models = CausalABA(n_nodes, facts_location, print_models=False)
+        model_sets = set()
+        for model in models:
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
 
         self.assertIn(expected, model_sets)
@@ -329,4 +378,7 @@ class TestCausalABA(unittest.TestCase):
 # TestCausalABA().five_node_colombo_example()
 # ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 # TestCausalABA().six_node_example()
-TestCausalABA().five_node_colombo_PC_facts()
+# TestCausalABA().five_node_colombo_PC_facts()
+start = datetime.now()
+TestCausalABA().ten_node_randomG_PC_facts()
+logging.info(f"Total time={str(datetime.now()-start)}")
