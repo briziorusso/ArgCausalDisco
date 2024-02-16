@@ -29,8 +29,8 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     ### Create Control
     ctl = Control(['-t %d' % os.cpu_count()])
     ### Add vars
-    ctl.add("base", [], f"var(0..{num_of_nodes-1}).")
-    logging.debug(f"var(0..{num_of_nodes-1}).")
+    ctl.add("base", [], f"#const n_vars = {num_of_nodes-1}.")
+    logging.debug(f"#const n_vars = {num_of_nodes-1}.")
     ### Add set definition
     for S in powerset(range(num_of_nodes)):
         for s in S:
@@ -43,9 +43,8 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
 
     ### add nonblocker rules
     logging.info("   Adding Specific Rules...")
-    for Z in range(num_of_nodes):
-        ctl.add("base", [], f"nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in({Z},S), collider_desc({Z},N,X,Y).")
-        logging.debug(f"nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in({Z},S), collider_desc({Z},N,X,Y).")
+    ctl.add("base", [], f"nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in(0..n_vars,S), collider_desc(0..n_vars,N,X,Y).")
+    logging.debug(f"nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in(0..n_vars,S), collider_desc(0..n_vars,N,X,Y).")
     ### Active paths rules
     for path_len in range(2,num_of_nodes+1):
         if path_len>2:

@@ -1,4 +1,5 @@
 %%% sets and elements
+var(0..n_vars).
 set(X) :- in(_,X).
 set(empty).
 
