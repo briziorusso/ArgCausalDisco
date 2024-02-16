@@ -334,7 +334,7 @@ class TestCausalABA(unittest.TestCase):
         scenario = "randomG"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
-        print(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
+        logging.info(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
         s0 = int(n_nodes*edge_per_node)
         if s0 > int(n_nodes*(n_nodes-1)/2):
             logging.info(f'{s0} is too many edges, setting s0 to the max:', int(n_nodes*(n_nodes-1)/2))
@@ -363,15 +363,12 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertIn(expected, model_sets)
 
-    def randomG_PC_facts(self):
+    def randomG_PC_facts(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024):
         scenario = "randomG_PC_facts"
         alpha = 0.05
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
-
-        n_nodes = 7
-        edge_per_node = 2
-        graph_type = "ER"
+        logging.info(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
         s0 = int(n_nodes*edge_per_node)
         if s0 > int(n_nodes*(n_nodes-1)/2):
             logging.info(f'{s0} is too many edges, setting s0 to the max:', int(n_nodes*(n_nodes-1)/2))
@@ -414,20 +411,22 @@ class TestCausalABA(unittest.TestCase):
         self.assertIn(expected, model_sets)
 
 start = datetime.now()
-# TestCausalABA().three_node_all_graphs()
-# TestCausalABA().three_node_graph_empty()
-# TestCausalABA().collider()
-# TestCausalABA().chains_confounder()
-# TestCausalABA().one_edge()
-# TestCausalABA().incompatible_Is()
-# TestCausalABA().four_node_all_graphs()
-# TestCausalABA().four_node_example()
-# TestCausalABA().four_node_example2()
-# TestCausalABA().five_node_all_graphs()
-# TestCausalABA().five_node_colombo_example()
-# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-# TestCausalABA().six_node_example()
+TestCausalABA().three_node_all_graphs()
+TestCausalABA().three_node_graph_empty()
+TestCausalABA().collider()
+TestCausalABA().chains_confounder()
+TestCausalABA().one_edge()
+TestCausalABA().incompatible_Is()
+TestCausalABA().four_node_all_graphs()
+TestCausalABA().four_node_example()
+TestCausalABA().four_node_example2()
+TestCausalABA().five_node_all_graphs()
+TestCausalABA().five_node_colombo_example()
+## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+TestCausalABA().six_node_example()
 # TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().randomG_PC_facts()
+TestCausalABA().randomG(7, 1, "ER", 2024)
 TestCausalABA().randomG(8, 1, "ER", 2024)
+
 logging.info(f"Total time={str(datetime.now()-start)}")
