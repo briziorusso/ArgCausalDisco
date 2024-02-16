@@ -96,7 +96,9 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
 
     ### Ground & Solve
     logging.info("   Grounding...")
+    start_ground = datetime.now()
     ctl.ground([("base", [])])
+    logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
     ctl.configuration.solve.models="0"
     models = []
     count_models = 0
