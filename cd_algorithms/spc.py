@@ -16,6 +16,7 @@ from typing import List
 import igraph as ig
 def is_dag(W):
     G = ig.Graph.Weighted_Adjacency(W.tolist())
+    ##TODO: compare to nx.is_directed_acyclic_graph(G)
     return G.is_dag()
 
 def add_value(array, i, j, value):

@@ -1,7 +1,10 @@
 import sys
+import logging
 from itertools import chain, combinations
 import numpy as np
 import networkx as nx
+import igraph as ig
+from datetime import datetime
 
 maxpc = False
 if maxpc:
@@ -13,6 +16,29 @@ else:
 
 sys.path.append("../causal-learn/tests/")
 from utils_simulate_data import simulate_discrete_data, simulate_linear_continuous_data
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='.temp/causalaba.log',
+                    filemode='w')
+# define a Handler which writes INFO messages or higher to the sys.stderr
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+# set a format which is simpler for console use
+formatter = logging.Formatter('%(asctime)s %(name)-8s %(module)-12s - %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M:%S')
+# format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+# format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+# tell the handler to use this format
+console.setFormatter(formatter)
+# add the handler to the root logger
+logging.getLogger('').addHandler(console)
+
+def format_time(timestamp=datetime.now(), date=True, decimals=0):
+    if date:
+        return timestamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-7+decimals]
+    else:
+        return timestamp.strftime('%Y-%m-%d %H:%M:%S.%f')[11:-7+decimals]
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
@@ -50,29 +76,20 @@ def find_all_d_separations_sets(G, verbose=True, debug=False):
     no_of_var = len(G.nodes)
     septests = []
     for comb in combinations(range(no_of_var), 2):
-        if debug:
-            print(comb)
         if comb[0] != comb[1]:
             x = comb[0]
             y = comb[1]
-            if debug:
-                print(x,y)
             depth = 0
             while no_of_var-1 > depth:
                 Neigh_x_noy = [f"X{k+1}" for k in range(no_of_var) if k != x and k != y]
-                if debug:
-                    print(Neigh_x_noy)
                 for S in combinations(Neigh_x_noy, depth):
-                    if debug:
-                        print(S)
                     s = set([int(s.replace('X',''))-1 for s in S])
                     s_str = 'empty' if len(S)==0 else 's'+'y'.join([str(i) for i in s])
                     if nx.algorithms.d_separated(G, {f"X{x+1}"}, {f"X{y+1}"}, set(S)):
-                        if verbose:
-                            print(f"X{x+1} and X{y+1} are d-separated by {S}")
+                        logging.debug(f"X{x+1} and X{y+1} are d-separated by {S}")
                         septests.append(f"indep({x},{y},{s_str}).")
                     else:
-                        # print(f"X{x+1} and X{y+1} are not d-separated by {S}")
+                        # logging.info(f"X{x+1} and X{y+1} are not d-separated by {S}")
                         septests.append(f"dep({x},{y},{s_str}).")
                 depth += 1
     return septests
@@ -95,10 +112,10 @@ def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_p
 
     truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
 
-    print(f"Simulating data with {num_of_nodes} nodes, {10000} samples...")
+    logging.info(f"Simulating data with {num_of_nodes} nodes, {10000} samples...")
     data = simulate_discrete_data(num_of_nodes, 10000, truth_DAG_directed_edges, 42)
 
-    print(f"Running PC algorithm...")
+    logging.info(f"Running PC algorithm...")
     cg = pc(data=data, alpha=alpha, ikb=True, uc_rule=uc_rule, uc_priority=uc_priority, verbose=False)
     
     return cg

@@ -17,18 +17,19 @@ __email__ = "fabrizio@imperial.ac.uk"
 __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
 import unittest
+import logging
 from causalaba import CausalABA
 import networkx as nx
 import numpy as np
 import pandas as pd
-from utils import model_to_set_of_arrows, find_all_d_separations_sets, simulate_data_and_run_PC, extract_test_elements_from_symbol
-
+from datetime import datetime
+from utils import *
 
 class TestCausalABA(unittest.TestCase):
 
     def three_node_all_graphs(self):
-        print("===============Running three_node_all_graphs===============")
-        num_of_nodes = 3
+        logging.info("===============Running three_node_all_graphs===============")
+        n_nodes = 3
         expected = set([
             frozenset(),
             frozenset({(1, 0)}),
@@ -60,45 +61,45 @@ class TestCausalABA(unittest.TestCase):
             frozenset({(0, 1), (2, 0), (2, 1)}),
             frozenset({(1, 0), (1, 2), (2, 0)})
         ])
-        models = CausalABA(num_of_nodes)
+        models = CausalABA(n_nodes)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(model_sets, expected)
 
     def three_node_graph_empty(self):
-        print("===============Running three_node_graph_empty===============")
-        num_of_nodes = 3
+        logging.info("===============Running three_node_graph_empty===============")
+        n_nodes = 3
         expected = set([
             frozenset(),
         ])
-        models = CausalABA(num_of_nodes, "encodings/test_lps/three_node_empty.lp")
+        models = CausalABA(n_nodes, "encodings/test_lps/three_node_empty.lp")
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(model_sets, expected)
 
     def collider(self):
-        print("===============Running collider===============")
-        num_of_nodes = 3
+        logging.info("===============Running collider===============")
+        n_nodes = 3
         expected = set([
             frozenset({(0, 2), (1, 2)}),
         ])
-        models = CausalABA(num_of_nodes, "encodings/test_lps/collider.lp", show=["arrow", "indep"])
+        models = CausalABA(n_nodes, "encodings/test_lps/collider.lp", show=["arrow", "indep"])
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))
 
         self.assertEqual(model_sets, expected)
 
     def chains_confounder(self):
-        print("===============Running chains_confounder===============")
-        num_of_nodes = 3
+        logging.info("===============Running chains_confounder===============")
+        n_nodes = 3
         expected = set([
             ##chains
             frozenset({(1, 2), (2, 0)}),
@@ -106,48 +107,48 @@ class TestCausalABA(unittest.TestCase):
             ##confounder
             frozenset({(2, 0), (2, 1)})
         ])
-        models = CausalABA(num_of_nodes, "encodings/test_lps/chains_confounder.lp")
+        models = CausalABA(n_nodes, "encodings/test_lps/chains_confounder.lp")
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))
 
         self.assertEqual(model_sets, expected)
 
     def one_edge(self):
-        print("===============Running one_edge===============")
-        num_of_nodes = 3
+        logging.info("===============Running one_edge===============")
+        n_nodes = 3
         expected = set([
             frozenset({(0, 1)}),
             frozenset({(1, 0)}),
         ])
-        models = CausalABA(num_of_nodes, "encodings/test_lps/one_edge.lp")
+        models = CausalABA(n_nodes, "encodings/test_lps/one_edge.lp")
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))
 
         self.assertEqual(model_sets, expected)
 
     def incompatible_Is(self):
-        print("===============Running incompatible_Is===============")
-        num_of_nodes = 3
+        logging.info("===============Running incompatible_Is===============")
+        n_nodes = 3
         expected = set()
-        models = CausalABA(num_of_nodes, "encodings/test_lps/incompatible_Is.lp")
+        models = CausalABA(n_nodes, "encodings/test_lps/incompatible_Is.lp")
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))       
 
         self.assertEqual(model_sets, expected)
 
     def four_node_all_graphs(self):
-        print("===============Running four_node_graph_full===============")
-        num_of_nodes = 4
-        models = CausalABA(num_of_nodes, print_models=False)
+        logging.info("===============Running four_node_graph_full===============")
+        n_nodes = 4
+        models = CausalABA(n_nodes, print_models=False)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(len(model_sets), 543)
@@ -155,16 +156,16 @@ class TestCausalABA(unittest.TestCase):
     def four_node_example(self):
         scenario = "four_node_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
-        print(f"===============Running {scenario}===============")
+        logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0],
                             [ 0,  0,  0,  0],
                             [ 1,  1,  0,  0],
                             [ 0,  1,  1,  0],
                             ])
-        num_of_nodes = B_true.shape[0]
-        print(B_true)
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
         G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
-        print(G_true.edges)
+        logging.info(G_true.edges)
 
         expected = set([
             frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
@@ -176,21 +177,21 @@ class TestCausalABA(unittest.TestCase):
             for s in true_seplist:
                 f.write(s + "\n")
 
-        models = CausalABA(num_of_nodes, facts_location)
+        models = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
 
         self.assertEqual(set(model_sets), expected)
 
     def five_node_all_graphs(self):
-        print("===============Running five_node_all_graphs===============")
-        num_of_nodes = 5
-        models = CausalABA(num_of_nodes, print_models=False) 
+        logging.info("===============Running five_node_all_graphs===============")
+        n_nodes = 5
+        models = CausalABA(n_nodes, print_models=False) 
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(len(model_sets), 29281)
@@ -198,16 +199,16 @@ class TestCausalABA(unittest.TestCase):
     def five_node_colombo_example(self):
         scenario = "five_node_colombo_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
-        print(f"===============Running {scenario}===============")
+        logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0],
                             [ 0,  0,  0,  0],
                             [ 1,  1,  0,  0],
                             [ 0,  1,  1,  0],
                             ])
-        num_of_nodes = B_true.shape[0]
-        print(B_true)
+        n_nodes = B_true.shape[0]
+        logging.debug(B_true)
         G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
-        print(G_true.edges)
+        logging.debug(G_true.edges)
 
         expected = set([
             frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
@@ -219,21 +220,21 @@ class TestCausalABA(unittest.TestCase):
             for s in true_seplist:
                 f.write(s + "\n")
 
-        models = CausalABA(num_of_nodes, facts_location)
+        models = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
 
         self.assertEqual(set(model_sets), expected)
 
     def six_node_all_graphs(self):
-        print("===============Running six_node_all_graphs===============")
-        num_of_nodes = 6
-        models = CausalABA(num_of_nodes, print_models=False)
+        logging.info("===============Running six_node_all_graphs===============")
+        n_nodes = 6
+        models = CausalABA(n_nodes, print_models=False)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(len(model_sets), 3781503)
@@ -242,17 +243,17 @@ class TestCausalABA(unittest.TestCase):
     def six_node_example(self):
         scenario = "six_node_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
-        print(f"===============Running {scenario}===============")
+        logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0,  0,  0],
                             [ 0,  0,  0,  0,  0,  0],
                             [ 1,  1,  0,  0,  0,  0],
                             [ 1,  0,  1,  0,  0,  0],
                             [ 1,  0,  1,  0,  0,  0],
                             [ 1,  1,  1,  1,  1,  0]])
-        num_of_nodes = B_true.shape[0]
-        print(B_true)
+        n_nodes = B_true.shape[0]
+        logging.debug(B_true)
         G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
-        print(G_true.edges)
+        logging.debug(G_true.edges)
 
         inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
         G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
@@ -265,10 +266,10 @@ class TestCausalABA(unittest.TestCase):
             for s in true_seplist:
                 f.write(s + "\n")
 
-        models = CausalABA(num_of_nodes, facts_location)
+        models = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, num_of_nodes)
+            arrows = model_to_set_of_arrows(model, n_nodes)
             model_sets.add(frozenset(arrows))            
 
         self.assertEqual(model_sets, expected)
@@ -277,16 +278,16 @@ class TestCausalABA(unittest.TestCase):
         scenario = "five_node_colombo_PC_facts"
         alpha = 0.05
         facts_location = f"encodings/test_lps/{scenario}.lp"
-        print(f"===============Running {scenario}===============")
+        logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0,  0],
                             [ 0,  0,  0,  0,  0],
                             [ 1,  1,  0,  0,  0],
                             [ 1,  0,  1,  0,  0],
                             [ 1,  1,  1,  1,  0]])
-        num_of_nodes = B_true.shape[0]
-        print(B_true)
+        n_nodes = B_true.shape[0]
+        logging.debug(B_true)
         G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
-        print(G_true.edges)
+        logging.debug(G_true.edges)
 
         expected = frozenset({(0, 2), (1, 2), (0, 4), (2, 4), (3, 4), (0, 3), (1, 4), (2, 3)})
 

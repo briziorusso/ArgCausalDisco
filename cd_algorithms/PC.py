@@ -3,6 +3,7 @@ from itertools import combinations ,permutations
 
 import time
 import warnings
+import logging
 from typing import List
 from tqdm.auto import tqdm
 
@@ -127,40 +128,40 @@ def pc_alg(
         orient_by_background_knowledge(cg_1, background_knowledge)
 
     if uc_rule == 0:
-        print("Starting Orientation by Separating Set")
+        logging.info("   Starting Orientation by Separating Set")
         if uc_priority != -1:
             cg_1 = UCSepset.uc_sepset(cg_1, uc_priority, background_knowledge=background_knowledge)
         else:
             cg_1 = UCSepset.uc_sepset(cg_1, background_knowledge=background_knowledge)
-        print("Starting propagation by Meek Rules (Meek, 1995)")
+        logging.info("   Starting propagation by Meek Rules (Meek, 1995)")
         cg_1 = Meek.meek(cg_1, background_knowledge=background_knowledge)
 
     elif uc_rule == 1:
-        print("Starting Orientation by MaxP (Ramsey, 2016)")
+        logging.info("   Starting Orientation by MaxP (Ramsey, 2016)")
         if uc_priority != -1:
             cg_1 = UCSepset.maxp(cg_1, uc_priority, background_knowledge=background_knowledge)
         else:
             cg_1 = UCSepset.maxp(cg_1, background_knowledge=background_knowledge)
-        print("Starting propagation by Meek Rules (Meek, 1995)")
+        logging.info("   Starting propagation by Meek Rules (Meek, 1995)")
         cg_1 = Meek.meek(cg_1, background_knowledge=background_knowledge)
 
     elif uc_rule == 2:
-        print("Starting Orientation by DefiniteMaxP (Ramsey, 2016)")
+        logging.info("   Starting Orientation by DefiniteMaxP (Ramsey, 2016)")
         if uc_priority != -1:
             cg_1 = UCSepset.definite_maxp(cg_1, alpha, uc_priority, background_knowledge=background_knowledge)
         else:
             cg_1 = UCSepset.definite_maxp(cg_1, alpha, background_knowledge=background_knowledge)
         cg_1 = Meek.definite_meek(cg_1, background_knowledge=background_knowledge)
-        print("Starting propagation by Meek Rules (Meek, 1995)")
+        logging.info("   Starting propagation by Meek Rules (Meek, 1995)")
         cg_1 = Meek.meek(cg_1, background_knowledge=background_knowledge)
 
     elif uc_rule == 3:
-        print("Starting Orientation by Shapley PC")
+        logging.info("   Starting Orientation by Shapley PC")
         if uc_priority != -1:
             cg_1 = spc.shapley_cs(cg_1, uc_priority, background_knowledge=background_knowledge, selection=selection, verbose=verbose)
         else:
             cg_1 = spc.shapley_cs(cg_1, background_knowledge=background_knowledge, selection=selection,  verbose=verbose)
-        print("Starting propagation by Meek Rules (Meek, 1995)")
+        logging.info("   Starting propagation by Meek Rules (Meek, 1995)")
         cg_1 = Meek.meek(cg_1, background_knowledge=background_knowledge)
     else:
         raise ValueError("uc_rule should be in [0, 1, 2, 3]")
@@ -260,7 +261,7 @@ def skeleton_discovery(
                     p = cg.ci_test(x, y, S)
                     if p > alpha:
                         if verbose:
-                            print('%d ind %d | %s with p-value %f\n' % (x, y, S, p))
+                            logging.degub('%d ind %d | %s with p-value %f\n' % (x, y, S, p))
                         if not stable:
                             edge1 = cg.G.get_edge(cg.G.nodes[x], cg.G.nodes[y])
                             if edge1 is not None:
@@ -278,7 +279,7 @@ def skeleton_discovery(
                                 sepsets.add(s)
                     else:
                         if verbose:
-                            print('%d dep %d | %s with p-value %f\n' % (x, y, S, p))
+                            logging.degub('%d dep %d | %s with p-value %f\n' % (x, y, S, p))
                     if uc_rule == 3: ### SPC
                         spc.add_value(cg.sepset, x, y, (S,p))
                         spc.add_value(cg.sepset, y, x, (S,p))
