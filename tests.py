@@ -324,13 +324,14 @@ class TestCausalABA(unittest.TestCase):
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
 
-        n_nodes = 6
+        n_nodes = 8
         edge_per_node = 2
         graph_type = "ER"
         s0 = int(n_nodes*edge_per_node)
         if s0 > int(n_nodes*(n_nodes-1)/2):
             logging.info(f'{s0} is too many edges, setting s0 to the max:', int(n_nodes*(n_nodes-1)/2))
             s0 = int(n_nodes*(n_nodes-1)/2)
+        random_stability(2024)
         B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=graph_type)
         logging.debug(B_true)
         G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))

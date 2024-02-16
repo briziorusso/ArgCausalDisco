@@ -34,6 +34,49 @@ console.setFormatter(formatter)
 # add the handler to the root logger
 logging.getLogger('').addHandler(console)
 
+
+def random_stability(seed_value=0, deterministic=True, verbose=False):
+    '''
+        seed_value : int A random seed
+        deterministic : negatively effect performance making (parallel) operations deterministic
+    '''
+    if verbose:
+        print('Random seed {} set for:'.format(seed_value))
+    try:
+        import os
+        os.environ['PYTHONHASHSEED'] = str(seed_value)
+        if verbose:
+            print(' - PYTHONHASHSEED (env)')
+    except:
+        pass
+    try:
+        import random
+        random.seed(seed_value)
+        if verbose:
+            print(' - random')
+    except:
+        pass
+    try:
+        import numpy as np
+        np.random.seed(seed_value)
+        if verbose:
+            print(' - NumPy')
+    except:
+        pass
+    # try:
+    #     import torch
+    #     torch.manual_seed(seed_value)
+    #     torch.cuda.manual_seed_all(seed_value)
+    #     if verbose:
+    #         print(' - PyTorch')
+    #     if deterministic:
+    #         torch.backends.cudnn.deterministic = True
+    #         torch.backends.cudnn.benchmark = False
+    #         if verbose:
+    #             print('   -> deterministic')
+    # except:
+        pass
+
 def format_time(timestamp=datetime.now(), date=True, decimals=0):
     if date:
         return timestamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-7+decimals]
