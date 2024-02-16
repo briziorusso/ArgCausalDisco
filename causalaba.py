@@ -43,8 +43,6 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
 
     ### add nonblocker rules
     logging.info("   Adding Specific Rules...")
-    ctl.add("base", [], f"nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in(0..n_vars,S), collider_desc(0..n_vars,N,X,Y).")
-    logging.debug(f"nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in(0..n_vars,S), collider_desc(0..n_vars,N,X,Y).")
     ### Active paths rules
     for path_len in range(2,num_of_nodes+1):
         if path_len>2:
