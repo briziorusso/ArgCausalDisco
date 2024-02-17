@@ -185,8 +185,8 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertEqual(set(model_sets), expected)
 
-    def four_node_example2(self):
-        scenario = "four_node_example2"
+    def incompatible_chain(self):
+        scenario = "incompatible_chain"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
         n_nodes = 4
@@ -411,22 +411,22 @@ class TestCausalABA(unittest.TestCase):
         self.assertIn(expected, model_sets)
 
 start = datetime.now()
-TestCausalABA().three_node_all_graphs()
-TestCausalABA().three_node_graph_empty()
-TestCausalABA().collider()
-TestCausalABA().chains_confounder()
-TestCausalABA().one_edge()
-TestCausalABA().incompatible_Is()
-TestCausalABA().four_node_all_graphs()
-TestCausalABA().four_node_example()
-TestCausalABA().four_node_example2()
-TestCausalABA().five_node_all_graphs()
+# TestCausalABA().three_node_all_graphs()
+# TestCausalABA().three_node_graph_empty()
+# TestCausalABA().collider()
+# TestCausalABA().chains_confounder()
+# TestCausalABA().one_edge()
+# TestCausalABA().incompatible_Is()
+# TestCausalABA().four_node_all_graphs()
+# TestCausalABA().four_node_example()
+# TestCausalABA().incompatible_chain()
+# TestCausalABA().five_node_all_graphs()
 TestCausalABA().five_node_colombo_example()
 ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-TestCausalABA().six_node_example()
+# TestCausalABA().six_node_example()
 # TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().randomG_PC_facts()
-TestCausalABA().randomG(7, 1, "ER", 2024)
-TestCausalABA().randomG(8, 1, "ER", 2024)
+# TestCausalABA().randomG(7, 1, "ER", 2024)
+# TestCausalABA().randomG(9, 1, "ER", 2024)
 
 logging.info(f"Total time={str(datetime.now()-start)}")
