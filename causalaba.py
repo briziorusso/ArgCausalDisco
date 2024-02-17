@@ -35,6 +35,7 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     for S in powerset(range(num_of_nodes)):
         for s in S:
             ctl.add("base", [], f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
+    #         logging.debug(f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
 
     ### Load main program and facts
     ctl.load("encodings/causalaba.lp")
@@ -80,13 +81,17 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     for (X,Y) in dep_facts:
         G = nx.complete_graph(num_of_nodes)
         paths = nx.all_simple_paths(G, source=X, target=Y)
-        indep_rule_body = []
+        indep_rule_body = set()
         for path in paths:
+            broken_path = False
             for idx in range(len(path)-1):
                 idx1 = path[idx]
                 idx2 = path[idx+1]
-                if (idx1,idx2) not in indep_facts:
-                    indep_rule_body.append(f" not ap({','.join([str(p) for p in path])},S)")
+                if (idx1,idx2) in indep_facts:
+                    broken_path = True
+                    break
+            if not broken_path:
+                indep_rule_body.add(f" not ap({','.join([str(p) for p in path])},S)")
         indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
         ctl.add("base", [], indep_rule)
         logging.debug(indep_rule)
