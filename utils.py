@@ -27,7 +27,6 @@ console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 # set a format which is simpler for console use
 formatter = logging.Formatter('%(asctime)s %(name)-8s %(module)-12s - %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M:%S')
-# format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
 # format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
 # tell the handler to use this format
 console.setFormatter(formatter)
@@ -205,3 +204,57 @@ def simulate_dag(d, s0, graph_type):
     B_perm = _random_permutation(B)
     assert ig.Graph.Adjacency(B_perm.tolist()).is_dag()
     return B_perm
+
+def mount_adjacency_list(adjacency_matrix):
+    """
+    Reads an adjacency matrix and returns the corres-
+    ponding adjacency list (or adjacency map)
+    """
+    adjacency_list = {}
+    for v1 in range(len(adjacency_matrix)):
+        adjacency_list.update({v1: [v2 for v2 in range(len(adjacency_matrix[v1])) if adjacency_matrix[v1][v2] == 1]})
+    return adjacency_list
+
+def get_immoralities(adj_list):
+    """
+    Finds the set of immoralities in the adj_list
+    """
+    return [(v1, v3, v2) for v1 in adj_list for v2 in adj_list for v3 in adj_list[v1] \
+            if v3 in adj_list[v2] and v1 < v2 and v2 not in adj_list[v1] and v1 not in adj_list[v2]]
+
+def dag2skel(G):
+    """Convert a DAG to a skeleton.
+
+    Args:
+        B (np.ndarray): [d, d] binary adj matrix of DAG
+
+    Returns:
+        G (np.ndarray): [d, d] binary adj matrix of skeleton
+    """
+    C = np.zeros(G.shape)
+    G1 = mount_adjacency_list(G)
+    edges = [(v1, v2) for v1 in range(len(G1)) for v2 in G1[v1]]
+    for v1, v2 in edges:
+        C[v1, v2] = -1
+        C[v2, v1] = -1
+
+    return C
+
+def dag2cpdag(G):
+    """Convert a DAG to a CPDAG.
+
+    Args:
+        G (np.ndarray): [d, d] binary adj matrix of DAG
+
+    Returns:
+        C (np.ndarray): [d, d] binary adj matrix of CPDAG
+    """
+
+    ###only leave the arrows that are part of a v-structure
+    C = dag2skel(G)
+    immoralities = get_immoralities(mount_adjacency_list(G))
+    for v1, v3, v2 in immoralities:
+        C[v1, v3] = 1
+        C[v2, v3] = 1
+
+    return C

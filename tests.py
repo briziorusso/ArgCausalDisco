@@ -25,9 +25,9 @@ import pandas as pd
 from datetime import datetime
 from collections import defaultdict
 from utils import *
-import cdt
-cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
-from cdt.metrics import get_CPDAG
+# import cdt
+# cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
+# from cdt.metrics import get_CPDAG
 
 class TestCausalABA(unittest.TestCase):
 
@@ -369,7 +369,8 @@ class TestCausalABA(unittest.TestCase):
             model_sets.add(frozenset(arrows))        
             if mec_check:
                 adj = model_to_adjacency_matrix(model, n_nodes)
-                cp_adj = get_CPDAG(adj)
+                cp_adj = dag2cpdag(adj)
+                #cp_adj = get_CPDAG(adj)
                 cp_adj_hashable = map(tuple, cp_adj)
                 MECs[cp_adj_hashable] = list(adj.flatten())
                 MEC_set.add(frozenset(cp_adj_hashable))
