@@ -28,6 +28,9 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     logging.info(f"Running CausalABA")
     ### Create Control
     ctl = Control(['-t %d' % os.cpu_count()])
+    ctl.configuration.solve.parallel_mode = os.cpu_count()
+    ctl.configuration.solve.models="0"
+    ctl.configuration.solver.seed="2024"
     ### Add vars
     ctl.add("base", [], f"#const n_vars = {num_of_nodes-1}.")
     logging.debug(f"#const n_vars = {num_of_nodes-1}.")
@@ -122,7 +125,6 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     start_ground = datetime.now()
     ctl.ground([("base", [])])
     logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
-    ctl.configuration.solve.models="0"
     models = []
     count_models = 0
     logging.info("   Solving...")
