@@ -23,7 +23,11 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from collections import defaultdict
 from utils import *
+import cdt
+cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
+from cdt.metrics import get_CPDAG
 
 class TestCausalABA(unittest.TestCase):
 
@@ -330,7 +334,7 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertIn(expected, model_sets)
 
-    def randomG(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024):
+    def randomG(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
         scenario = "randomG"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
@@ -355,12 +359,22 @@ class TestCausalABA(unittest.TestCase):
             for s in true_seplist:
                 f.write(s + "\n")
 
+        MECs = defaultdict(list)
+        MEC_set = set()
         models = CausalABA(n_nodes, facts_location)
         model_sets = set()
+        logging.info(   f"Checking MECs")
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
-            model_sets.add(frozenset(arrows))            
-
+            model_sets.add(frozenset(arrows))        
+            if mec_check:
+                adj = model_to_adjacency_matrix(model, n_nodes)
+                cp_adj = get_CPDAG(adj)
+                cp_adj_hashable = map(tuple, cp_adj)
+                MECs[cp_adj_hashable] = list(adj.flatten())
+                MEC_set.add(frozenset(cp_adj_hashable))
+                assert len(MEC_set) == 1, f"More than one MEC found, \n MEC_set={MEC_set}"
+           
         self.assertIn(expected, model_sets)
 
     def randomG_PC_facts(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024):
@@ -421,12 +435,12 @@ start = datetime.now()
 # TestCausalABA().four_node_example()
 # TestCausalABA().incompatible_chain()
 # TestCausalABA().five_node_all_graphs()
-TestCausalABA().five_node_colombo_example()
+# TestCausalABA().five_node_colombo_example()
 ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 # TestCausalABA().six_node_example()
 # TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().randomG_PC_facts()
-# TestCausalABA().randomG(7, 1, "ER", 2024)
+TestCausalABA().randomG(7, 1, "ER", 2024)
 # TestCausalABA().randomG(9, 1, "ER", 2024)
 
 logging.info(f"Total time={str(datetime.now()-start)}")
