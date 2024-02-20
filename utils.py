@@ -17,21 +17,23 @@ else:
 sys.path.append("../causal-learn/tests/")
 from utils_simulate_data import simulate_discrete_data, simulate_linear_continuous_data
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(message)s',
-                    datefmt='%m-%d %H:%M',
-                    filename='.temp/causalaba.log',
-                    filemode='w')
-# define a Handler which writes INFO messages or higher to the sys.stderr
-console = logging.StreamHandler()
-console.setLevel(logging.INFO)
-# set a format which is simpler for console use
-formatter = logging.Formatter('%(asctime)s %(name)-8s %(module)-12s - %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M:%S')
-# format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
-# tell the handler to use this format
-console.setFormatter(formatter)
-# add the handler to the root logger
-logging.getLogger('').addHandler(console)
+# create logger
+def logger_setup(output_file:str="causalaba"):
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(message)s',
+                        datefmt='%m-%d %H:%M',
+                        filename=f'.temp/{output_file}.log',
+                        filemode='w')
+    # define a Handler which writes INFO messages or higher to the sys.stderr
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    # set a format which is simpler for console use
+    formatter = logging.Formatter('%(asctime)s %(name)-8s %(module)-12s - %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M:%S')
+    # format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+    # tell the handler to use this format
+    console.setFormatter(formatter)
+    # add the handler to the root logger
+    logging.getLogger('').addHandler(console)
 
 
 def random_stability(seed_value=0, deterministic=True, verbose=False):

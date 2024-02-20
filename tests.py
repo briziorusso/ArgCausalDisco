@@ -336,7 +336,9 @@ class TestCausalABA(unittest.TestCase):
 
     def randomG(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
         scenario = "randomG"
-        facts_location = f"encodings/test_lps/{scenario}.lp"
+        output_name = f"{scenario}_{n_nodes}_{edge_per_node}_{graph_type}_{seed}"
+        facts_location = f"encodings/test_lps/{output_name}.lp"
+        logger_setup(output_name)
         logging.info(f"===============Running {scenario}===============")
         logging.info(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
         s0 = int(n_nodes*edge_per_node)
@@ -348,16 +350,14 @@ class TestCausalABA(unittest.TestCase):
         logging.debug(B_true)
         G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
+        true_seplist = find_all_d_separations_sets(G_true, verbose=False)
+        with open(facts_location, "w") as f:
+            for s in true_seplist:
+                f.write(s + "\n")
 
         inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
         G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
         expected = frozenset(set(G_true1.edges()))
-
-        true_seplist = find_all_d_separations_sets(G_true, verbose=False)
-
-        with open(facts_location, "w") as f:
-            for s in true_seplist:
-                f.write(s + "\n")
 
         MECs = defaultdict(list)
         MEC_set = set()
@@ -441,7 +441,7 @@ start = datetime.now()
 # TestCausalABA().six_node_example()
 # TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().randomG_PC_facts()
-TestCausalABA().randomG(7, 1, "ER", 2024)
+TestCausalABA().randomG(9, 1, "ER", 2024)
 # TestCausalABA().randomG(9, 1, "ER", 2024)
 
 logging.info(f"Total time={str(datetime.now()-start)}")
