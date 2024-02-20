@@ -2,6 +2,7 @@ import os
 import logging
 from clingo.control import Control
 import networkx as nx
+import numpy as np
 from itertools import combinations
 from datetime import datetime
 from utils import powerset, extract_test_elements_from_symbol
@@ -47,27 +48,6 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
 
     ### add nonblocker rules
     logging.info("   Adding Specific Rules...")
-    ### Active paths rules
-    for path_len in range(2,num_of_nodes+1):
-        if path_len>2:
-            Xs = [f"X{idx}" for idx in range(path_len)]
-            vars = [f"var({X})" for X in Xs]
-            edges = [f"edge(X{idx},X{idx+1})" for idx in range(len(Xs)-1)]
-            nbs = [f"nb(X{idx},X{idx-1},X{idx+1},S)" for idx in range(1,len(Xs)-1)]
-            uneq_const = []
-            for comb in combinations(Xs, 2):
-                uneq_const.append(f"{comb[0]}!={comb[1]}")
-            if len(nbs)>0:
-                body = f"{','.join(edges)}, {','.join(vars)}, {','.join(uneq_const)}, {','.join(nbs)}"
-            else:
-                body = f"{','.join(edges)}, {','.join(vars)}, {','.join(uneq_const)}"
-            ### Active paths
-            ctl.add("base", [], f"ap({','.join(Xs)},S) :- {body}, not in({Xs[0]},S), not in({Xs[-1]},S), set(S).")
-            logging.debug(f"ap({','.join(Xs)},S) :- {body}, not in({Xs[0]},S), not in({Xs[-1]},S), set(S).")
-            ## add dep rules
-            ctl.add("base", [], f"dep({Xs[0]},{Xs[-1]},S) :- ap({','.join(Xs)},S).")
-            logging.debug(f"dep({Xs[0]},{Xs[-1]},S) :- ap({','.join(Xs)},S).")
-    
     indep_facts = set()
     dep_facts = set()
     if facts_location:
@@ -80,11 +60,14 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
                     X, _, Y, _ = extract_test_elements_from_symbol(line.replace("\n",""))
                     dep_facts.add((X,Y))
 
-    ### add indep rules
-    for (X,Y) in dep_facts:
+    ### Active paths rules
+    n_p = 0
+    for (X,Y) in combinations(range(num_of_nodes),2):
         G = nx.complete_graph(num_of_nodes)
         paths = nx.all_simple_paths(G, source=X, target=Y)
-        indep_rule_body = set()
+        ### make the list a matrix
+        logging.debug(f"Paths from {X} to {Y}: {len(list(paths))}")
+        indep_rule_body = []
         for path in paths:
             broken_path = False
             for idx in range(len(path)-1):
@@ -94,7 +77,20 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
                     broken_path = True
                     break
             if not broken_path:
-                indep_rule_body.add(f" not ap({','.join([str(p) for p in path])},S)")
+                n_p += 1
+                path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
+                nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
+                nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
+                ctl.add("base", [], f"p{n_p} :- {','.join(path_edges)}.")
+                logging.debug(f"p{n_p} :- {','.join(path_edges)}.")
+                ctl.add("base", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+                logging.debug(f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+                indep_rule_body.append(f" not ap({X},{Y},p{n_p},S)")
+                # ctl.add("base", [], f"dep(X,Y,S) :- ap(X,Y,p{n_p},S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
+                # logging.debug(f"dep(X,Y,S) :- ap(X,Y,p{n_p},S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
+        ctl.add("base", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
+        logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
+
         indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
         ctl.add("base", [], indep_rule)
         logging.debug(indep_rule)
