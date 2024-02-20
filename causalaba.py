@@ -62,7 +62,7 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
 
     ### Active paths rules
     n_p = 0
-    for (X,Y) in combinations(range(num_of_nodes),2):
+    for (X,Y) in dep_facts:
         G = nx.complete_graph(num_of_nodes)
         paths = nx.all_simple_paths(G, source=X, target=Y)
         ### make the list a matrix
