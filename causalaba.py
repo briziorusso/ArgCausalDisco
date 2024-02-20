@@ -51,6 +51,7 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     indep_facts = set()
     dep_facts = set()
     if facts_location:
+        logging.debug(f"   Loading facts from {facts_location}")
         with open(facts_location, 'r') as file:
             for line in file:
                 if 'indep' in line:
@@ -66,34 +67,38 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
         G = nx.complete_graph(num_of_nodes)
         paths = nx.all_simple_paths(G, source=X, target=Y)
         ### make the list a matrix
-        logging.debug(f"Paths from {X} to {Y}: {len(list(paths))}")
+        paths_mat = np.array([np.array(list(xi)+[None]*(num_of_nodes-len(xi))) for xi in paths])
+        ### remove paths that contain an indep fact
+        paths_mat_red = paths_mat[[not any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts 
+                                            for j in range(num_of_nodes-1) if paths_mat[i,j] is not None]) \
+                                                for i in range(len(paths_mat))]]
+        remaining_paths = [list(filter(lambda x: x is not None, paths_mat_red[i])) for i in range(len(paths_mat_red))]
+        logging.debug(f"   Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")
         indep_rule_body = []
-        for path in paths:
-            broken_path = False
-            for idx in range(len(path)-1):
-                idx1 = path[idx]
-                idx2 = path[idx+1]
-                if (idx1,idx2) in indep_facts:
-                    broken_path = True
-                    break
-            if not broken_path:
-                n_p += 1
-                path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
-                nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
-                nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
-                ctl.add("base", [], f"p{n_p} :- {','.join(path_edges)}.")
-                logging.debug(f"p{n_p} :- {','.join(path_edges)}.")
-                ctl.add("base", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
-                logging.debug(f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
-                indep_rule_body.append(f" not ap({X},{Y},p{n_p},S)")
-                # ctl.add("base", [], f"dep(X,Y,S) :- ap(X,Y,p{n_p},S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
-                # logging.debug(f"dep(X,Y,S) :- ap(X,Y,p{n_p},S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
-        ctl.add("base", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
-        logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
+        for path in remaining_paths:
+            n_p += 1
+            ### build indep rule body
+            indep_rule_body.append(f" not ap({X},{Y},p{n_p},S)")
 
+            ### add path rule
+            path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
+            ctl.add("base", [], f"p{n_p} :- {','.join(path_edges)}.")
+            logging.debug(f"p{n_p} :- {','.join(path_edges)}.")
+
+            ### add active path rule
+            nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
+            nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
+            ctl.add("base", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+            logging.debug(f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+
+        ### add indep rule
         indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
         ctl.add("base", [], indep_rule)
         logging.debug(indep_rule)
+
+        ### add dep rule
+        ctl.add("base", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
+        logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
 
     ### add show statements
     if 'arrow' in show:
