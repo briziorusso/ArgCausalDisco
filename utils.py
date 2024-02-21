@@ -33,7 +33,8 @@ def logger_setup(output_file:str="causalaba"):
     # tell the handler to use this format
     console.setFormatter(formatter)
     # add the handler to the root logger
-    logging.getLogger('').addHandler(console)
+    if len(logging.getLogger('').handlers) < 2:
+        logging.getLogger('').addHandler(console)
 
 
 def random_stability(seed_value=0, deterministic=True, verbose=False):
