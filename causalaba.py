@@ -63,17 +63,17 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
 
     ### Active paths rules
     n_p = 0
-    for (X,Y) in dep_facts:
-        G = nx.complete_graph(num_of_nodes)
+    G = nx.complete_graph(num_of_nodes)
+    for (X,Y) in indep_facts.union(dep_facts):
         paths = nx.all_simple_paths(G, source=X, target=Y)
-        ### make the list a matrix
-        paths_mat = np.array([np.array(list(xi)+[None]*(num_of_nodes-len(xi))) for xi in paths])
         ### remove paths that contain an indep fact
+        paths_mat = np.array([np.array(list(xi)+[None]*(num_of_nodes-len(xi))) for xi in paths])
         paths_mat_red = paths_mat[[not any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts 
                                             for j in range(num_of_nodes-1) if paths_mat[i,j] is not None]) \
                                                 for i in range(len(paths_mat))]]
         remaining_paths = [list(filter(lambda x: x is not None, paths_mat_red[i])) for i in range(len(paths_mat_red))]
         logging.debug(f"   Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")
+
         indep_rule_body = []
         for path in remaining_paths:
             n_p += 1
@@ -92,13 +92,14 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
             logging.debug(f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
 
         ### add indep rule
-        indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
-        ctl.add("base", [], indep_rule)
-        logging.debug(indep_rule)
+        if len(indep_rule_body) > 0:
+            indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
+            ctl.add("base", [], indep_rule)
+            logging.debug(indep_rule)
 
         ### add dep rule
-        ctl.add("base", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
-        logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in({X},S), not in({Y},S), set(S).")
+        ctl.add("base", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
+        logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
 
     ### add show statements
     if 'arrow' in show:
