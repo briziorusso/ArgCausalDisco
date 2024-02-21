@@ -1,24 +1,25 @@
+#program main(n_vars).
 %%% sets and elements
 var(0..n_vars).
 set(X) :- in(_,X).
 set(empty).
 
 %%% dependency and independency
-indep(X,Y,S) :- not dep(X,Y,S), set(S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S).
-:- dep(X,Y,S), indep(X,Y,S).
 %%% symmetry
 indep(X,Y,S) :- indep(Y,X,S), var(X), var(Y), set(S), X!=Y.
 dep(X,Y,S) :- dep(Y,X,S), var(X), var(Y), set(S), X!=Y.
+%%% test
+:- dep(X,Y,S), indep(X,Y,S), set(S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S).
 
 %%%%% All DAGs
-%generate arrows
+%%% generate arrows
 arrow(X,Y) | arrow(Y,X) | not edge(X,Y) :- var(X), var(Y), X!=Y.
-%%% edge and arrow conditions
+%%% symmetry
 edge(X,Y):- arrow(X,Y), X!=Y, var(X), var(Y).
 edge(X,Y):- edge(Y,X), X!=Y, var(X), var(Y).
-not arrow(X,Y) :- not edge(X,Y), var(X), var(Y).
-arrow(X,Y) :- edge(X,Y), not arrow(Y,X), var(X), var(Y).
-not edge(X,Y) :- not arrow(X,Y), not arrow(Y,X), var(X), var(Y).
+%%% test
+:- arrow(X,Y), not edge(X,Y), var(X), var(Y).
+:- edge(X,Y), not arrow(X,Y), not arrow(Y,X), var(X), var(Y).
 :- arrow(Y,X), arrow(X,Y), X!=Y, var(X), var(Y).
 %%% acyclicity
 dpath(X,Y):- arrow(X,Y), X!=Y, var(X), var(Y).
