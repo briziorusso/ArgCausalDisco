@@ -32,6 +32,7 @@ from utils import *
 class TestCausalABA(unittest.TestCase):
 
     def three_node_all_graphs(self):
+        logger_setup()
         logging.info("===============Running three_node_all_graphs===============")
         n_nodes = 3
         expected = set([
@@ -74,6 +75,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(model_sets, expected)
 
     def three_node_graph_empty(self):
+        logger_setup()
         logging.info("===============Running three_node_graph_empty===============")
         n_nodes = 3
         expected = set([
@@ -88,6 +90,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(model_sets, expected)
 
     def collider(self):
+        logger_setup()
         logging.info("===============Running collider===============")
         n_nodes = 3
         expected = set([
@@ -102,6 +105,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(model_sets, expected)
 
     def chains_confounder(self):
+        logger_setup()
         logging.info("===============Running chains_confounder===============")
         n_nodes = 3
         expected = set([
@@ -120,6 +124,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(model_sets, expected)
 
     def one_edge(self):
+        logger_setup()
         logging.info("===============Running one_edge===============")
         n_nodes = 3
         expected = set([
@@ -135,6 +140,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(model_sets, expected)
 
     def incompatible_Is(self):
+        logger_setup()
         logging.info("===============Running incompatible_Is===============")
         n_nodes = 3
         expected = set()
@@ -147,6 +153,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(model_sets, expected)
 
     def four_node_all_graphs(self):
+        logger_setup()
         logging.info("===============Running four_node_graph_full===============")
         n_nodes = 4
         models = CausalABA(n_nodes, print_models=False)
@@ -158,6 +165,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(len(model_sets), 543)
 
     def four_node_example(self):
+        logger_setup()
         scenario = "four_node_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
@@ -190,6 +198,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(set(model_sets), expected)
 
     def incompatible_chain(self):
+        logger_setup()
         scenario = "incompatible_chain"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
@@ -205,6 +214,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(set(model_sets), expected)
 
     def five_node_all_graphs(self):
+        logger_setup()
         logging.info("===============Running five_node_all_graphs===============")
         n_nodes = 5
         models = CausalABA(n_nodes, print_models=False) 
@@ -218,6 +228,7 @@ class TestCausalABA(unittest.TestCase):
     def five_node_colombo_example(self):
         scenario = "five_node_colombo_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
+        logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0,  0],
                             [ 0,  0,  0,  0,  0],
@@ -246,6 +257,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(set(model_sets), expected)
 
     def six_node_all_graphs(self):
+        logger_setup()
         logging.info("===============Running six_node_all_graphs===============")
         n_nodes = 6
         models = CausalABA(n_nodes, print_models=False)
@@ -259,6 +271,7 @@ class TestCausalABA(unittest.TestCase):
     def six_node_example(self):
         scenario = "six_node_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
+        logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0,  0,  0],
                             [ 0,  0,  0,  0,  0,  0],
@@ -290,10 +303,11 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertEqual(model_sets, expected)
 
-    def five_node_colombo_PC_facts(self):
+    def five_node_colombo_PC_facts(self, mec_check=True):
         scenario = "five_node_colombo_PC_facts"
         alpha = 0.05
         facts_location = f"encodings/test_lps/{scenario}.lp"
+        logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0,  0],
                             [ 0,  0,  0,  0,  0],
