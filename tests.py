@@ -451,7 +451,7 @@ class TestCausalABA(unittest.TestCase):
         models = CausalABA(n_nodes, facts_location)
         model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
 
-        ##Drop facts with conditioning set of increasing size
+        ##Drop facts with conditioning set of decreasing size
         for S_size in range(n_nodes-2, 0, -1):
             if len(model_sets) == 0:
                 logging.info(f"No models found, dropping facts with conditioning set of size {S_size}")
@@ -462,12 +462,13 @@ class TestCausalABA(unittest.TestCase):
                         facts_red.append(test)
                 logging.info(f"Number of facts dropped={len(facts)-len(facts_red)}")
                 logging.info(f"Number of facts left={len(facts_red)}")
-                with open(facts_location, "w") as f:
-                    for s in facts:
-                        f.write(s + "\n")
+                if len(facts_red) != len(facts):
+                    with open(facts_location, "w") as f:
+                        for s in facts:
+                            f.write(s + "\n")
 
-                models = CausalABA(n_nodes, facts_location)
-                model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
+                    models = CausalABA(n_nodes, facts_location)
+                    model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
 
         self.assertIn(expected, model_sets)
 
@@ -488,7 +489,7 @@ start = datetime.now()
 # TestCausalABA().randomG(10, 1, "ER", 2024)
 
 # TestCausalABA().five_node_colombo_PC_facts()
-TestCausalABA().randomG_PC_facts(7, 1, "ER", 2024)
+TestCausalABA().randomG_PC_facts(10, 1, "ER", 2024)
 
 
 logging.info(f"Total time={str(datetime.now()-start)}")
