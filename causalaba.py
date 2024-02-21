@@ -1,18 +1,19 @@
 import os
 import logging
 from clingo.control import Control
+from clingo import Function, Number, String
 import networkx as nx
 import numpy as np
 from itertools import combinations
 from datetime import datetime
 from utils import powerset, extract_test_elements_from_symbol
 
-def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], print_models:bool=True, verbose:bool=False)->list:     
+def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_models:bool=True, verbose:bool=False)->list:     
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
 
     input:
-    num_of_nodes: int
+    n_nodes: int
     facts: str
     verbose: bool
 
@@ -32,13 +33,11 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     ctl.configuration.solve.parallel_mode = os.cpu_count()
     ctl.configuration.solve.models="0"
     ctl.configuration.solver.seed="2024"
-    ### Add vars
-    ctl.add("base", [], f"#const n_vars = {num_of_nodes-1}.")
-    logging.debug(f"#const n_vars = {num_of_nodes-1}.")
+
     ### Add set definition
-    for S in powerset(range(num_of_nodes)):
+    for S in powerset(range(n_nodes)):
         for s in S:
-            ctl.add("base", [], f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
+            ctl.add("specific", [], f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
     #         logging.debug(f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
 
     ### Load main program and facts
@@ -50,26 +49,33 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     logging.info("   Adding Specific Rules...")
     indep_facts = set()
     dep_facts = set()
+    facts = []
     if facts_location:
         logging.debug(f"   Loading facts from {facts_location}")
         with open(facts_location, 'r') as file:
             for line in file:
-                if 'indep' in line:
-                    X, _, Y, _ = extract_test_elements_from_symbol(line.replace("\n",""))
-                    indep_facts.add((X,Y))
-                elif 'dep' in line and 'in' not in line:
-                    X, _, Y, _ = extract_test_elements_from_symbol(line.replace("\n",""))
-                    dep_facts.add((X,Y))
+                if "dep" in line:
+                    line = line.replace("#external ","")
+                    X, S, Y, dep_type = extract_test_elements_from_symbol(line.replace("\n",""))
+                    S_str = line.replace(').\n','').split(",")[-1]
+                    facts.append((X,S,Y,dep_type, line.replace("\n","")))
+                    if 'indep' in line:
+                        indep_facts.add((X,Y))
+                        ctl.assign_external(Function(dep_type, [Number(X), Number(Y), String(S_str)]), True)
+                    elif 'dep' in line and 'in' not in line:
+                        dep_facts.add((X,Y))
+                        ctl.assign_external(Function(dep_type, [Number(X), Number(Y), String(S_str)]), True)
+
 
     ### Active paths rules
     n_p = 0
-    G = nx.complete_graph(num_of_nodes)
+    G = nx.complete_graph(n_nodes)
     for (X,Y) in indep_facts.union(dep_facts):
         paths = nx.all_simple_paths(G, source=X, target=Y)
         ### remove paths that contain an indep fact
-        paths_mat = np.array([np.array(list(xi)+[None]*(num_of_nodes-len(xi))) for xi in paths])
+        paths_mat = np.array([np.array(list(xi)+[None]*(n_nodes-len(xi))) for xi in paths])
         paths_mat_red = paths_mat[[not any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts 
-                                            for j in range(num_of_nodes-1) if paths_mat[i,j] is not None]) \
+                                            for j in range(n_nodes-1) if paths_mat[i,j] is not None]) \
                                                 for i in range(len(paths_mat))]]
         remaining_paths = [list(filter(lambda x: x is not None, paths_mat_red[i])) for i in range(len(paths_mat_red))]
         logging.debug(f"   Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")
@@ -82,23 +88,23 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
 
             ### add path rule
             path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
-            ctl.add("base", [], f"p{n_p} :- {','.join(path_edges)}.")
+            ctl.add("specific", [], f"p{n_p} :- {','.join(path_edges)}.")
             logging.debug(f"p{n_p} :- {','.join(path_edges)}.")
 
             ### add active path rule
             nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
             nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
-            ctl.add("base", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+            ctl.add("specific", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
             logging.debug(f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
 
         ### add indep rule
         if len(indep_rule_body) > 0:
             indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
-            ctl.add("base", [], indep_rule)
+            ctl.add("specific", [], indep_rule)
             logging.debug(indep_rule)
 
         ### add dep rule
-        ctl.add("base", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
+        ctl.add("specific", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
         logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
 
     ### add show statements
@@ -125,7 +131,7 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     ### Ground & Solve
     logging.info("   Grounding...")
     start_ground = datetime.now()
-    ctl.ground([("base", [])])
+    ctl.ground([("base", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
     models = []
     count_models = 0
