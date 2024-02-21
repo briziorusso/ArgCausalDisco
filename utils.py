@@ -1,10 +1,14 @@
 import sys
 import logging
 from itertools import chain, combinations
+from collections import defaultdict
 import numpy as np
 import networkx as nx
 import igraph as ig
 from datetime import datetime
+# import cdt
+# cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
+# from cdt.metrics import get_CPDAG
 
 maxpc = False
 if maxpc:
@@ -103,6 +107,24 @@ def model_to_set_of_arrows(model:list, num_of_nodes:int)->set:
         if atom.name == 'arrow':
             arrows.add((atom.arguments[0].number,atom.arguments[1].number))
     return arrows
+
+def set_of_models_to_set_of_graphs(models, n_nodes, mec_check=True):
+    MECs = defaultdict(list)
+    MEC_set = set()
+    model_sets = set()
+    for model in models:
+        arrows = model_to_set_of_arrows(model, n_nodes)
+        model_sets.add(frozenset(arrows))        
+        if mec_check:
+            logging.info(   f"Checking MECs")
+            adj = model_to_adjacency_matrix(model, n_nodes)
+            cp_adj = dag2cpdag(adj)
+            #cp_adj = get_CPDAG(adj)
+            cp_adj_hashable = map(tuple, cp_adj)
+            MECs[cp_adj_hashable] = list(adj.flatten())
+            MEC_set.add(frozenset(cp_adj_hashable))
+            assert len(MEC_set) == 1, f"More than one MEC found, \n MEC_set={MEC_set}"         
+    return model_sets
 
 def extract_test_elements_from_symbol(symbol:str)->list:
     dep_type, elements = symbol.replace(").","").split("(")

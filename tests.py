@@ -373,22 +373,8 @@ class TestCausalABA(unittest.TestCase):
         G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
         expected = frozenset(set(G_true1.edges()))
 
-        MECs = defaultdict(list)
-        MEC_set = set()
         models = CausalABA(n_nodes, facts_location)
-        model_sets = set()
-        logging.info(   f"Checking MECs")
-        for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
-            model_sets.add(frozenset(arrows))        
-            if mec_check:
-                adj = model_to_adjacency_matrix(model, n_nodes)
-                cp_adj = dag2cpdag(adj)
-                #cp_adj = get_CPDAG(adj)
-                cp_adj_hashable = map(tuple, cp_adj)
-                MECs[cp_adj_hashable] = list(adj.flatten())
-                MEC_set.add(frozenset(cp_adj_hashable))
-                assert len(MEC_set) == 1, f"More than one MEC found, \n MEC_set={MEC_set}"
+        model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
            
         self.assertIn(expected, model_sets)
 
