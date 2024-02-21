@@ -1,4 +1,11 @@
 indep(0,1,empty).
+indep(0,1,s2).
+indep(0,1,s3).
+indep(0,1,s4).
+indep(0,1,s2y3).
+indep(0,1,s2y4).
+indep(0,1,s3y4).
+indep(0,1,s2y3y4).
 dep(0,2,empty).
 dep(0,2,s1).
 dep(0,2,s3).
@@ -27,7 +34,14 @@ dep(1,2,s0y3).
 dep(1,2,s0y4).
 dep(1,2,s3y4).
 dep(1,2,s0y3y4).
+indep(1,3,empty).
+indep(1,3,s0).
+indep(1,3,s2).
+indep(1,3,s4).
 indep(1,3,s0y2).
+indep(1,3,s0y4).
+indep(1,3,s2y4).
+indep(1,3,s0y2y4).
 dep(1,4,empty).
 dep(1,4,s0).
 dep(1,4,s2).

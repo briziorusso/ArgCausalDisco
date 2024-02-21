@@ -23,11 +23,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from collections import defaultdict
 from utils import *
-# import cdt
-# cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
-# from cdt.metrics import get_CPDAG
 
 class TestCausalABA(unittest.TestCase):
 
@@ -326,6 +322,7 @@ class TestCausalABA(unittest.TestCase):
         cg = simulate_data_and_run_PC(G_true, alpha)
 
         facts = []
+        count_wrong = 0
         for test in true_seplist:
             X, S, Y, dep_type = extract_test_elements_from_symbol(test)
 
@@ -335,16 +332,20 @@ class TestCausalABA(unittest.TestCase):
                 dep_type_PC = "indep" if p > alpha else "dep" 
                 if dep_type == dep_type_PC:
                     facts.append(test)
-
+                elif dep_type == "indep":
+                    count_wrong += 1
+                    facts.append(test.replace("indep", "dep"))
+                elif dep_type == "dep":
+                    facts.append(test.replace("dep", "indep"))
+                    count_wrong += 1
+        
+        logging.info(f"Number of wrong facts={count_wrong}")
         with open(facts_location, "w") as f:
             for s in facts:
                 f.write(s + "\n")
 
         models = CausalABA(n_nodes, facts_location)
-        model_sets = set()
-        for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
-            model_sets.add(frozenset(arrows))            
+        model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
 
         self.assertIn(expected, model_sets)
 
@@ -378,10 +379,12 @@ class TestCausalABA(unittest.TestCase):
            
         self.assertIn(expected, model_sets)
 
-    def randomG_PC_facts(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024):
+    def randomG_PC_facts(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
         scenario = "randomG_PC_facts"
         alpha = 0.05
-        facts_location = f"encodings/test_lps/{scenario}.lp"
+        output_name = f"{scenario}_{n_nodes}_{edge_per_node}_{graph_type}_{seed}"
+        facts_location = f"encodings/test_lps/{output_name}.lp"
+        logger_setup(output_name)
         logging.info(f"===============Running {scenario}===============")
         logging.info(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
         s0 = int(n_nodes*edge_per_node)
@@ -412,16 +415,13 @@ class TestCausalABA(unittest.TestCase):
                 dep_type_PC = "indep" if p > alpha else "dep" 
                 if dep_type == dep_type_PC:
                     facts.append(test)
-
-        with open(facts_location, "w") as f:
-            for s in facts:
-                f.write(s + "\n")
-
-        models = CausalABA(n_nodes, facts_location, print_models=False)
-        model_sets = set()
-        for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
-            model_sets.add(frozenset(arrows))            
+                elif dep_type == "indep":
+                    facts.append(test.replace("indep", "dep"))
+                elif dep_type == "dep":
+                    facts.append(test.replace("dep", "indep"))
+        
+        models = CausalABA(n_nodes, facts_location)
+        model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
 
         self.assertIn(expected, model_sets)
 
@@ -437,11 +437,12 @@ start = datetime.now()
 # TestCausalABA().incompatible_chain()
 # TestCausalABA().five_node_all_graphs()
 # TestCausalABA().five_node_colombo_example()
-## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+# # TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 # TestCausalABA().six_node_example()
+# TestCausalABA().randomG(10, 1, "ER", 2024)
+
 # TestCausalABA().five_node_colombo_PC_facts()
-# TestCausalABA().randomG_PC_facts()
-TestCausalABA().randomG(9, 1, "ER", 2024)
-# TestCausalABA().randomG(9, 1, "ER", 2024)
+TestCausalABA().randomG_PC_facts(8, 1, "ER", 2024)
+
 
 logging.info(f"Total time={str(datetime.now()-start)}")
