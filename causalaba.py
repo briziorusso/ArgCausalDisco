@@ -141,6 +141,25 @@ def CausalABA(num_of_nodes:int, facts_location:str=None, show:list=['arrow'], pr
     times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
     logging.info(f"Times: {times}")
 
+    if count_models == 0:
+        ### BFS over the set of facts by length of condition set
+        facts = sorted(facts, key=lambda x: len(x[1]), reverse=True)
+        for i in range(len(facts)):
+            ### remove fact
+            logging.info(f"   Removing fact {facts[i][4]}")
+            ctl.assign_external(Function(facts[i][3], [Number(facts[i][0]), Number(facts[i][2]), String(facts[i][4].replace(').','').split(",")[-1])]), False)
+            with ctl.solve(yield_=True) as handle:
+                for model in handle:
+                    models.append(model.symbols(shown=True))
+                    if print_models:
+                        count_models += 1
+                        logging.info(f"Answer {count_models}: {model}")
+            logging.info(f"Number of models: {int(ctl.statistics['summary']['models']['enumerated'])}")
+            times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
+            logging.info(f"Times: {times}")
+            if count_models > 0:
+                break
+
     return models
 
 # CausalABA(3, "outputs/test_facts.lp", False)
