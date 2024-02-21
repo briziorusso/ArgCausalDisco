@@ -406,6 +406,7 @@ class TestCausalABA(unittest.TestCase):
         cg = simulate_data_and_run_PC(G_true, alpha)
 
         facts = []
+        count_wrong = 0
         for test in true_seplist:
             X, S, Y, dep_type = extract_test_elements_from_symbol(test)
 
@@ -416,9 +417,16 @@ class TestCausalABA(unittest.TestCase):
                 if dep_type == dep_type_PC:
                     facts.append(test)
                 elif dep_type == "indep":
+                    count_wrong += 1
                     facts.append(test.replace("indep", "dep"))
                 elif dep_type == "dep":
+                    count_wrong += 1
                     facts.append(test.replace("dep", "indep"))
+        
+        logging.info(f"Number of wrong facts={count_wrong}")
+        with open(facts_location, "w") as f:
+            for s in facts:
+                f.write(s + "\n")
         
         models = CausalABA(n_nodes, facts_location)
         model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
@@ -442,7 +450,7 @@ start = datetime.now()
 # TestCausalABA().randomG(10, 1, "ER", 2024)
 
 # TestCausalABA().five_node_colombo_PC_facts()
-TestCausalABA().randomG_PC_facts(8, 1, "ER", 2024)
+TestCausalABA().randomG_PC_facts(9, 1, "ER", 2024)
 
 
 logging.info(f"Total time={str(datetime.now()-start)}")
