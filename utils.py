@@ -112,32 +112,36 @@ def set_of_models_to_set_of_graphs(models, n_nodes, mec_check=True):
     MECs = defaultdict(list)
     MEC_set = set()
     model_sets = set()
+    logging.info(   f"Checking MECs")
     for model in models:
         arrows = model_to_set_of_arrows(model, n_nodes)
         model_sets.add(frozenset(arrows))        
         if mec_check:
-            logging.info(   f"Checking MECs")
             adj = model_to_adjacency_matrix(model, n_nodes)
             cp_adj = dag2cpdag(adj)
             #cp_adj = get_CPDAG(adj)
             cp_adj_hashable = map(tuple, cp_adj)
             MECs[cp_adj_hashable] = list(adj.flatten())
             MEC_set.add(frozenset(cp_adj_hashable))
-            assert len(MEC_set) == 1, f"More than one MEC found, \n MEC_set={MEC_set}"         
+            assert len(MEC_set) == 1, f"More than one MEC found. \n incompatible graph={arrows}"         
     return model_sets
 
 def extract_test_elements_from_symbol(symbol:str)->list:
     dep_type, elements = symbol.replace(").","").split("(")
     
-    X, Y, condset = elements.split(",")
-    if condset == "empty":
-        S = set()
-    elif condset[0] == "s":
-        S = set([int(e) for e in condset[1:].split("y")])
-    else:
-        raise ValueError(f"Unknown element {condset}")
+    if "dep" in dep_type:
+        X, Y, condset = elements.split(",")
+        if condset == "empty":
+            S = set()
+        elif condset[0] == "s":
+            S = set([int(e) for e in condset[1:].split("y")])
+        else:
+            raise ValueError(f"Unknown element {condset}")
 
-    return int(X), S, int(Y), dep_type
+        return int(X), S, int(Y), dep_type
+    elif dep_type in ["arrow", "edge"]:
+        X, Y = elements.split(",")
+        return int(X), int(Y), dep_type
 
 def find_all_d_separations_sets(G, verbose=True, debug=False):
     no_of_var = len(G.nodes)
