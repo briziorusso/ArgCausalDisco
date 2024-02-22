@@ -98,7 +98,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
             logging.debug(f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
 
         ### add indep rule
-        if len(indep_rule_body) > 0:
+        if len(indep_rule_body) > 0 and (X,Y) in dep_facts:
             indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
             ctl.add("specific", [], indep_rule)
             logging.debug(indep_rule)
