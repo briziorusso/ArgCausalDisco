@@ -57,15 +57,13 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
                 if "dep" in line:
                     line = line.replace("#external ","")
                     X, S, Y, dep_type = extract_test_elements_from_symbol(line.replace("\n",""))
-                    S_str = line.replace(').\n','').split(",")[-1]
+                    # S_str = line.replace(').\n','').split(",")[-1]
                     facts.append((X,S,Y,dep_type, line.replace("\n","")))
+                    # ctl.assign_external(Function(dep_type, [Number(X), Number(Y), String(S_str)]), True)
                     if 'indep' in line:
                         indep_facts.add((X,Y))
-                        ctl.assign_external(Function(dep_type, [Number(X), Number(Y), String(S_str)]), True)
                     elif 'dep' in line and 'in' not in line:
                         dep_facts.add((X,Y))
-                        ctl.assign_external(Function(dep_type, [Number(X), Number(Y), String(S_str)]), True)
-
 
     ### Active paths rules
     n_p = 0

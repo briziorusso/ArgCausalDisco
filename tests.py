@@ -501,7 +501,7 @@ start = datetime.now()
 # TestCausalABA().collider()
 # TestCausalABA().chains_confounder()
 # TestCausalABA().one_edge()
-# TestCausalABA().incompatible_Is()
+TestCausalABA().incompatible_Is()
 # TestCausalABA().four_node_all_graphs()
 # TestCausalABA().four_node_example()
 # TestCausalABA().incompatible_chain()
@@ -514,7 +514,7 @@ start = datetime.now()
 # TestCausalABA().randomG(10, 1, "ER", 2024)
 
 # TestCausalABA().five_node_colombo_PC_facts()
-TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)
+# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)
 
 # TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
 
