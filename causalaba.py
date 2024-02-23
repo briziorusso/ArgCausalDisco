@@ -68,7 +68,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
     ### Active paths rules
     n_p = 0
     G = nx.complete_graph(n_nodes)
-    for (X,Y) in indep_facts.union(dep_facts):
+    for (X,Y) in combinations(range(n_nodes),2):
         paths = nx.all_simple_paths(G, source=X, target=Y)
         ### remove paths that contain an indep fact
         paths_mat = np.array([np.array(list(xi)+[None]*(n_nodes-len(xi))) for xi in paths])
@@ -101,9 +101,9 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
             ctl.add("specific", [], indep_rule)
             logging.debug(indep_rule)
 
-        ### add dep rule
-        ctl.add("specific", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
-        logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
+    ### add dep rule
+    ctl.add("specific", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
+    logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
 
     ### add show statements
     if 'arrow' in show:
