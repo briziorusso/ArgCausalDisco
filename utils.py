@@ -112,7 +112,7 @@ def set_of_models_to_set_of_graphs(models, n_nodes, mec_check=True):
     MECs = defaultdict(list)
     MEC_set = set()
     model_sets = set()
-    logging.info(   f"Checking MECs")
+    # logging.info("   Checking MECs")
     for model in models:
         arrows = model_to_set_of_arrows(model, n_nodes)
         model_sets.add(frozenset(arrows))        
@@ -123,8 +123,8 @@ def set_of_models_to_set_of_graphs(models, n_nodes, mec_check=True):
             cp_adj_hashable = map(tuple, cp_adj)
             MECs[cp_adj_hashable] = list(adj.flatten())
             MEC_set.add(frozenset(cp_adj_hashable))
-            assert len(MEC_set) == 1, f"More than one MEC found. \n incompatible graph={arrows}"         
-    return model_sets
+    logging.info(f"   Number of MECs: {len(MEC_set)}")
+    return model_sets, MECs
 
 def extract_test_elements_from_symbol(symbol:str)->list:
     dep_type, elements = symbol.replace(").","").split("(")

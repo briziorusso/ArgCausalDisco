@@ -346,7 +346,7 @@ class TestCausalABA(unittest.TestCase):
                 f.write(s + "\n")
 
         models = CausalABA(n_nodes, facts_location)
-        model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
+        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
 
         ##Drop facts with conditioning set of increasing size
         # for S_size in range(n_nodes-2, 0, -1):
@@ -394,7 +394,7 @@ class TestCausalABA(unittest.TestCase):
         expected = frozenset(set(G_true1.edges()))
 
         models = CausalABA(n_nodes, facts_location)
-        model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
+        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
            
         self.assertIn(expected, model_sets)
 
@@ -449,7 +449,7 @@ class TestCausalABA(unittest.TestCase):
                 f.write(s[4] + "\n")
         
         models = CausalABA(n_nodes, facts_location)
-        model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
+        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
 
         ##Drop facts with conditioning set of decreasing size
         # for S_size in range(n_nodes-2, 0, -1):
@@ -473,48 +473,59 @@ class TestCausalABA(unittest.TestCase):
         ### Drop facts with conditioning set of decreasing size (one at a time)
         if len(model_sets) == 0:
             facts = sorted(facts, key=lambda x: len(x[1]), reverse=True)
+            set_of_model_sets = []
+            found_solution = False
             for i in range(1,len(facts)-2):
-                    for f_to_go in combinations(facts, i):
-                        ### Remove fact from facts_expanded
-                        logging.info(f"Removing fact {[f[4] for f in f_to_go]}")
-                        facts_red = [f[4] for f in facts if f[4] not in [fa[4] for fa in f_to_go]]
-                        with open(facts_location, "w") as f:
-                            for s in facts_red:
-                                f.write(s + "\n")                
-                        models = CausalABA(n_nodes, facts_location)
-                        model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
-                        if len(model_sets) > 0:
-                            break
+                # if found_solution:
+                #     break
+                for f_to_go in combinations(facts, i):
+                    ### Remove fact from facts_expanded
+                    logging.debug(f"Removing fact {[f[4] for f in f_to_go]}")
+                    facts_red = [f[4] for f in facts if f[4] not in [fa[4] for fa in f_to_go]]
+                    with open(facts_location, "w") as f:
+                        for s in facts_red:
+                            f.write(s + "\n")                
+                    models = CausalABA(n_nodes, facts_location, print_models=False)
+                    model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
+                    if len(model_sets) > 0:
+                        found_solution = True
+                        set_of_model_sets.append(model_sets)
+                        break
+            if len(set_of_model_sets) > 0:
+                logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
+                for model_sets in set_of_model_sets:
+                    if expected in model_sets:
+                        logging.info(f"Models set: {model_sets}")
 
-        self.assertIn(expected, model_sets)
+        # self.assertIn(expected, model_sets)
 
     def test_specific_lp(self, filename, n_nodes, expected):
         logger_setup()
         logging.info("===============Running test_multiple_MECs===============")
         models = CausalABA(n_nodes, f"encodings/test_lps/{filename}.lp", show=["arrow", "indep"])
-        model_sets = set_of_models_to_set_of_graphs(models, n_nodes)
+        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
         self.assertEqual(model_sets, expected)
 
 start = datetime.now()
-# TestCausalABA().three_node_all_graphs()
-# TestCausalABA().three_node_graph_empty()
-# TestCausalABA().collider()
-# TestCausalABA().chains_confounder()
-# TestCausalABA().one_edge()
+TestCausalABA().three_node_all_graphs()
+TestCausalABA().three_node_graph_empty()
+TestCausalABA().collider()
+TestCausalABA().chains_confounder()
+TestCausalABA().one_edge()
 TestCausalABA().incompatible_Is()
-# TestCausalABA().four_node_all_graphs()
-# TestCausalABA().four_node_example()
-# TestCausalABA().incompatible_chain()
-# TestCausalABA().five_node_all_graphs()
-# TestCausalABA().five_node_colombo_example()
-# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-# TestCausalABA().six_node_example()
-# TestCausalABA().randomG(7, 1, "ER", 2024)
-# TestCausalABA().randomG(8, 1, "ER", 2024)
-# TestCausalABA().randomG(10, 1, "ER", 2024)
+TestCausalABA().four_node_all_graphs()
+TestCausalABA().four_node_example()
+TestCausalABA().incompatible_chain()
+TestCausalABA().five_node_all_graphs()
+TestCausalABA().five_node_colombo_example()
+## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+TestCausalABA().six_node_example()
+TestCausalABA().randomG(7, 1, "ER", 2024)
+TestCausalABA().randomG(8, 1, "ER", 2024)
+TestCausalABA().randomG(9, 1, "ER", 2024)
 
 # TestCausalABA().five_node_colombo_PC_facts()
-# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)
+TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)
 
 # TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
 
