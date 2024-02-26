@@ -32,18 +32,7 @@ collider(Y,X,Z) :- arrow(X,Y), arrow(Z,Y), X!=Z, X!=Y, Y!=Z, var(X), var(Y), var
 %%% Y is a collider between X and Z and there is a directed path from Y to N
 collider_desc(N,Y,X,Z) :- collider(Y,X,Z), dpath(Y,N), var(N), X!=N, Y!=N, Z!=N.
 
-%%% Nonblocker rules, third rule is in python since it is path dependent
+%%% Nonblocker rules
 nb(N,X,Y,S) :- in(N,S), collider(N,X,Y), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, set(S).
 nb(N,X,Y,S) :- not in(N,S), not collider(N,X,Y), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, set(S).
 nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in(Z,S), collider_desc(Z,N,X,Y), var(Z).
-
-%#show arrow/2.
-%#show collider/3.
-%#show collider_desc/4.
-%#show dep/3. 
-%#show indep/3. 
-%#show ap/3.
-%#show ap/4.
-%#show ap/5.
-%#show dpath/2.
-%#show nb/4.
