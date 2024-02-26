@@ -14,10 +14,11 @@ dep(X,Y,S) :- dep(Y,X,S), var(X), var(Y), set(S), X!=Y.
 %%%%% All DAGs
 %%% generate arrows
 arrow(X,Y) | arrow(Y,X) | not edge(X,Y) :- var(X), var(Y), X!=Y.
+edge(X,Y) :- arrow(X,Y), X!=Y, var(X), var(Y).
 %%% symmetry
-edge(X,Y):- arrow(X,Y), X!=Y, var(X), var(Y).
-edge(X,Y):- edge(Y,X), X!=Y, var(X), var(Y).
+edge(X,Y) :- edge(Y,X), X!=Y, var(X), var(Y).
 %%% test
+:- edge(X,Y), indep(X,Y,S), set(S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S).
 :- arrow(X,Y), not edge(X,Y), var(X), var(Y).
 :- edge(X,Y), not arrow(X,Y), not arrow(Y,X), var(X), var(Y).
 :- arrow(Y,X), arrow(X,Y), X!=Y, var(X), var(Y).
@@ -25,8 +26,6 @@ edge(X,Y):- edge(Y,X), X!=Y, var(X), var(Y).
 dpath(X,Y):- arrow(X,Y), X!=Y, var(X), var(Y).
 dpath(X,Y):- arrow(X,Z), dpath(Z,Y), var(X). 
 :- dpath(X,X), var(X).
-
-:- edge(X,Y), indep(X,Y,S), set(S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S).
 
 %%% Y is a collider between X and Z 
 collider(Y,X,Z) :- arrow(X,Y), arrow(Z,Y), X!=Z, X!=Y, Y!=Z, var(X), var(Y), var(Z).
