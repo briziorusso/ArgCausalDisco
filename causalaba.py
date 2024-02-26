@@ -8,7 +8,7 @@ from itertools import combinations
 from datetime import datetime
 from utils import powerset, extract_test_elements_from_symbol
 
-def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_models:bool=True, verbose:bool=False)->list:     
+def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_for_models:bool=False, print_models:bool=True, verbose:bool=False)->list:     
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
 
@@ -55,6 +55,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
         with open(facts_location, 'r') as file:
             for line in file:
                 if "dep" in line:
+                    ext_fact = True
                     line = line.replace("#external ","")
                     X, S, Y, dep_type = extract_test_elements_from_symbol(line.replace("\n",""))
                     # S_str = line.replace(').\n','').split(",")[-1]
@@ -64,6 +65,9 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
                         indep_facts.add((X,Y))
                     elif 'dep' in line and 'in' not in line:
                         dep_facts.add((X,Y))
+        if ext_fact:
+            ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+            ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
 
     ### Active paths rules
     n_p = 0
@@ -119,9 +123,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
     if 'nb' in show:
         ctl.add("base", [], "#show nb/4.")
     if 'ap' in show:
-        ctl.add("base", [], "#show ap/3.")
         ctl.add("base", [], "#show ap/4.")
-        ctl.add("base", [], "#show ap/5.")
     if 'dpath' in show:
         ctl.add("base", [], "#show dpath/2.")
 
@@ -131,6 +133,9 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
     start_ground = datetime.now()
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
+    for fact in facts:
+        ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+        # logging.debug(f"   Adding fact {fact[4]}")
     models = []
     count_models = 0
     logging.info("   Solving...")
@@ -145,20 +150,20 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], print_m
     times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
     logging.info(f"Times: {times}")
 
-    if count_models == 0:
+    if count_models == 0 and search_for_models:
         ### BFS over the set of facts by length of condition set
         facts = sorted(facts, key=lambda x: len(x[1]), reverse=True)
         for i in range(len(facts)):
             ### remove fact
             logging.info(f"   Removing fact {facts[i][4]}")
-            ctl.assign_external(Function(facts[i][3], [Number(facts[i][0]), Number(facts[i][2]), String(facts[i][4].replace(').','').split(",")[-1])]), False)
+            ctl.assign_external(Function(facts[i][3], [Number(facts[i][0]), Number(facts[i][2]), Function(facts[i][4].replace(').','').split(",")[-1])]), False)
             with ctl.solve(yield_=True) as handle:
                 for model in handle:
                     models.append(model.symbols(shown=True))
                     if print_models:
                         count_models += 1
                         logging.info(f"Answer {count_models}: {model}")
-            logging.info(f"Number of models: {int(ctl.statistics['summary']['models']['enumerated'])}")
+            logging.info(f"   Number of models: {int(ctl.statistics['summary']['models']['enumerated'])}")
             times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
             logging.info(f"Times: {times}")
             if count_models > 0:
