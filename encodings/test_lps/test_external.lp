@@ -13,34 +13,44 @@ in(0,s0y1y2).
 in(1,s0y1y2).
 in(2,s0y1y2).
 
-indep(0,1,empty).
+#external ext_indep(0,1,empty).
 %indep(0,1,s2).
 %dep(0,2,empty).
 %dep(0,2,s1).
 %dep(1,2,empty).
 %dep(1,2,s0).
 
+#external ext_ar.
+a :- not b. 
+#external b.
+
+ar :- ext_ar.
+b :- ext_b.
+ar :- a.
+
+indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.
+dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.
 
 p1 :- edge(0,1).
 ap(0,1,p1,S) :- p1,  not in(0,S), not in(1,S), set(S).
-%p2 :- edge(0,2),edge(2,1).
-%ap(0,1,p2,S) :- p2, nb(2,0,1,S), not in(0,S), not in(1,S), set(S).
-%indep(0,1,S) :-  not ap(0,1,p1,S), not ap(0,1,p2,S), not in(0,S), not in(1,S), set(S).
-%dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
+p2 :- edge(0,2),edge(2,1).
+ap(0,1,p2,S) :- p2, nb(2,0,1,S), not in(0,S), not in(1,S), set(S).
+indep(0,1,S) :-  not ap(0,1,p1,S), not ap(0,1,p2,S), not in(0,S), not in(1,S), set(S).
+dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
 
-%p3 :- edge(0,1),edge(1,2).
-%ap(0,2,p3,S) :- p3, nb(1,0,2,S), not in(0,S), not in(2,S), set(S).
-%p4 :- edge(0,2).
-%ap(0,2,p4,S) :- p4,  not in(0,S), not in(2,S), set(S).
-%indep(0,2,S) :-  not ap(0,2,p3,S), not ap(0,2,p4,S), not in(0,S), not in(2,S), set(S).
-%dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
+p3 :- edge(0,1),edge(1,2).
+ap(0,2,p3,S) :- p3, nb(1,0,2,S), not in(0,S), not in(2,S), set(S).
+p4 :- edge(0,2).
+ap(0,2,p4,S) :- p4,  not in(0,S), not in(2,S), set(S).
+indep(0,2,S) :-  not ap(0,2,p3,S), not ap(0,2,p4,S), not in(0,S), not in(2,S), set(S).
+dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
 
-%p5 :- edge(1,0),edge(0,2).
-%ap(1,2,p5,S) :- p5, nb(0,1,2,S), not in(1,S), not in(2,S), set(S).
-%p6 :- edge(1,2).
-%ap(1,2,p6,S) :- p6,  not in(1,S), not in(2,S), set(S).
-%indep(1,2,S) :-  not ap(1,2,p5,S), not ap(1,2,p6,S), not in(1,S), not in(2,S), set(S).
-%dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
+p5 :- edge(1,0),edge(0,2).
+ap(1,2,p5,S) :- p5, nb(0,1,2,S), not in(1,S), not in(2,S), set(S).
+p6 :- edge(1,2).
+ap(1,2,p6,S) :- p6,  not in(1,S), not in(2,S), set(S).
+indep(1,2,S) :-  not ap(1,2,p5,S), not ap(1,2,p6,S), not in(1,S), not in(2,S), set(S).
+dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).
 
 %%% sets and elements
 var(0..n_vars).
@@ -81,6 +91,12 @@ nb(N,X,Y,S) :- not in(N,S), not collider(N,X,Y), var(N), var(X), var(Y), N!=X, N
 nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in(Z,S), collider_desc(Z,N,X,Y), var(Z).
 
 #show arrow/2.
+%#show ext_indep/3.
+%#show ext_dep/3.
+#show ar/0.
+#show a/0.
+#show b/0.
+
 %#show collider/3.
 %#show collider_desc/4.
 %#show dep/3. 
