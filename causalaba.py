@@ -4,6 +4,7 @@ from clingo.control import Control
 from clingo import Function, Number, String
 import networkx as nx
 import numpy as np
+from tqdm.auto import tqdm
 from itertools import combinations
 from datetime import datetime
 from utils import powerset, extract_test_elements_from_symbol
@@ -58,9 +59,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
                     ext_fact = True
                     line = line.replace("#external ","")
                     X, S, Y, dep_type = extract_test_elements_from_symbol(line.replace("\n",""))
-                    # S_str = line.replace(').\n','').split(",")[-1]
                     facts.append((X,S,Y,dep_type, line.replace("\n","")))
-                    # ctl.assign_external(Function(dep_type, [Number(X), Number(Y), String(S_str)]), True)
                     if 'indep' in line:
                         indep_facts.add((X,Y))
                     elif 'dep' in line and 'in' not in line:
@@ -150,25 +149,36 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
     times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
     logging.info(f"Times: {times}")
 
+    set_of_models = []
     if count_models == 0 and search_for_models:
-        ### BFS over the set of facts by length of condition set
         facts = sorted(facts, key=lambda x: len(x[1]), reverse=True)
-        for i in range(len(facts)):
+        logging.info(f"Number of subsets to remove: {len(list(powerset(facts)))}")
+        for f_to_remove in tqdm(powerset(facts), desc=f"Removing facts"):
             ### remove fact
-            logging.info(f"   Removing fact {facts[i][4]}")
-            ctl.assign_external(Function(facts[i][3], [Number(facts[i][0]), Number(facts[i][2]), Function(facts[i][4].replace(').','').split(",")[-1])]), False)
+            logging.debug(f"Removing fact {[f[4] for f in f_to_remove]}")
+            for fact in facts:
+                ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                if fact in f_to_remove:
+                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
+
+            count_models = 0
+            models = []
             with ctl.solve(yield_=True) as handle:
                 for model in handle:
                     models.append(model.symbols(shown=True))
+                    count_models += 1
                     if print_models:
-                        count_models += 1
                         logging.info(f"Answer {count_models}: {model}")
-            logging.info(f"   Number of models: {int(ctl.statistics['summary']['models']['enumerated'])}")
+            logging.debug(f"   Number of models: {int(ctl.statistics['summary']['models']['enumerated'])}")
             times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
-            logging.info(f"Times: {times}")
+            logging.debug(f"Times: {times}")
             if count_models > 0:
-                break
+                set_of_models.append(models)
+                    # break
 
-    return models
+    if len(set_of_models) > 0:
+        return set_of_models, True
+
+    return models, False
 
 # CausalABA(3, "outputs/test_facts.lp", False)

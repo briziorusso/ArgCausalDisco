@@ -123,7 +123,7 @@ def set_of_models_to_set_of_graphs(models, n_nodes, mec_check=True):
             cp_adj_hashable = map(tuple, cp_adj)
             MECs[cp_adj_hashable] = list(adj.flatten())
             MEC_set.add(frozenset(cp_adj_hashable))
-    logging.info(f"   Number of MECs: {len(MEC_set)}")
+    logging.debug(f"   Number of MECs: {len(MEC_set)}")
     return model_sets, MECs
 
 def extract_test_elements_from_symbol(symbol:str)->list:
