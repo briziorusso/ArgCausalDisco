@@ -345,28 +345,25 @@ class TestCausalABA(unittest.TestCase):
             for s in facts:
                 f.write(s + "\n")
 
-        models = CausalABA(n_nodes, facts_location)
-        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
-
-        ##Drop facts with conditioning set of increasing size
-        # for S_size in range(n_nodes-2, 0, -1):
-        #     if len(model_sets) == 0:
-        #         logging.info(f"No models found, dropping facts with conditioning set of size {S_size}")
-        #         facts_red = []
-        #         for fact in facts:
-        #             X, S, Y, dep_type = extract_test_elements_from_symbol(fact)
-        #             if len(S) < S_size:
-        #                 facts_red.append(test)
-        #         logging.info(f"Number of facts dropped={len(facts)-len(facts_red)}")
-        #         logging.info(f"Number of facts left={len(facts_red)}")
-        #         with open(facts_location, "w") as f:
-        #             for s in facts:
-        #                 f.write(s + "\n")
-
-        #         models = CausalABA(n_nodes, facts_location)
-        #         model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
-
-        self.assertIn(expected, model_sets)
+        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, search_for_models='first', print_models=False)
+        if multiple_solutions:
+            for model in model_sets:
+                models, MECs = set_of_models_to_set_of_graphs(model, n_nodes, mec_check)
+                set_of_model_sets.append(models)
+        else:
+            models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes, mec_check)
+        if len(set_of_model_sets) > 0:
+            logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
+            count_right = 0
+            for model_sets in set_of_model_sets:
+                if expected in model_sets:
+                    count_right += 1
+                    logging.debug(f"Models set: {model_sets}")
+            logging.info(f"Number of right solutions found: {count_right}")
+                    
+            self.assertTrue(count_right > 0)
+        else:
+            self.assertIn(expected, models)
 
     def randomG(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
         scenario = "randomG"
@@ -494,8 +491,8 @@ start = datetime.now()
 # TestCausalABA().randomG(8, 1, "ER", 2024)
 # TestCausalABA().randomG(9, 1, "ER", 2024)
 
-# TestCausalABA().five_node_colombo_PC_facts()
-TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)
+TestCausalABA().five_node_colombo_PC_facts()
+# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)
 
 # TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
 
