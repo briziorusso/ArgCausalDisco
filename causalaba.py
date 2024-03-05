@@ -173,8 +173,8 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
             times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
             logging.debug(f"Times: {times}")
             if count_models > 0:
-                set_of_models.append(models)
-                    # break
+                # set_of_models.append(models)
+                break
 
     if len(set_of_models) > 0:
         return set_of_models, True

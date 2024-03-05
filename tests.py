@@ -455,7 +455,7 @@ class TestCausalABA(unittest.TestCase):
                 models, MECs = set_of_models_to_set_of_graphs(model, n_nodes, mec_check)
                 set_of_model_sets.append(models)
         else:
-            models, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
+            models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes, mec_check)
         if len(set_of_model_sets) > 0:
             logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
             count_right = 0
@@ -465,53 +465,9 @@ class TestCausalABA(unittest.TestCase):
                     logging.debug(f"Models set: {model_sets}")
             logging.info(f"Number of right solutions found: {count_right}")
                     
-        ##Drop facts with conditioning set of decreasing size
-        # for S_size in range(n_nodes-2, 0, -1):
-        #     if len(model_sets) == 0:
-        #         logging.info(f"No models found, dropping facts with conditioning set of size {S_size}")
-        #         facts_red = []
-        #         for fact in facts:
-        #             X, S, Y, dep_type = extract_test_elements_from_symbol(fact)
-        #             if len(S) < S_size:
-        #                 facts_red.append(test)
-        #         logging.info(f"Number of facts dropped={len(facts)-len(facts_red)}")
-        #         logging.info(f"Number of facts left={len(facts_red)}")
-        #         if len(facts_red) != len(facts):
-        #             with open(facts_location, "w") as f:
-        #                 for s in facts:
-        #                     f.write(s + "\n")
-
-        #             models = CausalABA(n_nodes, facts_location)
-        #             model_sets = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
-
-        ### Drop facts with conditioning set of decreasing size (one at a time)
-        # if len(model_sets) == 0:
-        #     facts = sorted(facts, key=lambda x: len(x[1]), reverse=True)
-        #     set_of_model_sets = []
-        #     found_solution = False
-        #     for i in range(1,len(facts)-2):
-        #         # if found_solution:
-        #         #     break
-        #         for f_to_go in combinations(facts, i):
-        #             ### Remove fact from facts_expanded
-        #             logging.debug(f"Removing fact {[f[4] for f in f_to_go]}")
-        #             facts_red = [f[4] for f in facts if f[4] not in [fa[4] for fa in f_to_go]]
-        #             with open(facts_location, "w") as f:
-        #                 for s in facts_red:
-        #                     f.write(s + "\n")                
-        #             models = CausalABA(n_nodes, facts_location, print_models=False)
-        #             model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
-        #             if len(model_sets) > 0:
-        #                 found_solution = True
-        #                 set_of_model_sets.append(model_sets)
-        #                 break
-        #     if len(set_of_model_sets) > 0:
-        #         logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
-        #         for model_sets in set_of_model_sets:
-        #             if expected in model_sets:
-        #                 logging.info(f"Models set: {model_sets}")
-
-        # self.assertIn(expected, model_sets)
+            self.assertTrue(count_right > 0)
+        else:
+            self.assertIn(expected, models)
 
     def test_specific_lp(self, filename, n_nodes, expected):
         logger_setup()

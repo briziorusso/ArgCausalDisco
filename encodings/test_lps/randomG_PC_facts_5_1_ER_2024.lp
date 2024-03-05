@@ -1,16 +1,26 @@
-dep(0,3,s2).
-dep(1,2,s0).
-dep(1,2,s3).
-indep(1,3,s0).
-dep(2,3,s0).
-dep(2,3,s1).
-indep(0,1,empty).
-dep(0,2,empty).
-dep(0,3,empty).
-indep(0,4,empty).
-dep(1,2,empty).
-indep(1,3,empty).
-indep(1,4,empty).
-dep(2,3,empty).
-indep(2,4,empty).
-indep(3,4,empty).
+#external ext_indep(0,1,empty).
+#external ext_indep(0,1,s2).
+#external ext_indep(0,1,s3).
+#external ext_indep(0,1,s2y3).
+#external ext_dep(0,2,empty).
+#external ext_dep(0,2,s1).
+#external ext_dep(0,2,s3).
+#external ext_dep(0,2,s1y3).
+#external ext_dep(0,3,empty).
+#external ext_dep(0,3,s2).
+#external ext_indep(0,4,empty).
+#external ext_dep(1,2,empty).
+#external ext_dep(1,2,s0).
+#external ext_dep(1,2,s3).
+#external ext_dep(1,2,s0y3).
+#external ext_indep(1,3,empty).
+#external ext_indep(1,3,s0).
+#external ext_indep(1,3,s2).
+#external ext_indep(1,3,s0y2).
+#external ext_indep(1,4,empty).
+#external ext_dep(2,3,empty).
+#external ext_dep(2,3,s0).
+#external ext_dep(2,3,s1).
+#external ext_dep(2,3,s0y1).
+#external ext_indep(2,4,empty).
+#external ext_indep(3,4,empty).
