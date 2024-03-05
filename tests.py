@@ -62,7 +62,7 @@ class TestCausalABA(unittest.TestCase):
             frozenset({(0, 1), (2, 0), (2, 1)}),
             frozenset({(1, 0), (1, 2), (2, 0)})
         ])
-        models = CausalABA(n_nodes)
+        models, _ = CausalABA(n_nodes)
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -77,7 +77,7 @@ class TestCausalABA(unittest.TestCase):
         expected = set([
             frozenset(),
         ])
-        models = CausalABA(n_nodes, "encodings/test_lps/three_node_empty.lp")
+        models, _ = CausalABA(n_nodes, "encodings/test_lps/three_node_empty.lp")
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -92,7 +92,7 @@ class TestCausalABA(unittest.TestCase):
         expected = set([
             frozenset({(0, 2), (1, 2)}),
         ])
-        models = CausalABA(n_nodes, "encodings/test_lps/collider.lp", show=["arrow", "indep"])
+        models, _ = CausalABA(n_nodes, "encodings/test_lps/collider.lp", show=["arrow", "indep"])
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -111,7 +111,7 @@ class TestCausalABA(unittest.TestCase):
             ##confounder
             frozenset({(2, 0), (2, 1)})
         ])
-        models = CausalABA(n_nodes, "encodings/test_lps/chains_confounder.lp")
+        models, _ = CausalABA(n_nodes, "encodings/test_lps/chains_confounder.lp")
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -127,7 +127,7 @@ class TestCausalABA(unittest.TestCase):
             frozenset({(0, 1)}),
             frozenset({(1, 0)}),
         ])
-        models = CausalABA(n_nodes, "encodings/test_lps/one_edge.lp")
+        models, _ = CausalABA(n_nodes, "encodings/test_lps/one_edge.lp")
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -140,7 +140,7 @@ class TestCausalABA(unittest.TestCase):
         logging.info("===============Running incompatible_Is===============")
         n_nodes = 3
         expected = set()
-        models = CausalABA(n_nodes, "encodings/test_lps/incompatible_Is.lp")
+        models, _ = CausalABA(n_nodes, "encodings/test_lps/incompatible_Is.lp")
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -152,7 +152,7 @@ class TestCausalABA(unittest.TestCase):
         logger_setup()
         logging.info("===============Running four_node_graph_full===============")
         n_nodes = 4
-        models = CausalABA(n_nodes, print_models=False)
+        models, _ = CausalABA(n_nodes, print_models=False)
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -185,7 +185,7 @@ class TestCausalABA(unittest.TestCase):
             for s in true_seplist:
                 f.write(s + "\n")
 
-        models = CausalABA(n_nodes, facts_location)
+        models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -201,7 +201,7 @@ class TestCausalABA(unittest.TestCase):
         n_nodes = 4
         expected = set()
 
-        models = CausalABA(n_nodes, facts_location)
+        models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -213,7 +213,7 @@ class TestCausalABA(unittest.TestCase):
         logger_setup()
         logging.info("===============Running five_node_all_graphs===============")
         n_nodes = 5
-        models = CausalABA(n_nodes, print_models=False) 
+        models, _ = CausalABA(n_nodes, print_models=False) 
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -244,7 +244,7 @@ class TestCausalABA(unittest.TestCase):
             for s in true_seplist:
                 f.write(s + "\n")
 
-        models = CausalABA(n_nodes, facts_location)
+        models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -256,7 +256,7 @@ class TestCausalABA(unittest.TestCase):
         logger_setup()
         logging.info("===============Running six_node_all_graphs===============")
         n_nodes = 6
-        models = CausalABA(n_nodes, print_models=False)
+        models, _ = CausalABA(n_nodes, print_models=False)
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -291,7 +291,7 @@ class TestCausalABA(unittest.TestCase):
             for s in true_seplist:
                 f.write(s + "\n")
 
-        models = CausalABA(n_nodes, facts_location)
+        models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model, n_nodes)
@@ -390,7 +390,7 @@ class TestCausalABA(unittest.TestCase):
         G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
         expected = frozenset(set(G_true1.edges()))
 
-        models = CausalABA(n_nodes, facts_location)
+        models, _ = CausalABA(n_nodes, facts_location)
         model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
            
         self.assertIn(expected, model_sets)
@@ -474,24 +474,24 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(model_sets, expected)
 
 start = datetime.now()
-# TestCausalABA().three_node_all_graphs()
-# TestCausalABA().three_node_graph_empty()
-# TestCausalABA().collider()
-# TestCausalABA().chains_confounder()
-# TestCausalABA().one_edge()
-# TestCausalABA().incompatible_Is()
-# TestCausalABA().four_node_all_graphs()
-# TestCausalABA().four_node_example()
-# TestCausalABA().incompatible_chain()
-# TestCausalABA().five_node_all_graphs()
-# TestCausalABA().five_node_colombo_example()
-# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-# TestCausalABA().six_node_example()
-# TestCausalABA().randomG(7, 1, "ER", 2024)
-# TestCausalABA().randomG(8, 1, "ER", 2024)
-# TestCausalABA().randomG(9, 1, "ER", 2024)
+TestCausalABA().three_node_all_graphs()
+TestCausalABA().three_node_graph_empty()
+TestCausalABA().collider()
+TestCausalABA().chains_confounder()
+TestCausalABA().one_edge()
+TestCausalABA().incompatible_Is()
+TestCausalABA().four_node_all_graphs()
+TestCausalABA().four_node_example()
+TestCausalABA().incompatible_chain()
+TestCausalABA().five_node_all_graphs()
+TestCausalABA().five_node_colombo_example()
+## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+TestCausalABA().six_node_example()
+TestCausalABA().randomG(7, 1, "ER", 2024)
+TestCausalABA().randomG(8, 1, "ER", 2024)
+TestCausalABA().randomG(9, 1, "ER", 2024)
 
-TestCausalABA().five_node_colombo_PC_facts()
+# TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)
 
 # TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
