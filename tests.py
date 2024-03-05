@@ -449,7 +449,7 @@ class TestCausalABA(unittest.TestCase):
                 f.write("#external ext_" + s[4] + "\n")
         
         set_of_model_sets = []
-        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, search_for_models=True, print_models=False)
+        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, search_for_models='all', print_models=False)
         if multiple_solutions:
             for model in model_sets:
                 models, MECs = set_of_models_to_set_of_graphs(model, n_nodes, mec_check)

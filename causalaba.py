@@ -9,7 +9,7 @@ from itertools import combinations
 from datetime import datetime
 from utils import powerset, extract_test_elements_from_symbol
 
-def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_for_models:bool=False, print_models:bool=True, verbose:bool=False)->list:     
+def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_for_models:str=None, print_models:bool=True, verbose:bool=False)->list:     
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
 
@@ -150,7 +150,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
     logging.info(f"Times: {times}")
 
     set_of_models = []
-    if count_models == 0 and search_for_models:
+    if count_models == 0 and search_for_models != None:
         facts = sorted(facts, key=lambda x: len(x[1]), reverse=True)
         logging.info(f"Number of subsets to remove: {len(list(powerset(facts)))}")
         for f_to_remove in tqdm(powerset(facts), desc=f"Removing facts"):
@@ -173,8 +173,10 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
             times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
             logging.debug(f"Times: {times}")
             if count_models > 0:
-                # set_of_models.append(models)
-                break
+                if search_for_models == "first":
+                    return models, False
+                else:
+                    set_of_models.append(models)
 
     if len(set_of_models) > 0:
         return set_of_models, True
