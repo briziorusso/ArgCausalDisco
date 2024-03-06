@@ -165,6 +165,18 @@ def find_all_d_separations_sets(G, verbose=True, debug=False):
                 depth += 1
     return septests
 
+def initial_strength(p:float, len_S:int, alpha:float, base_strength:float, num_vars:int, verbose=False)->float:
+    w_S = (1-len_S/num_vars)
+    # w_S = 1
+    if p != None:
+        if p < alpha:
+            initial_strength = (1-0.5/alpha*p)*w_S
+        else:
+            initial_strength = ((alpha-0.5*p-0.5)/(alpha-1))*w_S
+    else:
+        initial_strength = base_strength
+    return initial_strength
+
 def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_priority:int=2):
     """A function to simulate data and run PC algorithm
 
