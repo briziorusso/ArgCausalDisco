@@ -160,9 +160,9 @@ class TestCausalABA(unittest.TestCase):
         
         self.assertEqual(len(model_sets), 543)
 
-    def four_node_ShapPC_example(self):
+    def four_node_shapPC_example(self):
         logger_setup()
-        scenario = "four_node_ShapPC_example"
+        scenario = "four_node_shapPC_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0],
@@ -360,10 +360,96 @@ class TestCausalABA(unittest.TestCase):
            
         self.assertIn(expected, model_sets)
 
-    def five_node_colombo_PC_facts(self, mec_check=True):
+    ############################################################################################################
+    #######                                 CausalABA with PC facts                                     ########
+    ############################################################################################################
+
+    def four_node_shapPC_PC_facts(self):
+        scenario = "four_node_shapPC_PC_facts"
+        alpha = 0.05
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        facts_location_I = f"encodings/test_lps/{scenario}_I.lp"
+        facts_location_wc = f"encodings/test_lps/{scenario}_wc.lp"
+        logger_setup(scenario)
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  0,  0],
+                            [ 0,  0,  0,  0],
+                            [ 1,  1,  0,  0],
+                            [ 0,  1,  1,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+
+        expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        cg = simulate_data_and_run_PC(G_true, alpha)
+
+        facts = []
+        count_wrong = 0
+        for test in true_seplist:
+            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+
+            test_PC = [t for t in cg.sepset[X,Y] if set(t[0])==S]
+            if len(test_PC)==1:
+                p = test_PC[0][1]
+                dep_type_PC = "indep" if p > alpha else "dep" 
+                I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+                if dep_type == dep_type_PC:
+                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC))
+                elif dep_type == "indep":
+                    count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC))
+                elif dep_type == "dep":
+                    count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
+        
+        logging.info(f"Number of facts from PC={len(facts)}")
+        logging.info(f"Number of wrong facts={count_wrong}")
+        ### Save external statements
+        with open(facts_location, "w") as f:
+            for s in facts:
+                f.write(f"#external ext_{s[4]}\n")
+        ### Save weak constraints
+        with open(facts_location_wc, "w") as f:
+            for s in facts:
+                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+        ### Save inner strengths
+        with open(facts_location_I, "w") as f:
+            for s in facts:
+                f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
+        
+        set_of_model_sets = []
+        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
+                                                   fact_pct=0.27, print_models=False)
+        if multiple_solutions:
+            for model in model_sets:
+                models, MECs = set_of_models_to_set_of_graphs(model, n_nodes)
+                set_of_model_sets.append(models)
+        else:
+            models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes)
+
+        if len(set_of_model_sets) > 0:
+            logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
+            count_right = 0
+            for model_sets in set_of_model_sets:
+                if expected in model_sets:
+                    count_right += 1
+                    logging.debug(f"Models set: {model_sets}")
+            logging.info(f"Number of right solutions found: {count_right}")
+            self.assertTrue(count_right > 0)
+        else:
+            self.assertIn(expected, models)
+
+    def five_node_colombo_PC_facts(self):
         scenario = "five_node_colombo_PC_facts"
         alpha = 0.05
         facts_location = f"encodings/test_lps/{scenario}.lp"
+        facts_location_I = f"encodings/test_lps/{scenario}_I.lp"
+        facts_location_wc = f"encodings/test_lps/{scenario}_wc.lp"
         logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0,  0],
@@ -391,29 +477,41 @@ class TestCausalABA(unittest.TestCase):
             if len(test_PC)==1:
                 p = test_PC[0][1]
                 dep_type_PC = "indep" if p > alpha else "dep" 
+                I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
                 if dep_type == dep_type_PC:
-                    facts.append(test)
+                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC))
                 elif dep_type == "indep":
                     count_wrong += 1
-                    facts.append(test.replace("indep", "dep"))
+                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC))
                 elif dep_type == "dep":
-                    facts.append(test.replace("dep", "indep"))
                     count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
         logging.info(f"Number of facts from PC={len(facts)}")
         logging.info(f"Number of wrong facts={count_wrong}")
+        ### Save external statements
         with open(facts_location, "w") as f:
             for s in facts:
-                f.write(s + "\n")
-
-        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, search_for_models='first', print_models=False)
+                f.write(f"#external ext_{s[4]}\n")
+        ### Save weak constraints
+        with open(facts_location_wc, "w") as f:
+            for s in facts:
+                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+        ### Save inner strengths
+        with open(facts_location_I, "w") as f:
+            for s in facts:
+                f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
+        
+        set_of_model_sets = []
+        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
+                                                   fact_pct=0.27, print_models=False)
         if multiple_solutions:
-            set_of_model_sets = []
             for model in model_sets:
-                models, MECs = set_of_models_to_set_of_graphs(model, n_nodes, mec_check)
+                models, MECs = set_of_models_to_set_of_graphs(model, n_nodes)
                 set_of_model_sets.append(models)
         else:
-            models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes, mec_check)
+            models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes)
+
         if len(set_of_model_sets) > 0:
             logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
             count_right = 0
@@ -422,7 +520,86 @@ class TestCausalABA(unittest.TestCase):
                     count_right += 1
                     logging.debug(f"Models set: {model_sets}")
             logging.info(f"Number of right solutions found: {count_right}")
-                    
+            self.assertTrue(count_right > 0)
+        else:
+            self.assertIn(expected, models)
+
+    def five_node_sprinkler_PC_facts(self):
+        scenario = "five_node_sprinkler_PC_facts"
+        alpha = 0.05
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        facts_location_I = f"encodings/test_lps/{scenario}_I.lp"
+        facts_location_wc = f"encodings/test_lps/{scenario}_wc.lp"
+        logger_setup(scenario)
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0]])
+        n_nodes = B_true.shape[0]
+        logging.debug(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.debug(G_true.edges)
+
+        expected = frozenset({(0, 1), (0, 2), (1, 3), (2, 3), (3, 4)})
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        cg = simulate_data_and_run_PC(G_true, alpha)
+
+        facts = []
+        count_wrong = 0
+        for test in true_seplist:
+            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+
+            test_PC = [t for t in cg.sepset[X,Y] if set(t[0])==S]
+            if len(test_PC)==1:
+                p = test_PC[0][1]
+                dep_type_PC = "indep" if p > alpha else "dep" 
+                I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+                if dep_type == dep_type_PC:
+                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC))
+                elif dep_type == "indep":
+                    count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC))
+                elif dep_type == "dep":
+                    count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
+        
+        logging.info(f"Number of facts from PC={len(facts)}")
+        logging.info(f"Number of wrong facts={count_wrong}")
+        ### Save external statements
+        with open(facts_location, "w") as f:
+            for s in facts:
+                f.write(f"#external ext_{s[4]}\n")
+        ### Save weak constraints
+        with open(facts_location_wc, "w") as f:
+            for s in facts:
+                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+        ### Save inner strengths
+        with open(facts_location_I, "w") as f:
+            for s in facts:
+                f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
+        
+        set_of_model_sets = []
+        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
+                                                   fact_pct=0.27, print_models=False)
+        if multiple_solutions:
+            for model in model_sets:
+                models, MECs = set_of_models_to_set_of_graphs(model, n_nodes)
+                set_of_model_sets.append(models)
+        else:
+            models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes)
+
+        if len(set_of_model_sets) > 0:
+            logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
+            count_right = 0
+            for model_sets in set_of_model_sets:
+                if expected in model_sets:
+                    count_right += 1
+                    logging.debug(f"Models set: {model_sets}")
+            logging.info(f"Number of right solutions found: {count_right}")
             self.assertTrue(count_right > 0)
         else:
             self.assertIn(expected, models)
@@ -519,28 +696,29 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(model_sets, expected)
 
 start = datetime.now()
-TestCausalABA().three_node_all_graphs()
-TestCausalABA().three_node_graph_empty()
-TestCausalABA().collider()
-TestCausalABA().chains_confounder()
-TestCausalABA().one_edge()
-TestCausalABA().incompatible_Is()
-TestCausalABA().four_node_all_graphs()
-TestCausalABA().four_node_ShapPC_example()
-TestCausalABA().incompatible_chain()
-TestCausalABA().five_node_all_graphs()
-TestCausalABA().five_node_colombo_example()
-TestCausalABA().five_node_sprinkler_example()
-## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-TestCausalABA().six_node_example()
+# TestCausalABA().three_node_all_graphs()
+# TestCausalABA().three_node_graph_empty()
+# TestCausalABA().collider()
+# TestCausalABA().chains_confounder()
+# TestCausalABA().one_edge()
+# TestCausalABA().incompatible_Is()
+# TestCausalABA().four_node_all_graphs()
+# TestCausalABA().four_node_shapPC_example()
+# TestCausalABA().incompatible_chain()
+# TestCausalABA().five_node_all_graphs()
+# TestCausalABA().five_node_colombo_example()
+# TestCausalABA().five_node_sprinkler_example()
+# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+# TestCausalABA().six_node_example()
 # TestCausalABA().randomG(7, 1, "ER", 2024)
 # TestCausalABA().randomG(8, 1, "ER", 2024)
 # TestCausalABA().randomG(9, 1, "ER", 2024)
 
-# TestCausalABA().five_node_colombo_PC_facts()
+# TestCausalABA().four_node_shapPC_PC_facts()
+TestCausalABA().five_node_colombo_PC_facts()
+# TestCausalABA().five_node_sprinkler_PC_facts()
 # TestCausalABA().randomG_PC_facts(6, 1, "ER", 2024)
 
 # TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
-
 
 logging.info(f"Total time={str(datetime.now()-start)}")
