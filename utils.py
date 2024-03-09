@@ -166,7 +166,7 @@ def find_all_d_separations_sets(G, verbose=True, debug=False):
     return septests
 
 def initial_strength(p:float, len_S:int, alpha:float, base_strength:float, num_vars:int, verbose=False)->float:
-    w_S = (1-len_S/num_vars)
+    w_S = (1-len_S/(num_vars-2))
     # w_S = 1
     if p != None:
         if p < alpha:
