@@ -9,22 +9,14 @@ from itertools import combinations
 from datetime import datetime
 from utils import powerset, extract_test_elements_from_symbol
 
-def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_for_models:str=None, print_models:bool=True, verbose:bool=False)->list:     
+def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
+                weak_constraints:bool=False,
+                fact_pct:float=1,
+                search_for_models:str=None, 
+                show:list=['arrow']
+                )->list:     
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
-
-    input:
-    n_nodes: int
-    facts: str
-    verbose: bool
-
-    return: list
-    
-    This function takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
-    The CausalABA program is a logic program that encodes the causal structure of a graph.
-    The program is written in the Answer Set Programming (ASP) language.
-
-    The program is based on the following paper:
     
     """
 
@@ -34,17 +26,20 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
     ctl.configuration.solve.parallel_mode = os.cpu_count()
     ctl.configuration.solve.models="0"
     ctl.configuration.solver.seed="2024"
+    ctl.configuration.solve.opt_mode = "optN"
 
     ### Add set definition
     for S in powerset(range(n_nodes)):
         for s in S:
             ctl.add("specific", [], f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
-    #         logging.debug(f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
+            logging.debug(f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
 
     ### Load main program and facts
     ctl.load("encodings/causalaba.lp")
     if facts_location:
         ctl.load(facts_location)
+    if weak_constraints:
+        ctl.load(facts_location.replace(".lp","_wc.lp"))
 
     ### add nonblocker rules
     logging.info("   Adding Specific Rules...")
@@ -52,21 +47,30 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
     dep_facts = set()
     facts = []
     if facts_location:
+        if weak_constraints:
+            facts_location = facts_location.replace(".lp","_I.lp")
         logging.debug(f"   Loading facts from {facts_location}")
         with open(facts_location, 'r') as file:
             for line in file:
-                if "dep" in line:
-                    ext_fact = True
-                    line = line.replace("#external ","")
-                    X, S, Y, dep_type = extract_test_elements_from_symbol(line.replace("\n",""))
-                    facts.append((X,S,Y,dep_type, line.replace("\n","")))
-                    if 'indep' in line:
-                        indep_facts.add((X,Y))
-                    elif 'dep' in line and 'in' not in line:
-                        dep_facts.add((X,Y))
-        if ext_fact:
-            ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
-            ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+                if "dep" not in line:
+                    continue
+                line_clean = line.replace("#external ","").replace("\n","")
+                if weak_constraints:
+                    statement, Is = line_clean.split(" I=")
+                    I,truth = Is.split(",")
+                    X, S, Y, dep_type = extract_test_elements_from_symbol(statement)
+                    facts.append((X,S,Y, "ext_"+dep_type, statement, float(I), truth))
+                else:
+                    X, S, Y, dep_type = extract_test_elements_from_symbol(line_clean)
+                    facts.append((X,S,Y, dep_type, line_clean, np.nan, "unknown"))
+
+                if 'indep' in line_clean:
+                    indep_facts.add((X,Y))
+                elif 'dep' in line_clean and 'in' not in line_clean:
+                    dep_facts.add((X,Y))
+
+        ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+        ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
 
     ### Active paths rules
     n_p = 0
@@ -77,7 +81,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
         paths_mat = np.array([np.array(list(xi)+[None]*(n_nodes-len(xi))) for xi in paths])
         paths_mat_red = paths_mat[[not any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts 
                                             for j in range(n_nodes-1) if paths_mat[i,j] is not None]) \
-                                                for i in range(len(paths_mat))]]
+                                                for i in range(len(paths_mat))]] ##TODO: think about interaction with weak constraints
         remaining_paths = [list(filter(lambda x: x is not None, paths_mat_red[i])) for i in range(len(paths_mat_red))]
         logging.debug(f"   Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")
 
@@ -132,9 +136,14 @@ def CausalABA(n_nodes:int, facts_location:str=None, show:list=['arrow'], search_
     start_ground = datetime.now()
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
-    for fact in facts:
-        ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
-        # logging.debug(f"   Adding fact {fact[4]}")
+    facts = sorted(facts, key=lambda x: x[5], reverse=True) ###change to 5 to
+    for n, fact in enumerate(facts):
+        if n/len(facts) <= fact_pct:
+            ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+            logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+        else:
+            ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
+            logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
     models = []
     count_models = 0
     logging.info("   Solving...")

@@ -1,0 +1,16 @@
+indep(0,1,empty). I=0.8557833448493375, False
+indep(0,1,s2). I=0.330555409726852, False
+indep(0,1,s3). I=0.4381610475022683, False
+indep(0,1,s2y3). I=0.0, False
+dep(0,2,empty). I=0.9966481427479859, True
+dep(0,2,s1). I=0.49886335397528137, True
+dep(0,2,s3). I=0.498219534246372, True
+dep(0,3,empty). I=0.9999995767921024, True
+dep(0,3,s2). I=0.49999977546863317, True
+dep(1,2,empty). I=1.0, True
+dep(1,2,s0). I=0.5, True
+indep(1,3,empty). I=0.6538159623489905, True
+indep(2,3,empty). I=0.8428216224103651, True
+indep(2,3,s0). I=0.4608486454024168, False
+indep(2,3,s1). I=0.48642354181311515, True
+indep(2,3,s0y1). I=0.0, False

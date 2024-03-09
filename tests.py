@@ -347,6 +347,7 @@ class TestCausalABA(unittest.TestCase):
 
         model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, search_for_models='first', print_models=False)
         if multiple_solutions:
+            set_of_model_sets = []
             for model in model_sets:
                 models, MECs = set_of_models_to_set_of_graphs(model, n_nodes, mec_check)
                 set_of_model_sets.append(models)
@@ -400,6 +401,8 @@ class TestCausalABA(unittest.TestCase):
         alpha = 0.05
         output_name = f"{scenario}_{n_nodes}_{edge_per_node}_{graph_type}_{seed}"
         facts_location = f"encodings/test_lps/{output_name}.lp"
+        facts_location_I = f"encodings/test_lps/{output_name}_I.lp"
+        facts_location_wc = f"encodings/test_lps/{output_name}_wc.lp"
         logger_setup(output_name)
         logging.info(f"===============Running {scenario}===============")
         logging.info(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
@@ -430,23 +433,34 @@ class TestCausalABA(unittest.TestCase):
             if len(test_PC)==1:
                 p = test_PC[0][1]
                 dep_type_PC = "indep" if p > alpha else "dep" 
+                I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
                 if dep_type == dep_type_PC:
-                    facts.append((X,S,Y,dep_type_PC, test))
+                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC))
                 elif dep_type == "indep":
                     count_wrong += 1
-                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep")))
+                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC))
                 elif dep_type == "dep":
                     count_wrong += 1
-                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep")))
+                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
         logging.info(f"Number of facts from PC={len(facts)}")
         logging.info(f"Number of wrong facts={count_wrong}")
+        ### Save external statements
         with open(facts_location, "w") as f:
             for s in facts:
-                f.write("#external ext_" + s[4] + "\n")
+                f.write(f"#external ext_{s[4]}\n")
+        ### Save weak constraints
+        with open(facts_location_wc, "w") as f:
+            for s in facts:
+                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+        ### Save inner strengths
+        with open(facts_location_I, "w") as f:
+            for s in facts:
+                f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
         
         set_of_model_sets = []
-        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, search_for_models='all', print_models=False)
+        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
+                                                   fact_pct=0.27, print_models=False)
         if multiple_solutions:
             for model in model_sets:
                 models, MECs = set_of_models_to_set_of_graphs(model, n_nodes, mec_check)
@@ -470,7 +484,7 @@ class TestCausalABA(unittest.TestCase):
         logger_setup()
         logging.info("===============Running test_multiple_MECs===============")
         models = CausalABA(n_nodes, f"encodings/test_lps/{filename}.lp", show=["arrow", "indep"])
-        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
+        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes)
         self.assertEqual(model_sets, expected)
 
 start = datetime.now()
@@ -492,7 +506,7 @@ TestCausalABA().randomG(8, 1, "ER", 2024)
 TestCausalABA().randomG(9, 1, "ER", 2024)
 
 # TestCausalABA().five_node_colombo_PC_facts()
-# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)
+TestCausalABA().randomG_PC_facts(6, 1, "ER", 2024)
 
 # TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
 
