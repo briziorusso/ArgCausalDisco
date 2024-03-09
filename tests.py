@@ -160,9 +160,9 @@ class TestCausalABA(unittest.TestCase):
         
         self.assertEqual(len(model_sets), 543)
 
-    def four_node_example(self):
+    def four_node_ShapPC_example(self):
         logger_setup()
-        scenario = "four_node_example"
+        scenario = "four_node_ShapPC_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  0,  0],
@@ -252,6 +252,37 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertEqual(set(model_sets), expected)
 
+    def five_node_sprinkler_example(self):
+        scenario = "five_node_sprinkler_example"
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        logger_setup(scenario)
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0]])
+        n_nodes = B_true.shape[0]
+        logging.debug(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.debug(G_true.edges)
+
+        expected = frozenset({(0, 1), (0, 2), (1, 3), (2, 3), (3, 4)})
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        with open(facts_location, "w") as f:
+            for s in true_seplist:
+                f.write(s + "\n")
+
+        models, _ = CausalABA(n_nodes, facts_location)
+        model_sets = set()
+        for model in models:
+            arrows = model_to_set_of_arrows(model, n_nodes)
+            model_sets.add(frozenset(arrows))            
+
+        self.assertIn(expected, model_sets)
+
     def six_node_all_graphs(self):
         logger_setup()
         logging.info("===============Running six_node_all_graphs===============")
@@ -298,6 +329,36 @@ class TestCausalABA(unittest.TestCase):
             model_sets.add(frozenset(arrows))            
 
         self.assertEqual(model_sets, expected)
+
+    def randomG(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
+        scenario = "randomG"
+        output_name = f"{scenario}_{n_nodes}_{edge_per_node}_{graph_type}_{seed}"
+        facts_location = f"encodings/test_lps/{output_name}.lp"
+        logger_setup(output_name)
+        logging.info(f"===============Running {scenario}===============")
+        logging.info(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
+        s0 = int(n_nodes*edge_per_node)
+        if s0 > int(n_nodes*(n_nodes-1)/2):
+            logging.info(f'{s0} is too many edges, setting s0 to the max:', int(n_nodes*(n_nodes-1)/2))
+            s0 = int(n_nodes*(n_nodes-1)/2)
+        random_stability(seed)
+        B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=graph_type)
+        logging.debug(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.debug(G_true.edges)
+        true_seplist = find_all_d_separations_sets(G_true, verbose=False)
+        with open(facts_location, "w") as f:
+            for s in true_seplist:
+                f.write(s + "\n")
+
+        inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
+        G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
+        expected = frozenset(set(G_true1.edges()))
+
+        models, _ = CausalABA(n_nodes, facts_location)
+        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
+           
+        self.assertIn(expected, model_sets)
 
     def five_node_colombo_PC_facts(self, mec_check=True):
         scenario = "five_node_colombo_PC_facts"
@@ -365,36 +426,6 @@ class TestCausalABA(unittest.TestCase):
             self.assertTrue(count_right > 0)
         else:
             self.assertIn(expected, models)
-
-    def randomG(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
-        scenario = "randomG"
-        output_name = f"{scenario}_{n_nodes}_{edge_per_node}_{graph_type}_{seed}"
-        facts_location = f"encodings/test_lps/{output_name}.lp"
-        logger_setup(output_name)
-        logging.info(f"===============Running {scenario}===============")
-        logging.info(f"n_nodes={n_nodes}, edge_per_node={edge_per_node}, graph_type={graph_type}, seed={seed}")
-        s0 = int(n_nodes*edge_per_node)
-        if s0 > int(n_nodes*(n_nodes-1)/2):
-            logging.info(f'{s0} is too many edges, setting s0 to the max:', int(n_nodes*(n_nodes-1)/2))
-            s0 = int(n_nodes*(n_nodes-1)/2)
-        random_stability(seed)
-        B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=graph_type)
-        logging.debug(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
-        logging.debug(G_true.edges)
-        true_seplist = find_all_d_separations_sets(G_true, verbose=False)
-        with open(facts_location, "w") as f:
-            for s in true_seplist:
-                f.write(s + "\n")
-
-        inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
-        G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
-        expected = frozenset(set(G_true1.edges()))
-
-        models, _ = CausalABA(n_nodes, facts_location)
-        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
-           
-        self.assertIn(expected, model_sets)
 
     def randomG_PC_facts(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
         scenario = "randomG_PC_facts"
@@ -467,6 +498,7 @@ class TestCausalABA(unittest.TestCase):
                 set_of_model_sets.append(models)
         else:
             models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes, mec_check)
+
         if len(set_of_model_sets) > 0:
             logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
             count_right = 0
@@ -475,7 +507,6 @@ class TestCausalABA(unittest.TestCase):
                     count_right += 1
                     logging.debug(f"Models set: {model_sets}")
             logging.info(f"Number of right solutions found: {count_right}")
-                    
             self.assertTrue(count_right > 0)
         else:
             self.assertIn(expected, models)
@@ -495,18 +526,19 @@ TestCausalABA().chains_confounder()
 TestCausalABA().one_edge()
 TestCausalABA().incompatible_Is()
 TestCausalABA().four_node_all_graphs()
-TestCausalABA().four_node_example()
+TestCausalABA().four_node_ShapPC_example()
 TestCausalABA().incompatible_chain()
 TestCausalABA().five_node_all_graphs()
 TestCausalABA().five_node_colombo_example()
+TestCausalABA().five_node_sprinkler_example()
 ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 TestCausalABA().six_node_example()
-TestCausalABA().randomG(7, 1, "ER", 2024)
-TestCausalABA().randomG(8, 1, "ER", 2024)
-TestCausalABA().randomG(9, 1, "ER", 2024)
+# TestCausalABA().randomG(7, 1, "ER", 2024)
+# TestCausalABA().randomG(8, 1, "ER", 2024)
+# TestCausalABA().randomG(9, 1, "ER", 2024)
 
 # TestCausalABA().five_node_colombo_PC_facts()
-TestCausalABA().randomG_PC_facts(6, 1, "ER", 2024)
+# TestCausalABA().randomG_PC_facts(6, 1, "ER", 2024)
 
 # TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
 
