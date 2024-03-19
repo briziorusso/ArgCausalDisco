@@ -32,7 +32,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
     for S in powerset(range(n_nodes)):
         for s in S:
             ctl.add("specific", [], f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
-            logging.debug(f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
+            # logging.debug(f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
 
     ### Load main program and facts
     ctl.load("encodings/causalaba.lp")
@@ -83,7 +83,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
                                             for j in range(n_nodes-1) if paths_mat[i,j] is not None]) \
                                                 for i in range(len(paths_mat))]] ##TODO: think about interaction with weak constraints
         remaining_paths = [list(filter(lambda x: x is not None, paths_mat_red[i])) for i in range(len(paths_mat_red))]
-        logging.debug(f"   Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")
+        logging.debug(f"Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")
 
         indep_rule_body = []
         for path in remaining_paths:
@@ -94,23 +94,23 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
             ### add path rule
             path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
             ctl.add("specific", [], f"p{n_p} :- {','.join(path_edges)}.")
-            logging.debug(f"p{n_p} :- {','.join(path_edges)}.")
+            logging.debug(f"   p{n_p} :- {','.join(path_edges)}.")
 
             ### add active path rule
             nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
             nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
             ctl.add("specific", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
-            logging.debug(f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+            logging.debug(f"   ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
 
         ### add indep rule
         if len(indep_rule_body) > 0 and (X,Y) in dep_facts:
             indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
             ctl.add("specific", [], indep_rule)
-            logging.debug(indep_rule)
+            logging.debug(   indep_rule)
 
     ### add dep rule
     ctl.add("specific", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
-    logging.debug(f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
+    logging.debug(   f"dep(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
 
     ### add show statements
     if 'arrow' in show:
