@@ -407,8 +407,8 @@ class TestCausalABA(unittest.TestCase):
                     count_wrong += 1
                     facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
-        logging.info(f"Number of facts from PC={len(facts)}")
-        logging.info(f"Number of wrong facts={count_wrong}")
+        logging.info(f"Number of facts from PC: {len(facts)}")
+        logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
         ### Save external statements
         with open(facts_location, "w") as f:
             for s in facts:
@@ -487,8 +487,8 @@ class TestCausalABA(unittest.TestCase):
                     count_wrong += 1
                     facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
-        logging.info(f"Number of facts from PC={len(facts)}")
-        logging.info(f"Number of wrong facts={count_wrong}")
+        logging.info(f"Number of facts from PC: {len(facts)}")
+        logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
         ### Save external statements
         with open(facts_location, "w") as f:
             for s in facts:
@@ -567,8 +567,8 @@ class TestCausalABA(unittest.TestCase):
                     count_wrong += 1
                     facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
-        logging.info(f"Number of facts from PC={len(facts)}")
-        logging.info(f"Number of wrong facts={count_wrong}")
+        logging.info(f"Number of facts from PC: {len(facts)}")
+        logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
         ### Save external statements
         with open(facts_location, "w") as f:
             for s in facts:
@@ -607,6 +607,7 @@ class TestCausalABA(unittest.TestCase):
     def randomG_PC_facts(self, n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
         scenario = "randomG_PC_facts"
         alpha = 0.05
+        base_pct = 0.5
         output_name = f"{scenario}_{n_nodes}_{edge_per_node}_{graph_type}_{seed}"
         facts_location = f"encodings/test_lps/{output_name}.lp"
         facts_location_I = f"encodings/test_lps/{output_name}_I.lp"
@@ -651,8 +652,8 @@ class TestCausalABA(unittest.TestCase):
                     count_wrong += 1
                     facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
-        logging.info(f"Number of facts from PC={len(facts)}")
-        logging.info(f"Number of wrong facts={count_wrong}")
+        logging.info(f"Number of facts from PC: {len(facts)}")
+        logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
         ### Save external statements
         with open(facts_location, "w") as f:
             for s in facts:
@@ -720,10 +721,10 @@ start = datetime.now()
 # TestCausalABA().randomG(8, 1, "ER", 2024)
 # TestCausalABA().randomG(9, 1, "ER", 2024)
 
-# TestCausalABA().four_node_shapPC_PC_facts()
-TestCausalABA().five_node_colombo_PC_facts()
+TestCausalABA().four_node_shapPC_PC_facts()
+# TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().five_node_sprinkler_PC_facts()
-# TestCausalABA().randomG_PC_facts(6, 1, "ER", 2024)
+# TestCausalABA().randomG_PC_facts(7, 1, "ER", 2024)
 
 # TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
 
