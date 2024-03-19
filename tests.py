@@ -695,13 +695,6 @@ class TestCausalABA(unittest.TestCase):
         else:
             self.assertIn(expected, models)
 
-    def test_specific_lp(self, filename, n_nodes, expected):
-        logger_setup()
-        logging.info("===============Running test_multiple_MECs===============")
-        models = CausalABA(n_nodes, f"encodings/test_lps/{filename}.lp", show=["arrow", "indep"])
-        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes)
-        self.assertEqual(model_sets, expected)
-
 start = datetime.now()
 # TestCausalABA().three_node_all_graphs()
 # TestCausalABA().three_node_graph_empty()
@@ -725,7 +718,5 @@ TestCausalABA().four_node_shapPC_PC_facts()
 # TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().five_node_sprinkler_PC_facts()
 # TestCausalABA().randomG_PC_facts(7, 1, "ER", 2024)
-
-# TestCausalABA().test_specific_lp("randomG_PC_facts_5_1_ER_2024_multipleMECs", 5, set())
 
 logging.info(f"Total time={str(datetime.now()-start)}")
