@@ -668,7 +668,13 @@ class TestCausalABA(unittest.TestCase):
         
         set_of_model_sets = []
         model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
-                                                   fact_pct=0.27, print_models=False)
+                                                fact_pct=base_pct, print_models=False)
+        while len(model_sets) == 0:
+            base_pct -= 0.01
+            logging.info(f"Lowering the fact_pct by 0.01, to {base_pct:.2f}")
+            model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
+                                                       fact_pct=max(base_pct,0), print_models=False)
+
         if multiple_solutions:
             for model in model_sets:
                 models, MECs = set_of_models_to_set_of_graphs(model, n_nodes, mec_check)
