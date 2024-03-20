@@ -8,9 +8,9 @@ import networkx as nx
 import igraph as ig
 from datetime import datetime
 from copy import deepcopy
-# import cdt
-# cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
-# from cdt.metrics import get_CPDAG
+import cdt
+cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
+from cdt.metrics import get_CPDAG, SHD, SID, SHD_CPDAG, SID_CPDAG, precision_recall
 
 maxpc = False
 if maxpc:
@@ -205,6 +205,10 @@ def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_p
     
     return cg
 
+def is_dag(B):
+    """Check if a matrix is a DAG"""
+    return ig.Graph.Adjacency(B.tolist()).is_dag()
+
 ### From notears repo: https://github.com/xunzheng/notears
 def simulate_dag(d, s0, graph_type):
     """Simulate random DAG with some expected number of edges.
@@ -245,7 +249,7 @@ def simulate_dag(d, s0, graph_type):
     else:
         raise ValueError('unknown graph type')
     B_perm = _random_permutation(B)
-    assert ig.Graph.Adjacency(B_perm.tolist()).is_dag()
+    assert is_dag(B_perm)
     return B_perm
 
 def mount_adjacency_list(adjacency_matrix):
@@ -265,7 +269,7 @@ def get_immoralities(adj_list):
     return [(v1, v3, v2) for v1 in adj_list for v2 in adj_list for v3 in adj_list[v1] \
             if v3 in adj_list[v2] and v1 < v2 and v2 not in adj_list[v1] and v1 not in adj_list[v2]]
 
-def dag2skel(G):
+def dag2skel(G, unique=False):
     """Convert a DAG to a skeleton.
 
     Args:
@@ -279,11 +283,11 @@ def dag2skel(G):
     edges = [(v1, v2) for v1 in range(len(G1)) for v2 in G1[v1]]
     for v1, v2 in edges:
         C[v1, v2] = -1
-        C[v2, v1] = -1
-
+        if not unique:
+            C[v2, v1] = -1
     return C
 
-def dag2cpdag(G):
+def dag2cpdag(G, cdt_method=False):
     """Convert a DAG to a CPDAG.
 
     Args:
@@ -298,11 +302,14 @@ def dag2cpdag(G):
     immoralities = get_immoralities(mount_adjacency_list(G))
     for v1, v3, v2 in immoralities:
         C[v1, v3] = 1
+        C[v3, v1] = 0
         C[v2, v3] = 1
-
+        C[v3, v2] = 0
+    if cdt_method:
+        C = (C != 0).astype(int)
     return C
 
-### From TrustworthyAI repo:
+### Largely from TrustworthyAI repo, with some modifications and the addition of SID from cdt.metrics
 class MetricsDAG(object):
     """
     Compute various accuracy metrics for B_est.
@@ -330,7 +337,7 @@ class MetricsDAG(object):
         [d, d] ground truth graph, {0, 1}.
     """
 
-    def __init__(self, B_est, B_true):
+    def __init__(self, B_est, B_true, sid=True):
         
         if not isinstance(B_est, np.ndarray):
             raise TypeError("Input B_est is not numpy.ndarray!")
@@ -341,10 +348,14 @@ class MetricsDAG(object):
         self.B_est = deepcopy(B_est)
         self.B_true = deepcopy(B_true)
 
-        self.metrics = MetricsDAG._count_accuracy(self.B_est, self.B_true)
+        self.metrics = MetricsDAG._count_accuracy(self.B_est, self.B_true, sid)
+
+        if (self.B_est == -1).any() | (self.B_true == -1).any():
+            self.metrics['SHD_cpdag'] = self._cal_SHD_CPDAG(self.B_est, self.B_true)
+            self.metrics['SID_cpdag'] = self._cal_SID_CPDAG(self.B_est, self.B_true)
 
     @staticmethod
-    def _count_accuracy(B_est, B_true, decimal_num=4):
+    def _count_accuracy(B_est, B_true, sid=True, decimal_num=4):
         """
         Parameters
         ----------
@@ -352,8 +363,11 @@ class MetricsDAG(object):
             [d, d] estimate, {0, 1, -1}, -1 is undirected edge in CPDAG.
         B_true: np.ndarray
             [d, d] ground truth graph, {0, 1}.
+        sid: bool
+            If True, compute SID.
         decimal_num: int
             Result decimal numbers.
+
 
         Return
         ------
@@ -396,12 +410,20 @@ class MetricsDAG(object):
             if not ((B_est == 0) | (B_est == 1) | (B_est == -1)).all():
                 raise ValueError('B_est should take value in {0,1,-1}')
             if ((B_est == -1) & (B_est.T == -1)).any():
-                raise ValueError('undirected edge should only appear once')
+                ## only one entry in the pair of undirected edges should be -1
+                for i in range(len(B_est)):
+                    for j in range(len(B_est[i])):
+                        if B_est[i, j] == -1:
+                            B_est[j, i] = 0
+                        if B_true[i, j] == -1:
+                            B_true[j, i] = 0
+                assert not ((B_est == -1) & (B_est.T == -1)).any()
+                assert not ((B_true == -1) & (B_true.T == -1)).any()
         else:  # dag
             if not ((B_est == 0) | (B_est == 1)).all():
                 raise ValueError('B_est should take value in {0,1}')
-            # if not is_dag(B_est):
-            #     raise ValueError('B_est should be a DAG')
+            if not is_dag(B_est):
+                raise ValueError('B_est should be a DAG')
         d = B_true.shape[0]
         
         # linear index of nonzeros
@@ -411,9 +433,9 @@ class MetricsDAG(object):
         cond_reversed = np.flatnonzero(B_true.T)
         cond_skeleton = np.concatenate([cond, cond_reversed])
         # true pos
-        true_pos = np.intersect1d(pred, cond, assume_unique=True)
+        true_pos = np.intersect1d(pred, cond, assume_unique=True) if len(pred) > 0 else np.array([])
         # treat undirected edge favorably
-        true_pos_und = np.intersect1d(pred_und, cond_skeleton, assume_unique=True)
+        true_pos_und = np.intersect1d(pred_und, cond_skeleton, assume_unique=True) if len(pred_und) > 0 else np.array([])
         true_pos = np.concatenate([true_pos, true_pos_und])
         # false pos
         false_pos = np.setdiff1d(pred, cond_skeleton, assume_unique=True)
@@ -421,7 +443,7 @@ class MetricsDAG(object):
         false_pos = np.concatenate([false_pos, false_pos_und])
         # reverse
         extra = np.setdiff1d(pred, cond, assume_unique=True)
-        reverse = np.intersect1d(extra, cond_reversed, assume_unique=True)
+        reverse = np.intersect1d(extra, cond_reversed, assume_unique=True) if len(extra) > 0 else np.array([])
         # compute ratio
         pred_size = len(pred) + len(pred_und)
         cond_neg_size = 0.5 * d * (d - 1) - len(cond)
@@ -435,24 +457,22 @@ class MetricsDAG(object):
         missing_lower = np.setdiff1d(cond_lower, pred_lower, assume_unique=True)
         shd = len(extra_lower) + len(missing_lower) + len(reverse)
 
-        # trans cpdag [-1, 0, 1] to [0, 1], -1 is undirected edge in CPDAG
-        for i in range(len(B_est)):
-            for j in range(len(B_est[i])):
-                if B_est[i, j] == -1:
-                    B_est[i, j] = 1
-                    B_est[j, i] = 1
-
         W_p = pd.DataFrame(B_est)
         W_true = pd.DataFrame(B_true)
-        # TP_FP = W_p.sum(axis=1).sum()
-        # TP_FN = W_true.sum(axis=1).sum()
-        
+
         # gscore = MetricsDAG._cal_gscore(W_p, W_true)
         precision, recall, F1 = MetricsDAG._cal_precision_recall(W_p, W_true)
 
         mt = {'fdr': fdr, 'tpr': tpr, 'fpr': fpr, 'shd': shd, 'nnz': pred_size, 
               'precision': precision, 'recall': recall, 'F1': F1#, 'gscore': gscore
               }
+        
+        ### SHD from cdt
+        mt['SHD'] = SHD(B_true, B_est, False)
+        
+        if sid and not ((B_est == -1).any()|(B_true == -1).any()):
+            mt['sid'] = MetricsDAG._cal_SID(B_est, B_true)
+
         for i in mt:
             mt[i] = round(mt[i], decimal_num)
         
@@ -506,6 +526,11 @@ class MetricsDAG(object):
         """
 
         assert(W_p.shape==W_true.shape and W_p.shape[0]==W_p.shape[1])
+        if (W_p == -1).any().any():
+            W_p = pd.DataFrame((W_p != 0).astype(int))
+        if (W_true == -1).any().any():
+            W_true = pd.DataFrame((W_true != 0).astype(int))
+
         TP = (W_p + W_true).map(lambda elem:1 if elem==2 else 0).sum(axis=1).sum()
         TP_FP = W_p.sum(axis=1).sum()
         TP_FN = W_true.sum(axis=1).sum()
@@ -514,3 +539,65 @@ class MetricsDAG(object):
         F1 = 2*(recall*precision)/(recall+precision)
         
         return precision, recall, F1
+    
+    def _cal_SID(B_est, B_true):
+        """
+        Parameters
+        ----------
+        B_est: np.ndarray
+            [d, d] estimate, {0, 1}.
+        B_true: np.ndarray
+            [d, d] ground truth graph, {0, 1}.
+
+        Return
+        ------
+        SID: float
+            Structural Intervention Distance
+        """
+
+        if (B_est == -1).any():
+            raise ValueError('B_est should be a DAG')
+        
+        return SID(B_true, B_est).flat[0]
+    
+    def _cal_SHD_CPDAG(self, B_est, B_true):
+        """
+        Parameters
+        ----------
+        B_est: np.ndarray
+            [d, d] estimate, {0, 1, -1}, -1 is undirected edge in CPDAG.
+        B_true: np.ndarray
+            [d, d] ground truth graph, {0, 1}.
+
+        Return
+        ------
+        SHD: int
+            Structural Hamming Distance of CPDAG
+        """
+
+        if (B_est == -1).any():
+            B_est = (B_est != 0).astype(int)
+        if (B_true == -1).any():
+            B_true = (B_true != 0).astype(int)
+
+        return SHD_CPDAG(B_true, B_est)
+
+    def _cal_SID_CPDAG(self, B_est, B_true):
+        """
+        Parameters
+        ----------
+        B_est: np.ndarray
+            [d, d] estimate, {0, 1, -1}, -1 is undirected edge in CPDAG.
+        B_true: np.ndarray
+            [d, d] ground truth graph, {0, 1}.
+
+        Return
+        ------
+        SID_CPDAG_low: float
+            Lower bound of Structural Intervention Distance
+        SID_CPDAG_high: float
+            Upper bound of Structural Intervention Distance
+        """
+        
+        SID_CPDAG_low, SID_CPDAG_high = [a.flat[0] for a in SID_CPDAG(B_true, B_est)]
+        return SID_CPDAG_low, SID_CPDAG_high

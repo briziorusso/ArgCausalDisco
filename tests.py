@@ -695,6 +695,104 @@ class TestCausalABA(unittest.TestCase):
         else:
             self.assertIn(expected, models)
 
+    def test_metrics_perfect(self):
+        ## true DAG
+        B_true = np.array( [[ 0,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0]])
+        n_edges = B_true.sum()
+
+        ## estimated DAG
+        B_est = np.array(  [[ 0,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0]])
+        
+        ## calculate metrics
+        metrics = MetricsDAG(B_est, B_true).metrics
+        ## test metrics
+        self.assertEqual(metrics['fdr'], 0)
+        self.assertEqual(metrics['tpr'], 1)
+        self.assertEqual(metrics['fpr'], 0)
+        self.assertEqual(metrics['shd'], 0)
+        self.assertEqual(metrics['nnz'], n_edges)
+        self.assertEqual(metrics['precision'], 1)
+        self.assertEqual(metrics['recall'], 1)
+        self.assertEqual(metrics['F1'], 1)
+        self.assertEqual(metrics['sid'], 0)
+
+        ## convert to CPDAG
+        CP_true = dag2cpdag(B_true)
+        CP_est = dag2cpdag(B_est)
+        
+        ## calculate metrics for CPDAG
+        metrics = MetricsDAG(CP_est, CP_true).metrics
+        ## test metrics
+        self.assertEqual(metrics['fdr'], 0)
+        self.assertEqual(metrics['tpr'], 1)
+        self.assertEqual(metrics['fpr'], 0)
+        self.assertEqual(metrics['shd'], 0)
+        self.assertEqual(metrics['nnz'], n_edges)
+        self.assertEqual(metrics['precision'], 1)
+        self.assertEqual(metrics['recall'], 1)
+        self.assertEqual(metrics['F1'], 1)
+
+        self.assertEqual(metrics['SHD_cpdag'], 0)
+        self.assertEqual(metrics['SID_cpdag'][0], 0)
+        self.assertEqual(metrics['SID_cpdag'][1], 0)
+
+    def test_metrics_errors(self):
+        ## true DAG
+        B_true = np.array( [[ 0,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0]])
+        n_edges = B_true.sum()
+
+        ## estimated DAG
+        B_est = np.array(  [[ 0,  0,  0,  1,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 1,  0,  0,  0,  0],
+                            [ 0,  0,  0,  0,  0],
+                            [ 0,  0,  0,  1,  0]])
+        
+        ## calculate metrics
+        metrics = MetricsDAG(B_est, B_true).metrics
+        ## test metrics
+        self.assertEqual(metrics['fdr'], 0.25)
+        self.assertEqual(metrics['tpr'], 0.6)
+        self.assertEqual(metrics['fpr'], 0.2)
+        self.assertEqual(metrics['shd'], 3)
+        self.assertEqual(metrics['nnz'], 4)
+        self.assertEqual(metrics['precision'], 0.75)
+        self.assertEqual(metrics['recall'], 0.6)
+        self.assertEqual(metrics['F1'], 0.6667)
+        self.assertEqual(metrics['sid'], 11)
+
+        ## convert to CPDAG
+        CP_true = dag2cpdag(B_true)
+        CP_est = dag2cpdag(B_est)
+        
+        ## calculate metrics for CPDAG
+        metrics = MetricsDAG(CP_est, CP_true).metrics
+        ## test metrics
+        self.assertEqual(metrics['fdr'], 0.25)
+        self.assertEqual(metrics['tpr'], 0.375)
+        self.assertEqual(metrics['fpr'], 0.5)
+        self.assertEqual(metrics['shd'], 3)
+        self.assertEqual(metrics['nnz'], 4)
+        self.assertEqual(metrics['precision'], 0.75)
+        self.assertEqual(metrics['recall'], 0.375)
+        self.assertEqual(metrics['F1'], 0.5)
+
+        self.assertEqual(metrics['SHD_cpdag'], 3) ## Check
+        self.assertEqual(metrics['SID_cpdag'][0], 0) ## Check
+        self.assertEqual(metrics['SID_cpdag'][1], 0) ## Check
+
 start = datetime.now()
 # TestCausalABA().three_node_all_graphs()
 # TestCausalABA().three_node_graph_empty()
@@ -714,9 +812,12 @@ start = datetime.now()
 # TestCausalABA().randomG(8, 1, "ER", 2024)
 # TestCausalABA().randomG(9, 1, "ER", 2024)
 
-TestCausalABA().four_node_shapPC_PC_facts()
+# TestCausalABA().four_node_shapPC_PC_facts()
 # TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().five_node_sprinkler_PC_facts()
 # TestCausalABA().randomG_PC_facts(7, 1, "ER", 2024)
+
+# TestCausalABA().test_metrics_perfect()
+TestCausalABA().test_metrics_errors()
 
 logging.info(f"Total time={str(datetime.now()-start)}")
