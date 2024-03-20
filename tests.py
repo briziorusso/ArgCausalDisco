@@ -165,14 +165,14 @@ class TestCausalABA(unittest.TestCase):
         scenario = "four_node_shapPC_example"
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  0,  0],
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  1],
+                            [ 0,  0,  0,  1],
                             [ 0,  0,  0,  0],
-                            [ 1,  1,  0,  0],
-                            [ 0,  1,  1,  0],
                             ])
         n_nodes = B_true.shape[0]
         logging.info(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.info(G_true.edges)
 
         expected = set([
@@ -226,14 +226,14 @@ class TestCausalABA(unittest.TestCase):
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  0,  0,  0],
-                            [ 0,  0,  0,  0,  0],
-                            [ 1,  1,  0,  0,  0],
-                            [ 1,  0,  1,  0,  0],
-                            [ 1,  1,  1,  1,  0]])
+        B_true = np.array( [[ 0,  0,  1,  1,  1],
+                            [ 0,  0,  1,  0,  1],
+                            [ 0,  0,  0,  1,  1],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
         n_nodes = B_true.shape[0]
         logging.debug(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
 
         expected = {frozenset({(0, 2), (1, 2), (0, 4), (2, 4), (3, 4), (0, 3), (1, 4), (2, 3)})}
@@ -257,14 +257,14 @@ class TestCausalABA(unittest.TestCase):
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 0,  1,  1,  0,  0],
-                            [ 0,  0,  0,  1,  0]])
+        B_true = np.array( [[ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
         n_nodes = B_true.shape[0]
         logging.debug(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
 
         expected = frozenset({(0, 1), (0, 2), (1, 3), (2, 3), (3, 4)})
@@ -300,15 +300,15 @@ class TestCausalABA(unittest.TestCase):
         facts_location = f"encodings/test_lps/{scenario}.lp"
         logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  0,  0,  0,  0],
-                            [ 0,  0,  0,  0,  0,  0],
-                            [ 1,  1,  0,  0,  0,  0],
-                            [ 1,  0,  1,  0,  0,  0],
-                            [ 1,  0,  1,  0,  0,  0],
-                            [ 1,  1,  1,  1,  1,  0]])
+        B_true = np.array( [[ 0,  0,  1,  1,  1,  1],
+                            [ 0,  0,  1,  0,  0,  1],
+                            [ 0,  0,  0,  1,  1,  1],
+                            [ 0,  0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0,  0]])
         n_nodes = B_true.shape[0]
         logging.debug(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
 
         inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
@@ -344,7 +344,7 @@ class TestCausalABA(unittest.TestCase):
         random_stability(seed)
         B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=graph_type)
         logging.debug(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
         true_seplist = find_all_d_separations_sets(G_true, verbose=False)
         with open(facts_location, "w") as f:
@@ -372,14 +372,14 @@ class TestCausalABA(unittest.TestCase):
         facts_location_wc = f"encodings/test_lps/{scenario}_wc.lp"
         logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  0,  0],
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  1],
+                            [ 0,  0,  0,  1],
                             [ 0,  0,  0,  0],
-                            [ 1,  1,  0,  0],
-                            [ 0,  1,  1,  0],
                             ])
         n_nodes = B_true.shape[0]
         logging.info(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.info(G_true.edges)
 
         expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
@@ -452,14 +452,14 @@ class TestCausalABA(unittest.TestCase):
         facts_location_wc = f"encodings/test_lps/{scenario}_wc.lp"
         logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  0,  0,  0],
-                            [ 0,  0,  0,  0,  0],
-                            [ 1,  1,  0,  0,  0],
-                            [ 1,  0,  1,  0,  0],
-                            [ 1,  1,  1,  1,  0]])
+        B_true = np.array( [[ 0,  0,  1,  1,  1],
+                            [ 0,  0,  1,  0,  1],
+                            [ 0,  0,  0,  1,  1],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
         n_nodes = B_true.shape[0]
         logging.debug(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
 
         expected = frozenset({(0, 2), (1, 2), (0, 4), (2, 4), (3, 4), (0, 3), (1, 4), (2, 3)})
@@ -532,14 +532,14 @@ class TestCausalABA(unittest.TestCase):
         facts_location_wc = f"encodings/test_lps/{scenario}_wc.lp"
         logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 0,  1,  1,  0,  0],
-                            [ 0,  0,  0,  1,  0]])
+        B_true = np.array( [[ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
         n_nodes = B_true.shape[0]
         logging.debug(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
 
         expected = frozenset({(0, 1), (0, 2), (1, 3), (2, 3), (3, 4)})
@@ -622,7 +622,7 @@ class TestCausalABA(unittest.TestCase):
         random_stability(2024)
         B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=graph_type)
         logging.debug(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true.T, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
         logging.debug(G_true.edges)
 
         inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
@@ -794,30 +794,30 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['SID_cpdag'][1], 0) ## Check
 
 start = datetime.now()
-# TestCausalABA().three_node_all_graphs()
-# TestCausalABA().three_node_graph_empty()
-# TestCausalABA().collider()
-# TestCausalABA().chains_confounder()
-# TestCausalABA().one_edge()
-# TestCausalABA().incompatible_Is()
-# TestCausalABA().four_node_all_graphs()
-# TestCausalABA().four_node_shapPC_example()
-# TestCausalABA().incompatible_chain()
-# TestCausalABA().five_node_all_graphs()
-# TestCausalABA().five_node_colombo_example()
-# TestCausalABA().five_node_sprinkler_example()
-# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-# TestCausalABA().six_node_example()
-# TestCausalABA().randomG(7, 1, "ER", 2024)
-# TestCausalABA().randomG(8, 1, "ER", 2024)
-# TestCausalABA().randomG(9, 1, "ER", 2024)
+TestCausalABA().three_node_all_graphs()
+TestCausalABA().three_node_graph_empty()
+TestCausalABA().collider()
+TestCausalABA().chains_confounder()
+TestCausalABA().one_edge()
+TestCausalABA().incompatible_Is()
+TestCausalABA().four_node_all_graphs()
+TestCausalABA().four_node_shapPC_example()
+TestCausalABA().incompatible_chain()
+TestCausalABA().five_node_all_graphs()
+TestCausalABA().five_node_colombo_example()
+TestCausalABA().five_node_sprinkler_example()
+## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+TestCausalABA().six_node_example()
+TestCausalABA().randomG(7, 1, "ER", 2024)
+TestCausalABA().randomG(8, 1, "ER", 2024)
+TestCausalABA().randomG(9, 1, "ER", 2024)
 
 # TestCausalABA().four_node_shapPC_PC_facts()
 # TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().five_node_sprinkler_PC_facts()
 # TestCausalABA().randomG_PC_facts(7, 1, "ER", 2024)
 
-# TestCausalABA().test_metrics_perfect()
-TestCausalABA().test_metrics_errors()
+TestCausalABA().test_metrics_perfect()
+# TestCausalABA().test_metrics_errors()
 
 logging.info(f"Total time={str(datetime.now()-start)}")
