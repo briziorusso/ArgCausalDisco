@@ -780,8 +780,8 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['recall'], 0.8)
         self.assertEqual(metrics['F1'], 0.8)
 
-        self.assertEqual(metrics['SID_cpdag'][0], 2) ## Check
-        self.assertEqual(metrics['SID_cpdag'][1], 15) ## Check
+        self.assertEqual(metrics['SID_cpdag'][0], 2)
+        self.assertEqual(metrics['SID_cpdag'][1], 15)
 
 start = datetime.now()
 # TestCausalABA().three_node_all_graphs()

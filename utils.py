@@ -11,7 +11,8 @@ from copy import deepcopy
 import warnings
 warnings.filterwarnings("ignore")
 os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
-### To not have the WARNING: ignoring environment value of R_HOME set the verbose to False in the launch_R_script function in:
+### To not have the WARNING: ignoring environment value of R_HOME 
+### set the verbose to False in the launch_R_script function in:
 ### CausalDiscoveryToolbox/cdt/utils/R.py#L155
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import cdt
