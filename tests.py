@@ -407,7 +407,8 @@ class TestCausalABA(unittest.TestCase):
                     count_wrong += 1
                     facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
-        logging.info(f"Number of facts from PC: {len(facts)}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
         logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
         ### Save external statements
         with open(facts_location, "w") as f:
@@ -487,7 +488,8 @@ class TestCausalABA(unittest.TestCase):
                     count_wrong += 1
                     facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
-        logging.info(f"Number of facts from PC: {len(facts)}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
         logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
         ### Save external statements
         with open(facts_location, "w") as f:
@@ -567,7 +569,8 @@ class TestCausalABA(unittest.TestCase):
                     count_wrong += 1
                     facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
-        logging.info(f"Number of facts from PC: {len(facts)}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
         logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
         ### Save external statements
         with open(facts_location, "w") as f:
@@ -652,7 +655,8 @@ class TestCausalABA(unittest.TestCase):
                     count_wrong += 1
                     facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
         
-        logging.info(f"Number of facts from PC: {len(facts)}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
         logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
         ### Save external statements
         with open(facts_location, "w") as f:
@@ -669,12 +673,8 @@ class TestCausalABA(unittest.TestCase):
         
         set_of_model_sets = []
         model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
-                                                fact_pct=base_pct, print_models=False)
-        while len(model_sets) == 0:
-            base_pct -= 0.01
-            logging.info(f"Lowering the fact_pct by 0.01, to {base_pct:.2f}")
-            model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
-                                                       fact_pct=max(base_pct,0), print_models=False)
+                                                   fact_pct=base_pct, search_for_models='all_subsets',
+                                                   opt_mode='optN', print_models=False)
 
         if multiple_solutions:
             for model in model_sets:
@@ -801,13 +801,14 @@ start = datetime.now()
 # TestCausalABA().randomG(7, 1, "ER", 2024)
 # TestCausalABA().randomG(8, 1, "ER", 2024)
 # TestCausalABA().randomG(9, 1, "ER", 2024)
+# ## TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
 
-# TestCausalABA().four_node_shapPC_PC_facts()
-# TestCausalABA().five_node_colombo_PC_facts()
-# TestCausalABA().five_node_sprinkler_PC_facts()
-# TestCausalABA().randomG_PC_facts(7, 1, "ER", 2024)
+# TestCausalABA().test_metrics_perfect()
+# TestCausalABA().test_metrics_errors()
 
-TestCausalABA().test_metrics_perfect()
-TestCausalABA().test_metrics_errors()
+# TestCausalABA().four_node_shapPC_PC_facts() ## Does not pass, needs accuracy evaluation
+# TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
+# TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
+TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
 
 logging.info(f"Total time={str(datetime.now()-start)}")

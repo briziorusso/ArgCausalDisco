@@ -12,6 +12,7 @@ from utils import powerset, extract_test_elements_from_symbol
 def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
                 weak_constraints:bool=False,
                 fact_pct:float=1,
+                opt_mode:str='optN',
                 search_for_models:str=None, 
                 show:list=['arrow']
                 )->list:     
@@ -26,7 +27,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
     ctl.configuration.solve.parallel_mode = os.cpu_count()
     ctl.configuration.solve.models="0"
     ctl.configuration.solver.seed="2024"
-    ctl.configuration.solve.opt_mode = "optN"
+    ctl.configuration.solve.opt_mode = opt_mode
 
     ### Add set definition
     for S in powerset(range(n_nodes)):
@@ -136,59 +137,61 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
     start_ground = datetime.now()
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
-    facts = sorted(facts, key=lambda x: x[5], reverse=True) ###change to 5 to
-    for n, fact in enumerate(facts):
-        if n/len(facts) <= fact_pct:
-            ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
-            logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-        else:
-            ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
-            logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-    models = []
-    count_models = 0
-    logging.info("   Solving...")
-    with ctl.solve(yield_=True) as handle:
-        for model in handle:
-            models.append(model.symbols(shown=True))
-            if print_models:
-                count_models += 1
-                logging.info(f"Answer {count_models}: {model}")
+    facts = sorted(facts, key=lambda x: x[5], reverse=True)
+    if search_for_models == 'first':
+        n_models = 0
+        while n_models == 0 and fact_pct > 0:
+            for n, fact in enumerate(facts):
+                if n/len(facts) <= fact_pct:
+                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                    logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                else:
+                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
+                    logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+            models = []
+            logging.info("   Solving...")
+            with ctl.solve(yield_=True) as handle:
+                for model in handle:
+                    models.append(model.symbols(shown=True))
+                    if print_models:
+                        logging.info(f"Answer {len(models)}: {model}")
+            n_models = int(ctl.statistics['summary']['models']['enumerated'])
+            logging.info(f"Number of models: {n_models}")
+            times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
+            logging.info(f"Times: {times}")
+            
+            fact_pct -= 0.01
+            logging.info(f"Lowering the fact_pct by 0.01, to {fact_pct:.2f}")
 
-    logging.info(f"Number of models: {int(ctl.statistics['summary']['models']['enumerated'])}")
-    times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
-    logging.info(f"Times: {times}")
-
-    set_of_models = []
-    if count_models == 0 and search_for_models != None:
-        facts = sorted(facts, key=lambda x: len(x[1]), reverse=True)
+    elif 'subsets' in search_for_models:
+        set_of_models = []
         logging.info(f"Number of subsets to remove: {len(list(powerset(facts)))}")
         for f_to_remove in tqdm(powerset(facts), desc=f"Removing facts"):
             ### remove fact
             logging.debug(f"Removing fact {[f[4] for f in f_to_remove]}")
             for fact in facts:
                 ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
                 if fact in f_to_remove:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
-
-            count_models = 0
+                    logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+            
             models = []
             with ctl.solve(yield_=True) as handle:
                 for model in handle:
                     models.append(model.symbols(shown=True))
-                    count_models += 1
                     if print_models:
-                        logging.info(f"Answer {count_models}: {model}")
-            logging.debug(f"   Number of models: {int(ctl.statistics['summary']['models']['enumerated'])}")
-            times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
-            logging.debug(f"Times: {times}")
-            if count_models > 0:
-                if search_for_models == "first":
+                        logging.info(f"Answer {len(models)}: {model}")
+            n_models = int(ctl.statistics['summary']['models']['enumerated'])
+            
+            if n_models > 0:
+                if search_for_models == "first_subsets":
                     return models, False
                 else:
                     set_of_models.append(models)
 
-    if len(set_of_models) > 0:
-        return set_of_models, True
+        if len(set_of_models) > 0:
+            return set_of_models, True
 
     return models, False
 
