@@ -212,6 +212,14 @@ def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_p
     
     return cg
 
+def from_causallearn_to_cpdag(cg):
+    W_est = cg.G.graph
+    for i in range(len(W_est)):
+        for j in range(len(W_est[i])):
+            if W_est[i, j] == -1 and W_est[j, i] == 1:
+                W_est[i, j] = 0
+                W_est[j, i] = 1
+
 def is_dag(B):
     """Check if a matrix is a DAG"""
     return ig.Graph.Adjacency(B.tolist()).is_dag()
