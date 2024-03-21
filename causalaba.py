@@ -13,7 +13,7 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
                 weak_constraints:bool=False,
                 fact_pct:float=1,
                 opt_mode:str='optN',
-                search_for_models:str=None, 
+                search_for_models:str='No', 
                 show:list=['arrow']
                 )->list:     
     """
@@ -138,7 +138,26 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
-    if search_for_models == 'first':
+    if search_for_models == 'No':
+        for n, fact in enumerate(facts):
+            if n/len(facts) <= fact_pct:
+                ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+            else:
+                ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
+                logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+        models = []
+        logging.info("   Solving...")
+        with ctl.solve(yield_=True) as handle:
+            for model in handle:
+                models.append(model.symbols(shown=True))
+                if print_models:
+                    logging.info(f"Answer {len(models)}: {model}")
+        n_models = int(ctl.statistics['summary']['models']['enumerated'])
+        logging.info(f"Number of models: {n_models}")
+        times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
+        logging.info(f"Times: {times}")
+    elif search_for_models == 'first':
         n_models = 0
         while n_models == 0 and fact_pct > 0:
             for n, fact in enumerate(facts):

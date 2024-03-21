@@ -784,31 +784,31 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['SID_cpdag'][1], 15)
 
 start = datetime.now()
-# TestCausalABA().three_node_all_graphs()
-# TestCausalABA().three_node_graph_empty()
-# TestCausalABA().collider()
-# TestCausalABA().chains_confounder()
-# TestCausalABA().one_edge()
-# TestCausalABA().incompatible_Is()
-# TestCausalABA().four_node_all_graphs()
-# TestCausalABA().four_node_shapPC_example()
-# TestCausalABA().incompatible_chain()
-# TestCausalABA().five_node_all_graphs()
-# TestCausalABA().five_node_colombo_example()
-# TestCausalABA().five_node_sprinkler_example()
-# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-# TestCausalABA().six_node_example()
-# TestCausalABA().randomG(7, 1, "ER", 2024)
-# TestCausalABA().randomG(8, 1, "ER", 2024)
-# TestCausalABA().randomG(9, 1, "ER", 2024)
-# ## TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
+TestCausalABA().three_node_all_graphs()
+TestCausalABA().three_node_graph_empty()
+TestCausalABA().collider()
+TestCausalABA().chains_confounder()
+TestCausalABA().one_edge()
+TestCausalABA().incompatible_Is()
+TestCausalABA().four_node_all_graphs()
+TestCausalABA().four_node_shapPC_example()
+TestCausalABA().incompatible_chain()
+TestCausalABA().five_node_all_graphs()
+TestCausalABA().five_node_colombo_example()
+TestCausalABA().five_node_sprinkler_example()
+## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+TestCausalABA().six_node_example()
+TestCausalABA().randomG(7, 1, "ER", 2024)
+TestCausalABA().randomG(8, 1, "ER", 2024)
+TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
+## TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
 
-# TestCausalABA().test_metrics_perfect()
-# TestCausalABA().test_metrics_errors()
+TestCausalABA().test_metrics_perfect()
+TestCausalABA().test_metrics_errors()
 
 # TestCausalABA().four_node_shapPC_PC_facts() ## Does not pass, needs accuracy evaluation
 # TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
 # TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
-TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
+# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
 
 logging.info(f"Total time={str(datetime.now()-start)}")
