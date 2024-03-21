@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import logging
 from itertools import chain, combinations
 from collections import defaultdict
@@ -8,9 +8,15 @@ import networkx as nx
 import igraph as ig
 from datetime import datetime
 from copy import deepcopy
+import warnings
+warnings.filterwarnings("ignore")
+os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
+### To not have the WARNING: ignoring environment value of R_HOME set the verbose to False in the launch_R_script function in:
+### CausalDiscoveryToolbox/cdt/utils/R.py#L155
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import cdt
-cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
 from cdt.metrics import get_CPDAG, SHD, SID, SHD_CPDAG, SID_CPDAG, precision_recall
+cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
 
 maxpc = False
 if maxpc:
@@ -337,7 +343,7 @@ class MetricsDAG(object):
         [d, d] ground truth graph, {0, 1}.
     """
 
-    def __init__(self, B_est, B_true, sid=True):
+    def __init__(self, B_est, B_true, sid=True, cpdag=False):
         
         if not isinstance(B_est, np.ndarray):
             raise TypeError("Input B_est is not numpy.ndarray!")
@@ -348,14 +354,10 @@ class MetricsDAG(object):
         self.B_est = deepcopy(B_est)
         self.B_true = deepcopy(B_true)
 
-        self.metrics = MetricsDAG._count_accuracy(self.B_est, self.B_true, sid)
-
-        if (self.B_est == -1).any() | (self.B_true == -1).any():
-            self.metrics['SHD_cpdag'] = self._cal_SHD_CPDAG(self.B_est, self.B_true)
-            self.metrics['SID_cpdag'] = self._cal_SID_CPDAG(self.B_est, self.B_true)
+        self.metrics = MetricsDAG._count_accuracy(self.B_est, self.B_true, sid, cpdag)
 
     @staticmethod
-    def _count_accuracy(B_est, B_true, sid=True, decimal_num=4):
+    def _count_accuracy(B_est, B_true, sid=True, cpdag=False, decimal_num=4):
         """
         Parameters
         ----------
@@ -450,12 +452,19 @@ class MetricsDAG(object):
         fdr = float(len(reverse) + len(false_pos)) / max(pred_size, 1)
         tpr = float(len(true_pos)) / max(len(cond), 1)
         fpr = float(len(reverse) + len(false_pos)) / max(cond_neg_size, 1)
-        # structural hamming distance
-        pred_lower = np.flatnonzero(np.tril(B_est + B_est.T))
-        cond_lower = np.flatnonzero(np.tril(B_true + B_true.T))
-        extra_lower = np.setdiff1d(pred_lower, cond_lower, assume_unique=True)
-        missing_lower = np.setdiff1d(cond_lower, pred_lower, assume_unique=True)
-        shd = len(extra_lower) + len(missing_lower) + len(reverse)
+        # structural hamming distance 
+        # pred_lower = np.flatnonzero(np.tril(B_est + B_est.T))
+        # cond_lower = np.flatnonzero(np.tril(B_true + B_true.T))
+        # extra_lower = np.setdiff1d(pred_lower, cond_lower, assume_unique=True)
+        # missing_lower = np.setdiff1d(cond_lower, pred_lower, assume_unique=True)
+        # shd = len(extra_lower) + len(missing_lower) + len(reverse)        
+        ### this, although standard in some packages,
+        ### trests undirected edge as a present edge in the CPDAG 
+        ### Replacing with SHD from cdt
+        if cpdag:
+            shd = MetricsDAG._cal_SHD_CPDAG(B_est, B_true)
+        else:
+            shd = SHD(B_true, B_est, False)
 
         W_p = pd.DataFrame(B_est)
         W_true = pd.DataFrame(B_true)
@@ -466,16 +475,15 @@ class MetricsDAG(object):
         mt = {'fdr': fdr, 'tpr': tpr, 'fpr': fpr, 'shd': shd, 'nnz': pred_size, 
               'precision': precision, 'recall': recall, 'F1': F1#, 'gscore': gscore
               }
-        
-        ### SHD from cdt
-        mt['SHD'] = SHD(B_true, B_est, False)
-        
-        if sid and not ((B_est == -1).any()|(B_true == -1).any()):
-            mt['sid'] = MetricsDAG._cal_SID(B_est, B_true)
 
         for i in mt:
-            mt[i] = round(mt[i], decimal_num)
-        
+            mt[i] = round(mt[i], decimal_num)   
+
+        if sid and not cpdag:
+            mt['sid'] = MetricsDAG._cal_SID(B_est, B_true)
+        elif sid and cpdag:
+            mt['SID_cpdag'] = MetricsDAG._cal_SID_CPDAG(B_est, B_true)
+       
         return mt
 
     @staticmethod
@@ -540,6 +548,7 @@ class MetricsDAG(object):
         
         return precision, recall, F1
     
+    @staticmethod
     def _cal_SID(B_est, B_true):
         """
         Parameters
@@ -560,7 +569,8 @@ class MetricsDAG(object):
         
         return SID(B_true, B_est).flat[0]
     
-    def _cal_SHD_CPDAG(self, B_est, B_true):
+    @staticmethod
+    def _cal_SHD_CPDAG(B_est, B_true):
         """
         Parameters
         ----------
@@ -575,21 +585,17 @@ class MetricsDAG(object):
             Structural Hamming Distance of CPDAG
         """
 
-        if (B_est == -1).any():
-            B_est = (B_est != 0).astype(int)
-        if (B_true == -1).any():
-            B_true = (B_true != 0).astype(int)
+        return SHD_CPDAG(dag2cpdag(B_true,True), dag2cpdag(B_est,True))
 
-        return SHD_CPDAG(B_true, B_est)
-
-    def _cal_SID_CPDAG(self, B_est, B_true):
+    @staticmethod
+    def _cal_SID_CPDAG(B_est, B_true):
         """
         Parameters
         ----------
         B_est: np.ndarray
             [d, d] estimate, {0, 1, -1}, -1 is undirected edge in CPDAG.
         B_true: np.ndarray
-            [d, d] ground truth graph, {0, 1}.
+            [d, d] ground truth graph, {0, 1}. Needs to be a DAG.
 
         Return
         ------
@@ -599,5 +605,5 @@ class MetricsDAG(object):
             Upper bound of Structural Intervention Distance
         """
         
-        SID_CPDAG_low, SID_CPDAG_high = [a.flat[0] for a in SID_CPDAG(B_true, B_est)]
+        SID_CPDAG_low, SID_CPDAG_high = [a.flat[0] for a in SID_CPDAG(B_true, dag2cpdag(B_est,True))]
         return SID_CPDAG_low, SID_CPDAG_high

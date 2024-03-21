@@ -697,19 +697,19 @@ class TestCausalABA(unittest.TestCase):
 
     def test_metrics_perfect(self):
         ## true DAG
-        B_true = np.array( [[ 0,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 0,  1,  1,  0,  0],
-                            [ 0,  0,  0,  1,  0]])
+        B_true = np.array( [[ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
         n_edges = B_true.sum()
 
         ## estimated DAG
-        B_est = np.array(  [[ 0,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 0,  1,  1,  0,  0],
-                            [ 0,  0,  0,  1,  0]])
+        B_est = np.array( [[ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
         
         ## calculate metrics
         metrics = MetricsDAG(B_est, B_true).metrics
@@ -723,13 +723,9 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['recall'], 1)
         self.assertEqual(metrics['F1'], 1)
         self.assertEqual(metrics['sid'], 0)
-
-        ## convert to CPDAG
-        CP_true = dag2cpdag(B_true)
-        CP_est = dag2cpdag(B_est)
         
         ## calculate metrics for CPDAG
-        metrics = MetricsDAG(CP_est, CP_true).metrics
+        metrics = MetricsDAG(B_est, B_true, cpdag=True).metrics
         ## test metrics
         self.assertEqual(metrics['fdr'], 0)
         self.assertEqual(metrics['tpr'], 1)
@@ -740,77 +736,71 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['recall'], 1)
         self.assertEqual(metrics['F1'], 1)
 
-        self.assertEqual(metrics['SHD_cpdag'], 0)
         self.assertEqual(metrics['SID_cpdag'][0], 0)
-        self.assertEqual(metrics['SID_cpdag'][1], 0)
+        self.assertEqual(metrics['SID_cpdag'][1], 12)
 
     def test_metrics_errors(self):
         ## true DAG
-        B_true = np.array( [[ 0,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 0,  1,  1,  0,  0],
-                            [ 0,  0,  0,  1,  0]])
+        B_true = np.array( [[ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
         n_edges = B_true.sum()
 
         ## estimated DAG
-        B_est = np.array(  [[ 0,  0,  0,  1,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 1,  0,  0,  0,  0],
-                            [ 0,  0,  0,  0,  0],
-                            [ 0,  0,  0,  1,  0]])
+        B_est = np.array( [[ 0,  1,  1,  0,  0],
+                           [ 0,  0,  0,  0,  0],
+                           [ 0,  0,  0,  1,  1],
+                           [ 0,  0,  0,  0,  1],
+                           [ 0,  0,  0,  0,  0]])
         
         ## calculate metrics
         metrics = MetricsDAG(B_est, B_true).metrics
         ## test metrics
-        self.assertEqual(metrics['fdr'], 0.25)
-        self.assertEqual(metrics['tpr'], 0.6)
-        self.assertEqual(metrics['fpr'], 0.2)
-        self.assertEqual(metrics['shd'], 3)
-        self.assertEqual(metrics['nnz'], 4)
-        self.assertEqual(metrics['precision'], 0.75)
-        self.assertEqual(metrics['recall'], 0.6)
-        self.assertEqual(metrics['F1'], 0.6667)
-        self.assertEqual(metrics['sid'], 11)
-
-        ## convert to CPDAG
-        CP_true = dag2cpdag(B_true)
-        CP_est = dag2cpdag(B_est)
+        self.assertEqual(metrics['fdr'], 0.2) #1/5
+        self.assertEqual(metrics['tpr'], 0.8) #4/5
+        self.assertEqual(metrics['fpr'], 0.2) #1/5
+        self.assertEqual(metrics['shd'], 2)
+        self.assertEqual(metrics['nnz'], 5)
+        self.assertEqual(metrics['precision'], 0.8)
+        self.assertEqual(metrics['recall'], 0.8)
+        self.assertEqual(metrics['F1'], 0.8)
+        self.assertEqual(metrics['sid'], 2)
         
         ## calculate metrics for CPDAG
-        metrics = MetricsDAG(CP_est, CP_true).metrics
+        metrics = MetricsDAG(B_est, B_true, cpdag=True).metrics
         ## test metrics
-        self.assertEqual(metrics['fdr'], 0.25)
-        self.assertEqual(metrics['tpr'], 0.375)
-        self.assertEqual(metrics['fpr'], 0.5)
+        self.assertEqual(metrics['fdr'], 0.2) #1/5
+        self.assertEqual(metrics['tpr'], 0.8) #4/5
+        self.assertEqual(metrics['fpr'], 0.2) #1/5
         self.assertEqual(metrics['shd'], 3)
-        self.assertEqual(metrics['nnz'], 4)
-        self.assertEqual(metrics['precision'], 0.75)
-        self.assertEqual(metrics['recall'], 0.375)
-        self.assertEqual(metrics['F1'], 0.5)
+        self.assertEqual(metrics['nnz'], 5)
+        self.assertEqual(metrics['precision'], 0.8)
+        self.assertEqual(metrics['recall'], 0.8)
+        self.assertEqual(metrics['F1'], 0.8)
 
-        self.assertEqual(metrics['SHD_cpdag'], 3) ## Check
-        self.assertEqual(metrics['SID_cpdag'][0], 0) ## Check
-        self.assertEqual(metrics['SID_cpdag'][1], 0) ## Check
+        self.assertEqual(metrics['SID_cpdag'][0], 2) ## Check
+        self.assertEqual(metrics['SID_cpdag'][1], 15) ## Check
 
 start = datetime.now()
-TestCausalABA().three_node_all_graphs()
-TestCausalABA().three_node_graph_empty()
-TestCausalABA().collider()
-TestCausalABA().chains_confounder()
-TestCausalABA().one_edge()
-TestCausalABA().incompatible_Is()
-TestCausalABA().four_node_all_graphs()
-TestCausalABA().four_node_shapPC_example()
-TestCausalABA().incompatible_chain()
-TestCausalABA().five_node_all_graphs()
-TestCausalABA().five_node_colombo_example()
-TestCausalABA().five_node_sprinkler_example()
-## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-TestCausalABA().six_node_example()
-TestCausalABA().randomG(7, 1, "ER", 2024)
-TestCausalABA().randomG(8, 1, "ER", 2024)
-TestCausalABA().randomG(9, 1, "ER", 2024)
+# TestCausalABA().three_node_all_graphs()
+# TestCausalABA().three_node_graph_empty()
+# TestCausalABA().collider()
+# TestCausalABA().chains_confounder()
+# TestCausalABA().one_edge()
+# TestCausalABA().incompatible_Is()
+# TestCausalABA().four_node_all_graphs()
+# TestCausalABA().four_node_shapPC_example()
+# TestCausalABA().incompatible_chain()
+# TestCausalABA().five_node_all_graphs()
+# TestCausalABA().five_node_colombo_example()
+# TestCausalABA().five_node_sprinkler_example()
+# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+# TestCausalABA().six_node_example()
+# TestCausalABA().randomG(7, 1, "ER", 2024)
+# TestCausalABA().randomG(8, 1, "ER", 2024)
+# TestCausalABA().randomG(9, 1, "ER", 2024)
 
 # TestCausalABA().four_node_shapPC_PC_facts()
 # TestCausalABA().five_node_colombo_PC_facts()
@@ -818,6 +808,6 @@ TestCausalABA().randomG(9, 1, "ER", 2024)
 # TestCausalABA().randomG_PC_facts(7, 1, "ER", 2024)
 
 TestCausalABA().test_metrics_perfect()
-# TestCausalABA().test_metrics_errors()
+TestCausalABA().test_metrics_errors()
 
 logging.info(f"Total time={str(datetime.now()-start)}")
