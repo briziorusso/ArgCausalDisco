@@ -22,6 +22,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from tqdm.auto import tqdm
 from utils import *
 
 def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_check=True):
@@ -114,7 +115,7 @@ def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_c
     set_of_model_sets = []
     model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
                                                 fact_pct=base_pct, search_for_models='first',
-                                                opt_mode='opt', print_models=False)
+                                                opt_mode='optN', print_models=False, show=['arrow'])
 
     if multiple_solutions:
         for model in model_sets:
@@ -133,7 +134,7 @@ def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_c
         logging.info(f"Number of right solutions found: {count_right}")
     
     ## derive B_est from model_sets
-    for model in models:
+    for model in tqdm(models, desc="Models from d-ABA"):
         B_est = np.zeros((n_nodes, n_nodes))
         for edge in model:
             B_est[edge[0], edge[1]] = 1
@@ -141,11 +142,31 @@ def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_c
         logging.debug(B_est)
         G_est = nx.DiGraph(pd.DataFrame(B_est, columns=[f"X{i+1}" for i in range(B_est.shape[1])], index=[f"X{i+1}" for i in range(B_est.shape[1])]))
         logging.debug(G_est.edges)
+
+        models_metrics = []
+        est_seplist = find_all_d_separations_sets(G_est, verbose=False)
+        est_ind_statements = []
+        est_I = 0
+        for test in est_seplist:
+            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+            test_PC = [t for t in cg.sepset[X,Y] if set(t[0])==S]
+            if len(test_PC)==1:
+                p = test_PC[0][1]
+                dep_type_PC = "indep" if p > alpha else "dep" 
+                I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+                if dep_type == dep_type_PC:
+                    est_ind_statements.append((X,S,Y,dep_type, test, I))
+                    est_I += I
+                else:
+                    est_ind_statements.append((X,S,Y,dep_type, test, 1-I))
+                    est_I += 1-I
+                
         ## calculate metrics
         metrics = MetricsDAG(B_est, B_true).metrics
         ## Log metrics
-        logging.info(f"Metrics for DAG:")
-        logging.info(metrics)
+        logging.debug(f"Metrics for DAG:")
+        logging.debug(metrics)
+        logging.debug(f"Sum of Initial Strength for ind implied by est DAG: {est_I:.2f}")
 
         CP_est = dag2cpdag(B_est)
         logging.debug("CPDAG from d-ABA")
@@ -153,10 +174,16 @@ def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_c
         ## calculate metrics for CPDAG
         metrics_cp = MetricsDAG(CP_est, B_true).metrics
         ## Log metrics
-        logging.info(f"Metrics for CPDAG:")
-        logging.info(metrics_cp)
-    ## Save results
-    # save_results(output_name, G_true, G_est, models, MECs, metrics, metrics_cp)
+        logging.debug(f"Metrics for CPDAG:")
+        logging.debug(metrics_cp)
+        
+        models_metrics.append((metrics, metrics_cp, est_I))
+
+    ## Select the best model
+    best_model = sorted(models_metrics, key=lambda x: x[2], reverse=True)
+    logging.info(50*"=")
+    logging.info(f"Best model by I:")
+    logging.info(best_model[0])
 
 start = datetime.now()
 randomG_PC_facts(4, 1, "ER", 2024)
