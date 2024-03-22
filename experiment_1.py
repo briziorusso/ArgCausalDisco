@@ -40,10 +40,15 @@ def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_c
         logging.info(f'{s0} is too many edges, setting s0 to the max:', int(n_nodes*(n_nodes-1)/2))
         s0 = int(n_nodes*(n_nodes-1)/2)
     random_stability(2024)
+    
     B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=graph_type)
+    logging.debug("True DAG")
     logging.debug(B_true)
-    G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+    G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))    
     logging.debug(G_true.edges)
+    
+    logging.debug("True CPDAG")
+    logging.debug(dag2cpdag(B_true))
 
     inv_nodes_dict = {n:int(n.replace("X",""))-1 for n in G_true.nodes()}
     G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
@@ -52,15 +57,17 @@ def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_c
     true_seplist = find_all_d_separations_sets(G_true, verbose=False)
 
     cg = simulate_data_and_run_PC(G_true, alpha)
-    B_est_PC = from_causallearn_to_cpdag(cg)
+    CP_est_PC = (cg.G.graph != 0).astype(int)#from_causallearn_to_cpdag(cg)
+    logging.debug("CPDAG from PC")
+    logging.debug(CP_est_PC)
+    ## undirected edges are not considered in DAG metrics
+    B_est_PC = (cg.G.graph > 0).astype(int)
+    logging.debug("DAG from PC - removing undirected edges")
     logging.debug(B_est_PC)
-    ### TODO: need to transform B_est_PC to CPDAG as we use it
-    ### MetricsDAG needs to be able to handle CPDAGs directly instead of transforming them
-    
-    ## calculate metrics
-    metrics = MetricsDAG(B_est_PC, B_true, cpdag=True).metrics
+    ## calculate metrics for DAG
+    metrics = MetricsDAG(B_est_PC, B_true).metrics
     ## calculate metrics for CPDAG
-    metrics_cp = MetricsDAG(B_est_PC, B_true, cpdag=True).metrics
+    metrics_cp = MetricsDAG(CP_est_PC, B_true).metrics
     ## Log metrics
     logging.info(f"Metrics for ShapleyPC (DAG):")
     logging.info(metrics)
@@ -107,7 +114,7 @@ def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_c
     set_of_model_sets = []
     model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
                                                 fact_pct=base_pct, search_for_models='first',
-                                                opt_mode='optN', print_models=False)
+                                                opt_mode='opt', print_models=False)
 
     if multiple_solutions:
         for model in model_sets:
@@ -130,17 +137,22 @@ def randomG_PC_facts(n_nodes, edge_per_node=2, graph_type="ER", seed=2024, mec_c
         B_est = np.zeros((n_nodes, n_nodes))
         for edge in model:
             B_est[edge[0], edge[1]] = 1
-        
+        logging.debug("DAG from d-ABA")
         logging.debug(B_est)
         G_est = nx.DiGraph(pd.DataFrame(B_est, columns=[f"X{i+1}" for i in range(B_est.shape[1])], index=[f"X{i+1}" for i in range(B_est.shape[1])]))
         logging.debug(G_est.edges)
         ## calculate metrics
         metrics = MetricsDAG(B_est, B_true).metrics
-        ## calculate metrics for CPDAG
-        metrics_cp = MetricsDAG(B_est, B_true, cpdag=True).metrics
         ## Log metrics
         logging.info(f"Metrics for DAG:")
         logging.info(metrics)
+
+        CP_est = dag2cpdag(B_est)
+        logging.debug("CPDAG from d-ABA")
+        logging.debug(CP_est)
+        ## calculate metrics for CPDAG
+        metrics_cp = MetricsDAG(CP_est, B_true).metrics
+        ## Log metrics
         logging.info(f"Metrics for CPDAG:")
         logging.info(metrics_cp)
     ## Save results

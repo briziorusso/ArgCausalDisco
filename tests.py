@@ -725,7 +725,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['sid'], 0)
         
         ## calculate metrics for CPDAG
-        metrics = MetricsDAG(B_est, B_true, cpdag=True).metrics
+        metrics = MetricsDAG(dag2cpdag(B_est), B_true).metrics
         ## test metrics
         self.assertEqual(metrics['fdr'], 0)
         self.assertEqual(metrics['tpr'], 1)
@@ -736,8 +736,8 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['recall'], 1)
         self.assertEqual(metrics['F1'], 1)
 
-        self.assertEqual(metrics['SID_cpdag'][0], 0)
-        self.assertEqual(metrics['SID_cpdag'][1], 12)
+        self.assertEqual(metrics['sid'][0], 0)
+        self.assertEqual(metrics['sid'][1], 12)
 
     def test_metrics_errors(self):
         ## true DAG
@@ -769,7 +769,7 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['sid'], 2)
         
         ## calculate metrics for CPDAG
-        metrics = MetricsDAG(B_est, B_true, cpdag=True).metrics
+        metrics = MetricsDAG(dag2cpdag(B_est), B_true).metrics
         ## test metrics
         self.assertEqual(metrics['fdr'], 0.2) #1/5
         self.assertEqual(metrics['tpr'], 0.8) #4/5
@@ -780,8 +780,8 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['recall'], 0.8)
         self.assertEqual(metrics['F1'], 0.8)
 
-        self.assertEqual(metrics['SID_cpdag'][0], 2)
-        self.assertEqual(metrics['SID_cpdag'][1], 15)
+        self.assertEqual(metrics['sid'][0], 2)
+        self.assertEqual(metrics['sid'][1], 15)
 
 start = datetime.now()
 TestCausalABA().three_node_all_graphs()

@@ -212,14 +212,6 @@ def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_p
     
     return cg
 
-def from_causallearn_to_cpdag(cg):
-    W_est = cg.G.graph
-    for i in range(len(W_est)):
-        for j in range(len(W_est[i])):
-            if W_est[i, j] == -1 and W_est[j, i] == 1:
-                W_est[i, j] = 0
-                W_est[j, i] = 1
-
 def is_dag(B):
     """Check if a matrix is a DAG"""
     return ig.Graph.Adjacency(B.tolist()).is_dag()
@@ -311,7 +303,7 @@ def dag2cpdag(G, cdt_method=False):
     Returns:
         C (np.ndarray): [d, d] binary adj matrix of CPDAG
     """
-
+    assert is_dag(G), 'Input graph is not a DAG'
     ###only leave the arrows that are part of a v-structure
     C = dag2skel(G)
     immoralities = get_immoralities(mount_adjacency_list(G))
@@ -352,7 +344,7 @@ class MetricsDAG(object):
         [d, d] ground truth graph, {0, 1}.
     """
 
-    def __init__(self, B_est, B_true, sid=True, cpdag=False):
+    def __init__(self, B_est, B_true, sid=True):
         
         if not isinstance(B_est, np.ndarray):
             raise TypeError("Input B_est is not numpy.ndarray!")
@@ -363,10 +355,10 @@ class MetricsDAG(object):
         self.B_est = deepcopy(B_est)
         self.B_true = deepcopy(B_true)
 
-        self.metrics = MetricsDAG._count_accuracy(self.B_est, self.B_true, sid, cpdag)
+        self.metrics = MetricsDAG._count_accuracy(self.B_est, self.B_true, sid)
 
     @staticmethod
-    def _count_accuracy(B_est, B_true, sid=True, cpdag=False, decimal_num=4):
+    def _count_accuracy(B_est, B_true, sid=True, decimal_num=4):
         """
         Parameters
         ----------
@@ -403,34 +395,35 @@ class MetricsDAG(object):
                 max(0, (TP-FP))/(TP+FN), A score ranges from 0 to 1
         """
 
-        # trans diagonal element into 0
-        for i in range(len(B_est)):
-            if B_est[i, i] == 1:
-                B_est[i, i] = 0
-            if B_true[i, i] == 1:
-                B_true[i, i] = 0
-
-        # trans cpdag [0, 1] to [-1, 0, 1], -1 is undirected edge in CPDAG
-        for i in range(len(B_est)):
-            for j in range(len(B_est[i])):
-                if B_est[i, j] == B_est[j, i] == 1:
-                    B_est[i, j] = -1
-                    B_est[j, i] = 0
+        ## Do not allow self loops
+        if (np.diag(B_est)).any():
+            raise ValueError('Graph contains self loops')
+        ## Only allow 0, 1, -1
+        if not ((B_est == 0) | (B_est == 1) | (B_est == -1)).all():
+            raise ValueError('B_est should take value in {0,1,-1}')
         
-        if (B_est == -1).any():  # cpdag
-            if not ((B_est == 0) | (B_est == 1) | (B_est == -1)).all():
-                raise ValueError('B_est should take value in {0,1,-1}')
-            if ((B_est == -1) & (B_est.T == -1)).any():
-                ## only one entry in the pair of undirected edges should be -1
-                for i in range(len(B_est)):
-                    for j in range(len(B_est[i])):
-                        if B_est[i, j] == -1:
-                            B_est[j, i] = 0
-                        if B_true[i, j] == -1:
-                            B_true[j, i] = 0
-                assert not ((B_est == -1) & (B_est.T == -1)).any()
-                assert not ((B_true == -1) & (B_true.T == -1)).any()
+        B_est_unique = deepcopy(B_est)
+        # trans cpdag [0, 1] to [-1, 0, 1], -1 is undirected edge in CPDAG
+        if ((B_est_unique == 1) & (B_est_unique.T == 1)).any():
+            cpdag = True
+            for i in range(len(B_est_unique)):
+                for j in range(len(B_est_unique[i])):
+                    if B_est_unique[i, j] == B_est_unique[j, i] == 1:
+                        B_est_unique[i, j] = -1
+                        B_est_unique[j, i] = 0
+        if (B_est_unique == -1).any():  # cpdag
+            cpdag = True
+            ## only one entry in the pair of undirected edges should be -1
+            if ((B_est_unique == -1) & (B_est_unique.T == -1)).any():
+                for i in range(len(B_est_unique)):
+                    for j in range(len(B_est_unique[i])):
+                        if B_est_unique[i, j] == B_est_unique[j, i] == -1:
+                            B_est_unique[i, j] = -1
+                            B_est_unique[j, i] = 0
+                assert not ((B_est_unique == -1) & (B_est_unique.T == -1)).any()
+                assert not ((B_est_unique == -1) & (B_est_unique.T == -1)).any()
         else:  # dag
+            cpdag = False
             if not ((B_est == 0) | (B_est == 1)).all():
                 raise ValueError('B_est should take value in {0,1}')
             if not is_dag(B_est):
@@ -438,8 +431,8 @@ class MetricsDAG(object):
         d = B_true.shape[0]
         
         # linear index of nonzeros
-        pred_und = np.flatnonzero(B_est == -1)
-        pred = np.flatnonzero(B_est == 1)
+        pred_und = np.flatnonzero(B_est_unique == -1)
+        pred = np.flatnonzero(B_est_unique == 1)
         cond = np.flatnonzero(B_true)
         cond_reversed = np.flatnonzero(B_true.T)
         cond_skeleton = np.concatenate([cond, cond_reversed])
@@ -462,28 +455,28 @@ class MetricsDAG(object):
         tpr = float(len(true_pos)) / max(len(cond), 1)
         fpr = float(len(reverse) + len(false_pos)) / max(cond_neg_size, 1)
         # structural hamming distance 
-        # pred_lower = np.flatnonzero(np.tril(B_est + B_est.T))
+        # pred_lower = np.flatnonzero(np.tril(B_est_unique + B_est.T))
         # cond_lower = np.flatnonzero(np.tril(B_true + B_true.T))
         # extra_lower = np.setdiff1d(pred_lower, cond_lower, assume_unique=True)
         # missing_lower = np.setdiff1d(cond_lower, pred_lower, assume_unique=True)
         # shd = len(extra_lower) + len(missing_lower) + len(reverse)        
         ### this, although standard in some packages,
-        ### trests undirected edge as a present edge in the CPDAG 
+        ### treats undirected edge as a present edge in the CPDAG 
         ### Replacing with SHD from cdt
         if cpdag:
             shd = MetricsDAG._cal_SHD_CPDAG(B_est, B_true)
         else:
             shd = SHD(B_true, B_est, False)
 
-        W_p = pd.DataFrame(B_est)
+        W_p = pd.DataFrame(B_est_unique)
         W_true = pd.DataFrame(B_true)
 
         # gscore = MetricsDAG._cal_gscore(W_p, W_true)
         precision, recall, F1 = MetricsDAG._cal_precision_recall(W_p, W_true)
 
-        mt = {'fdr': fdr, 'tpr': tpr, 'fpr': fpr, 'shd': shd, 'nnz': pred_size, 
-              'precision': precision, 'recall': recall, 'F1': F1#, 'gscore': gscore
-              }
+        mt = {'nnz': pred_size, 'fdr': fdr, 'tpr': tpr, 'fpr': fpr,  
+              'precision': precision, 'recall': recall, 'F1': F1,#, 'gscore': gscore
+              'shd': shd}
 
         for i in mt:
             mt[i] = round(mt[i], decimal_num)   
@@ -491,7 +484,7 @@ class MetricsDAG(object):
         if sid and not cpdag:
             mt['sid'] = MetricsDAG._cal_SID(B_est, B_true)
         elif sid and cpdag:
-            mt['SID_cpdag'] = MetricsDAG._cal_SID_CPDAG(B_est, B_true)
+            mt['sid'] = MetricsDAG._cal_SID_CPDAG(B_est, B_true)
        
         return mt
 
@@ -572,10 +565,8 @@ class MetricsDAG(object):
         SID: float
             Structural Intervention Distance
         """
-
-        if (B_est == -1).any():
-            raise ValueError('B_est should be a DAG')
-        
+        assert is_dag(B_true), 'B_true should be a DAG'
+        assert is_dag(B_est), 'B_est should be a DAG'
         return SID(B_true, B_est).flat[0]
     
     @staticmethod
@@ -593,8 +584,10 @@ class MetricsDAG(object):
         SHD: int
             Structural Hamming Distance of CPDAG
         """
-
-        return SHD_CPDAG(dag2cpdag(B_true,True), dag2cpdag(B_est,True))
+        assert is_dag(B_true), 'B_true should be a DAG'
+        ### treat undirected edge as a present edge in the CPDAG
+        ### the difference will be in the missed immoralities
+        return SHD(dag2cpdag(B_true,True), (B_est != 0).astype(int), False)
 
     @staticmethod
     def _cal_SID_CPDAG(B_est, B_true):
@@ -613,6 +606,8 @@ class MetricsDAG(object):
         SID_CPDAG_high: float
             Upper bound of Structural Intervention Distance
         """
-        
-        SID_CPDAG_low, SID_CPDAG_high = [a.flat[0] for a in SID_CPDAG(B_true, dag2cpdag(B_est,True))]
+        assert is_dag(B_true), 'B_true should be a DAG'
+        ### treat undirected edge as a present edge in the CPDAG
+        ### the difference will be in the missed immoralities
+        SID_CPDAG_low, SID_CPDAG_high = [a.flat[0] for a in SID_CPDAG(B_true, (B_est != 0).astype(int))]
         return SID_CPDAG_low, SID_CPDAG_high
