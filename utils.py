@@ -31,12 +31,19 @@ sys.path.append("../causal-learn/tests/")
 from utils_simulate_data import simulate_discrete_data, simulate_linear_continuous_data
 
 # create logger
-def logger_setup(output_file:str="causalaba"):
+def logger_setup(output_file:str=""):
+    if not os.path.exists('.temp'):
+        os.makedirs('.temp')
+    if output_file == "":
+        output_file = f'.temp/{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
+    elif ".log" not in output_file: ## when one passes only the name of the file
+        output_file = f'.temp/{output_file}.log'
+
     logging.basicConfig(level=logging.DEBUG,
                         format='%(message)s',
                         datefmt='%m-%d %H:%M',
-                        filename=f'.temp/{output_file}.log',
-                        filemode='w')
+                        filename= output_file,
+                        filemode='w', force=True)
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
