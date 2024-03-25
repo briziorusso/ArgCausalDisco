@@ -25,6 +25,10 @@ import pandas as pd
 from datetime import datetime
 from utils import *
 
+sys.path.append("../causal-learn/tests/")  ### TODO: should save down a test dataset
+from utils_simulate_data import simulate_discrete_data, simulate_linear_continuous_data 
+from abapc import ABAPC
+
 class TestCausalABA(unittest.TestCase):
 
     def three_node_all_graphs(self):
@@ -65,7 +69,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(model_sets, expected)
@@ -80,7 +84,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, "encodings/test_lps/three_node_empty.lp")
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(model_sets, expected)
@@ -95,7 +99,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, "encodings/test_lps/collider.lp", show=["arrow", "indep"])
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))
 
         self.assertEqual(model_sets, expected)
@@ -114,7 +118,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, "encodings/test_lps/chains_confounder.lp")
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))
 
         self.assertEqual(model_sets, expected)
@@ -130,7 +134,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, "encodings/test_lps/one_edge.lp")
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))
 
         self.assertEqual(model_sets, expected)
@@ -143,7 +147,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, "encodings/test_lps/incompatible_Is.lp")
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))       
 
         self.assertEqual(model_sets, expected)
@@ -155,7 +159,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, print_models=False)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(len(model_sets), 543)
@@ -188,7 +192,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
 
         self.assertEqual(set(model_sets), expected)
@@ -204,7 +208,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
 
         self.assertEqual(set(model_sets), expected)
@@ -216,7 +220,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, print_models=False) 
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(len(model_sets), 29281)
@@ -247,7 +251,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
 
         self.assertEqual(set(model_sets), expected)
@@ -278,7 +282,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
 
         self.assertIn(expected, model_sets)
@@ -290,7 +294,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, print_models=False)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
         
         self.assertEqual(len(model_sets), 3781503)
@@ -325,7 +329,7 @@ class TestCausalABA(unittest.TestCase):
         models, _ = CausalABA(n_nodes, facts_location)
         model_sets = set()
         for model in models:
-            arrows = model_to_set_of_arrows(model, n_nodes)
+            arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
 
         self.assertEqual(model_sets, expected)
@@ -410,7 +414,7 @@ class TestCausalABA(unittest.TestCase):
 
     def four_node_shapPC_PC_facts(self):
         scenario = "four_node_shapPC_PC_facts"
-        alpha = 0.05
+        alpha = 0.05    
         facts_location = f"encodings/test_lps/{scenario}.lp"
         facts_location_I = f"encodings/test_lps/{scenario}_I.lp"
         facts_location_wc = f"encodings/test_lps/{scenario}_wc.lp"
@@ -430,7 +434,7 @@ class TestCausalABA(unittest.TestCase):
 
         true_seplist = find_all_d_separations_sets(G_true)
 
-        cg = simulate_data_and_run_PC(G_true, alpha)
+        cg = simulate_data_and_run_PC(G_true, alpha, seed=2024)
 
         facts = []
         count_wrong = 0
@@ -443,13 +447,13 @@ class TestCausalABA(unittest.TestCase):
                 dep_type_PC = "indep" if p > alpha else "dep" 
                 I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
                 if dep_type == dep_type_PC:
-                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC))
+                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC, p))
                 elif dep_type == "indep":
                     count_wrong += 1
-                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC))
+                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC, p))
                 elif dep_type == "dep":
                     count_wrong += 1
-                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC))
+                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC, p))
         
         logging.info(f"Number of total independence statements: {len(true_seplist)}")
         logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
@@ -469,7 +473,8 @@ class TestCausalABA(unittest.TestCase):
         
         set_of_model_sets = []
         model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
-                                                   fact_pct=0.27, print_models=False)
+                                                   fact_pct=0.65, print_models=False#, show=['arrow', 'indep']
+                                                   )
         if multiple_solutions:
             for model in model_sets:
                 models, MECs = set_of_models_to_set_of_graphs(model, n_nodes)
@@ -738,6 +743,8 @@ class TestCausalABA(unittest.TestCase):
             self.assertTrue(count_right > 0)
         else:
             self.assertIn(expected, models)
+
+class TestMetricsDAG(unittest.TestCase):
 
     def test_metrics_perfect(self):
         ## true DAG

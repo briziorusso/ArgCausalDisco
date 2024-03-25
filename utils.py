@@ -110,7 +110,7 @@ def model_to_adjacency_matrix(model:list, num_of_nodes:int)->np.ndarray:
             adj_mat[int(atom.arguments[0].number)][int(atom.arguments[1].number)] = 1
     return adj_mat
 
-def model_to_set_of_arrows(model:list, num_of_nodes:int)->set:
+def model_to_set_of_arrows(model:list)->set:
     arrows = set()
     for atom in model:
         if atom.name == 'arrow':
