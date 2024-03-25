@@ -361,6 +361,50 @@ class TestCausalABA(unittest.TestCase):
         self.assertIn(expected, model_sets)
 
     ############################################################################################################
+    #######                               CausalABA with arbitrary facts                                ########
+    ############################################################################################################
+        
+    def four_node_shapPC_example_arbitrary(self):
+        logger_setup()
+        scenario = "four_node_shapPC_example_arbitrary"
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  1],
+                            [ 0,  0,  0,  1],
+                            [ 0,  0,  0,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+
+        expected = set([
+            frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
+        ])
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        facts = []
+        with open(facts_location, "r") as f:
+            for line in f:
+                facts.append(line.strip())
+
+        missing_facts = set(true_seplist) - set(facts)
+        extra_facts = set(facts) - set(true_seplist)
+        logging.info(f"Number of missing facts: {len(missing_facts)}")
+        logging.info(f"Number of extra facts: {len(extra_facts)}")
+
+        models, _ = CausalABA(n_nodes, facts_location)
+        model_sets = set()
+        for model in models:
+            arrows = model_to_set_of_arrows(model)
+            model_sets.add(frozenset(arrows))            
+
+        self.assertIn(next(iter(expected)), set(model_sets))
+        self.assertEqual(set(model_sets), expected)
+
+    ############################################################################################################
     #######                                 CausalABA with PC facts                                     ########
     ############################################################################################################
 
