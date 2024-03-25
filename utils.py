@@ -132,13 +132,21 @@ def model_to_set_of_arrows(model:list)->set:
             arrows.add((atom.arguments[0].number,atom.arguments[1].number))
     return arrows
 
+def model_to_set_of_indep(model:list)->set:
+    indeps = set()
+    for atom in model:
+        if atom.name == 'indep':
+            indeps.add((atom.arguments[0].number,atom.arguments[1].number,atom.arguments[2].name))
+    return indeps
+
 def set_of_models_to_set_of_graphs(models, n_nodes, mec_check=True):
     MECs = defaultdict(list)
     MEC_set = set()
     model_sets = set()
     # logging.info("   Checking MECs")
     for model in models:
-        arrows = model_to_set_of_arrows(model, n_nodes)
+        arrows = model_to_set_of_arrows(model)
+        indeps = model_to_set_of_indep(model)
         model_sets.add(frozenset(arrows))        
         if mec_check:
             adj = model_to_adjacency_matrix(model, n_nodes)
