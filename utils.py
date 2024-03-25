@@ -209,7 +209,7 @@ def initial_strength(p:float, len_S:int, alpha:float, base_strength:float, num_v
         initial_strength = base_strength
     return initial_strength
 
-def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_priority:int=2):
+def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_priority:int=2, seed:int=42):
     """A function to simulate data and run PC algorithm
 
     Args:
@@ -228,7 +228,7 @@ def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_p
     truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
 
     logging.info(f"Simulating data with {num_of_nodes} nodes, {10000} samples...")
-    data = simulate_discrete_data(num_of_nodes, 10000, truth_DAG_directed_edges, 42)
+    data = simulate_discrete_data(num_of_nodes, 10000, truth_DAG_directed_edges, seed)
 
     logging.info(f"Running PC algorithm...")
     cg = pc(data=data, alpha=alpha, ikb=True, uc_rule=uc_rule, uc_priority=uc_priority, verbose=False)
