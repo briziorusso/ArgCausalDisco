@@ -827,6 +827,31 @@ class TestCausalABA(unittest.TestCase):
         self.assertEqual(metrics['sid'][0], 2)
         self.assertEqual(metrics['sid'][1], 15)
 
+class TestABAPC(unittest.TestCase):
+
+    def test_abapc(self):
+        scenario = "test_abapc"
+        logger_setup(scenario)
+        ## true DAG
+        B_true = np.array( [[ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
+        n_nodes = B_true.shape[0]
+        n_samples = 1000
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+        truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
+        ## generate data
+        data = simulate_discrete_data(n_nodes, n_samples, truth_DAG_directed_edges, 42)
+
+        ## run ABAPC
+        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario)
+
+        self.assertEqual(np.abs(B_est - B_true).sum(), 5)
+
 start = datetime.now()
 TestCausalABA().three_node_all_graphs()
 TestCausalABA().three_node_graph_empty()
@@ -845,14 +870,18 @@ TestCausalABA().six_node_example()
 TestCausalABA().randomG(7, 1, "ER", 2024)
 TestCausalABA().randomG(8, 1, "ER", 2024)
 TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
-## TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
+# TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
 
-TestCausalABA().test_metrics_perfect()
-TestCausalABA().test_metrics_errors()
+TestCausalABA().four_node_shapPC_example_arbitrary()
+TestCausalABA().four_node_shapPC_PC_facts() 
 
-# TestCausalABA().four_node_shapPC_PC_facts() ## Does not pass, needs accuracy evaluation
 # TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
 # TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
 # TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
+
+TestMetricsDAG().test_metrics_perfect()
+TestMetricsDAG().test_metrics_errors()
+
+TestABAPC().test_abapc()
 
 logging.info(f"Total time={str(datetime.now()-start)}")
