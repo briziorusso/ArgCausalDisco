@@ -8,6 +8,9 @@ import networkx as nx
 import igraph as ig
 from datetime import datetime
 from copy import deepcopy
+from pgmpy.readwrite import BIFReader
+import PIL.Image as Image
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 import warnings
 warnings.filterwarnings("ignore")
 os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
@@ -634,3 +637,81 @@ class MetricsDAG(object):
         ### the difference will be in the missed immoralities
         SID_CPDAG_low, SID_CPDAG_high = [a.flat[0] for a in SID_CPDAG(B_true, (B_est != 0).astype(int))]
         return SID_CPDAG_low, SID_CPDAG_high
+
+BIF_FOLDER_MAP = {
+    'cancer': 'small',
+    'earthquake': 'small',
+    'survey': 'small',
+    'asia': 'small',
+    'sachs': 'small',
+    'alarm': 'medium',
+    'child': 'medium',
+    'insurance': 'medium',
+    'hailfinder': 'large',
+    'hepar2': 'large'
+}
+
+def load_bn_from_BIF(main_data_path, data_folder='bayesian', dataset_name='child', seed=1, verbose=False):
+    bif_file = os.path.join(main_data_path, data_folder, BIF_FOLDER_MAP[dataset_name], dataset_name + '.bif', dataset_name + '.bif')
+    image_file = os.path.join(main_data_path, data_folder, BIF_FOLDER_MAP[dataset_name], dataset_name + '.png')
+
+    if verbose:
+        logging.debug(f'Loading graph from {bif_file}')
+
+    random_stability(seed)
+    reader = BIFReader(bif_file)
+    model = reader.get_model()
+
+    if os.path.exists(image_file):
+        if verbose:
+            logging.debug(f'Loading graph image from {image_file}')
+        model.image = Image.open(image_file)
+
+    # Take the leaves as features
+    __FEATURES = model.get_leaves()
+    __ROOTS = model.get_roots()
+    __NODES = model.nodes()
+    __NOT_FEATURES = list({node for node in __NODES if node not in __FEATURES and node not in __ROOTS})
+
+    if verbose:
+        logging.debug(f'Nodes: {__NODES} ({len(__NODES)})')
+        logging.debug(f'Features/Leaves: {__FEATURES} ({len(__FEATURES)})')
+        logging.debug(f'Roots: {__ROOTS} ({len(__ROOTS)})')
+        logging.debug(f'Intermediate (non-roots/non-leaves): {__NOT_FEATURES} ({len(__NOT_FEATURES)})')
+
+    return model
+
+def load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=1, print_info=False):
+    assert dataset_name in BIF_FOLDER_MAP.keys(), "dataset name not recognised"
+    ##Load Bayesian Network
+    random_stability(seed)
+    bn = load_bn_from_BIF(main_data_path=data_path, dataset_name=dataset_name, seed=seed)
+    ##Simulate data from BN
+    df = bn.simulate(sample_size, seed=seed)
+    ##Preprocess categorical data
+    df = df[np.sort(df.columns)] ##Sort columns alphabetically to match DAG
+    enc = LabelEncoder()
+    df_le = df.copy()
+    for var in df.columns:
+        enc.fit(df[var])
+        df_le[var] = enc.transform(df[var])
+    df_le_s = StandardScaler().fit_transform(df_le)
+
+    ##Extract true DAG from Bayesian network
+    G = nx.from_edgelist(list(bn.edges()), create_using=nx.DiGraph)
+    B_true = nx.adjacency_matrix(G).todense()
+    B_pd = pd.DataFrame(B_true, columns=G.nodes(), index=G.nodes())
+    ##Sort columns alphabetically to match data
+    B_pd = B_pd.reindex(sorted(df.columns), axis=0)
+    B_pd = B_pd.reindex(sorted(df.columns), axis=1)
+    B_true = B_pd.values
+
+    if print_info:
+        logging.info("Data shape:", df_le_s.shape)
+        logging.info("Number of true edges: ", len(bn.edges()))
+        logging.info("True BN edges:", bn.edges())
+        logging.info("DAG?",nx.is_directed_acyclic_graph(G))
+        logging.info("True DAG shape:", B_true.shape, "True DAG edges:", B_true.sum())
+        logging.info(B_pd)
+
+    return df_le_s, B_true
