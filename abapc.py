@@ -25,7 +25,10 @@ from datetime import datetime
 from tqdm.auto import tqdm
 from utils import *
 
-def ABAPC(data, seed=2024, scenario="ABAPC", alpha=0.05, indep_test='fisherz', base_pct=1, base_location="results"):
+def ABAPC(data, 
+          seed=2024, alpha=0.05, indep_test='fisherz', 
+          base_fact_pct=1, set_indep_facts=False, 
+          scenario="ABAPC", base_location="results"):
     facts_location = f"{base_location}/{scenario}/facts.lp"
     facts_location_I = f"{base_location}/{scenario}/facts_I.lp"
     facts_location_wc = f"{base_location}/{scenario}/facts_wc.lp"
@@ -62,8 +65,8 @@ def ABAPC(data, seed=2024, scenario="ABAPC", alpha=0.05, indep_test='fisherz', b
     
     set_of_model_sets = []
     model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
-                                                fact_pct=base_pct, search_for_models='first',
-                                                opt_mode='optN', print_models=False, show=['arrow'])
+                                                fact_pct=base_fact_pct, search_for_models='first',
+                                                opt_mode='optN', print_models=False, set_indep_facts=set_indep_facts)
 
     if multiple_solutions:
         for model in model_sets:

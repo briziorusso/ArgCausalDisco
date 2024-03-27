@@ -12,6 +12,7 @@ from utils import powerset, extract_test_elements_from_symbol
 def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
                 weak_constraints:bool=False,
                 fact_pct:float=1,
+                set_indep_facts:bool=False,
                 opt_mode:str='optN',
                 search_for_models:str='No', 
                 show:list=['arrow']
@@ -140,7 +141,10 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
-            if n/len(facts) <= fact_pct:
+            if fact[3] == "ext_indep" and set_indep_facts:
+                ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+            elif n/len(facts) <= fact_pct:
                 ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                 logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
             else:
@@ -161,7 +165,10 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
         n_models = 0
         while n_models == 0 and fact_pct > 0:
             for n, fact in enumerate(facts):
-                if n/len(facts) <= fact_pct:
+                if fact[3] == "ext_indep" and set_indep_facts:
+                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                    logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                elif n/len(facts) <= fact_pct:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
                 else:
@@ -192,6 +199,8 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
                 ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                 logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
                 if fact in f_to_remove:
+                    if fact[3] == "ext_indep" and set_indep_facts:
+                        continue
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
                     logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
             
