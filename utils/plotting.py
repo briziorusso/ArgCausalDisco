@@ -1,5 +1,6 @@
 from plotly import graph_objects as go
 from plotly.subplots import make_subplots
+# import kaleido
 import numpy as np
 ##Colors
 main_gray = '#262626'
@@ -135,7 +136,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         xanchor="center",
         x=0,
         yanchor="bottom",
-        y=-0.05,
+        y=-0.08,
         text=f"Dataset:",
         showarrow=False,    
         font=dict(
@@ -153,7 +154,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         elif vars_to_plot == ['fdr', 'tpr']:
             range_y = [0, 1]
         elif vars_to_plot == ['p_shd', 'p_SID']:
-            range_y = [0, 1.9] if n==0 else [0, max(all_sum['p_SID_mean'])+.5]
+            range_y = [0, 2] if n==0 else [0, max(all_sum['p_SID_mean'])+.3]
         if 'n_' in var_to_plot or 'p_' in var_to_plot:
             orig_y = var_to_plot.replace('n_','').replace('p_','').upper()
             fig.update_yaxes(title={'text':f'Normalised {orig_y} = {orig_y} / Number of Edges in DAG','font':{'size':20}}, secondary_y=n==1, range=range_y)
@@ -234,5 +235,6 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
 
     if save_figs:
         fig.write_html(output_name)
+        fig.write_image(output_name.replace('.html','.jpeg'))
 
     fig.show()
