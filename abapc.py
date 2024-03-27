@@ -100,8 +100,8 @@ def ABAPC(data, seed=2024, scenario="ABAPC", alpha=0.05, indep_test='fisherz', b
                     est_ind_statements.append((X,S,Y,dep_type, test, I))
                     est_I += I
                 else:
-                    est_ind_statements.append((X,S,Y,dep_type, test, 1-I))
-                    est_I += 1-I
+                    est_ind_statements.append((X,S,Y,dep_type, test, -I))
+                    est_I += -I
         model_ranking.append((n, est_I))
 
     ## Select the best model
