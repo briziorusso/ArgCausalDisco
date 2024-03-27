@@ -23,7 +23,7 @@ import pandas as pd
 from datetime import datetime
 from tqdm.auto import tqdm
 from models import run_method
-from utils import load_bnlearn_data_dag, MetricsDAG, random_stability, simulate_dag, logger_setup
+from utils import load_bnlearn_data_dag, DAGMetrics, random_stability, simulate_dag, logger_setup
 
 import warnings
 warnings.filterwarnings("ignore")

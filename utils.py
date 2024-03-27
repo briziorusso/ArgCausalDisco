@@ -18,7 +18,11 @@ os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
 ### set the verbose to False in the launch_R_script function in:
 ### CausalDiscoveryToolbox/cdt/utils/R.py#L155
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-import cdt
+try:
+    import cdt
+except:
+    sys.path.append('../CausalDiscoveryToolbox/')
+    import cdt
 from cdt.metrics import get_CPDAG, SHD, SID, SHD_CPDAG, SID_CPDAG, precision_recall
 cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
 
