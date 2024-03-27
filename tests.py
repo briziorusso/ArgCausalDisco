@@ -762,7 +762,7 @@ class TestMetricsDAG(unittest.TestCase):
                             [ 0,  0,  0,  0,  0]])
         
         ## calculate metrics
-        metrics = MetricsDAG(B_est, B_true).metrics
+        metrics = DAGMetrics(B_est, B_true).metrics
         ## test metrics
         self.assertEqual(metrics['fdr'], 0)
         self.assertEqual(metrics['tpr'], 1)
@@ -775,7 +775,7 @@ class TestMetricsDAG(unittest.TestCase):
         self.assertEqual(metrics['sid'], 0)
         
         ## calculate metrics for CPDAG
-        metrics = MetricsDAG(dag2cpdag(B_est), B_true).metrics
+        metrics = DAGMetrics(dag2cpdag(B_est), B_true).metrics
         ## test metrics
         self.assertEqual(metrics['fdr'], 0)
         self.assertEqual(metrics['tpr'], 1)
@@ -806,7 +806,7 @@ class TestMetricsDAG(unittest.TestCase):
                            [ 0,  0,  0,  0,  0]])
         
         ## calculate metrics
-        metrics = MetricsDAG(B_est, B_true).metrics
+        metrics = DAGMetrics(B_est, B_true).metrics
         ## test metrics
         self.assertEqual(metrics['fdr'], 0.2) #1/5
         self.assertEqual(metrics['tpr'], 0.8) #4/5
@@ -819,7 +819,7 @@ class TestMetricsDAG(unittest.TestCase):
         self.assertEqual(metrics['sid'], 2)
         
         ## calculate metrics for CPDAG
-        metrics = MetricsDAG(dag2cpdag(B_est), B_true).metrics
+        metrics = DAGMetrics(dag2cpdag(B_est), B_true).metrics
         ## test metrics
         self.assertEqual(metrics['fdr'], 0.2) #1/5
         self.assertEqual(metrics['tpr'], 0.8) #4/5

@@ -348,7 +348,7 @@ def dag2cpdag(G, cdt_method=False):
     return C
 
 ### Largely from TrustworthyAI repo, with some modifications and the addition of SID from cdt.metrics
-class MetricsDAG(object):
+class DAGMetrics(object):
     """
     Compute various accuracy metrics for B_est.
     true positive(TP): an edge estimated with correct direction.
@@ -386,7 +386,7 @@ class MetricsDAG(object):
         self.B_est = deepcopy(B_est)
         self.B_true = deepcopy(B_true)
 
-        self.metrics = MetricsDAG._count_accuracy(self.B_est, self.B_true, sid)
+        self.metrics = DAGMetrics._count_accuracy(self.B_est, self.B_true, sid)
 
     @staticmethod
     def _count_accuracy(B_est, B_true, sid=True, decimal_num=4):
@@ -495,15 +495,15 @@ class MetricsDAG(object):
         ### treats undirected edge as a present edge in the CPDAG 
         ### Replacing with SHD from cdt
         if cpdag:
-            shd = MetricsDAG._cal_SHD_CPDAG(B_est, B_true)
+            shd = DAGMetrics._cal_SHD_CPDAG(B_est, B_true)
         else:
             shd = SHD(B_true, B_est, False)
 
         W_p = pd.DataFrame(B_est_unique)
         W_true = pd.DataFrame(B_true)
 
-        # gscore = MetricsDAG._cal_gscore(W_p, W_true)
-        precision, recall, F1 = MetricsDAG._cal_precision_recall(W_p, W_true)
+        # gscore = DAGMetrics._cal_gscore(W_p, W_true)
+        precision, recall, F1 = DAGMetrics._cal_precision_recall(W_p, W_true)
 
         mt = {'nnz': pred_size, 'fdr': fdr, 'tpr': tpr, 'fpr': fpr,  
               'precision': precision, 'recall': recall, 'F1': F1,#, 'gscore': gscore
@@ -513,9 +513,9 @@ class MetricsDAG(object):
             mt[i] = round(mt[i], decimal_num)   
 
         if sid and not cpdag:
-            mt['sid'] = MetricsDAG._cal_SID(B_est, B_true)
+            mt['sid'] = DAGMetrics._cal_SID(B_est, B_true)
         elif sid and cpdag:
-            mt['sid'] = MetricsDAG._cal_SID_CPDAG(B_est, B_true)
+            mt['sid'] = DAGMetrics._cal_SID_CPDAG(B_est, B_true)
        
         return mt
 
@@ -686,7 +686,7 @@ def load_bn_from_BIF(main_data_path, data_folder='bayesian', dataset_name='child
 
     return model
 
-def load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=1, print_info=False):
+def load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=1, standardise=True, print_info=False):
     assert dataset_name in BIF_FOLDER_MAP.keys(), "dataset name not recognised"
     ##Load Bayesian Network
     logging.info(f"==================Loading {dataset_name} dataset==================")
@@ -701,7 +701,10 @@ def load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=1, print_in
     for var in df.columns:
         enc.fit(df[var])
         df_le[var] = enc.transform(df[var])
-    df_le_s = StandardScaler().fit_transform(df_le)
+    if standardise:
+        df_le_s = StandardScaler().fit_transform(df_le)
+    else:
+        df_le_s = df_le.to_numpy().astype(float)
 
     ##Extract true DAG from Bayesian network
     G = nx.from_edgelist(list(bn.edges()), create_using=nx.DiGraph)
