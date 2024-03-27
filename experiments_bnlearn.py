@@ -28,7 +28,7 @@ from utils import load_bnlearn_data_dag, DAGMetrics, random_stability, simulate_
 import warnings
 warnings.filterwarnings("ignore")
 
-version = 'bnlearn_minusI'
+version = 'bnlearn_nostd_v2'
 logger_setup(f'results/log_{version}.log')
 device = 0
 print_graphs = False
@@ -39,30 +39,30 @@ dataset_list = ['cancer', 'earthquake', 'survey', 'asia'
                 #, 'alarm', 'insurance', 'child', 'hailfinder',  'hepar2'
                 ]
 model_list = [
-            #'random'
-            # ,'spc' 
+            'random'
+            ,'spc' 
             # ,'pc_max'
             # ,'cam'
-            # ,'nt' 
+            ,'nt' 
             # ,'mcsl'
-            # ,'fgs',
+            ,'fgs',
             'abapc'
     ]
 data_path = '../ShapleyPC-local/datasets'
 sample_size = 2000
 
+mt_res = pd.DataFrame()
 for dataset_name in dataset_list:
     if load_res:
         mt_res = np.load(f"results/stored_results_{dataset_name}.npy", allow_pickle=True)
     else:
         ##Load data
-        X_s, B_true = load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=2023, print_info=True)
+        X_s, B_true = load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=2023, print_info=True, standardise=False)
         # np.save(f"{dataset_name}_data.npy", X_s)
 
-        names_dict = {'pc_max':'Max-PC', 'fgs':'FGS', 'spc':'SPC (Ours)', 'abapc':'ABAPC (Ours)', 'cam':'CAM', 'nt':'NOTEARS-MLP', 'mcsl':'MCSL-MLP', 'ges':'GES', 'random':'Random'}
+        names_dict = {'pc_max':'Max-PC', 'fgs':'FGS', 'spc':'Shapley-PC', 'abapc':'ABAPC (Ours)', 'cam':'CAM', 'nt':'NOTEARS-MLP', 'mcsl':'MCSL-MLP', 'ges':'GES', 'random':'Random'}
         # B_true = nx.adjacency_matrix(true_causal_matrix).todense()
 
-        mt_res = pd.DataFrame()
         for method in model_list:
             random_stability(2023)
             seeds_list = [2023] if method in ['abapc', 'spc', 'pc_max', 'cam', 'fgs'] else np.random.randint(0, 10000, (10, )).tolist()
@@ -73,23 +73,25 @@ for dataset_name in dataset_list:
             for seed in seeds_list:
                 if method=='random':
                     random_stability(seed)
+                    start = datetime.now()
                     B_est = simulate_dag(d=B_true.shape[1], s0=B_true.sum().astype(int), graph_type='ER')
-                    mt = MetricsDAG(B_est, B_true)
+                    elapsed = (datetime.now()-start).total_seconds()
+                    mt = DAGMetrics(B_est, B_true)
                 else:
-                    W_est, _ = run_method(X_s, method, seed, test_alpha=0.01, test_name='fisherz', device=device, scenario=f"{method}_{version}_{dataset_name}")
+                    W_est, elapsed = run_method(X_s, method, seed, test_alpha=0.01, test_name='fisherz', device=device, scenario=f"{method}_{version}_{dataset_name}")
                     logger_setup(f'results/log_{version}.log', continue_logging=True)
                     if W_est is None:
-                        mt.metrics = {'nnz':np.nan, 'fdr':np.nan, 'tpr':np.nan, 'fpr':np.nan, 'precision':np.nan, 'recall':np.nan, 'F1':np.nan, 'shd':np.nan, 'sid':np.nan}
+                        mt.metrics = {'nnz':np.nan, 'fdr':np.nan, 'tpr':np.nan, 'fpr':np.nan, 'precision':np.nan, 'recall':np.nan, 'F1':np.nan, 'shd':np.nan, 'sid':np.nan, 'elapsed':elapsed}
                     else:
                         B_est = (W_est > 0).astype(int)
-                        mt = MetricsDAG(B_est, B_true)
+                        mt = DAGMetrics(B_est, B_true)
 
                 # calculate metrics
-                logging.info({'model':names_dict[method] , **mt.metrics})
-                method_res.append({'model':names_dict[method] , **mt.metrics})
-            method_sum = pd.DataFrame(method_res).groupby('model', as_index=False).agg(['mean','std']).round(2).reset_index()
+                logging.info({'dataset':dataset_name, 'model':names_dict[method], 'elapsed':elapsed , **mt.metrics})
+                method_res.append({'dataset':dataset_name, 'model':names_dict[method], 'elapsed':elapsed , **mt.metrics})
+            method_sum = pd.DataFrame(method_res).groupby(['dataset','model'], as_index=False).agg(['mean','std']).round(2).reset_index(drop=True)
             method_sum.columns = method_sum.columns.map('_'.join).str.strip('_')
             mt_res = pd.concat([mt_res, method_sum], sort=False)
 
             if save_res:
-                np.save(f"results/stored_results_{dataset_name}_{version}.npy", mt_res )
+                np.save(f"results/stored_results_{version}.npy", mt_res )

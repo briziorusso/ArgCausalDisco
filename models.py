@@ -8,6 +8,7 @@ import networkx as nx
 import pandas as pd
 import torch
 import pydot
+import logging
 
 # from tqdm.auto import tqdm
 # from collections import defaultdict
@@ -22,7 +23,7 @@ try:
     sys.path.append("cd_algorithms/")
     from PC import pc
 except:
-    print('PC not installed')
+    logging.info('PC not installed')
     sys.path.append('../causal-learn/')
     from causallearn.search.ConstraintBased.PC import pc
 
@@ -48,7 +49,7 @@ from notears import utils as nt_utils
 try:
     from castle.algorithms import MCSL#, GraNDAG, NotearsNonlinear, Notears
 except:
-    print('Castle not installed')
+    logging.info('Castle not installed')
     sys.path.append('../trustworthyAI/gcastle/')
     from castle.algorithms import MCSL#, GraNDAG, NotearsNonlinear, Notears
     
@@ -58,7 +59,7 @@ try:
     from cdt.causality.graph import CAM
     os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
 except:
-    print('CDT or R components not installed')
+    logging.info('CDT or R components not installed')
     sys.path.append('../CausalDiscoveryToolbox/')
     import cdt
     cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
@@ -86,7 +87,7 @@ def run_method(X,
     X : np.array or pd.DataFrame to run the method on
     method : str Name of the causal discovery method to run
     seed : int Random seed
-    debug : bool Whether to print debug statements
+    debug : bool Whether to logging.info debug statements
     selection : str Selection rule for SPC (default: 'bot')
     priority : int Priority rule for SPC (default: 2)
     test_name : str Name of the independence test to use for PC
@@ -106,7 +107,7 @@ def run_method(X,
     if method == 'nt':
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
-        print("Running on: ",device)
+        logging.info(f"Running on: {device}")
         notears_from = 'notears'
         if notears_from == 'castle':
             start = time.time()
@@ -127,10 +128,9 @@ def run_method(X,
             W_est = notears_nonlinear(fitted, X, lambda1=0.01, lambda2=0.01)
 
         elapsed = time.time() - start
-        print('Time taken for Notears:', round(elapsed,2), 's')
+        logging.info(f'Time taken for Notears: {round(elapsed,2)}s')
 
     elif method == 'nt_lin':
-
         start = time.time()
         random_stability(seed)
         fitted = Notears()
@@ -138,12 +138,12 @@ def run_method(X,
         W_est = fitted.causal_matrix
 
         elapsed = time.time() - start
-        print('Time taken for Notears:', round(elapsed,2), 's')
+        logging.info(f'Time taken for Notears: {round(elapsed,2)}s')
 
     elif method == 'mcsl':
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
-        print("Running on: ",device)
+        logging.info(f"Running on: {device}")
 
         start = time.time()
         random_stability(seed)
@@ -163,12 +163,12 @@ def run_method(X,
         W_est = fitted.causal_matrix
 
         elapsed = time.time() - start
-        print('Time taken for MCSL:', round(elapsed,2), 's')
+        logging.info(f'Time taken for MCSL: {round(elapsed,2)}s')
 
     elif method == 'grandag':
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
-        print("Running on: ",device)
+        logging.info(f"Running on: {device}")
 
         d = {'model_name': 'NonLinGauss', 'nonlinear': 'leaky-relu', 'optimizer': 'sgd', 'norm_prod': 'paths', 'device_type': 'gpu'}
         start = time.time()
@@ -180,7 +180,7 @@ def run_method(X,
         W_est = fitted.causal_matrix
 
         elapsed = time.time() - start
-        print('Time taken for GraN-DAG:', round(elapsed,2), 's')
+        logging.info(f'Time taken for GraN-DAG: {round(elapsed,2)}s')
 
     elif method == 'pc_max':
         random_stability(seed)
@@ -189,7 +189,7 @@ def run_method(X,
         # fitted.draw_pydot_graph()
         W_est = fitted.G.graph
         elapsed = fitted.PC_elapsed
-        print('Time taken for max-PC:', round(elapsed,2), 's')
+        logging.info(f'Time taken for max-PC: {round(elapsed,2)}s')
 
     elif method == 'pc':
         random_stability(seed)
@@ -199,7 +199,7 @@ def run_method(X,
         # fitted.draw_pydot_graph()
         W_est = fitted.G.graph
         elapsed = fitted.PC_elapsed
-        print('Time taken for PC:', round(elapsed,2), 's')
+        logging.info(f'Time taken for PC: {round(elapsed,2)}s')
 
     elif method == 'spc':
         random_stability(seed)
@@ -208,14 +208,14 @@ def run_method(X,
         # fitted.draw_pydot_graph()
         W_est = fitted.G.graph
         elapsed = fitted.PC_elapsed
-        print('Time taken for SPC:', round(elapsed,2), 's')
+        logging.info(f'Time taken for SPC: {round(elapsed,2)}s')
 
     elif method == 'abapc':
         random_stability(seed)
         start = time.time()
         W_est = ABAPC(data=X, alpha=test_alpha, indep_test=test_name, scenario=scenario)
         elapsed = time.time() - start
-        print('Time taken for ABAPC:', round(elapsed,2), 's')
+        logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')
 
     elif method == 'ges':
         random_stability(seed)
@@ -224,7 +224,7 @@ def run_method(X,
         elapsed = time.time() - start
         # model4.draw_pydot_graph()
         W_est = fitted['G'].graph
-        print('Time taken for GES:', round(elapsed,2), 's')
+        logging.info(f'Time taken for GES: {round(elapsed,2)}s')
 
     elif method == 'fgs':
         from pycausal.pycausal import pycausal as pyc
@@ -253,17 +253,17 @@ def run_method(X,
 
             if W_est.shape[0] != X.shape[1]:
                 ### If the graph is not fully connected, we need to add edges to make it so
-                print('Graph is not fully connected, adding edges')
+                logging.debug('Graph is not fully connected, adding edges')
                 g = nx.nx_pydot.from_pydot(graphs[0])
                 g.add_nodes_from([f"X{d}" for d in range(1, X.shape[1]+1)])
                 W_est = nx.adjacency_matrix(g).todense()            
 
         except:
-            print("FGES failed, returning None")
+            logging.debug("FGES failed, returning None")
             W_est = None
         elapsed = time.time() - start
 
-        print('Time taken for FGS:', round(elapsed,2), 's')
+        logging.info(f'Time taken for FGS: {round(elapsed,2)}s')
 
     elif method == 'cam':
         random_stability(seed)
@@ -272,9 +272,9 @@ def run_method(X,
         try:
             W_est = nx.adjacency_matrix(fitted.predict(pd.DataFrame(X))).todense()
         except:
-            print("CAM failed, returning None")
+            logging.debug("CAM failed, returning None")
             W_est = None
         elapsed = time.time() - start
-        print('Time taken for CAM:', round(elapsed,2), 's')
+        logging.info(f'Time taken for CAM: {round(elapsed,2)}s')
 
     return W_est, elapsed
