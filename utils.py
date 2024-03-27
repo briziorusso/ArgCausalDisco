@@ -34,7 +34,7 @@ sys.path.append("../causal-learn/tests/")
 from utils_simulate_data import simulate_discrete_data, simulate_linear_continuous_data
 
 # create logger
-def logger_setup(output_file:str=""):
+def logger_setup(output_file:str="", continue_logging=False):
     if not os.path.exists('.temp'):
         os.makedirs('.temp')
     if output_file == "":
@@ -42,11 +42,12 @@ def logger_setup(output_file:str=""):
     elif ".log" not in output_file: ## when one passes only the name of the file
         output_file = f'.temp/{output_file}.log'
 
+    file_mode = 'a' if continue_logging else 'w'
     logging.basicConfig(level=logging.DEBUG,
                         format='%(message)s',
                         datefmt='%m-%d %H:%M',
                         filename= output_file,
-                        filemode='w', force=True)
+                        filemode=file_mode, force=True)
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
@@ -684,6 +685,7 @@ def load_bn_from_BIF(main_data_path, data_folder='bayesian', dataset_name='child
 def load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=1, print_info=False):
     assert dataset_name in BIF_FOLDER_MAP.keys(), "dataset name not recognised"
     ##Load Bayesian Network
+    logging.info(f"==================Loading {dataset_name} dataset==================")
     random_stability(seed)
     bn = load_bn_from_BIF(main_data_path=data_path, dataset_name=dataset_name, seed=seed)
     ##Simulate data from BN
@@ -707,11 +709,11 @@ def load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=1, print_in
     B_true = B_pd.values
 
     if print_info:
-        logging.info("Data shape:", df_le_s.shape)
-        logging.info("Number of true edges: ", len(bn.edges()))
-        logging.info("True BN edges:", bn.edges())
-        logging.info("DAG?",nx.is_directed_acyclic_graph(G))
-        logging.info("True DAG shape:", B_true.shape, "True DAG edges:", B_true.sum())
+        logging.info(f"Data shape: {df_le_s.shape}")
+        logging.info(f"Number of true edges: {len(bn.edges())}")
+        logging.info(f"True BN edges: {bn.edges()}")
+        logging.info(f"DAG? {nx.is_directed_acyclic_graph(G)}")
+        logging.info(f"True DAG shape: {B_true.shape}, True DAG edges: {B_true.sum()}")
         logging.info(B_pd)
 
     return df_le_s, B_true
