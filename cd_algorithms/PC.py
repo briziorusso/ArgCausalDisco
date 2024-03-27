@@ -9,9 +9,13 @@ from tqdm.auto import tqdm
 
 import numpy as np
 from numpy import ndarray
-# import sys
-# sys.path.append("../causal-learn/")
-from causallearn.graph.GraphClass import CausalGraph
+try:
+    from causallearn.graph.GraphClass import CausalGraph
+except:
+    import sys
+    sys.path.append("../causal-learn/")
+    from causallearn.graph.GraphClass import CausalGraph
+
 from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
 from causallearn.utils.cit import *
 from causallearn.utils.PCUtils.Helper import append_value
