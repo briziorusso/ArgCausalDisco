@@ -1,0 +1,15 @@
+indep(0,1,empty). I=0.8810695666265813, NA
+indep(0,2,empty). I=0.7899468712049209, NA
+indep(0,3,empty). I=0.8674920171355084, NA
+indep(0,4,empty). I=0.7756667327366382, NA
+indep(0,5,empty). I=0.5917442391883565, NA
+dep(1,2,empty). I=0.9997520246080129, NA
+indep(1,3,empty). I=0.7367028743009911, NA
+indep(1,4,empty). I=0.9248388949154406, NA
+indep(1,5,empty). I=0.6959649828277092, NA
+indep(2,3,empty). I=0.6078941583826768, NA
+indep(2,4,empty). I=0.777745913530867, NA
+indep(2,5,empty). I=0.7048926726564297, NA
+indep(3,4,empty). I=0.6226685047034449, NA
+dep(3,5,empty). I=1.0, NA
+indep(4,5,empty). I=0.5511281232085624, NA

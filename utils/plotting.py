@@ -80,6 +80,7 @@ def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, save_figs=Fa
 
 def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict, 
                             methods=['Random', 'FGS', 'NOTEARS-MLP', 'Shapley-PC', 'ABAPC (Ours)'],
+                            range_y1=None, range_y2=None,
                             save_figs=False, output_name="bar_chart.html", debug=False):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     # for dataset_name in ['asia','cancer','earthquake','sachs','survey','alarm','child','insurance','hepar2']:
@@ -146,15 +147,19 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
                     )
         )
     
-
-
     for n, var_to_plot in enumerate(vars_to_plot):
         if vars_to_plot == ['precision', 'recall']:
-            range_y = [0, 1.3]
+            if range_y1 is None:
+                range_y = [0, 1.3]
+            else:
+                range_y = range_y1
         elif vars_to_plot == ['fdr', 'tpr']:
             range_y = [0, 1]
         elif vars_to_plot == ['p_shd', 'p_SID']:
-            range_y = [0, 2] if n==0 else [0, max(all_sum['p_SID_mean'])+.3]
+            if range_y1 is None and range_y2 is None:
+                range_y = [0, 2] if n==0 else [0, max(all_sum['p_SID_mean'])+.3]
+            else:
+                range_y = range_y1 if n==0 else range_y2
         if 'n_' in var_to_plot or 'p_' in var_to_plot:
             orig_y = var_to_plot.replace('n_','').replace('p_','').upper()
             fig.update_yaxes(title={'text':f'Normalised {orig_y} = {orig_y} / Number of Edges in DAG','font':{'size':20}}, secondary_y=n==1, range=range_y)
