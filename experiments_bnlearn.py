@@ -28,15 +28,14 @@ from utils import load_bnlearn_data_dag, MetricsDAG, random_stability, simulate_
 import warnings
 warnings.filterwarnings("ignore")
 
-version = 'bnlearn'
+version = 'bnlearn_minusI'
 logger_setup(f'results/log_{version}.log')
-print = logging.info
 device = 0
 print_graphs = False
 save_res = True
 load_res = False
 dataset_list = ['cancer', 'earthquake', 'survey', 'asia'
-                , 'sachs' 
+                # , 'sachs' 
                 #, 'alarm', 'insurance', 'child', 'hailfinder',  'hepar2'
                 ]
 model_list = [
