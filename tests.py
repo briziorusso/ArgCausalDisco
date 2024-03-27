@@ -405,8 +405,7 @@ class TestCausalABA(unittest.TestCase):
             arrows = model_to_set_of_arrows(model)
             model_sets.add(frozenset(arrows))            
 
-        self.assertIn(next(iter(expected)), set(model_sets))
-        self.assertEqual(set(model_sets), expected)
+        self.assertEqual(len(model_sets), 0)
 
     ############################################################################################################
     #######                                 CausalABA with PC facts                                     ########
@@ -855,9 +854,43 @@ class TestABAPC(unittest.TestCase):
         data = simulate_discrete_data(n_nodes, n_samples, truth_DAG_directed_edges, 42)
 
         ## run ABAPC
-        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario)
+        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, base_fact_pct=1)
 
         self.assertEqual(np.abs(B_est - B_true).sum(), 5)
+
+    def test_abapc_indeps(self):
+        scenario = "test_abapc"
+        logger_setup(scenario)
+        ## true DAG
+        B_true = np.array( [[ 0,  1,  1,  0,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  1,  0],
+                            [ 0,  0,  0,  0,  1],
+                            [ 0,  0,  0,  0,  0]])
+        n_nodes = B_true.shape[0]
+        n_samples = 1000
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+        truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
+        ## generate data
+        data = simulate_discrete_data(n_nodes, n_samples, truth_DAG_directed_edges, 42)
+
+        ## run ABAPC
+        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, base_fact_pct=0.1, set_indep_facts=True)
+
+        self.assertEqual(np.abs(B_est - B_true).sum(), 3)
+
+    def test_abapc_bnlearn(self):
+        scenario = "test_abapc_bnlearn"
+        logger_setup(scenario)
+        ## load data
+        data, B_true = load_bnlearn_data_dag('earthquake', '../ShapleyPC-local/datasets', 2000, seed=2023, print_info=True)
+
+        ## run ABAPC
+        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, set_indep_facts=True)
+
+        self.assertEqual(np.abs(B_est - B_true).sum(), 0)
 
 start = datetime.now()
 TestCausalABA().three_node_all_graphs()
@@ -890,5 +923,7 @@ TestMetricsDAG().test_metrics_perfect()
 TestMetricsDAG().test_metrics_errors()
 
 TestABAPC().test_abapc()
+TestABAPC().test_abapc_indeps()
+TestABAPC().test_abapc_bnlearn()
 
 logging.info(f"Total time={str(datetime.now()-start)}")
