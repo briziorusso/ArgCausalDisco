@@ -412,6 +412,7 @@ class TestCausalABA(unittest.TestCase):
     ############################################################################################################
 
     def four_node_shapPC_PC_facts(self):
+        #### ArgCD paper example ####
         scenario = "four_node_shapPC_PC_facts"
         alpha = 0.05    
         facts_location = f"encodings/test_lps/{scenario}.lp"

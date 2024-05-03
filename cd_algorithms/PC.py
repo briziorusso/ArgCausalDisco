@@ -93,7 +93,7 @@ def pc_alg(
            0: run uc_sepset
            1: run maxP (Ramsey, J. (2016). Improving accuracy and scalability of the pc algorithm by maximizing p-value. arXiv preprint arXiv:1610.00378.)
            2: run definiteMaxP (Ramsey, J. (2016))
-           3: run ShaplePC (Shapley causal discovery. arXiv preprint arXiv:XXXX.XXXXXX.)
+           3: run Shapley-PC (Russo, F and Toni F (2023) Constraint-based Causal Structure Learning with Shapley Values. arXiv preprint arXiv:2312.11582.)
     uc_priority : rule of resolving conflicts between unshielded colliders
            -1: whatever is default in uc_rule
            0: overwrite

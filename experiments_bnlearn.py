@@ -28,13 +28,14 @@ from utils import load_bnlearn_data_dag, DAGMetrics, random_stability, simulate_
 import warnings
 warnings.filterwarnings("ignore")
 
-version = 'bnlearn_nostd_v2'
+version = 'bnlearn_wstd_disco_kci'
 logger_setup(f'results/log_{version}.log')
 device = 0
 print_graphs = False
 save_res = True
 load_res = False
-dataset_list = ['cancer', 'earthquake', 'survey', 'asia'
+dataset_list = ['cancer', #'earthquake', 
+                'survey', 'asia'
                 # , 'sachs' 
                 #, 'alarm', 'insurance', 'child', 'hailfinder',  'hepar2'
                 ]
@@ -54,10 +55,10 @@ sample_size = 2000
 mt_res = pd.DataFrame()
 for dataset_name in dataset_list:
     if load_res:
-        mt_res = np.load(f"results/stored_results_{dataset_name}.npy", allow_pickle=True)
+        mt_res = np.load(f"results/stored_results_{version}.npy", allow_pickle=True)
     else:
         ##Load data
-        X_s, B_true = load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=2023, print_info=True, standardise=False)
+        X_s, B_true = load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=2023, print_info=True, standardise=True)
         # np.save(f"{dataset_name}_data.npy", X_s)
 
         names_dict = {'pc_max':'Max-PC', 'fgs':'FGS', 'spc':'Shapley-PC', 'abapc':'ABAPC (Ours)', 'cam':'CAM', 'nt':'NOTEARS-MLP', 'mcsl':'MCSL-MLP', 'ges':'GES', 'random':'Random'}
@@ -65,7 +66,8 @@ for dataset_name in dataset_list:
 
         for method in model_list:
             random_stability(2023)
-            seeds_list = [2023] if method in ['abapc', 'spc', 'pc_max', 'cam', 'fgs'] else np.random.randint(0, 10000, (10, )).tolist()
+            seeds_list = np.random.randint(0, 10000, (10, )).tolist()
+            seeds_list = [seeds_list[0]] if method in ['abapc', 'spc', 'pc_max', 'cam', 'fgs'] else seeds_list
             logging.debug(f'Seeds:{seeds_list}')
             logging.info(f"Running {method}")
             
@@ -78,10 +80,10 @@ for dataset_name in dataset_list:
                     elapsed = (datetime.now()-start).total_seconds()
                     mt = DAGMetrics(B_est, B_true)
                 else:
-                    W_est, elapsed = run_method(X_s, method, seed, test_alpha=0.01, test_name='fisherz', device=device, scenario=f"{method}_{version}_{dataset_name}")
+                    W_est, elapsed = run_method(X_s, method, seed, test_alpha=0.01, test_name='kci', device=device, scenario=f"{method}_{version}_{dataset_name}")
                     logger_setup(f'results/log_{version}.log', continue_logging=True)
                     if W_est is None:
-                        mt.metrics = {'nnz':np.nan, 'fdr':np.nan, 'tpr':np.nan, 'fpr':np.nan, 'precision':np.nan, 'recall':np.nan, 'F1':np.nan, 'shd':np.nan, 'sid':np.nan, 'elapsed':elapsed}
+                        mt.metrics = {'nnz':np.nan, 'fdr':np.nan, 'tpr':np.nan, 'fpr':np.nan, 'precision':np.nan, 'recall':np.nan, 'F1':np.nan, 'shd':np.nan, 'sid':np.nan}
                     else:
                         B_est = (W_est > 0).astype(int)
                         mt = DAGMetrics(B_est, B_true)
