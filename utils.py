@@ -23,16 +23,10 @@ try:
 except:
     sys.path.append('../CausalDiscoveryToolbox/')
     import cdt
-from cdt.metrics import get_CPDAG, SHD, SID, SHD_CPDAG, SID_CPDAG, precision_recall
+from cdt.metrics import SHD, SID, SID_CPDAG
 cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
 
-maxpc = False
-if maxpc:
-    sys.path.append("../causal-learn/")
-    from causallearn.search.ConstraintBased.PC import pc
-else:
-    sys.path.append("cd_algorithms/")
-    from PC import pc
+from cd_algorithms.PC import pc
 
 sys.path.append("../causal-learn/tests/")
 from utils_simulate_data import simulate_discrete_data, simulate_linear_continuous_data
@@ -66,6 +60,7 @@ def logger_setup(output_file:str="", continue_logging=False):
 
 # @profile
 def get_freer_gpu():
+    import torch
     os.system('nvidia-smi -q -d Memory |grep -A4 GPU|grep Free >tmp')
     memory_available = [int(x.split()[2]) for x in open('tmp', 'r').readlines()]
     if len(memory_available)>0:
@@ -148,6 +143,7 @@ def model_to_set_of_indep(model:list)->set:
     return indeps
 
 def set_of_models_to_set_of_graphs(models, n_nodes, mec_check=True):
+    logging.info("   Converting models to graphs")
     MECs = defaultdict(list)
     MEC_set = set()
     model_sets = set()
@@ -166,7 +162,7 @@ def set_of_models_to_set_of_graphs(models, n_nodes, mec_check=True):
     logging.debug(f"   Number of MECs: {len(MEC_set)}")
     return model_sets, MECs
 
-def extract_test_elements_from_symbol(symbol:str)->list:
+def extract_test_elements_from_symbol(symbol:str)->tuple:
     dep_type, elements = symbol.replace(").","").split("(")
     
     if "dep" in dep_type:
@@ -217,7 +213,7 @@ def initial_strength(p:float, len_S:int, alpha:float, base_strength:float, num_v
         initial_strength = base_strength
     return initial_strength
 
-def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_priority:int=2, seed:int=42):
+def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_priority:int=2, stable:bool=True, seed:int=42):
     """A function to simulate data and run PC algorithm
 
     Args:
@@ -239,9 +235,9 @@ def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_p
     data = simulate_discrete_data(num_of_nodes, 10000, truth_DAG_directed_edges, seed)
 
     logging.info(f"Running PC algorithm...")
-    cg = pc(data=data, alpha=alpha, ikb=True, uc_rule=uc_rule, uc_priority=uc_priority, verbose=False)
+    cg = pc(data=data, alpha=alpha, ikb=True, uc_rule=uc_rule, uc_priority=uc_priority, stable=stable, verbose=False)
     
-    return cg
+    return data, cg
 
 def is_dag(B):
     """Check if a matrix is a DAG"""
