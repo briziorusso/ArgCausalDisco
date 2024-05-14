@@ -16,7 +16,6 @@ __author__ = "Fabrizio Russo"
 __email__ = "fabrizio@imperial.ac.uk"
 __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
-from __future__ import annotations
 from itertools import combinations
 import time
 import warnings
