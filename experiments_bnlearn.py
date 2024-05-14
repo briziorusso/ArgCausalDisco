@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from tqdm.auto import tqdm
-from models import run_method
+from cd_algorithms.models import run_method
 from utils import load_bnlearn_data_dag, DAGMetrics, random_stability, simulate_dag, logger_setup, dag2cpdag
 
 import warnings
@@ -30,12 +30,12 @@ warnings.filterwarnings("ignore")
 
 version = 'bnlearn_50rep'
 logger_setup(f'results/log_{version}.log')
-data_path = '../ShapleyPC-local/datasets'
+data_path = 'datasets'
 sample_size = 5000
 n_runs = 50
 device = 0
-load_res = True
-save_res = True
+load_res = False
+save_res = False
 dataset_list = [
                 'cancer', 
                 'earthquake', 
