@@ -11,9 +11,9 @@ ctl.load("test_external.lp")
 
 ctl.ground([("base", [])])
 
-ctl.assign_external(Function("ext_ar"), True)
-ctl.assign_external(Function("b"), True)
-ctl.assign_external(Function("ext_indep", [Number(0), Number(1), Function("empty")]), True)
+# ctl.assign_external(Function("ext_ar"), False)
+ctl.assign_external(Function("ext_b"), False)
+# ctl.assign_external(Function("ext_indep", [Number(0), Number(1), Function("empty")]), True)
 
 models = []
 count_models = 0

@@ -20,13 +20,14 @@ in(2,s0y1y2).
 %dep(1,2,empty).
 %dep(1,2,s0).
 
-#external ext_ar.
+%#external ext_ar.
 a :- not b. 
-#external b.
+#external ext_b.
 
-ar :- ext_ar.
+%ar :- ext_ar.
+%ar :- a.
 b :- ext_b.
-ar :- a.
+b :- not a.
 
 indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.
 dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.
@@ -90,7 +91,7 @@ nb(N,X,Y,S) :- in(N,S), collider(N,X,Y), var(N), var(X), var(Y), N!=X, N!=Y, X!=
 nb(N,X,Y,S) :- not in(N,S), not collider(N,X,Y), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, set(S).
 nb(N,X,Y,S) :- not in(N,S), var(N), var(X), var(Y), N!=X, N!=Y, X!=Y, in(Z,S), collider_desc(Z,N,X,Y), var(Z).
 
-#show arrow/2.
+%#show arrow/2.
 %#show ext_indep/3.
 %#show ext_dep/3.
 #show ar/0.
