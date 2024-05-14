@@ -13,12 +13,19 @@ from cd_algorithms.PC import pc
 from utils.helpers import random_stability, get_freer_gpu
 
 try:
-    from castle.algorithms import MCSL#, GraNDAG, NotearsNonlinear, Notears
+    from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
 except:
     logging.info('Castle not installed')
     sys.path.append('../trustworthyAI/gcastle/')
-    from castle.algorithms import MCSL#, GraNDAG, NotearsNonlinear, Notears
-    
+    from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
+
+notears_from = 'notears' ## 'castle' or 'notears'
+try:
+    from notears.nonlinear import NotearsMLP, notears_nonlinear
+except:
+    sys.path.append('../notears/')
+    from notears.nonlinear import NotearsMLP, notears_nonlinear
+  
 try:
     import cdt
     cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
@@ -74,7 +81,6 @@ def run_method(X,
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
         logging.info(f"Running on: {device}")
-        notears_from = 'notears'
         if notears_from == 'castle':
             start = time.time()
             random_stability(seed)
@@ -83,14 +89,9 @@ def run_method(X,
             fitted.learn(X)
             W_est = fitted.causal_matrix
         else:
-            sys.path.append("../notears/")
-            from notears.nonlinear import NotearsMLP, notears_nonlinear
-            if device == '':
-                device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
-
             start = time.time()
             random_stability(seed)
-            fitted = NotearsMLP(dims=[X.shape[1], 10, 1], bias=True, device=device)
+            fitted = NotearsMLP(dims=[X.shape[1], 10, 1], bias=True)#, device=device)
             W_est = notears_nonlinear(fitted, X, lambda1=0.01, lambda2=0.01)
 
         elapsed = time.time() - start
