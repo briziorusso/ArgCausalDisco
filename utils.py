@@ -334,6 +334,17 @@ def dag2cpdag(G, cdt_method=False):
     Returns:
         C (np.ndarray): [d, d] binary adj matrix of CPDAG
     """
+    ### handle results from PC methods
+    edges_removed = False
+    if not is_dag(G):
+        ### get undirected edges and remove them from G
+        undirected_edges = [(v1, v2) for v1 in range(len(G)) for v2 in range(len(G)) if G[v1, v2] == 1 and G[v2, v1] == 1]
+        if len(undirected_edges) > 0:
+            edges_removed = True
+            for v1, v2 in undirected_edges:
+                G[v1, v2] = 0
+                G[v2, v1] = 0
+            
     assert is_dag(G), 'Input graph is not a DAG'
     ###only leave the arrows that are part of a v-structure
     C = dag2skel(G)
@@ -343,6 +354,11 @@ def dag2cpdag(G, cdt_method=False):
         C[v3, v1] = 0
         C[v2, v3] = 1
         C[v3, v2] = 0
+    if edges_removed:
+        for v1, v2 in undirected_edges:
+            ## reintroduce undirected edges
+            C[v1, v2] = 1
+            C[v2, v1] = 1
     if cdt_method:
         C = (C != 0).astype(int)
     return C
