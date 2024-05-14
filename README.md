@@ -25,10 +25,9 @@ from abapc import ABAPC
 B_true = np.array( [[ 0,  0,  1,  0],
                     [ 0,  0,  1,  1],
                     [ 0,  0,  0,  1],
-                    [ 0,  0,  0,  0],
-                    ])
+                    [ 0,  0,  0,  0]])
 n_nodes = B_true.shape[0]
-expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
+expected = {(0, 2), (1, 2), (1, 3), (2, 3)}
 G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
 truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
 ## Simulate data 
@@ -43,7 +42,7 @@ print(f"Expected edges: {expected}")
 print(f"Edges from ABAPC: {est_edges}")
 
 OUTPUT:
->>> Expected edges: frozenset({(2, 3), (0, 2), (1, 2), (1, 3)})
+>>> Expected edges: {(2, 3), (0, 2), (1, 2), (1, 3)}
 >>> Edges from ABAPC: {(2, 3), (0, 2), (1, 2), (1, 3)}
 ```
 ABAPC is integrated in the ```run_method()``` function together with the baselines used in the paper in [models.py](https://github.com/briziorusso/ArgCausalDisco/blob/main/abapc.py).
