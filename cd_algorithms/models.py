@@ -75,8 +75,8 @@ def run_method(X,
                selection:str='bot', 
                priority:int=2, 
                test_name:str='kci', 
-               test_alpha:int=0.01, 
-               device:str='',
+               test_alpha:float=0.01, 
+               device:int=0,
                scenario:str=''
                ):
     """
@@ -182,33 +182,42 @@ def run_method(X,
         elapsed = time.time() - start
         logging.info(f'Time taken for GraN-DAG: {round(elapsed,2)}s')
 
+    elif method == 'pc':
+        random_stability(seed)
+        ## uc_priority=3: prioritize stronger colliders
+        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=0, uc_priority=2, show_progress=False, 
+                    verbose=False)
+        # fitted.draw_pydot_graph()
+        W_est = fitted.G.graph.T
+        elapsed = fitted.PC_elapsed
+        logging.info(f'Time taken for PC: {round(elapsed,2)}s')
+
+    elif method == 'cpc':
+        random_stability(seed)
+        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=4, uc_priority=priority, 
+                    selection=selection, show_progress=False, verbose=debug)
+        # fitted.draw_pydot_graph()
+        W_est = fitted.G.graph.T
+        elapsed = fitted.PC_elapsed
+        logging.info(f'Time taken for CPC: {round(elapsed,2)}s')
+
+    elif method == 'mpc':
+        random_stability(seed)
+        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=5, uc_priority=priority, 
+                    selection=selection, show_progress=False, verbose=debug)
+        # fitted.draw_pydot_graph()
+        W_est = fitted.G.graph.T
+        elapsed = fitted.PC_elapsed
+        logging.info(f'Time taken for MPC: {round(elapsed,2)}s')
+
     elif method == 'pc_max':
         random_stability(seed)
         fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=1, uc_priority=3, show_progress=False, 
                     verbose=False)
         # fitted.draw_pydot_graph()
-        W_est = fitted.G.graph
+        W_est = fitted.G.graph.T
         elapsed = fitted.PC_elapsed
         logging.info(f'Time taken for max-PC: {round(elapsed,2)}s')
-
-    elif method == 'pc':
-        random_stability(seed)
-        ## uc_priority=3: prioritize stronger colliders
-        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=0, uc_priority=3, show_progress=False, 
-                    verbose=False)
-        # fitted.draw_pydot_graph()
-        W_est = fitted.G.graph
-        elapsed = fitted.PC_elapsed
-        logging.info(f'Time taken for PC: {round(elapsed,2)}s')
-
-    elif method == 'spc':
-        random_stability(seed)
-        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=3, uc_priority=priority, 
-                    selection=selection, show_progress=False, verbose=debug)
-        # fitted.draw_pydot_graph()
-        W_est = fitted.G.graph
-        elapsed = fitted.PC_elapsed
-        logging.info(f'Time taken for SPC: {round(elapsed,2)}s')
 
     elif method == 'abapc':
         random_stability(seed)
