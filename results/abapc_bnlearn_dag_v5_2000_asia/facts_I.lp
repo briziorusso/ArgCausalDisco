@@ -1,0 +1,13 @@
+dep(1,2,empty). I=1.0, NA
+dep(1,5,empty). I=1.0, NA
+dep(2,3,empty). I=1.0, NA
+dep(2,5,empty). I=1.0, NA
+dep(3,4,empty). I=1.0, NA
+dep(3,6,empty). I=1.0, NA
+dep(3,7,empty). I=1.0, NA
+dep(4,7,empty). I=1.0, NA
+dep(6,7,empty). I=1.0, NA
+dep(2,4,empty). I=0.9999999999999334, NA
+dep(4,5,empty). I=0.9999999999998557, NA
+dep(3,5,empty). I=0.999999973897491, NA
+dep(2,7,empty). I=0.9999964344185921, NA

@@ -1,0 +1,17 @@
+#external ext_dep(3,5,empty).
+#external ext_dep(1,2,empty).
+#external ext_dep(2,5,empty).
+#external ext_indep(0,3,empty).
+#external ext_indep(0,4,empty).
+#external ext_indep(1,5,empty).
+#external ext_indep(0,1,empty).
+#external ext_indep(2,4,empty).
+#external ext_dep(3,5,s1).
+#external ext_dep(3,5,s2).
+#external ext_dep(1,2,s5).
+#external ext_dep(1,2,s4).
+#external ext_dep(1,2,s3).
+#external ext_dep(1,3,empty).
+#external ext_dep(2,5,s1).
+#external ext_dep(2,5,s3).
+#external ext_indep(0,5,empty).

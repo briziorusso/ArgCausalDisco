@@ -1,0 +1,510 @@
+clingo version 5.6.2
+Reading from causalaba.lp ...
+Solving...
+Answer: 1
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 1
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 2
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 3
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 4
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(1,2) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 5
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(1,2) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 6
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(1,2) arrow(1,3) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 7
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 8
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 9
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 10
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(1,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 11
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(1,2) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 12
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) arrow(1,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 13
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(1,2) arrow(1,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 14
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(2,1) arrow(1,3) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 15
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(1,2) arrow(1,3) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 16
+arrow(1,0) arrow(2,0) arrow(3,0) arrow(1,2) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 17
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,s0) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,2,s0) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 18
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,s0) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,2,s0) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 19
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(1,2) arrow(1,3) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,s0) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,2,s0) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 20
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(1,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,s0) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,2,s0) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 21
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(1,2) arrow(1,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,s0) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,2,s0) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 22
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,1) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,s0) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,2,s0) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 23
+arrow(1,0) arrow(3,0) arrow(2,1) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 24
+arrow(1,0) arrow(3,0) arrow(2,1) arrow(3,1) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 25
+arrow(1,0) arrow(3,0) arrow(1,2) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 26
+arrow(1,0) arrow(3,0) arrow(1,2) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 27
+arrow(1,0) arrow(3,0) arrow(1,2) arrow(1,3) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 28
+arrow(1,0) arrow(3,0) arrow(2,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 29
+arrow(1,0) arrow(3,0) arrow(2,1) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 30
+arrow(1,0) arrow(3,0) arrow(2,1) arrow(1,3) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 31
+arrow(1,0) arrow(3,0) arrow(1,2) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 32
+arrow(1,0) arrow(3,0) arrow(1,2) arrow(1,3) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(2,3,s0) dep(3,2,s0) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 33
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(3,2) indep(1,2,s0y3) indep(2,1,s0y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty)
+Optimization: -4492
+Answer: 34
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(3,1) arrow(3,2) indep(1,2,s0y3) indep(2,1,s0y3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 35
+arrow(1,0) arrow(0,2) arrow(3,0) arrow(1,3) arrow(3,2) indep(1,2,s0y3) indep(2,1,s0y3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,s0y2) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,s0y2) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 36
+arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) arrow(2,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 37
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) arrow(2,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 38
+arrow(1,0) arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) arrow(2,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 39
+arrow(0,1) arrow(2,0) arrow(0,3) arrow(2,1) arrow(1,3) arrow(2,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 40
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(2,1) arrow(1,3) arrow(2,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 41
+arrow(1,0) arrow(2,0) arrow(0,3) arrow(1,2) arrow(1,3) arrow(2,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 42
+arrow(1,0) arrow(2,0) arrow(0,3) arrow(2,1) arrow(1,3) arrow(2,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 43
+arrow(2,0) arrow(0,3) arrow(2,1) arrow(1,3) arrow(2,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 44
+arrow(2,0) arrow(0,3) arrow(1,2) arrow(1,3) arrow(2,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 45
+arrow(0,2) arrow(0,3) arrow(2,1) arrow(1,3) arrow(2,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 46
+arrow(1,0) arrow(2,0) arrow(0,3) arrow(2,1) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 47
+arrow(1,0) arrow(2,0) arrow(0,3) arrow(1,2) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 48
+arrow(0,2) arrow(0,3) arrow(1,2) arrow(2,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 49
+arrow(1,0) arrow(0,2) arrow(0,3) arrow(1,2) arrow(2,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 50
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(1,2) arrow(2,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 51
+arrow(2,0) arrow(0,3) arrow(2,1) arrow(3,1) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 52
+arrow(2,0) arrow(0,3) arrow(2,1) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 53
+arrow(2,0) arrow(0,3) arrow(1,2) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 54
+arrow(0,2) arrow(0,3) arrow(2,1) arrow(3,1) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 55
+arrow(0,2) arrow(0,3) arrow(2,1) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 56
+arrow(0,1) arrow(2,0) arrow(0,3) arrow(2,1) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 57
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(2,1) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 58
+arrow(0,1) arrow(2,0) arrow(0,3) arrow(2,1) arrow(3,1) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 59
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(2,1) arrow(3,1) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 60
+arrow(1,0) arrow(2,0) arrow(0,3) arrow(1,2) arrow(1,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 61
+arrow(1,0) arrow(2,0) arrow(0,3) arrow(1,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 62
+arrow(1,0) arrow(2,0) arrow(0,3) arrow(2,1) arrow(1,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 63
+arrow(1,0) arrow(2,0) arrow(0,3) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 64
+arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 65
+arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 66
+arrow(0,2) arrow(3,0) arrow(1,2) arrow(1,3) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 67
+arrow(0,2) arrow(3,0) arrow(1,2) arrow(1,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 68
+arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 69
+arrow(0,2) arrow(0,3) arrow(1,2) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 70
+arrow(0,2) arrow(3,0) arrow(1,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 71
+arrow(0,2) arrow(0,3) arrow(1,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 72
+arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 73
+arrow(0,2) arrow(0,3) arrow(1,2) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 74
+arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,1) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 75
+arrow(0,2) arrow(0,3) arrow(1,2) arrow(3,1) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 76
+arrow(0,1) arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 77
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(1,2) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 78
+arrow(0,1) arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,1) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 79
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(1,2) arrow(3,1) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 80
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 81
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 82
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(1,2) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 83
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(1,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 84
+arrow(0,1) arrow(0,2) arrow(3,0) arrow(1,2) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 85
+arrow(0,1) arrow(0,2) arrow(3,0) arrow(1,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 86
+arrow(1,0) arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 87
+arrow(1,0) arrow(0,2) arrow(0,3) arrow(1,2) arrow(1,3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 88
+arrow(1,0) arrow(0,2) arrow(0,3) arrow(1,2) arrow(3,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 89
+arrow(1,0) arrow(0,2) arrow(0,3) arrow(1,2) dep(0,1,s2) dep(0,1,s2y3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 90
+arrow(0,1) arrow(3,0) arrow(1,2) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 91
+arrow(0,1) arrow(0,3) arrow(1,2) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 92
+arrow(3,0) arrow(1,2) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 93
+arrow(0,3) arrow(1,2) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 94
+arrow(2,0) arrow(3,0) arrow(1,2) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 95
+arrow(2,0) arrow(3,0) arrow(1,2) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 96
+arrow(0,1) arrow(3,0) arrow(2,1) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,s1) dep(3,2,s1) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 97
+arrow(0,1) arrow(0,3) arrow(2,1) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,s1) dep(3,2,s1) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 98
+arrow(0,1) arrow(3,0) arrow(2,1) arrow(3,1) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,s1) dep(3,2,s1) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 99
+arrow(0,1) arrow(0,2) arrow(3,0) arrow(2,1) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 100
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(2,1) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 101
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 102
+arrow(0,1) arrow(0,2) arrow(3,0) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 103
+arrow(0,1) arrow(2,0) arrow(0,3) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 104
+arrow(0,1) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,empty) dep(1,3,s2) dep(2,3,s0) dep(2,3,s0y1) dep(2,3,s1) dep(3,2,s1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s2) dep(3,1,empty) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 105
+arrow(0,1) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,empty) dep(1,3,s2) dep(2,3,s0) dep(2,3,s0y1) dep(2,3,s1) dep(3,2,s1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s2) dep(3,1,empty) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 106
+arrow(0,1) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,empty) dep(1,3,s2) dep(2,3,s0) dep(2,3,s0y1) dep(2,3,s1) dep(3,2,s1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s2) dep(3,1,empty) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 107
+arrow(0,3) arrow(2,1) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 108
+arrow(3,0) arrow(2,1) arrow(3,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 109
+arrow(3,0) arrow(2,1) arrow(3,1) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 110
+arrow(0,2) arrow(0,3) arrow(2,1) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 111
+arrow(0,2) arrow(0,3) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 112
+arrow(0,2) arrow(3,0) arrow(2,1) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 113
+arrow(0,2) arrow(3,0) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 114
+arrow(2,0) arrow(0,3) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 115
+arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 116
+arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 117
+arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,1) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 118
+arrow(0,1) arrow(0,3) arrow(1,2) arrow(1,3) arrow(3,2) indep(0,2,s1y3) indep(2,0,s1y3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 119
+arrow(0,1) arrow(0,3) arrow(1,2) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 120
+arrow(0,1) arrow(3,0) arrow(1,2) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 121
+arrow(0,3) arrow(1,2) arrow(1,3) arrow(3,2) indep(0,2,s1y3) indep(2,0,s1y3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 122
+arrow(3,0) arrow(1,2) arrow(1,3) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 123
+arrow(3,0) arrow(1,2) arrow(1,3) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 124
+arrow(3,0) arrow(1,2) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 125
+arrow(0,3) arrow(1,2) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 126
+arrow(3,0) arrow(1,2) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 127
+arrow(1,0) arrow(0,3) arrow(1,2) arrow(1,3) arrow(3,2) indep(0,2,s1y3) indep(2,0,s1y3) dep(0,1,s2) dep(0,1,s2y3) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,s2y3) dep(1,0,s2)
+Optimization: -4492
+Answer: 128
+arrow(1,0) arrow(0,3) arrow(1,2) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 129
+arrow(2,0) arrow(0,3) arrow(1,2) arrow(1,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 130
+arrow(2,0) arrow(3,0) arrow(1,2) arrow(1,3) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 131
+arrow(2,0) arrow(3,0) arrow(1,2) arrow(1,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 132
+arrow(2,0) arrow(3,0) arrow(1,2) arrow(1,3) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 133
+arrow(2,0) arrow(3,0) arrow(1,2) arrow(3,2) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 134
+arrow(2,0) arrow(3,0) arrow(1,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 135
+arrow(2,0) arrow(0,3) arrow(1,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 136
+arrow(2,0) arrow(3,0) arrow(1,2) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 137
+arrow(0,1) arrow(3,0) arrow(2,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,s1) dep(3,2,s1) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 138
+arrow(0,1) arrow(3,0) arrow(2,1) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,s1) dep(3,2,s1) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 139
+arrow(0,1) arrow(0,3) arrow(2,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,s1) dep(3,2,s1) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 140
+arrow(0,1) arrow(2,0) arrow(0,3) arrow(2,1) arrow(1,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 141
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(2,1) arrow(1,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 142
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(2,1) arrow(3,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 143
+arrow(0,1) arrow(2,0) arrow(0,3) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 144
+arrow(0,1) arrow(0,2) arrow(0,3) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 145
+arrow(0,1) arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,empty) dep(1,3,s2) dep(2,3,s0) dep(2,3,s0y1) dep(2,3,s1) dep(3,2,s1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s2) dep(3,1,empty) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 146
+arrow(0,1) arrow(0,2) arrow(3,0) arrow(2,1) arrow(3,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 147
+arrow(0,1) arrow(2,0) arrow(3,0) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,empty) dep(1,3,s2) dep(2,3,s0) dep(2,3,s0y1) dep(2,3,s1) dep(3,2,s1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s2) dep(3,1,empty) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 148
+arrow(0,1) arrow(0,2) arrow(3,0) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(1,3,s2) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,s2) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 149
+arrow(0,1) arrow(2,0) arrow(3,0) arrow(2,1) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(1,3,empty) dep(1,3,s2) dep(2,3,s0) dep(2,3,s0y1) dep(2,3,s1) dep(3,2,s1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s2) dep(3,1,empty) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 150
+arrow(2,0) arrow(0,3) arrow(2,1) arrow(1,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 151
+arrow(0,2) arrow(0,3) arrow(2,1) arrow(1,3) dep(0,1,s2y3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2y3)
+Optimization: -4492
+Answer: 152
+arrow(3,0) arrow(2,1) arrow(1,3) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,s2) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 153
+arrow(2,0) arrow(3,0) arrow(2,1) arrow(1,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 154
+arrow(2,0) arrow(3,0) arrow(2,1) arrow(1,3) arrow(2,3) dep(0,1,s2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty) dep(1,0,s2)
+Optimization: -4492
+Answer: 155
+arrow(3,0) arrow(2,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 156
+arrow(0,3) arrow(2,1) arrow(3,2) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 157
+arrow(3,0) arrow(2,1) arrow(2,3) indep(0,2,s3) indep(0,2,s1y3) indep(2,0,s1y3) indep(2,0,s3) dep(0,1,empty) dep(0,2,empty) dep(0,2,s1) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1) dep(2,0,empty) dep(1,0,empty)
+Optimization: -4492
+Answer: 158
+arrow(0,2) arrow(0,3) arrow(2,1) arrow(3,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 159
+arrow(2,0) arrow(0,3) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 160
+arrow(0,2) arrow(0,3) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 161
+arrow(2,0) arrow(3,0) arrow(2,1) arrow(3,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 162
+arrow(0,2) arrow(3,0) arrow(2,1) arrow(3,2) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 163
+arrow(0,2) arrow(3,0) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,empty) dep(2,3,empty) dep(2,3,s1) dep(3,2,s1) dep(3,2,empty) dep(3,1,empty) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 164
+arrow(2,0) arrow(3,0) arrow(2,1) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+Answer: 165
+arrow(2,0) arrow(3,0) arrow(2,1) arrow(2,3) dep(0,1,empty) dep(0,1,s3) dep(0,2,empty) dep(0,2,s1) dep(0,2,s3) dep(0,2,s1y3) dep(0,3,empty) dep(0,3,s1) dep(0,3,s2) dep(0,3,s1y2) dep(1,2,s0) dep(1,2,s0y3) dep(1,2,empty) dep(1,2,s3) dep(1,3,s0) dep(2,3,s0) dep(2,3,s0y1) dep(3,2,s0y1) dep(3,2,s0) dep(3,1,s0) dep(2,1,s3) dep(2,1,empty) dep(2,1,s0y3) dep(2,1,s0) dep(3,0,s1y2) dep(3,0,s2) dep(3,0,s1) dep(3,0,empty) dep(2,0,s1y3) dep(2,0,s3) dep(2,0,s1) dep(2,0,empty) dep(1,0,s3) dep(1,0,empty)
+Optimization: -4492
+OPTIMUM FOUND
+
+Models       : 166
+  Optimum    : yes
+  Optimal    : 165
+Optimization : -4492
+Calls        : 1
+Time         : 0.007s (Solving: 0.00s 1st Model: 0.00s Unsat: 0.00s)
+CPU Time     : 0.005s
