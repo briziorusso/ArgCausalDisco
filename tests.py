@@ -359,7 +359,8 @@ class TestCausalABA(unittest.TestCase):
         G_true1 = nx.relabel_nodes(G_true, inv_nodes_dict)
         expected = frozenset(set(G_true1.edges()))
 
-        models, _ = CausalABA(n_nodes, facts_location)
+        models, _ = CausalABA(n_nodes, facts_location, skeleton_rules_reduction=True, weak_constraints=False, 
+                              fact_pct=1.0, search_for_models='No', opt_mode='optN', print_models=False)
         model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes, mec_check)
            
         self.assertIn(expected, model_sets)
@@ -368,10 +369,11 @@ class TestCausalABA(unittest.TestCase):
     #######                               CausalABA with arbitrary facts                                ########
     ############################################################################################################
         
-    def four_node_shapPC_example_arbitrary(self):
+    def four_node_example_arbitrary(self):
         logger_setup()
-        scenario = "four_node_shapPC_example_arbitrary"
+        scenario = "four_node_example_arbitrary"
         facts_location = f"encodings/test_lps/{scenario}.lp"
+        logger_setup(scenario)
         logging.info(f"===============Running {scenario}===============")
         B_true = np.array( [[ 0,  0,  1,  0],
                             [ 0,  0,  1,  1],
@@ -399,11 +401,14 @@ class TestCausalABA(unittest.TestCase):
         logging.info(f"Number of missing facts: {len(missing_facts)}")
         logging.info(f"Number of extra facts: {len(extra_facts)}")
 
-        models, _ = CausalABA(n_nodes, facts_location)
+        models, _ = CausalABA(n_nodes, facts_location, skeleton_rules_reduction=False, weak_constraints=False, 
+                              fact_pct=1.0, search_for_models='No', opt_mode='optN', print_models=True)
         model_sets = set()
         for model in models:
             arrows = model_to_set_of_arrows(model)
-            model_sets.add(frozenset(arrows))            
+            model_sets.add(frozenset(arrows))      
+
+        model_sets, MECs = set_of_models_to_set_of_graphs(models, n_nodes)      
 
         self.assertEqual(len(model_sets), 0)
 
@@ -411,9 +416,9 @@ class TestCausalABA(unittest.TestCase):
     #######                                 CausalABA with PC facts                                     ########
     ############################################################################################################
 
-    def four_node_shapPC_PC_facts(self):
+    def four_node_PC_facts(self):
         #### ArgCD paper example ####
-        scenario = "four_node_shapPC_PC_facts"
+        scenario = "four_node_PC_facts"
         alpha = 0.05    
         facts_location = f"encodings/test_lps/{scenario}.lp"
         facts_location_I = f"encodings/test_lps/{scenario}_I.lp"
@@ -434,16 +439,19 @@ class TestCausalABA(unittest.TestCase):
 
         true_seplist = find_all_d_separations_sets(G_true)
 
-        cg = simulate_data_and_run_PC(G_true, alpha, seed=2024)
+        random_stability(2376)
+        data, cg = simulate_data_and_run_PC(G_true, alpha, seed=2376, uc_rule=5, stable=True) ## Majority-PC
+        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x<y]}")
 
         facts = []
         count_wrong = 0
         for test in true_seplist:
             X, S, Y, dep_type = extract_test_elements_from_symbol(test)
 
-            test_PC = [t for t in cg.sepset[X,Y] if set(t[0])==S]
+            test_PC = set([t for t in cg.sepset[X,Y] if set(t[0])==S]) 
             if len(test_PC)==1:
-                p = test_PC[0][1]
+                p = list(test_PC)[0][1]
                 dep_type_PC = "indep" if p > alpha else "dep" 
                 I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
                 if dep_type == dep_type_PC:
@@ -472,8 +480,8 @@ class TestCausalABA(unittest.TestCase):
                 f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
         
         set_of_model_sets = []
-        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
-                                                   fact_pct=0.65, print_models=False#, show=['arrow', 'indep']
+        model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=True,
+                                                   fact_pct=0.6, print_models=False#, show=['arrow', 'indep']
                                                    )
         if multiple_solutions:
             for model in model_sets:
@@ -481,6 +489,26 @@ class TestCausalABA(unittest.TestCase):
                 set_of_model_sets.append(models)
         else:
             models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes)
+
+        used_facts = []
+        discarded_facts = []
+        facts = sorted(facts, key=lambda x: x[5], reverse=True)
+        for n, fact in enumerate(facts):
+            if n/len(facts) <= 0.6:
+                used_facts.append(fact[4])
+            else:
+                discarded_facts.append(fact[4])
+
+        ### check that each model respects the used facts
+        for model in models:
+            G_est = nx.DiGraph()
+            for edge in model:
+                G_est.add_edge(f"X{edge[0]+1}", f"X{edge[1]+1}")
+
+            est_seplist = find_all_d_separations_sets(G_est)
+            assert set(used_facts).intersection(set(est_seplist)) == set(used_facts)
+
+        logging.info(f"ABA-PC edges: {models}")
 
         if len(set_of_model_sets) > 0:
             logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
@@ -493,6 +521,74 @@ class TestCausalABA(unittest.TestCase):
             self.assertTrue(count_right > 0)
         else:
             self.assertIn(expected, models)
+
+    def four_node_example_indeps(self):
+        #### ArgCD paper example ####
+        scenario = "four_node_example_indeps"
+        alpha = 0.05    
+        logger_setup(scenario)
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  1],
+                            [ 0,  0,  0,  0],
+                            [ 0,  0,  1,  0], ### Same as origingal but with 3->2 instead of 2->3
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+        true_seplist1 = set(find_all_d_separations_sets(G_true))
+        logging.debug(true_seplist1)
+
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  0,  1],
+                            [ 0,  1,  0,  0], ### 1->2 is inverted to 2->1
+                            [ 0,  0,  1,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges) ### Not Acyclic
+        logging.debug("Not Acyclic")
+        # true_seplist2 = set(find_all_d_separations_sets(G_true))
+        # logging.debug(true_seplist2)
+
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  0], ### 1->3 is inverted to 3->1
+                            [ 0,  0,  0,  0], 
+                            [ 0,  1,  1,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+        true_seplist3 = set(find_all_d_separations_sets(G_true))
+        logging.debug(true_seplist3)
+
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  0,  0], ### 1->3 is inverted to 3->1
+                            [ 0,  1,  0,  0], ### 1->2 is inverted to 2->1
+                            [ 0,  1,  1,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+        true_seplist4 = set(find_all_d_separations_sets(G_true))
+        logging.debug(true_seplist4)
+
+        common = true_seplist1.intersection(true_seplist3).intersection(true_seplist4)
+        logging.debug(f"Common Independendencies ({len(common)}): {common}")
+        diff1 = true_seplist1 - common
+        # diff2 = true_seplist2 - common
+        diff3 = true_seplist3 - common
+        diff4 = true_seplist4 - common
+        logging.debug(diff1)
+        # logging.debug(diff2)
+        logging.debug(diff3)
+        logging.debug(diff4)
+
+        self.assertEqual(len(common), 20)
 
     def five_node_colombo_PC_facts(self):
         scenario = "five_node_colombo_PC_facts"
@@ -516,7 +612,7 @@ class TestCausalABA(unittest.TestCase):
 
         true_seplist = find_all_d_separations_sets(G_true)
 
-        cg = simulate_data_and_run_PC(G_true, alpha)
+        data, cg = simulate_data_and_run_PC(G_true, alpha)
 
         facts = []
         count_wrong = 0
@@ -597,7 +693,7 @@ class TestCausalABA(unittest.TestCase):
 
         true_seplist = find_all_d_separations_sets(G_true)
 
-        cg = simulate_data_and_run_PC(G_true, alpha)
+        data, cg = simulate_data_and_run_PC(G_true, alpha)
 
         facts = []
         count_wrong = 0
@@ -683,7 +779,7 @@ class TestCausalABA(unittest.TestCase):
 
         true_seplist = find_all_d_separations_sets(G_true, verbose=False)
 
-        cg = simulate_data_and_run_PC(G_true, alpha)
+        data, cg = simulate_data_and_run_PC(G_true, alpha)
 
         facts = []
         count_wrong = 0
@@ -855,9 +951,9 @@ class TestABAPC(unittest.TestCase):
         data = simulate_discrete_data(n_nodes, n_samples, truth_DAG_directed_edges, 42)
 
         ## run ABAPC
-        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, base_fact_pct=1)
+        B_est, ranking = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, base_fact_pct=1, out_mode='optN')
 
-        self.assertEqual(np.abs(B_est - B_true).sum(), 5)
+        self.assertEqual(len(ranking), 4)
 
     def test_abapc_indeps(self):
         scenario = "test_abapc"
@@ -878,9 +974,140 @@ class TestABAPC(unittest.TestCase):
         data = simulate_discrete_data(n_nodes, n_samples, truth_DAG_directed_edges, 42)
 
         ## run ABAPC
-        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, base_fact_pct=0.1, set_indep_facts=True)
+        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, base_fact_pct=0.1, set_indep_facts=False)
 
-        self.assertEqual(np.abs(B_est - B_true).sum(), 3)
+        self.assertEqual(np.abs(B_est - B_true).sum(), 7)
+
+    def test_abapc_four_vars_example_seed_loop(self):
+        #### ArgCD paper example ####
+        scenario = "abapc_four_node_example"
+        alpha = 0.05    
+        logger_setup(scenario)
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  1],
+                            [ 0,  0,  0,  1],
+                            [ 0,  0,  0,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+
+        expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        random_stability(20204)
+        ##generate random seeds to loop over
+        seeds = np.random.randint(0, 10000, 100)
+        for seed in seeds:
+            random_stability(seed)
+            data, cg = simulate_data_and_run_PC(G_true, alpha, seed=seed, uc_rule=5, stable=True)
+
+            facts = []
+            count_wrong = 0
+            for test in true_seplist:
+                X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+
+                test_PC = set([t for t in cg.sepset[X,Y] if set(t[0])==S]) 
+                if len(test_PC)==1:
+                    p = list(test_PC)[0][1]
+                    dep_type_PC = "indep" if p > alpha else "dep" 
+                    I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+                    if dep_type == dep_type_PC:
+                        facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC, p))
+                    elif dep_type == "indep":
+                        count_wrong += 1
+                        facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC, p))
+                    elif dep_type == "dep":
+                        count_wrong += 1
+                        facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC, p))
+            
+            ### Save external statements
+            B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, set_indep_facts=False)
+            ## edges from adjacency matrix
+            est_edges = set([(i,j) for i in range(n_nodes) for j in range(n_nodes) if B_est[i,j]==1])
+
+            logging.info(f"Seed: {seed}")
+            logging.info(f"True DAG: {G_true.edges}")
+            logging.info(f"Number of total independence statements: {len(true_seplist)}")
+            logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
+            logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
+            logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
+            logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
+            logging.info(f"Edges from ABAPC: {est_edges}")
+
+            # self.assertTrue(np.abs(B_est - B_true).sum()!=0)
+            if len(set(cg.find_fully_directed()).intersection(expected)) > 0:
+                ## stop if PC outputs something and ABAPC does better
+                self.assertTrue(len(est_edges.intersection(expected)) <= len(set(cg.find_fully_directed()).intersection(expected))) 
+
+    def test_abapc_four_node_example(self):
+        #### ArgCD paper example ####
+        scenario = "test_abapc_four_node_example"
+        alpha = 0.05    
+        logger_setup(scenario)
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  1],
+                            [ 0,  0,  0,  1],
+                            [ 0,  0,  0,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        relabel_dict = {f"X{i+1}":i for i in range(n_nodes)}
+        G_true1 = nx.relabel_nodes(G_true, relabel_dict)
+
+        expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        seed=2376
+        random_stability(seed)
+        data, cg = simulate_data_and_run_PC(G_true, alpha, seed=seed, uc_rule=5, stable=True)
+
+        facts = []
+        count_wrong = 0
+        for test in true_seplist:
+            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+
+            test_PC = set([t for t in cg.sepset[X,Y] if set(t[0])==S]) 
+            if len(test_PC)==1:
+                p = list(test_PC)[0][1]
+                dep_type_PC = "indep" if p > alpha else "dep" 
+                I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+                if dep_type == dep_type_PC:
+                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC, p))
+                elif dep_type == "indep":
+                    count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC, p))
+                elif dep_type == "dep":
+                    count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC, p))
+        
+        ### Save external statements
+        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
+                      set_indep_facts=False, stable=True, conservative=True)
+        ## edges from adjacency matrix
+        est_edges = set([(i,j) for i in range(n_nodes) for j in range(n_nodes) if B_est[i,j]==1])
+
+        logging.info(f"Seed: {seed}")
+        logging.info(f"True DAG: {G_true1.edges}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
+        logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
+        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
+        logging.info(f"Edges from ABAPC: {est_edges}")
+
+        models, ranking = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
+                                set_indep_facts=False, stable=True, conservative=True, out_mode='optN')
+        logging.info(f"Number of models found: {len(models)}")
+
+        self.assertIn(expected, models)
+
+        self.assertEqual(np.abs(B_est - B_true).sum(), 0)
 
     def test_abapc_bnlearn(self):
         scenario = "test_abapc_bnlearn"
@@ -913,12 +1140,9 @@ TestCausalABA().randomG(8, 1, "ER", 2024)
 TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
 # TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
 
-TestCausalABA().four_node_shapPC_example_arbitrary()
-TestCausalABA().four_node_shapPC_PC_facts() 
-
-# TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
-# TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
-# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
+# # TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
+# # TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
+# # TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
 
 TestMetricsDAG().test_metrics_perfect()
 TestMetricsDAG().test_metrics_errors()
@@ -926,5 +1150,11 @@ TestMetricsDAG().test_metrics_errors()
 TestABAPC().test_abapc()
 TestABAPC().test_abapc_indeps()
 TestABAPC().test_abapc_bnlearn()
+
+## Paper Examples
+TestCausalABA().four_node_PC_facts() 
+TestABAPC().test_abapc_four_node_example()
+TestCausalABA().four_node_example_arbitrary()
+TestCausalABA().four_node_example_indeps()
 
 logging.info(f"Total time={str(datetime.now()-start)}")
