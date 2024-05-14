@@ -1,35 +1,38 @@
 from __future__ import annotations
 from itertools import combinations
-
 import time
 import warnings
 from typing import List
 from tqdm.auto import tqdm
 import logging
-
 import numpy as np
 from numpy import ndarray
-
+from copy import deepcopy
 
 try:
     from causallearn.graph.GraphClass import CausalGraph
     from causallearn.graph.GraphClass import CausalGraph    
     from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
     from causallearn.utils.PCUtils.Helper import append_value
-    from causallearn.utils.PCUtils import Helper, Meek, UCSepset
+    from causallearn.utils.PCUtils import Meek, UCSepset
     from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import \
         orient_by_background_knowledge
+    from causallearn.graph.Edge import Edge
+    from causallearn.graph.Endpoint import Endpoint
+    from causallearn.utils.PCUtils.Helper import append_value, sort_dict_ascending
 except:
     import sys
     sys.path.append("../causal-learn/")
     from causallearn.graph.GraphClass import CausalGraph    
     from causallearn.utils.PCUtils.BackgroundKnowledge import BackgroundKnowledge
     from causallearn.utils.PCUtils.Helper import append_value
-    from causallearn.utils.PCUtils import Helper, Meek, UCSepset
+    from causallearn.utils.PCUtils import Meek, UCSepset
     from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import \
         orient_by_background_knowledge
-
-from ..utils.cit import *
+    from causallearn.graph.Edge import Edge
+    from causallearn.graph.Endpoint import Endpoint
+    from causallearn.utils.PCUtils.Helper import append_value, sort_dict_ascending
+from utils.cit import *
 
 #This function overrides causal-learn/causallearn/search/ConstraintBased/PC.py
 #It is the same as the original pc function, but with the uc_rule parameter allowing value of 3 for spc

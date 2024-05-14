@@ -16,19 +16,49 @@ __author__ = "Fabrizio Russo"
 __email__ = "fabrizio@imperial.ac.uk"
 __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
+import os,gc
 import logging
-from causalaba import CausalABA
 import networkx as nx
 import numpy as np
 import pandas as pd
-from datetime import datetime
 from tqdm.auto import tqdm
-from utils import *
+from itertools import combinations
+from cd_algorithms.PC import pc
+from causalaba import CausalABA
+from utils.helpers import logger_setup, random_stability
+from utils.graph_utils import initial_strength, set_of_models_to_set_of_graphs
 
 def ABAPC(data, 
-          seed=2024, alpha=0.05, indep_test='fisherz', 
-          base_fact_pct=1, set_indep_facts=False, 
-          scenario="ABAPC", base_location="results"):
+          seed=2024, alpha=0.05, indep_test='fisherz',
+          stable=True, conservative=True,
+          base_fact_pct=1.0, set_indep_facts=False, 
+          scenario="ABAPC", base_location="results",
+          out_mode="opt"):
+    """
+    Args:
+    data: np.array
+        The dataset to be used for the PC algorithm
+    seed: int
+        The seed to be used for the random number generator
+    alpha: float
+        The significance level to be used for the PC algorithm
+    indep_test: str
+        The independence test to be used for the PC algorithm
+    stable: bool
+        Whether to use the stable version of the PC algorithm
+    conservative: bool
+        Whether to use the conservative version of the PC algorithm
+    base_fact_pct: float
+        The percentage of facts to be used for the ABAPC algorithm
+    set_indep_facts: bool
+        Whether to set the independence facts in the ABAPC algorithm
+    scenario: str
+        The scenario to be used for the ABAPC algorithm
+    base_location: str
+        The base location to save the results of the ABAPC algorithm
+    out_mode: str
+        The output mode to be used for the ABAPC algorithm
+    """
     facts_location = f"{base_location}/{scenario}/facts.lp"
     facts_location_I = f"{base_location}/{scenario}/facts_I.lp"
     facts_location_wc = f"{base_location}/{scenario}/facts_wc.lp"

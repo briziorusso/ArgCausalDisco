@@ -18,15 +18,14 @@ __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
 import unittest
 import logging
-from causalaba import CausalABA
 import networkx as nx
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from utils import *
-
-sys.path.append("../causal-learn/tests/")  ### TODO: should save down a test dataset
-from utils_simulate_data import simulate_discrete_data, simulate_linear_continuous_data 
+from utils.graph_utils import find_all_d_separations_sets, model_to_set_of_arrows, set_of_models_to_set_of_graphs, dag2cpdag, extract_test_elements_from_symbol, initial_strength, DAGMetrics
+from utils.helpers import logger_setup, random_stability
+from utils.data_utils import simulate_discrete_data, simulate_dag, simulate_data_and_run_PC, load_bnlearn_data_dag
+from causalaba import CausalABA
 from abapc import ABAPC
 
 class TestCausalABA(unittest.TestCase):

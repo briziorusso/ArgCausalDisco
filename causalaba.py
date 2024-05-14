@@ -7,7 +7,7 @@ import numpy as np
 from tqdm.auto import tqdm
 from itertools import combinations
 from datetime import datetime
-from utils import powerset, extract_test_elements_from_symbol
+from utils.graph_utils import powerset, extract_test_elements_from_symbol
 
 def compile_and_ground(n_nodes:int, facts_location:str="",
                 skeleton_rules_reduction:bool=False,

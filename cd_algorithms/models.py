@@ -1,50 +1,16 @@
 import sys
 import os
-import yaml
-import argparse
 import time
-import numpy as np
 import networkx as nx
 import pandas as pd
 import torch
 import pydot
 import logging
-
-# from tqdm.auto import tqdm
-# from collections import defaultdict
-from sklearn.preprocessing import StandardScaler  
-from sklearn.model_selection import ParameterGrid
 import gc
 gc.set_threshold(0,0,0)
-
 from abapc import ABAPC
-
-try:
-    sys.path.append("cd_algorithms/")
-    from PC import pc
-except:
-    logging.info('PC not installed')
-    sys.path.append('../causal-learn/')
-    from causallearn.search.ConstraintBased.PC import pc
-
-### Import from cloned repos
-sys.path.append("../notears/")
-# sys.path.append("../causal-learn/")
-# from causallearn.search.ConstraintBased.PC import pc
-# sys.path.append('../trustworthyAI/gcastle/')
-# sys.path.append('../CausalDiscoveryToolbox/')
-# sys.path.append('../py-causal/src/')
-
-from notears import utils as nt_utils
-# from baselines.notears_gpu import *
-# from notears.nonlinear import NotearsMLP, notears_nonlinear
-# from notears.linear import notears_linear
-
-# from causallearn.search.ScoreBased.GES import ges
-
-from utils import random_stability, get_freer_gpu
-
-from notears import utils as nt_utils
+from cd_algorithms.PC import pc
+from utils.helpers import random_stability, get_freer_gpu
 
 try:
     from castle.algorithms import MCSL#, GraNDAG, NotearsNonlinear, Notears

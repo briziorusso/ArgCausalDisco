@@ -17,14 +17,13 @@ __email__ = "fabrizio@imperial.ac.uk"
 __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
 import logging
-import networkx as nx
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from tqdm.auto import tqdm
 from cd_algorithms.models import run_method
-from utils import load_bnlearn_data_dag, DAGMetrics, random_stability, simulate_dag, logger_setup, dag2cpdag
-
+from utils.graph_utils import DAGMetrics, dag2cpdag
+from utils.helpers import random_stability, logger_setup
+from utils.data_utils import load_bnlearn_data_dag, simulate_dag
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -47,8 +46,8 @@ model_list = [
             ,'mpc'
             ,'abapc'
             ,'fgs'
-            ,'nt' 
-    ]
+            ,'nt'
+            ]
 
 if load_res:         
     mt_res = pd.DataFrame(np.load(f"results/stored_results_{version}.npy", allow_pickle=True), 
