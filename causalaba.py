@@ -9,20 +9,16 @@ from itertools import combinations
 from datetime import datetime
 from utils import powerset, extract_test_elements_from_symbol
 
-def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
+def compile_and_ground(n_nodes:int, facts_location:str="",
+                skeleton_rules_reduction:bool=False,
                 weak_constraints:bool=False,
-                fact_pct:float=1,
-                set_indep_facts:bool=False,
+                indep_facts:set=set(),
+                dep_facts:set=set(),
                 opt_mode:str='optN',
-                search_for_models:str='No', 
                 show:list=['arrow']
-                )->list:     
-    """
-    CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
-    
-    """
+                )->Control:
 
-    logging.info(f"Running CausalABA")
+    logging.info(f"Compiling the program")
     ### Create Control
     ctl = Control(['-t %d' % os.cpu_count()])
     ctl.configuration.solve.parallel_mode = os.cpu_count()
@@ -38,41 +34,15 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
 
     ### Load main program and facts
     ctl.load("encodings/causalaba.lp")
-    if facts_location:
+    if facts_location != "":
         ctl.load(facts_location)
     if weak_constraints:
         ctl.load(facts_location.replace(".lp","_wc.lp"))
 
+    ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+    ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
     ### add nonblocker rules
     logging.info("   Adding Specific Rules...")
-    indep_facts = set()
-    dep_facts = set()
-    facts = []
-    if facts_location:
-        if weak_constraints:
-            facts_location = facts_location.replace(".lp","_I.lp")
-        logging.debug(f"   Loading facts from {facts_location}")
-        with open(facts_location, 'r') as file:
-            for line in file:
-                if "dep" not in line:
-                    continue
-                line_clean = line.replace("#external ","").replace("\n","")
-                if weak_constraints:
-                    statement, Is = line_clean.split(" I=")
-                    I,truth = Is.split(",")
-                    X, S, Y, dep_type = extract_test_elements_from_symbol(statement)
-                    facts.append((X,S,Y, "ext_"+dep_type, statement, float(I), truth))
-                else:
-                    X, S, Y, dep_type = extract_test_elements_from_symbol(line_clean)
-                    facts.append((X,S,Y, dep_type, line_clean, np.nan, "unknown"))
-
-                if 'indep' in line_clean:
-                    indep_facts.add((X,Y))
-                elif 'dep' in line_clean and 'in' not in line_clean:
-                    dep_facts.add((X,Y))
-
-        ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
-        ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
 
     ### Active paths rules
     n_p = 0
@@ -81,11 +51,16 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
         paths = nx.all_simple_paths(G, source=X, target=Y)
         ### remove paths that contain an indep fact
         paths_mat = np.array([np.array(list(xi)+[None]*(n_nodes-len(xi))) for xi in paths])
-        paths_mat_red = paths_mat[[not any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts 
-                                            for j in range(n_nodes-1) if paths_mat[i,j] is not None]) \
-                                                for i in range(len(paths_mat))]] ##TODO: think about interaction with weak constraints
-        remaining_paths = [list(filter(lambda x: x is not None, paths_mat_red[i])) for i in range(len(paths_mat_red))]
-        logging.debug(f"Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")
+        if skeleton_rules_reduction:
+            paths_mat_red = paths_mat[[not any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts 
+                                                for j in range(n_nodes-1) if paths_mat[i,j] is not None]) \
+                                                    for i in range(len(paths_mat))]] ##TODO: think about interaction with weak constraints
+            remaining_paths = [list(filter(lambda x: x is not None, paths_mat_red[i])) for i in range(len(paths_mat_red))]
+            logging.debug(f"Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")#
+            excluded_paths = [list(filter(lambda x: x is not None, paths_mat[i])) for i in range(len(paths_mat)) if any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts for j in range(n_nodes-1) if paths_mat[i,j] is not None])]
+            logging.debug(f"Excluded paths from {X} to {Y}: {len(excluded_paths)}")
+        else:
+            remaining_paths = [list(filter(lambda x: x is not None, paths_mat[i])) for i in range(len(paths_mat))]
 
         indep_rule_body = []
         for path in remaining_paths:
@@ -105,10 +80,16 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
             logging.debug(f"   ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
 
         ### add indep rule
-        if len(indep_rule_body) > 0 and (X,Y) in dep_facts:
-            indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
-            ctl.add("specific", [], indep_rule)
-            logging.debug(   indep_rule)
+        if len(indep_rule_body) > 0:
+            if skeleton_rules_reduction:
+                if (X,Y) in dep_facts:
+                    indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
+                    ctl.add("specific", [], indep_rule)
+                    logging.debug(   indep_rule)
+            else:
+                indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
+                ctl.add("specific", [], indep_rule)
+                logging.debug(   indep_rule)
 
     ### add dep rule
     ctl.add("specific", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
@@ -132,12 +113,60 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
     if 'dpath' in show:
         ctl.add("base", [], "#show dpath/2.")
 
-
-    ### Ground & Solve
+    ### Ground
     logging.info("   Grounding...")
     start_ground = datetime.now()
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
+
+    return ctl
+
+def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
+                skeleton_rules_reduction:bool=False,
+                weak_constraints:bool=False,
+                fact_pct:float=1.0,
+                set_indep_facts:bool=False,
+                opt_mode:str='optN',
+                search_for_models:str='No', 
+                show:list=['arrow']
+                )->list:     
+    """
+    CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
+    
+    """
+    logging.info(f"Running CausalABA")
+
+    facts_location_wc = facts_location.replace(".lp","_wc.lp")
+    facts_location_I = facts_location.replace(".lp","_I.lp")
+
+    indep_facts = set()
+    dep_facts = set()
+    facts = []
+    if facts_location:
+        facts_loc = facts_location.replace(".lp","_I.lp") if weak_constraints else facts_location
+        logging.debug(f"   Loading facts from {facts_location}")
+        with open(facts_loc, 'r') as file:
+            for line in file:
+                if "dep" not in line:
+                    continue
+                line_clean = line.replace("#external ","").replace("\n","")
+                if weak_constraints:
+                    statement, Is = line_clean.split(" I=")
+                    I,truth = Is.split(",")
+                    X, S, Y, dep_type = extract_test_elements_from_symbol(statement)
+                    facts.append((X,S,Y, "ext_"+dep_type, statement, float(I), truth))
+                else:
+                    X, S, Y, dep_type = extract_test_elements_from_symbol(line_clean)
+                    facts.append((X,S,Y, dep_type, line_clean, np.nan, "unknown"))
+
+                if 'indep' in line_clean:
+                    indep_facts.add((X,Y))
+                elif 'dep' in line_clean and 'in' not in line_clean:
+                    dep_facts.add((X,Y))                
+
+    ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
+                weak_constraints, indep_facts, dep_facts, opt_mode, show)
+
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
@@ -161,34 +190,89 @@ def CausalABA(n_nodes:int, facts_location:str=None, print_models:bool=True,
         logging.info(f"Number of models: {n_models}")
         times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
         logging.info(f"Times: {times}")
-    elif search_for_models == 'first':
-        n_models = 0
-        while n_models == 0 and fact_pct > 0:
-            for n, fact in enumerate(facts):
-                if fact[3] == "ext_indep" and set_indep_facts:
-                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
-                    logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-                elif n/len(facts) <= fact_pct:
-                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
-                    logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-                else:
-                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
-                    logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-            models = []
-            logging.info("   Solving...")
-            with ctl.solve(yield_=True) as handle:
-                for model in handle:
-                    models.append(model.symbols(shown=True))
-                    if print_models:
-                        logging.info(f"Answer {len(models)}: {model}")
-            n_models = int(ctl.statistics['summary']['models']['enumerated'])
-            logging.info(f"Number of models: {n_models}")
-            times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
-            logging.info(f"Times: {times}")
-            
-            fact_pct -= 0.01
-            logging.info(f"Lowering the fact_pct by 0.01, to {fact_pct:.2f}")
 
+    elif search_for_models == 'first':
+        for fact in facts:
+            ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+            logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+        models = []
+        logging.info("   Solving...")
+        with ctl.solve(yield_=True) as handle:
+            for model in handle:
+                models.append(model.symbols(shown=True))
+                if print_models:
+                    logging.info(f"Answer {len(models)}: {model}")
+        n_models = int(ctl.statistics['summary']['models']['enumerated'])
+        logging.info(f"Number of models: {n_models}")
+        times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
+        logging.info(f"Times: {times}")
+        remove_n = 0
+        logging.info(f"Number of facts removed: {remove_n}")
+
+        ## start removing facts if no models are found
+        while n_models == 0:
+            remove_n += 1
+            logging.info(f"Number of facts removed: {remove_n}")
+
+            if remove_n < len(facts):
+                reground = False
+                if remove_n > 0:
+                    fact_to_remove = facts[-remove_n]
+                    logging.debug(f"Removing fact {fact_to_remove[4]}")
+                    if fact_to_remove[3] == "ext_indep":
+                        if set_indep_facts:
+                            ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), True)
+                        else:
+                            ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), False)
+                            reground = True
+                    else:
+                        ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), False)
+
+                for fact in facts[:-remove_n]:
+                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                    logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                # for n, fact in enumerate(facts):
+                #     if fact[3] == "ext_indep" and set_indep_facts:
+                #         ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                #         logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                #     elif n/len(facts) <= fact_pct:
+                #         ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                #         logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                #     else:
+                #         ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
+                #         logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                #         count_indeps =+ 1 if fact[3] == "ext_indep" else 0
+                if reground:
+                    ### Save external statements
+                    with open(facts_location, "w") as f:
+                        for n, s in enumerate(facts[:-remove_n]):
+                            f.write(f"#external ext_{s[4]}\n")
+                    ### Save weak constraints
+                    with open(facts_location_wc, "w") as f:
+                        for n, s in enumerate(facts[:-remove_n]):
+                            f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+                    ### Save inner strengths
+                    with open(facts_location_I, "w") as f:
+                        for n, s in enumerate(facts[:-remove_n]):
+                            f.write(f"{s[4]} I={s[5]}, NA\n")
+                    logging.info("Recompiling and regrounding...")
+                    ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
+                                    weak_constraints, indep_facts, dep_facts, opt_mode, show)
+                    for fact in facts[:-remove_n]:
+                        ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                        logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                models = []
+                logging.info("   Solving...")
+                with ctl.solve(yield_=True) as handle:
+                    for model in handle:
+                        models.append(model.symbols(shown=True))
+                        if print_models:
+                            logging.info(f"Answer {len(models)}: {model}")
+                n_models = int(ctl.statistics['summary']['models']['enumerated'])
+                logging.info(f"Number of models: {n_models}")
+                times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
+                logging.info(f"Times: {times}")
+            
     elif 'subsets' in search_for_models:
         set_of_models = []
         logging.info(f"Number of subsets to remove: {len(list(powerset(facts)))}")
