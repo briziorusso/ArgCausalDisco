@@ -92,6 +92,8 @@ for dataset_name in dataset_list:
                 mt_dag = DAGMetrics(B_est, B_true).metrics
             else:
                 W_est, elapsed = run_method(X_s, method, seed, test_alpha=0.01, test_name='fisherz', device=device, scenario=f"{method}_{version}_{dataset_name}")
+                if 'Tensor' in str(type(W_est)):
+                    W_est = np.asarray([list(i) for i in W_est])
                 logger_setup(f'results/log_{version}.log', continue_logging=True)
                 if W_est is None:
                     mt_cpdag = {'nnz':np.nan, 'fdr':np.nan, 'tpr':np.nan, 'fpr':np.nan, 'precision':np.nan, 'recall':np.nan, 'F1':np.nan, 'shd':np.nan, 'sid':np.nan}
