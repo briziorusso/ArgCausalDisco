@@ -1,6 +1,11 @@
 # Argumentative Causal Discovery
 This repository provides the code for the paper "Argumentative Causal Discovery". 
 
+In this paper we propose Causal ABA, which combines statistical tests and expert domain knowledge with non-monotonic reasoning and performs argumentative reasoning to output causal graphs in accordance with the reported causal relationships. Below is an overview of the workflow.
+
+![alt text](workflow.jpg)
+
+We instantiate Causal ABA using the conditional independence tests from the Majority-PC algorithm [(Colombo and Maathuis, 2014)](https://jmlr.org/papers/v15/colombo14a.html) as input, resulting in ABA-PC, a practical Causal Discovery algorithm that, in our experiments, is competitive with state-of-the-art baselines.
 ### Reproduce Experiments
 The experiments in the paper can be reproduced by running ```python experiments_bnlearn.py``` from the root folder. All the plots included in the paper can be inspected interactively from the [results/figs](results/figs) folder. Just download them and open them in a browser. 
 
