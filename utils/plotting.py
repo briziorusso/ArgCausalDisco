@@ -280,7 +280,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
 
 ###Plot Runtime
 def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, colors_dict, methods,
-                         share_y=False, save_figs=False, output_name="runtime.html", debug=False, font_size=20):
+                         share_y=False, save_figs=False, output_name="runtime.html", debug=False, font_size=20, plot_width=750, plot_height=300):
     cols = len(x_var_list)
     rows = 1
     fig = make_subplots(rows, cols, vertical_spacing=0.05, horizontal_spacing=0.01, shared_yaxes=True, shared_xaxes=True,)
@@ -296,14 +296,22 @@ def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, color
             tab_grouped = pd.DataFrame()
             for g in df[group_list].drop_duplicates().values:
                 ## aggregate only if more than one obs in the group
-                if list(tab.groupby(group_list)[metric].count().loc[g])[0]>1:
+                try:
+                    relevant_row = list(tab.groupby(group_list)[metric].count().loc[g])[0]
+                except:
+                    relevant_row = 0
+                if relevant_row > 1:
                     tab_grouped = pd.concat([tab_grouped, tab.groupby(group_list)[metric].agg(['mean','std']).loc[g].reset_index()], axis=0)
                 else:
                     ##append the single obs
-                    single_tab = tab.query(f"{x_var}=={g[0]}")[[x_var,metric,metric.replace('mean','std')]]
+                    if relevant_row == 1:
+                        single_tab = tab.query(f"{x_var}=={g[0]}")[[x_var,metric,metric.replace('mean','std')]]
+                    else:
+                        single_tab = pd.DataFrame([g[0], np.nan, np.nan]).T
                     single_tab.columns = [x_var,'mean','std']
+                    single_tab[x_var] = single_tab[x_var].astype(int)
                     tab_grouped = pd.concat([tab_grouped, single_tab], axis=0)
-                    
+            tab_grouped.reset_index(drop=True, inplace=True)
             tab_grouped.sort_values(by=[x_var], inplace=True)
             fig.add_trace(go.Scatter(x=tab_grouped[x_var].astype(str)
                                     ,y=tab_grouped[metric.split("_")[1]]
@@ -330,8 +338,8 @@ def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, color
         legend=dict(orientation="h", xanchor="center", x=0.5, yanchor="top", y=1.1),
         template='plotly_white',
         # autosize=True,
-        width=750, 
-        height=300,
+        width=plot_width, 
+        height=plot_height,
         margin=dict(
             l=10,
             r=10,
