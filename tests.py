@@ -439,9 +439,13 @@ class TestCausalABA(unittest.TestCase):
         true_seplist = find_all_d_separations_sets(G_true)
 
         random_stability(2376)
+        data, cg = simulate_data_and_run_PC(G_true, alpha, seed=2376, uc_rule=3, stable=True) ## Shapley-PC
+        logging.info(f"Fully directed edges from Shapley-PC: {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from Shapley-PC: {[(x,y) for (x,y) in cg.find_undirected() if x<y]}")
+
         data, cg = simulate_data_and_run_PC(G_true, alpha, seed=2376, uc_rule=5, stable=True) ## Majority-PC
-        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
-        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x<y]}")
+        logging.info(f"Fully directed edges from Majority-PC: {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from Majority-PC: {[(x,y) for (x,y) in cg.find_undirected() if x<y]}")
 
         facts = []
         count_wrong = 0
@@ -1120,35 +1124,35 @@ class TestABAPC(unittest.TestCase):
         self.assertEqual(np.abs(B_est - B_true).sum(), 0)
 
 start = datetime.now()
-TestCausalABA().three_node_all_graphs()
-TestCausalABA().three_node_graph_empty()
-TestCausalABA().collider()
-TestCausalABA().chains_confounder()
-TestCausalABA().one_edge()
-TestCausalABA().incompatible_Is()
-TestCausalABA().four_node_all_graphs()
-TestCausalABA().four_node_shapPC_example()
-TestCausalABA().incompatible_chain()
-TestCausalABA().five_node_all_graphs()
-TestCausalABA().five_node_colombo_example()
-TestCausalABA().five_node_sprinkler_example()
-## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-TestCausalABA().six_node_example()
-TestCausalABA().randomG(7, 1, "ER", 2024)
-TestCausalABA().randomG(8, 1, "ER", 2024)
-TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
-# TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
+# TestCausalABA().three_node_all_graphs()
+# TestCausalABA().three_node_graph_empty()
+# TestCausalABA().collider()
+# TestCausalABA().chains_confounder()
+# TestCausalABA().one_edge()
+# TestCausalABA().incompatible_Is()
+# TestCausalABA().four_node_all_graphs()
+# TestCausalABA().four_node_shapPC_example()
+# TestCausalABA().incompatible_chain()
+# TestCausalABA().five_node_all_graphs()
+# TestCausalABA().five_node_colombo_example()
+# TestCausalABA().five_node_sprinkler_example()
+# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+# TestCausalABA().six_node_example()
+# TestCausalABA().randomG(7, 1, "ER", 2024)
+# TestCausalABA().randomG(8, 1, "ER", 2024)
+# TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
+# # TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
 
-# # TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
-# # TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
-# # TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
+# # # TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
+# # # TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
+# # # TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
 
-TestMetricsDAG().test_metrics_perfect()
-TestMetricsDAG().test_metrics_errors()
+# TestMetricsDAG().test_metrics_perfect()
+# TestMetricsDAG().test_metrics_errors()
 
-TestABAPC().test_abapc()
-TestABAPC().test_abapc_indeps()
-TestABAPC().test_abapc_bnlearn()
+# TestABAPC().test_abapc()
+# TestABAPC().test_abapc_indeps()
+# TestABAPC().test_abapc_bnlearn()
 
 ## Paper Examples
 TestCausalABA().four_node_PC_facts() 

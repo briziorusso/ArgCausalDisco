@@ -27,14 +27,14 @@ from utils.data_utils import load_bnlearn_data_dag, simulate_dag
 import warnings
 warnings.filterwarnings("ignore")
 
-version = 'bnlearn_50rep'
+version = 'spc_bnlearn_50rep'
 logger_setup(f'results/log_{version}.log')
 data_path = 'datasets'
 sample_size = 5000
 n_runs = 50
 device = 0
 load_res = False
-save_res = False
+save_res = True
 dataset_list = [
                 'cancer', 
                 'earthquake', 
@@ -42,11 +42,12 @@ dataset_list = [
                 'asia'
                 ]
 model_list = [
-            'random'
-            ,'mpc'
-            ,'abapc'
-            ,'fgs'
-            ,'nt'
+            # 'random'
+            # ,'mpc'
+            # ,'abapc'
+            # ,'fgs'
+            # ,'nt'
+            'spc'
             ]
 
 if load_res:         

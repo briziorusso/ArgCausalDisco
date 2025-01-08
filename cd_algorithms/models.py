@@ -63,12 +63,13 @@ def run_method(X,
                method:str, 
                seed:int, 
                debug:bool=False, 
-               selection:str='bot', 
+               selection:str='neg', 
                priority:int=2, 
                test_name:str='kci', 
-               test_alpha:float=0.01, 
-               device:int=0,
-               scenario:str=''
+               scenario:str='',
+               test_alpha:float=0.01,
+               extra_tests:bool=False,
+               device:str=''
                ):
     """
     Runs the causal discovery method specified by method on the data X
@@ -203,6 +204,15 @@ def run_method(X,
         W_est = fitted.G.graph.T
         elapsed = fitted.PC_elapsed
         logging.info(f'Time taken for max-PC: {round(elapsed,2)}s')
+
+    elif method == 'spc':
+        random_stability(seed)
+        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=3, uc_priority=priority, 
+                    selection=selection, extra_tests=extra_tests, show_progress=False, verbose=debug)
+        # fitted.draw_pydot_graph()
+        W_est = fitted.G.graph.T ### CausalLearn PC returns the transpose of the adjacency matrix
+        elapsed = fitted.PC_elapsed
+        logging.info(f'Time taken for SPC: {round(elapsed,2)}s')
 
     elif method == 'abapc':
         random_stability(seed)
