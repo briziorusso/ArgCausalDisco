@@ -54,3 +54,19 @@ ABAPC is integrated in the ```run_method()``` function together with the baselin
 
 ### Environment
 The code was tested with Python 3.10. `requirements.txt` provides the necessary python packages. Run `pip install -r requirements.txt` from a terminal at the root folder to install all packages in your virtual environment. You will need clingo 5.6.2 installed from the potassco repository via conda (command provided in requirements.txt).
+
+
+### Reference
+If you are using this code, please cite our paper
+```
+@inproceedings{KR2024-88,
+    title     = {{Argumentative Causal Discovery}},
+    author    = {Russo, Fabrizio and Rapberger, Anna and Toni, Francesca},
+    booktitle = {{Proceedings of the 21st International Conference on Principles of Knowledge Representation and Reasoning}},
+    pages     = {938--949},
+    year      = {2024},
+    month     = {8},
+    doi       = {10.24963/kr.2024/88},
+    url       = {https://doi.org/10.24963/kr.2024/88},
+  }
+```
