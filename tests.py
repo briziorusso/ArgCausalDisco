@@ -1141,7 +1141,9 @@ start = datetime.now()
 # TestCausalABA().randomG(7, 1, "ER", 2024)
 # TestCausalABA().randomG(8, 1, "ER", 2024)
 # TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
-# # TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
+# TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
+# TestCausalABA().randomG(11, 1, "ER", 2024) ## This test takes 45 minutes to run, 48 models
+# TestCausalABA().randomG(12, 1, "ER", 2024) ## This does not finish grounding: RuntimeError: Clasp::Asp::PrgNode value too large
 
 # # # TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
 # # # TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
