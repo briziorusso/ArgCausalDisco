@@ -199,6 +199,34 @@ class TestCausalABA(unittest.TestCase):
 
         self.assertEqual(set(model_sets), expected)
 
+
+    def four_node_shapPC_example_noI0(self):
+        logger_setup()
+        scenario = "four_node_shapPC_example_remove_I0"
+        facts_location = f"encodings/test_lps/{scenario}.lp"
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  1],
+                            [ 0,  0,  0,  1],
+                            [ 0,  0,  0,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+
+        expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        models, _ = CausalABA(n_nodes, facts_location)
+        model_sets = set()
+        for model in models:
+            arrows = model_to_set_of_arrows(model)
+            model_sets.add(frozenset(arrows))            
+
+        self.assertIn(expected,model_sets)
+
     def incompatible_chain(self):
         logger_setup()
         scenario = "incompatible_chain"
@@ -1107,7 +1135,7 @@ class TestABAPC(unittest.TestCase):
         logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
         logging.info(f"Edges from ABAPC: {est_edges}")
 
-        models, ranking = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
+        models, _ = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
                                 set_indep_facts=False, stable=True, conservative=True, out_mode='optN')
         logging.info(f"Number of models found: {len(models)}")
 
@@ -1122,7 +1150,7 @@ class TestABAPC(unittest.TestCase):
         data, B_true = load_bnlearn_data_dag('earthquake', '../ShapleyPC-local/datasets', 2000, seed=2023, print_info=True)
 
         ## run ABAPC
-        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, set_indep_facts=True)
+        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, set_indep_facts=False)
 
         self.assertEqual(np.abs(B_est - B_true).sum(), 0)
 
@@ -1157,44 +1185,111 @@ class TestABAPC(unittest.TestCase):
 
         self.assertEqual(B_est[0], expected)
 
+    def test_abapc_four_node_example(self):
+        #### ArgCD paper example ####
+        scenario = "test_abapc_four_node_example"
+        alpha = 0.05    
+        logger_setup(scenario)
+        logging.info(f"===============Running {scenario}===============")
+        B_true = np.array( [[ 0,  0,  1,  0],
+                            [ 0,  0,  1,  1],
+                            [ 0,  0,  0,  1],
+                            [ 0,  0,  0,  0],
+                            ])
+        n_nodes = B_true.shape[0]
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        relabel_dict = {f"X{i+1}":i for i in range(n_nodes)}
+        G_true1 = nx.relabel_nodes(G_true, relabel_dict)
+
+        expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
+
+        true_seplist = find_all_d_separations_sets(G_true)
+
+        seed=2376
+        random_stability(seed)
+        data, cg = simulate_data_and_run_PC(G_true, alpha, seed=seed, uc_rule=5, stable=True)
+
+        facts = []
+        count_wrong = 0
+        for test in true_seplist:
+            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+
+            test_PC = set([t for t in cg.sepset[X,Y] if set(t[0])==S]) 
+            if len(test_PC)==1:
+                p = list(test_PC)[0][1]
+                dep_type_PC = "indep" if p > alpha else "dep" 
+                I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+                if dep_type == dep_type_PC:
+                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC, p))
+                elif dep_type == "indep":
+                    count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC, p))
+                elif dep_type == "dep":
+                    count_wrong += 1
+                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC, p))
+        
+        ### Save external statements
+        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
+                      set_indep_facts=False, stable=True, conservative=True)
+        ## edges from adjacency matrix
+        est_edges = set([(i,j) for i in range(n_nodes) for j in range(n_nodes) if B_est[i,j]==1])
+
+        logging.info(f"Seed: {seed}")
+        logging.info(f"True DAG: {G_true1.edges}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
+        logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
+        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
+        logging.info(f"Edges from ABAPC: {est_edges}")
+
+        models, B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
+                                set_indep_facts=False, stable=True, conservative=True, out_mode='optN')
+        logging.info(f"Number of models found: {len(models)}")
+
+        self.assertIn(expected, models)
+
+
 start = datetime.now()
-# TestCausalABA().three_node_all_graphs()
-# TestCausalABA().three_node_graph_empty()
-# TestCausalABA().collider()
-# TestCausalABA().chains_confounder()
-# TestCausalABA().one_edge()
-# TestCausalABA().incompatible_Is()
-# TestCausalABA().four_node_all_graphs()
-# TestCausalABA().four_node_shapPC_example()
-# TestCausalABA().incompatible_chain()
-# TestCausalABA().five_node_all_graphs()
-# TestCausalABA().five_node_colombo_example()
-# TestCausalABA().five_node_sprinkler_example()
-# ## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-# TestCausalABA().six_node_example()
-# TestCausalABA().randomG(7, 1, "ER", 2024)
-# TestCausalABA().randomG(8, 1, "ER", 2024)
-# TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
+TestCausalABA().three_node_all_graphs()
+TestCausalABA().three_node_graph_empty()
+TestCausalABA().collider()
+TestCausalABA().chains_confounder()
+TestCausalABA().one_edge()
+TestCausalABA().incompatible_Is()
+TestCausalABA().four_node_all_graphs()
+TestCausalABA().four_node_shapPC_example()
+TestCausalABA().four_node_shapPC_example_noI0()
+TestCausalABA().incompatible_chain()
+TestCausalABA().five_node_all_graphs()
+TestCausalABA().five_node_colombo_example()
+TestCausalABA().five_node_sprinkler_example()
+## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+TestCausalABA().six_node_example()
+TestCausalABA().randomG(7, 1, "ER", 2024)
+TestCausalABA().randomG(8, 1, "ER", 2024)
+TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
 # TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
 # TestCausalABA().randomG(11, 1, "ER", 2024) ## This test takes 45 minutes to run, 48 models
 # TestCausalABA().randomG(12, 1, "ER", 2024) ## This does not finish grounding: RuntimeError: Clasp::Asp::PrgNode value too large
 
-# # TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
-# # TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
-# # TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
+# TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
+# TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
+# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
 
-# TestMetricsDAG().test_metrics_perfect()
-# TestMetricsDAG().test_metrics_errors()
+TestMetricsDAG().test_metrics_perfect()
+TestMetricsDAG().test_metrics_errors()
 
-# TestABAPC().test_abapc()
-# TestABAPC().test_abapc_indeps()
-# TestABAPC().test_abapc_bnlearn()
+TestABAPC().test_abapc()
+TestABAPC().test_abapc_indeps()
+TestABAPC().test_abapc_bnlearn()
 
-# ## Paper Examples
-# TestCausalABA().four_node_PC_facts() 
-# TestABAPC().test_abapc_four_node_example()
-# TestCausalABA().four_node_example_arbitrary()
-# TestCausalABA().four_node_example_indeps()
+## Paper Examples
+TestCausalABA().four_node_PC_facts() 
+TestABAPC().test_abapc_four_node_example()
+TestCausalABA().four_node_example_arbitrary()
+TestCausalABA().four_node_example_indeps()
 
 TestABAPC().test_abapc_mock_three_var()
 
