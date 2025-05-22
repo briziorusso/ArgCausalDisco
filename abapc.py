@@ -80,14 +80,14 @@ def ABAPC(data,
     else:
         logging.info("Using provided cg")
     ## Extract facts from PC
-    facts = []
+    facts = set()
     for X,Y in combinations(range(n_nodes), 2):
         test_PC = [t for t in sepsets[X,Y]]
         for S, p in test_PC:
             dep_type_PC = "indep" if p > alpha else "dep" 
             I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
             s_str = 'empty' if len(S)==0 else 's'+'y'.join([str(i) for i in S])
-            facts.append((X,S,Y,dep_type_PC, f"{dep_type_PC}({X},{Y},{s_str}).", I))
+            facts.add((X,S,Y,dep_type_PC, f"{dep_type_PC}({X},{Y},{s_str}).", I))
 
     ### Save external statements
     with open(facts_location, "w") as f:
