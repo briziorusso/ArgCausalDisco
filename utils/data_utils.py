@@ -146,7 +146,8 @@ def simulate_discrete_data(
         sample_size,
         truth_DAG_directed_edges,
         random_seed=None):
-    from pgmpy.models.BayesianNetwork import BayesianNetwork
+    # from pgmpy.models.BayesianNetwork import BayesianNetwork
+    from pgmpy.models.DiscreteBayesianNetwork import DiscreteBayesianNetwork
     from pgmpy.factors.discrete import TabularCPD
     from pgmpy.sampling import BayesianModelSampling
 
@@ -182,7 +183,10 @@ def simulate_discrete_data(
     adjacency_matrix = adjacency_matrix.T
 
     cards = _simulate_cards()
-    bn = BayesianNetwork(truth_DAG_directed_edges)  # so isolating nodes will echo error
+    try:
+        bn = BayesianNetwork(truth_DAG_directed_edges)  # so isolating nodes will echo error
+    except:
+        bn = DiscreteBayesianNetwork(truth_DAG_directed_edges)
     for node in range(num_of_nodes):
         if node not in bn.nodes(): bn.add_node(node) # add node if it is isolated
         parents = np.where(adjacency_matrix[node])[0].tolist()
