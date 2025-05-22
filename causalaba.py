@@ -16,7 +16,7 @@ __author__ = "Fabrizio Russo"
 __email__ = "fabrizio@imperial.ac.uk"
 __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
-import os
+import os, sys
 import logging
 from clingo.control import Control
 from clingo import Function, Number, String
@@ -25,6 +25,8 @@ import numpy as np
 from tqdm.auto import tqdm
 from itertools import combinations
 from datetime import datetime
+from pathlib import Path
+# sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 from utils.graph_utils import powerset, extract_test_elements_from_symbol
 
 def compile_and_ground(n_nodes:int, facts_location:str="",
@@ -51,7 +53,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             # logging.debug(f"in({s},{'s'+'y'.join([str(i) for i in S])}).")
 
     ### Load main program and facts
-    ctl.load("encodings/causalaba.lp")
+    ctl.load(str(Path(__file__).resolve().parent / 'encodings' / 'causalaba.lp'))
     if facts_location != "":
         ctl.load(facts_location)
     if weak_constraints:
@@ -238,28 +240,14 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     fact_to_remove = facts[-remove_n]
                     logging.debug(f"Removing fact {fact_to_remove[4]}")
                     if fact_to_remove[3] == "ext_indep":
+                        indep_facts.remove((fact_to_remove[0], fact_to_remove[2]))
                         if set_indep_facts:
                             ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), True)
                         else:
-                            ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), False)
                             reground = True
                     else:
-                        ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), False)
+                        dep_facts.remove((fact_to_remove[0], fact_to_remove[2]))
 
-                for fact in facts[:-remove_n]:
-                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
-                    logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-                # for n, fact in enumerate(facts):
-                #     if fact[3] == "ext_indep" and set_indep_facts:
-                #         ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
-                #         logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-                #     elif n/len(facts) <= fact_pct:
-                #         ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
-                #         logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-                #     else:
-                #         ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), False)
-                #         logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-                #         count_indeps =+ 1 if fact[3] == "ext_indep" else 0
                 if reground:
                     ### Save external statements
                     with open(facts_location, "w") as f:
