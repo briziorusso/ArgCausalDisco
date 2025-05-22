@@ -240,13 +240,35 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     fact_to_remove = facts[-remove_n]
                     logging.debug(f"Removing fact {fact_to_remove[4]}")
                     if fact_to_remove[3] == "ext_indep":
-                        indep_facts.remove((fact_to_remove[0], fact_to_remove[2]))
-                        if set_indep_facts:
-                            ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), True)
+                        ### check if there is only one fact with the same X and Y that we are removing
+                        if len([f for f in facts[:-remove_n] if f[0] == fact_to_remove[0] and f[2] == fact_to_remove[2] and f[3] == "ext_indep"]) == 0:
+                            indep_facts.remove((fact_to_remove[0], fact_to_remove[2]))
+                        ## if there are multiple facts with the same X and Y that we are removing
+                        elif len([f for f in facts[:-remove_n] if f[0] == fact_to_remove[0] and f[2] == fact_to_remove[2] and f[3] == "ext_indep"]) > 1:
+                            ## we should not remove the fact
+                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")
+                        ## if there are no facts with the same X and Y that we are removing
                         else:
-                            reground = True
+                            ## again we should not remove the fact
+                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are no facts with the same X and Y")
+                            
+                        # if set_indep_facts:
+                        #     ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), True)
+                        # else:
+                        reground = True
                     else:
-                        dep_facts.remove((fact_to_remove[0], fact_to_remove[2]))
+                        ### check if there is only one fact with the same X and Y that we are removing
+                        if len([f for f in facts[:-remove_n] if f[0] == fact_to_remove[0] and f[2] == fact_to_remove[2] and f[3] == "ext_dep"]) == 0:
+                            dep_facts.remove((fact_to_remove[0], fact_to_remove[2]))
+                        ## if there are multiple facts with the same X and Y that we are removing
+                        elif len([f for f in facts[:-remove_n] if f[0] == fact_to_remove[0] and f[2] == fact_to_remove[2] and f[3] == "ext_dep"]) > 1:
+                            ## we should not remove the fact
+                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")
+                        ## if there are no facts with the same X and Y that we are removing
+                        else:
+                            ## again we should not remove the fact
+                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are no facts with the same X and Y")
+                        ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), False)
 
                 if reground:
                     ### Save external statements
@@ -267,6 +289,8 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     for fact in facts[:-remove_n]:
                         ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                         logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                    for fact in facts[-remove_n:]:
+                        logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
                 models = []
                 logging.info("   Solving...")
                 with ctl.solve(yield_=True) as handle:
