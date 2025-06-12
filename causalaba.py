@@ -25,6 +25,7 @@ import numpy as np
 from tqdm.auto import tqdm
 from itertools import combinations
 from datetime import datetime
+from collections import defaultdict
 from pathlib import Path
 # sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 from utils.graph_utils import powerset, extract_test_elements_from_symbol
@@ -67,27 +68,13 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     ### Active paths rules
     n_p = 0
     G = nx.complete_graph(n_nodes)
+    ### remove paths that contain an indep fact
+    if skeleton_rules_reduction:
+        G.remove_edges_from(indep_facts)
+
     for (X,Y) in combinations(range(n_nodes),2):
-        paths = nx.all_simple_paths(G, source=X, target=Y)
-        ### remove paths that contain an indep fact
-        paths_mat = np.array([np.array(list(xi)+[None]*(n_nodes-len(xi))) for xi in paths])
-        if skeleton_rules_reduction:
-            paths_mat_red = paths_mat[[not any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts 
-                                                for j in range(n_nodes-1) if paths_mat[i,j] is not None]) \
-                                                    for i in range(len(paths_mat))]] ##TODO: think about interaction with weak constraints
-            remaining_paths = [list(filter(lambda x: x is not None, paths_mat_red[i])) for i in range(len(paths_mat_red))]
-            logging.debug(f"Paths from {X} to {Y}: {len(paths_mat)}, removing indep: {len(remaining_paths)}")#
-            excluded_paths = [list(filter(lambda x: x is not None, paths_mat[i])) for i in range(len(paths_mat)) if any([(paths_mat[i,j],paths_mat[i,j+1]) in indep_facts for j in range(n_nodes-1) if paths_mat[i,j] is not None])]
-            logging.debug(f"Excluded paths from {X} to {Y}: {len(excluded_paths)}")
-        else:
-            remaining_paths = [list(filter(lambda x: x is not None, paths_mat[i])) for i in range(len(paths_mat))]
-
-        indep_rule_body = []
-        for path in remaining_paths:
+        for path in nx.all_simple_paths(G, source=X, target=Y):
             n_p += 1
-            ### build indep rule body
-            indep_rule_body.append(f" not ap({X},{Y},p{n_p},S)")
-
             ### add path rule
             path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
             ctl.add("specific", [], f"p{n_p} :- {','.join(path_edges)}.")
@@ -100,16 +87,10 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             logging.debug(f"   ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
 
         ### add indep rule
-        if len(indep_rule_body) > 0:
-            if skeleton_rules_reduction:
-                if (X,Y) in dep_facts:
-                    indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
-                    ctl.add("specific", [], indep_rule)
-                    logging.debug(   indep_rule)
-            else:
-                indep_rule = f"indep({X},{Y},S) :- {','.join(indep_rule_body)}, not in({X},S), not in({Y},S), set(S)."
-                ctl.add("specific", [], indep_rule)
-                logging.debug(   indep_rule)
+        if not skeleton_rules_reduction or (X,Y) in dep_facts or (Y,X) in dep_facts:
+            indep_rule = f"indep({X},{Y},S) :- not ap({X},{Y},_,S), not in({X},S), not in({Y},S), set(S)."
+            ctl.add("specific", [], indep_rule)
+            logging.debug(   indep_rule)
 
     ### add dep rule
     ctl.add("specific", [], f"dep(X,Y,S):- ap(X,Y,_,S), var(X), var(Y), X!=Y, not in(X,S), not in(Y,S), set(S).")
@@ -159,8 +140,8 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
     facts_location_wc = facts_location.replace(".lp","_wc.lp")
     facts_location_I = facts_location.replace(".lp","_I.lp")
 
-    indep_facts = set()
-    dep_facts = set()
+    indep_facts = defaultdict(int)
+    dep_facts = defaultdict(int)
     facts = []
     if facts_location:
         facts_loc = facts_location.replace(".lp","_I.lp") if weak_constraints else facts_location
@@ -180,9 +161,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     facts.append((X,S,Y, dep_type, line_clean, np.nan, "unknown"))
 
                 if 'indep' in line_clean:
-                    indep_facts.add((X,Y))
+                    indep_facts[(X,Y)] += 1 
                 elif 'dep' in line_clean and 'in' not in line_clean:
-                    dep_facts.add((X,Y))                
+                    dep_facts[(X,Y)] += 1
 
     ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
                 weak_constraints, indep_facts, dep_facts, opt_mode, show)
@@ -240,34 +221,21 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     fact_to_remove = facts[-remove_n]
                     logging.debug(f"Removing fact {fact_to_remove[4]}")
                     if fact_to_remove[3] == "ext_indep":
-                        ### check if there is only one fact with the same X and Y that we are removing
-                        if len([f for f in facts[:-remove_n] if f[0] == fact_to_remove[0] and f[2] == fact_to_remove[2] and f[3] == "ext_indep"]) == 0:
-                            indep_facts.remove((fact_to_remove[0], fact_to_remove[2]))
-                        ## if there are multiple facts with the same X and Y that we are removing
-                        elif len([f for f in facts[:-remove_n] if f[0] == fact_to_remove[0] and f[2] == fact_to_remove[2] and f[3] == "ext_indep"]) > 1:
-                            ## we should not remove the fact
-                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")
-                        ## if there are no facts with the same X and Y that we are removing
+                        indep_facts[(fact_to_remove[0], fact_to_remove[2])] -= 1
+                        if indep_facts[(fact_to_remove[0], fact_to_remove[2])] == 0:
+                            del indep_facts[(fact_to_remove[0], fact_to_remove[2])]
                         else:
-                            ## again we should not remove the fact
-                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are no facts with the same X and Y")
-                            
+                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")                            
                         # if set_indep_facts:
                         #     ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), True)
                         # else:
                         reground = True
                     else:
-                        ### check if there is only one fact with the same X and Y that we are removing
-                        if len([f for f in facts[:-remove_n] if f[0] == fact_to_remove[0] and f[2] == fact_to_remove[2] and f[3] == "ext_dep"]) == 0:
-                            dep_facts.remove((fact_to_remove[0], fact_to_remove[2]))
-                        ## if there are multiple facts with the same X and Y that we are removing
-                        elif len([f for f in facts[:-remove_n] if f[0] == fact_to_remove[0] and f[2] == fact_to_remove[2] and f[3] == "ext_dep"]) > 1:
-                            ## we should not remove the fact
-                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")
-                        ## if there are no facts with the same X and Y that we are removing
+                        dep_facts[(fact_to_remove[0], fact_to_remove[2])] -= 1
+                        if dep_facts[(fact_to_remove[0], fact_to_remove[2])] == 0:
+                            del dep_facts[(fact_to_remove[0], fact_to_remove[2])]
                         else:
-                            ## again we should not remove the fact
-                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are no facts with the same X and Y")
+                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")
                         ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), False)
 
                 if reground:

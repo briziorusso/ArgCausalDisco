@@ -1184,6 +1184,39 @@ class TestABAPC(unittest.TestCase):
         expected = {frozenset({(0, 2), (1, 2)}),frozenset({(1, 2)}),frozenset({(2, 1)})}
 
         self.assertEqual(B_est[0], expected)
+    
+    def test_abapc_mock_three_var_collider(self):
+        from collections import defaultdict
+        scenario = "test_abapc_mock_three_var_new"
+        logger_setup(scenario)
+        ## true DAG
+        B_true = np.array( [[ 0,  0,  1],
+                            [ 0,  0,  1],
+                            [ 0,  0,  0]])
+        n_nodes = B_true.shape[0]
+        n_samples = 5000
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+        truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
+        ## generate data
+        data = simulate_discrete_data(n_nodes, n_samples, truth_DAG_directed_edges, 42)
+
+        sepset = defaultdict(list)
+
+        sepset.update({
+            (0, 1): [((2,), 0),  # For dep(0,1,s2) -> Expected I approx 1.0
+                     ((), 1)],   # For indep(0,1,empty) -> Expected I approx 1.0
+            (0, 2): [((), 0.011)]    # For indep(0,2,empty) -> Expected I approx 0.5 and to be rejected
+        })
+        ## run ABAPC
+        B_est = ABAPC(data=data, alpha=0.01, indep_test='fisherz', scenario=scenario, 
+                      sepsets=sepset, out_mode='optN', set_indep_facts=False, print_models=True, smoothing_k=3)  # Add smoothing to increase prob of dep(0,1,s2)
+
+        expected = {frozenset({(0, 2), (1, 2)})}
+
+        self.assertEqual(B_est[0], expected)
+
 
     def test_abapc_four_node_example(self):
         #### ArgCD paper example ####
@@ -1292,5 +1325,6 @@ TestCausalABA().four_node_example_arbitrary()
 TestCausalABA().four_node_example_indeps()
 
 TestABAPC().test_abapc_mock_three_var()
+TestABAPC().test_abapc_mock_three_var_collider()
 
 logging.info(f"Total time={str(datetime.now()-start)}")
