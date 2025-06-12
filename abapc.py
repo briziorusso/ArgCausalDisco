@@ -35,7 +35,7 @@ def ABAPC(data,
           base_fact_pct=1.0, set_indep_facts=False, 
           scenario="ABAPC", base_location="results",
           out_mode="opt" , print_models=False,
-          sepsets = None):
+          sepsets = None, smoothing_k=1):
     """
     Args:
     data: np.array
@@ -85,7 +85,7 @@ def ABAPC(data,
         test_PC = [t for t in sepsets[X,Y]]
         for S, p in test_PC:
             dep_type_PC = "indep" if p > alpha else "dep" 
-            I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+            I = initial_strength(p, len(S), alpha, 0.5, n_nodes, smoothing_k=smoothing_k)
             s_str = 'empty' if len(S)==0 else 's'+'y'.join([str(i) for i in S])
             facts.add((X,S,Y,dep_type_PC, f"{dep_type_PC}({X},{Y},{s_str}).", I))
 
@@ -140,7 +140,7 @@ def ABAPC(data,
                 PC_dep_type = 'indep' if p > alpha else 'dep'
                 s_text = [f"X{r+1}" for r in s]
                 dep_type = 'indep' if nx.algorithms.d_separated(G_est, {f"X{x+1}"}, {f"X{y+1}"}, set(s_text)) else 'dep'
-                I = initial_strength(p, len(s), alpha, 0.5, n_nodes)
+                I = initial_strength(p, len(s), alpha, 0.5, n_nodes, smoothing_k=smoothing_k)
                 if dep_type != PC_dep_type:
                     est_I += -I
                 else:

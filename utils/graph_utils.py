@@ -108,8 +108,8 @@ def find_all_d_separations_sets(G, verbose=True, debug=False):
                 depth += 1
     return septests
 
-def initial_strength(p:float, len_S:int, alpha:float, base_strength:float, num_vars:int, verbose=False)->float:
-    w_S = (1-len_S/(num_vars-2))
+def initial_strength(p:float, len_S:int, alpha:float, base_strength:float, num_vars:int, verbose=False, smoothing_k=1)->float:
+    w_S = (1-len_S/(num_vars-2+smoothing_k))  # Add-K smoothing
     # w_S = 1
     if p != None:
         if p < alpha:
