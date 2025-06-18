@@ -507,11 +507,11 @@ class TestCausalABA(unittest.TestCase):
         ### Save weak constraints
         with open(facts_location_wc, "w") as f:
             for s in facts:
-                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+                f.write(f":~ ext_{s[4]} [-{int(s[5]*1000)}]\n")
         ### Save inner strengths
         with open(facts_location_I, "w") as f:
             for s in facts:
-                f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
+                f.write(f"ext_{s[4]} I={s[5]}, {s[6]}\n")
         
         set_of_model_sets = []
         model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=True,
@@ -677,11 +677,11 @@ class TestCausalABA(unittest.TestCase):
         ### Save weak constraints
         with open(facts_location_wc, "w") as f:
             for s in facts:
-                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+                f.write(f":~ ext_{s[4]} [-{int(s[5]*1000)}]\n")
         ### Save inner strengths
         with open(facts_location_I, "w") as f:
             for s in facts:
-                f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
+                f.write(f"ext_{s[4]} I={s[5]}, {s[6]}\n")
         
         set_of_model_sets = []
         model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
@@ -758,11 +758,11 @@ class TestCausalABA(unittest.TestCase):
         ### Save weak constraints
         with open(facts_location_wc, "w") as f:
             for s in facts:
-                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+                f.write(f":~ ext_{s[4]} [-{int(s[5]*1000)}]\n")
         ### Save inner strengths
         with open(facts_location_I, "w") as f:
             for s in facts:
-                f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
+                f.write(f"ext_{s[4]} I={s[5]}, {s[6]}\n")
         
         set_of_model_sets = []
         model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
@@ -844,11 +844,11 @@ class TestCausalABA(unittest.TestCase):
         ### Save weak constraints
         with open(facts_location_wc, "w") as f:
             for s in facts:
-                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+                f.write(f":~ ext_{s[4]} [-{int(s[5]*1000)}]\n")
         ### Save inner strengths
         with open(facts_location_I, "w") as f:
             for s in facts:
-                f.write(f"{s[4]} I={s[5]}, {s[6]}\n")
+                f.write(f"ext_{s[4]} I={s[5]}, {s[6]}\n")
         
         set_of_model_sets = []
         model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, 
@@ -1135,6 +1135,8 @@ class TestABAPC(unittest.TestCase):
         logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
         logging.info(f"Edges from ABAPC: {est_edges}")
 
+        # This may not pass if smoothing_k is set to other values which changes weak constraints weights distribution
+        # optN mode may pick removed external facts with lower weights but larger sum over facts with higher weights
         models, _ = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
                                 set_indep_facts=False, stable=True, conservative=True, out_mode='optN')
         logging.info(f"Number of models found: {len(models)}")
@@ -1303,13 +1305,13 @@ TestCausalABA().six_node_example()
 TestCausalABA().randomG(7, 1, "ER", 2024)
 TestCausalABA().randomG(8, 1, "ER", 2024)
 TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
-# TestCausalABA().randomG(10, 1, "ER", 2024) ## This test takes 2 minutes to run, 4 models
-# TestCausalABA().randomG(11, 1, "ER", 2024) ## This test takes 45 minutes to run, 48 models
-# TestCausalABA().randomG(12, 1, "ER", 2024) ## This does not finish grounding: RuntimeError: Clasp::Asp::PrgNode value too large
+TestCausalABA().randomG(10, 1, "ER", 2024) ## 4 models
+TestCausalABA().randomG(11, 1, "ER", 2024) ## 48 models
+TestCausalABA().randomG(12, 1, "ER", 2024) ## 12 models
 
-# TestCausalABA().five_node_colombo_PC_facts() ## Does not pass, needs accuracy evaluation
-# TestCausalABA().five_node_sprinkler_PC_facts() ## Does not pass, needs accuracy evaluation
-# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024) ## Does not pass, needs accuracy evaluation
+TestCausalABA().five_node_colombo_PC_facts()
+TestCausalABA().five_node_sprinkler_PC_facts()
+# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)  ## This test takes a little longer
 
 TestMetricsDAG().test_metrics_perfect()
 TestMetricsDAG().test_metrics_errors()
