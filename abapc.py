@@ -35,7 +35,7 @@ def ABAPC(data,
           base_fact_pct=1.0, set_indep_facts=False, 
           scenario="ABAPC", base_location="results",
           out_mode="opt" , print_models=False,
-          sepsets = None, smoothing_k=1):
+          sepsets = None, smoothing_k=0):
     """
     Args:
     data: np.array
@@ -98,13 +98,13 @@ def ABAPC(data,
     with open(facts_location_wc, "w") as f:
         for n, s in enumerate(facts):
             if n/len(facts) <= base_fact_pct:
-                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+                f.write(f":~ ext_{s[4]} [-{int(s[5]*1000)}]\n")
     ### Save inner strengths
     with open(facts_location_I, "w") as f:
         for n, s in enumerate(facts):
             if n/len(facts) <= base_fact_pct:
-                f.write(f"{s[4]} I={s[5]}, NA\n")
-    
+                f.write(f"ext_{s[4]} I={s[5]}, NA\n")
+
     set_of_model_sets = []
     model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=True,
                                                 fact_pct=base_fact_pct, search_for_models='first',
