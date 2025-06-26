@@ -106,7 +106,7 @@ def ABAPC(data,
                 f.write(f"ext_{s[4]} I={s[5]}, NA\n")
 
     set_of_model_sets = []
-    model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=False,
+    model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=True,
                                                 fact_pct=base_fact_pct, search_for_models='first',
                                                 opt_mode='optN', print_models=print_models, set_indep_facts=set_indep_facts)
 

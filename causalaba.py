@@ -240,15 +240,15 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 ### Save external statements
                 with open(facts_location, "w") as f:
                     for n, s in enumerate(facts[:-remove_n]):
-                        f.write(f"#external ext_{s[4]}\n")
+                        f.write(f"#external {s[4]}\n")
                 ### Save weak constraints
                 with open(facts_location_wc, "w") as f:
                     for n, s in enumerate(facts[:-remove_n]):
-                        f.write(f":~ ext_{s[4]} [-{int(s[5]*1000)}]\n")
+                        f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
                 ### Save inner strengths
                 with open(facts_location_I, "w") as f:
                     for n, s in enumerate(facts[:-remove_n]):
-                        f.write(f"ext_{s[4]} I={s[5]}, NA\n")
+                        f.write(f"{s[4]} I={s[5]}, NA\n")
                 logging.info("Recompiling and regrounding...")
                 ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
                                 weak_constraints, indep_facts, dep_facts, opt_mode, show)
