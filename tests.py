@@ -1122,7 +1122,7 @@ class TestABAPC(unittest.TestCase):
         
         ### Save external statements
         B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
-                      set_indep_facts=False, stable=True, conservative=True)
+                      set_indep_facts=False, stable=True, conservative=True, smoothing_k=0)
         ## edges from adjacency matrix
         est_edges = set([(i,j) for i in range(n_nodes) for j in range(n_nodes) if B_est[i,j]==1])
 
@@ -1135,10 +1135,8 @@ class TestABAPC(unittest.TestCase):
         logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
         logging.info(f"Edges from ABAPC: {est_edges}")
 
-        # This may not pass if smoothing_k is set to other values which changes weak constraints weights distribution
-        # optN mode may pick removed external facts with lower weights but larger sum over facts with higher weights
         models, _ = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
-                                set_indep_facts=False, stable=True, conservative=True, out_mode='optN')
+                                set_indep_facts=False, stable=True, conservative=True, out_mode='optN', smoothing_k=0)
         logging.info(f"Number of models found: {len(models)}")
 
         self.assertIn(expected, models)
@@ -1214,6 +1212,39 @@ class TestABAPC(unittest.TestCase):
         ## run ABAPC
         B_est = ABAPC(data=data, alpha=0.01, indep_test='fisherz', scenario=scenario, 
                       sepsets=sepset, out_mode='optN', set_indep_facts=False, print_models=True, smoothing_k=3)  # Add smoothing to increase prob of dep(0,1,s2)
+
+        expected = {frozenset({(0, 2), (1, 2)})}
+
+        self.assertEqual(B_est[0], expected)
+    
+    def test_incremental_solving(self):
+        from collections import defaultdict
+        scenario = "test_incremental_solving"
+        logger_setup(scenario)
+        ## true DAG
+        B_true = np.array( [[ 0,  0,  1],
+                            [ 0,  0,  1],
+                            [ 0,  0,  0]])
+        n_nodes = B_true.shape[0]
+        n_samples = 5000
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+        truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
+        ## generate data
+        data = simulate_discrete_data(n_nodes, n_samples, truth_DAG_directed_edges, 42)
+
+        sepset = defaultdict(list)
+
+        sepset.update({
+            (0, 1): [((2,), 0),  # For dep(0,1,s2) -> Expected I approx 1.0
+                     ((), 1)],   # For indep(0,1,empty) -> Expected I approx 1.0
+            (0, 2): [((), 0.011)]    # For indep(0,2,empty) -> Expected I approx 0.5 and to be rejected
+        })
+        ## run ABAPC
+        B_est = ABAPC(data=data, alpha=0.01, indep_test='fisherz', scenario=scenario, 
+                      sepsets=sepset, out_mode='optN', set_indep_facts=False, 
+                      print_models=True, smoothing_k=3, skeleton_rules_reduction=False)
 
         expected = {frozenset({(0, 2), (1, 2)})}
 
@@ -1300,7 +1331,7 @@ TestCausalABA().incompatible_chain()
 TestCausalABA().five_node_all_graphs()
 TestCausalABA().five_node_colombo_example()
 TestCausalABA().five_node_sprinkler_example()
-## TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+# TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 TestCausalABA().six_node_example()
 TestCausalABA().randomG(7, 1, "ER", 2024)
 TestCausalABA().randomG(8, 1, "ER", 2024)
@@ -1310,8 +1341,8 @@ TestCausalABA().randomG(11, 1, "ER", 2024) ## 48 models
 TestCausalABA().randomG(12, 1, "ER", 2024) ## 12 models
 
 TestCausalABA().five_node_colombo_PC_facts()
-TestCausalABA().five_node_sprinkler_PC_facts()
-# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)  ## This test takes a little longer
+# TestCausalABA().five_node_sprinkler_PC_facts()
+TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)  ## This test takes a little longer
 
 TestMetricsDAG().test_metrics_perfect()
 TestMetricsDAG().test_metrics_errors()
@@ -1328,5 +1359,6 @@ TestCausalABA().four_node_example_indeps()
 
 TestABAPC().test_abapc_mock_three_var()
 TestABAPC().test_abapc_mock_three_var_collider()
+TestABAPC().test_incremental_solving()
 
 logging.info(f"Total time={str(datetime.now()-start)}")

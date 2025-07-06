@@ -57,8 +57,8 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     ctl.load(str(Path(__file__).resolve().parent / 'encodings' / 'causalaba.lp'))
     if facts_location != "":
         ctl.load(facts_location)
-    if weak_constraints:
-        ctl.load(facts_location.replace(".lp","_wc.lp"))
+        if weak_constraints:
+            ctl.load(facts_location.replace(".lp","_wc.lp"))
 
     ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
     ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
@@ -222,33 +222,23 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 indep_facts[(fact_to_remove[0], fact_to_remove[2])] -= 1
                 if indep_facts[(fact_to_remove[0], fact_to_remove[2])] == 0:
                     del indep_facts[(fact_to_remove[0], fact_to_remove[2])]
+                    reground = skeleton_rules_reduction
                 else:
                     logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")                            
                 # if set_indep_facts:
                 #     ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), True)
                 # else:
-                reground = skeleton_rules_reduction
             else:
                 dep_facts[(fact_to_remove[0], fact_to_remove[2])] -= 1
                 if dep_facts[(fact_to_remove[0], fact_to_remove[2])] == 0:
                     del dep_facts[(fact_to_remove[0], fact_to_remove[2])]
+                    reground = skeleton_rules_reduction
                 else:
                     logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")
             ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), None)
 
             if reground:
                 ### Save external statements
-                with open(facts_location, "w") as f:
-                    for n, s in enumerate(facts[:-remove_n]):
-                        f.write(f"#external {s[4]}\n")
-                ### Save weak constraints
-                with open(facts_location_wc, "w") as f:
-                    for n, s in enumerate(facts[:-remove_n]):
-                        f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
-                ### Save inner strengths
-                with open(facts_location_I, "w") as f:
-                    for n, s in enumerate(facts[:-remove_n]):
-                        f.write(f"{s[4]} I={s[5]}, NA\n")
                 logging.info("Recompiling and regrounding...")
                 ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
                                 weak_constraints, indep_facts, dep_facts, opt_mode, show)
@@ -256,6 +246,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
                 for fact in facts[-remove_n:]:
+                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), None)
                     logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
             models = []
             logging.info("   Solving...")
