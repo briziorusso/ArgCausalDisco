@@ -57,8 +57,8 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     ctl.load(str(Path(__file__).resolve().parent / 'encodings' / 'causalaba.lp'))
     if facts_location != "":
         ctl.load(facts_location)
-    if weak_constraints:
-        ctl.load(facts_location.replace(".lp","_wc.lp"))
+        if weak_constraints:
+            ctl.load(facts_location.replace(".lp","_wc.lp"))
 
     ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
     ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
@@ -155,7 +155,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     statement, Is = line_clean.split(" I=")
                     I,truth = Is.split(",")
                     X, S, Y, dep_type = extract_test_elements_from_symbol(statement)
-                    facts.append((X,S,Y, "ext_"+dep_type, statement, float(I), truth))
+                    facts.append((X,S,Y, dep_type, statement, float(I), truth))
                 else:
                     X, S, Y, dep_type = extract_test_elements_from_symbol(line_clean)
                     facts.append((X,S,Y, dep_type, line_clean, np.nan, "unknown"))
@@ -211,66 +211,55 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         logging.info(f"Number of facts removed: {remove_n}")
 
         ## start removing facts if no models are found
-        while n_models == 0:
+        while n_models == 0 and remove_n < len(facts):
             remove_n += 1
             logging.info(f"Number of facts removed: {remove_n}")
 
-            if remove_n < len(facts):
-                reground = False
-                if remove_n > 0:
-                    fact_to_remove = facts[-remove_n]
-                    logging.debug(f"Removing fact {fact_to_remove[4]}")
-                    if fact_to_remove[3] == "ext_indep":
-                        indep_facts[(fact_to_remove[0], fact_to_remove[2])] -= 1
-                        if indep_facts[(fact_to_remove[0], fact_to_remove[2])] == 0:
-                            del indep_facts[(fact_to_remove[0], fact_to_remove[2])]
-                        else:
-                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")                            
-                        # if set_indep_facts:
-                        #     ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), True)
-                        # else:
-                        reground = True
-                    else:
-                        dep_facts[(fact_to_remove[0], fact_to_remove[2])] -= 1
-                        if dep_facts[(fact_to_remove[0], fact_to_remove[2])] == 0:
-                            del dep_facts[(fact_to_remove[0], fact_to_remove[2])]
-                        else:
-                            logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")
-                        ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), False)
+            reground = False
+            fact_to_remove = facts[-remove_n]
+            logging.debug(f"Removing fact {fact_to_remove[4]}")
+            if fact_to_remove[3] == "ext_indep":
+                indep_facts[(fact_to_remove[0], fact_to_remove[2])] -= 1
+                if indep_facts[(fact_to_remove[0], fact_to_remove[2])] == 0:
+                    del indep_facts[(fact_to_remove[0], fact_to_remove[2])]
+                    reground = skeleton_rules_reduction
+                else:
+                    logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")                            
+                # if set_indep_facts:
+                #     ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), True)
+                # else:
+            else:
+                dep_facts[(fact_to_remove[0], fact_to_remove[2])] -= 1
+                if dep_facts[(fact_to_remove[0], fact_to_remove[2])] == 0:
+                    del dep_facts[(fact_to_remove[0], fact_to_remove[2])]
+                    reground = skeleton_rules_reduction
+                else:
+                    logging.debug(f"   Not removing fact {fact_to_remove[4]} because there are multiple facts with the same X and Y")
+            ctl.assign_external(Function(fact_to_remove[3], [Number(fact_to_remove[0]), Number(fact_to_remove[2]), Function(fact_to_remove[4].replace(').','').split(",")[-1])]), None)
 
-                if reground:
-                    ### Save external statements
-                    with open(facts_location, "w") as f:
-                        for n, s in enumerate(facts[:-remove_n]):
-                            f.write(f"#external ext_{s[4]}\n")
-                    ### Save weak constraints
-                    with open(facts_location_wc, "w") as f:
-                        for n, s in enumerate(facts[:-remove_n]):
-                            f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
-                    ### Save inner strengths
-                    with open(facts_location_I, "w") as f:
-                        for n, s in enumerate(facts[:-remove_n]):
-                            f.write(f"{s[4]} I={s[5]}, NA\n")
-                    logging.info("Recompiling and regrounding...")
-                    ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                                    weak_constraints, indep_facts, dep_facts, opt_mode, show)
-                    for fact in facts[:-remove_n]:
-                        ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
-                        logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-                    for fact in facts[-remove_n:]:
-                        logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
-                models = []
-                logging.info("   Solving...")
-                with ctl.solve(yield_=True) as handle:
-                    for model in handle:
-                        models.append(model.symbols(shown=True))
-                        if print_models:
-                            logging.info(f"Answer {len(models)}: {model}")
-                n_models = int(ctl.statistics['summary']['models']['enumerated'])
-                logging.info(f"Number of models: {n_models}")
-                times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
-                logging.info(f"Times: {times}")
-            
+            if reground:
+                ### Save external statements
+                logging.info("Recompiling and regrounding...")
+                ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
+                                weak_constraints, indep_facts, dep_facts, opt_mode, show)
+                for fact in facts[:-remove_n]:
+                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
+                    logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+                for fact in facts[-remove_n:]:
+                    ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), None)
+                    logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+            models = []
+            logging.info("   Solving...")
+            with ctl.solve(yield_=True) as handle:
+                for model in handle:
+                    models.append(model.symbols(shown=True))
+                    if print_models:
+                        logging.info(f"Answer {len(models)}: {model}")
+            n_models = int(ctl.statistics['summary']['models']['enumerated'])
+            logging.info(f"Number of models: {n_models}")
+            times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
+            logging.info(f"Times: {times}")
+        
     elif 'subsets' in search_for_models:
         set_of_models = []
         logging.info(f"Number of subsets to remove: {len(list(powerset(facts)))}")
