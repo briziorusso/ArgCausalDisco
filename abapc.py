@@ -35,7 +35,7 @@ def ABAPC(data,
           base_fact_pct=1.0, set_indep_facts=False, 
           scenario="ABAPC", base_location="results",
           out_mode="opt" , print_models=False,
-          sepsets = None, smoothing_k=0, skeleton_rules_reduction=True):
+          sepsets = None, smoothing_k=0, S_weight=True, skeleton_rules_reduction=True):
     """
     Args:
     data: np.array
@@ -85,7 +85,7 @@ def ABAPC(data,
         test_PC = [t for t in sepsets[X,Y]]
         for S, p in test_PC:
             dep_type_PC = "indep" if p > alpha else "dep" 
-            I = initial_strength(p, len(S), alpha, 0.5, n_nodes, smoothing_k=smoothing_k)
+            I = initial_strength(p, len(S), alpha, 0.5, n_nodes, smoothing_k=smoothing_k, S_weight=S_weight)
             s_str = 'empty' if len(S)==0 else 's'+'y'.join([str(i) for i in S])
             facts.add((X,S,Y,dep_type_PC, f"{dep_type_PC}({X},{Y},{s_str}).", I))
 
