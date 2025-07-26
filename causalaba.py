@@ -41,8 +41,9 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
 
     logging.info(f"Compiling the program")
     ### Create Control
-    ctl = Control(['-t %d' % os.cpu_count()])
-    ctl.configuration.solve.parallel_mode = os.cpu_count()
+    cpu_count = min(os.cpu_count() or 1, 64)
+    ctl = Control(['-t %d' % cpu_count])
+    ctl.configuration.solve.parallel_mode = cpu_count
     ctl.configuration.solve.models="0"
     ctl.configuration.solver.seed="2024"
     ctl.configuration.solve.opt_mode = opt_mode
