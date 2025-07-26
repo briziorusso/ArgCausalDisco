@@ -1352,7 +1352,7 @@ TestABAPC().test_abapc()
 TestABAPC().test_abapc_indeps()
 TestABAPC().test_abapc_bnlearn()
 
-## Paper Examples
+# Paper Examples
 TestCausalABA().four_node_PC_facts() 
 TestABAPC().test_abapc_four_node_example()
 TestCausalABA().four_node_example_arbitrary()
