@@ -20,7 +20,7 @@ import os, sys
 import logging
 from clingo.control import Control
 from clingo import Function, Number, String
-import networkx as nx
+import rustworkx as rx
 import numpy as np
 from tqdm.auto import tqdm
 from itertools import combinations
@@ -36,10 +36,10 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 dep_facts:dict[tuple, set[tuple]]=dict(),
                 opt_mode:str='optN',
                 show:list=['arrow'],
-                triple_optimization:bool=False,
+                pre_grounding:bool=False,
                 )->Control:
 
-    logging.info(f"Compiling the program")
+    logging.info("Compiling the program")
     ### Create Control
     cpu_count = min(os.cpu_count() or 1, 64)
     ctl = Control(['-t %d' % cpu_count])
@@ -51,7 +51,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     ### Add set definition
     condition_sets = (
         set().union(*indep_facts.values(), *dep_facts.values())
-        if triple_optimization
+        if skeleton_rules_reduction
         else powerset(range(n_nodes))
     )
     for S in tqdm(condition_sets):
@@ -74,46 +74,18 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
 
     ### Active paths rules
     n_p = 0
-    G = nx.complete_graph(n_nodes)
+    G = rx.generators.complete_graph(n_nodes)
     ### remove paths that contain an indep fact
     if skeleton_rules_reduction:
         G.remove_edges_from(indep_facts)
 
-    node_pairs = tuple(dep_facts | indep_facts if triple_optimization else combinations(range(n_nodes),2))
+    node_pairs = tuple(dep_facts | indep_facts if skeleton_rules_reduction else combinations(range(n_nodes),2))
     logging.info(f"{len(node_pairs) / (n_nodes*(n_nodes-1)/2):.2%} of all node pairs will be considered for active paths.")
-    targets = [set() for _ in range(n_nodes)]
-    for (X,Y) in node_pairs:
-        if X > Y:
-            X, Y = Y, X
-        targets[X].add(Y)
 
-        ### add indep/dep rule
-        if triple_optimization:
-            if (X,Y) in dep_facts:
-                for S in dep_facts[(X,Y)]:
-                    s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
-                    indep_rule = f"indep({X},{Y},{s_str}) :- not ap({X},{Y},_,{s_str})."
-                    ctl.add("specific", [], indep_rule)
-                    logging.debug(   indep_rule)
-            if (X,Y) in indep_facts:
-                for S in indep_facts[(X,Y)]:
-                    s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
-                    dep_rule = f"dep({X},{Y},{s_str}) :- ap({X},{Y},_,{s_str})."
-                    ctl.add("specific", [], dep_rule)
-                    logging.debug(   dep_rule)
-        else:
-            if (X,Y) in dep_facts:
-                indep_rule = f"indep({X},{Y},S) :- not ap({X},{Y},_,S), not in({X},S), not in({Y},S), set(S)."
-                ctl.add("specific", [], indep_rule)
-                logging.debug(   indep_rule)
-            if (X,Y) in indep_facts:
-                dep_rule = f"dep({X},{Y},S) :- ap({X},{Y},_,S), not in({X},S), not in({Y},S), set(S)."
-                ctl.add("specific", [], dep_rule)
-                logging.debug(   dep_rule)
-
-    for X, Ys in enumerate(targets):
-        for path in nx.all_simple_paths(G, source=X, target=Ys):
-            Y = path[-1]
+    if skeleton_rules_reduction is False:
+        pre_grounding = False
+    for (X, Y) in tqdm(node_pairs):
+        for path in rx.all_simple_paths(G, X, Y):
             n_p += 1
             ### add path rule
             path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
@@ -121,7 +93,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             logging.debug(f"   p{n_p} :- {','.join(path_edges)}.")
 
             ### add active path rule
-            if triple_optimization:
+            if pre_grounding:
                 condition_sets = set()
                 if (X,Y) in dep_facts:
                     condition_sets.update(dep_facts[(X,Y)])
@@ -133,11 +105,19 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                     nbs_str = ", " + ','.join(nbs) if len(nbs) > 0 else ""
                     ctl.add("specific", [], f"ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
                     logging.debug(f"   ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
+
+                    if S in indep_facts.get((X,Y), set()):
+                        ctl.add("specific", [], f"dep({X},{Y},{s_str}) :- ap({X},{Y},p{n_p},{s_str}).")
             else:
                 nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
                 nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
                 ctl.add("specific", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
                 logging.debug(f"   ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+
+        if (X, Y) in dep_facts:
+            ctl.add("specific", [], f"indep({X},{Y},S) :- not ap({X},{Y},_,S), set(S).")
+        if (X, Y) in indep_facts and pre_grounding is False:
+            ctl.add("specific", [], f"dep({X},{Y},S) :- ap({X},{Y},_,S), set(S).")
 
     logging.info(f"{n_p} active paths added.")
 
@@ -175,7 +155,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 opt_mode:str='optN',
                 search_for_models:str='No', 
                 show:list=['arrow'],
-                triple_optimization: bool=False,
+                pre_grounding: bool=False,
                 )->list:     
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
@@ -217,7 +197,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 facts_group[(X,Y)].add(condition_set)
 
     ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                weak_constraints, indep_facts, dep_facts, opt_mode, show, triple_optimization)
+                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding)
 
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
     if search_for_models == 'No':
@@ -284,7 +264,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 ### Save external statements
                 logging.info("Recompiling and regrounding...")
                 ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                                weak_constraints, indep_facts, dep_facts, opt_mode, show, triple_optimization)
+                                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding)
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")

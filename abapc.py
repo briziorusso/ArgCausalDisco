@@ -36,7 +36,7 @@ def ABAPC(data,
           scenario="ABAPC", base_location="results",
           out_mode="opt" , print_models=False,
           sepsets = None, smoothing_k=0, S_weight=True,
-          skeleton_rules_reduction=True, triple_optimization=False):
+          skeleton_rules_reduction=True, pre_grounding=False):
     """
     Args:
     data: np.array
@@ -109,7 +109,7 @@ def ABAPC(data,
     set_of_model_sets = []
     model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=skeleton_rules_reduction,
                                                 fact_pct=base_fact_pct, search_for_models='first',
-                                                opt_mode='optN', print_models=print_models, set_indep_facts=set_indep_facts, triple_optimization=triple_optimization)
+                                                opt_mode='optN', print_models=print_models, set_indep_facts=set_indep_facts, pre_grounding=pre_grounding)
 
     if multiple_solutions:
         for model in model_sets:

@@ -218,7 +218,7 @@ def run_method(X,
         random_stability(seed)
         start = time.time()
         W_est = ABAPC(data=X, alpha=test_alpha, indep_test=test_name,
-                      scenario=scenario, S_weight=True, triple_optimization=True)
+                      scenario=scenario, S_weight=True, pre_grounding=True)
         elapsed = time.time() - start
         logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')
 
