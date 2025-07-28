@@ -67,6 +67,7 @@ def extract_test_elements_from_symbol(symbol:str)->tuple:
     
     if "dep" in dep_type:
         X, Y, condset = elements.split(",")
+        X, Y = sorted([int(X), int(Y)])
         if condset == "empty":
             S = set()
         elif condset[0] == "s":
@@ -74,10 +75,11 @@ def extract_test_elements_from_symbol(symbol:str)->tuple:
         else:
             raise ValueError(f"Unknown element {condset}")
 
-        return int(X), S, int(Y), dep_type
+        return X, S, Y, dep_type
     elif dep_type in ["arrow", "edge"]:
         X, Y = elements.split(",")
-        return int(X), int(Y), dep_type
+        X, Y = sorted([int(X), int(Y)])
+        return X, Y, dep_type
     else:
         raise ValueError(f"Unknown element {dep_type}")
 
