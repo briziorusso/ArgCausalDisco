@@ -78,6 +78,8 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     ### remove paths that contain an indep fact
     if skeleton_rules_reduction:
         G.remove_edges_from(indep_facts)
+        for (X, Y) in indep_facts:
+            ctl.add("specific", [], f":- edge({X},{Y}).")
 
     node_pairs = tuple(dep_facts | indep_facts if skeleton_rules_reduction else combinations(range(n_nodes),2))
     logging.info(f"{len(node_pairs) / (n_nodes*(n_nodes-1)/2):.2%} of all node pairs will be considered for active paths.")
@@ -115,7 +117,12 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 logging.debug(f"   ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
 
         if (X, Y) in dep_facts:
-            ctl.add("specific", [], f"indep({X},{Y},S) :- not ap({X},{Y},_,S), set(S).")
+            if pre_grounding:
+                for S in dep_facts[(X, Y)]:
+                    s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
+                    ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- not ap({X},{Y},_,{s_str}).")
+            else:
+                ctl.add("specific", [], f"indep({X},{Y},S) :- not ap({X},{Y},_,S), set(S).")
         if (X, Y) in indep_facts and pre_grounding is False:
             ctl.add("specific", [], f"dep({X},{Y},S) :- ap({X},{Y},_,S), set(S).")
 
