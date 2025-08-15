@@ -19,7 +19,7 @@ __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 import os, sys
 import logging
 from clingo.control import Control
-from clingo import Function, Number, String
+from clingo import Function, Number
 import rustworkx as rx
 import numpy as np
 from tqdm.auto import tqdm
@@ -37,6 +37,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 opt_mode:str='optN',
                 show:list=['arrow'],
                 pre_grounding:bool=False,
+                ext_flag: bool = False,
                 )->Control:
 
     logging.info("Compiling the program")
@@ -109,7 +110,8 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                     logging.debug(f"   ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
 
                     if S in indep_facts.get((X,Y), set()):
-                        ctl.add("specific", [], f"dep({X},{Y},{s_str}) :- ap({X},{Y},p{n_p},{s_str}).")
+                        ext_premise = f"ext_indep({X},{Y},{s_str}), " if ext_flag else ""
+                        ctl.add("specific", [], f"dep({X},{Y},{s_str}) :- {ext_premise}ap({X},{Y},p{n_p},{s_str}).")
             else:
                 nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
                 nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
@@ -120,11 +122,14 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             if pre_grounding:
                 for S in dep_facts[(X, Y)]:
                     s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
-                    ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- not ap({X},{Y},_,{s_str}).")
+                    ext_premise = f"ext_dep({X},{Y},{s_str}), " if ext_flag else ""
+                    ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- {ext_premise}not ap({X},{Y},_,{s_str}).")
             else:
-                ctl.add("specific", [], f"indep({X},{Y},S) :- not ap({X},{Y},_,S), set(S).")
+                ext_premise = f"ext_dep({X},{Y},S), " if ext_flag else ""
+                ctl.add("specific", [], f"indep({X},{Y},S) :- {ext_premise}not ap({X},{Y},_,S), set(S).")
         if (X, Y) in indep_facts and pre_grounding is False:
-            ctl.add("specific", [], f"dep({X},{Y},S) :- ap({X},{Y},_,S), set(S).")
+            ext_premise = f"ext_indep({X},{Y},S), " if ext_flag else ""
+            ctl.add("specific", [], f"dep({X},{Y},S) :- {ext_premise}ap({X},{Y},_,S), set(S).")
 
     logging.info(f"{n_p} active paths added.")
 
@@ -177,6 +182,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
     indep_facts: dict[tuple, set[tuple]] = {}
     dep_facts: dict[tuple, set[tuple]] = {}
     facts = []
+    ext_flag = False
     if facts_location:
         facts_loc = facts_location.replace(".lp","_I.lp") if weak_constraints else facts_location
         logging.debug(f"   Loading facts from {facts_location}")
@@ -185,6 +191,8 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 if "dep" not in line or line.startswith("%"):
                     continue
                 line_clean = line.replace("#external ","").replace("\n","")
+                if "ext_" in line_clean:
+                    ext_flag = True
                 if weak_constraints:
                     statement, Is = line_clean.split(" I=")
                     I,truth = Is.split(",")
@@ -204,7 +212,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 facts_group[(X,Y)].add(condition_set)
 
     ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding)
+                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding, ext_flag)
 
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
     if search_for_models == 'No':
@@ -262,7 +270,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             facts_group[(X, Y)].remove(tuple(S))
             if not facts_group[(X, Y)]:
                 del facts_group[(X, Y)]
-                reground = skeleton_rules_reduction
+                reground = skeleton_rules_reduction and (ext_flag is False or dep_type == "ext_indep")
             else:
                 logging.debug(f"   Not removing fact {fact_str} because there are multiple facts with the same X and Y")
             ctl.assign_external(Function(dep_type, [Number(X), Number(Y), Function(fact_str.replace(').','').split(",")[-1])]), None)
@@ -271,7 +279,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 ### Save external statements
                 logging.info("Recompiling and regrounding...")
                 ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding)
+                                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding, ext_flag=ext_flag)
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
