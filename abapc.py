@@ -140,8 +140,8 @@ def ABAPC(data,
             for s,p in I_from_data:
                 PC_dep_type = 'indep' if p > alpha else 'dep'
                 s_text = [f"X{r+1}" for r in s]
-                dep_type = 'indep' if nx.algorithms.d_separated(G_est, {f"X{x+1}"}, {f"X{y+1}"}, set(s_text)) else 'dep'
-                I = initial_strength(p, len(s), alpha, 0.5, n_nodes, smoothing_k=smoothing_k)
+                dep_type = 'indep' if nx.is_d_separator(G_est, {f"X{x+1}"}, {f"X{y+1}"}, set(s_text)) else 'dep'
+                I = initial_strength(p, len(s), alpha, 0.5, n_nodes, smoothing_k=smoothing_k, S_weight=S_weight)
                 if dep_type != PC_dep_type:
                     est_I += -I
                 else:
