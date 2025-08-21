@@ -15,7 +15,7 @@ sec_purple='#441469'
 main_orange='#8a4500'
 sec_orange='#b85c00'
 
-def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, save_figs=False, output_name="bar_chart.html", debug=False):
+def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, font_size=20, save_figs=False, output_name="bar_chart.html", debug=False):
     fig = go.Figure()
     # for dataset_name in ['asia','cancer','earthquake','sachs','survey','alarm','child','insurance','hepar2']:
     # for method in ['Random', 'FGS', 'MCSL-MLP', 'NOTEARS-MLP', 'Max-PC', 'SPC (Ours)', 'ABAPC (Ours)']:
@@ -59,7 +59,7 @@ def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, sav
                 t=20,
                 # pad=10
             ),hovermode='x unified',
-            font=dict(size=20, family="Serif", color="black")
+            font=dict(size=font_size, family="Serif", color="black")
             )
 
     fig.add_annotation(
@@ -73,19 +73,19 @@ def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, sav
         showarrow=False,    
         font=dict(
                     family="Serif",
-                    size=20,
+                    size=font_size,
                     color="Black"
                     )
         )
 
     if 'n_' in var_to_plot or 'p_' in var_to_plot:
         orig_y = var_to_plot.replace('n_','').replace('p_','').upper()
-        fig.update_yaxes(title={'text':f'Normalised {orig_y} = {orig_y} / Number of Edges in DAG','font':{'size':20}})
+        fig.update_yaxes(title={'text':f'Normalised {orig_y} = {orig_y} / Number of Edges in DAG','font':{'size':font_size}})
     elif var_to_plot=='nnz':
         orig_y = 'Number of Edges in DAG'
-        fig.update_yaxes(title={'text':f'{orig_y}','font':{'size':20}})
+        fig.update_yaxes(title={'text':f'{orig_y}','font':{'size':font_size}})
     else:
-        fig.update_yaxes(title={'text':f'{var_to_plot.title()}','font':{'size':20}})
+        fig.update_yaxes(title={'text':f'{var_to_plot.title()}','font':{'size':font_size}})
 
     if save_figs:
         fig.write_html(output_name)
@@ -94,7 +94,7 @@ def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, sav
 
 def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict, 
                             methods=['Random', 'FGS', 'NOTEARS-MLP', 'Shapley-PC', 'ABAPC (Ours)'],
-                            range_y1=None, range_y2=None,
+                            range_y1=None, range_y2=None, font_size=20,
                             save_figs=False, output_name="bar_chart.html", debug=False):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     # for dataset_name in ['asia','cancer','earthquake','sachs','survey','alarm','child','insurance','hepar2']:
@@ -142,7 +142,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
                 t=20,
                 # pad=10
             ),hovermode='x unified',
-            font=dict(size=20, family="Serif", color="black"),
+            font=dict(size=font_size, family="Serif", color="black"),
             yaxis2=dict(scaleanchor=0, showline=False, showgrid=False, showticklabels=second_ticks, zeroline=True),
             )
 
@@ -157,7 +157,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         showarrow=False,    
         font=dict(
                     family="Serif",
-                    size=20,
+                    size=font_size,
                     color="Black"
                     )
         )
@@ -182,14 +182,14 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
                 range_y = range_y1 if n==0 else range_y2
         if 'n_' in var_to_plot or 'p_' in var_to_plot:
             orig_y = var_to_plot.replace('n_','').replace('p_','').replace('_low','').replace('_high','').upper()
-            fig.update_yaxes(title={'text':f'Normalised {orig_y} = {orig_y} / Number of Edges in DAG','font':{'size':20}}, secondary_y=n==1, range=range_y)
+            fig.update_yaxes(title={'text':f'Normalised {orig_y}','font':{'size':font_size}}, secondary_y=n==1, range=range_y)
             if second_ticks == False:
-                fig.update_yaxes(title={'text':'','font':{'size':20}}, secondary_y=True, range=range_y, showticklabels=False)
+                fig.update_yaxes(title={'text':'','font':{'size':font_size}}, secondary_y=True, range=range_y, showticklabels=False)
         elif var_to_plot=='nnz':
             orig_y = 'Number of Edges in DAG'
-            fig.update_yaxes(title={'text':f'{orig_y}','font':{'size':20}}, secondary_y=n==1, range=range_y)
+            fig.update_yaxes(title={'text':f'{orig_y}','font':{'size':font_size}}, secondary_y=n==1, range=range_y)
         else:
-            fig.update_yaxes(title={'text':f'{var_to_plot.title()}','font':{'size':20}}, secondary_y=n==1, range=range_y)
+            fig.update_yaxes(title={'text':f'{var_to_plot.title()}','font':{'size':font_size}}, secondary_y=n==1, range=range_y)
 
     start_pos = 0.017
     intra_dis = 0.12
@@ -213,12 +213,12 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         lin_space=9
         nl_space=9
     elif vars_to_plot == ['p_SID_low', 'p_SID_high']:
-        name1 = 'Low'
-        name2 = 'High'
-        lin_space=11
-        nl_space=11
-        intra_dis = 0.115
-        inter_dis = 0.135
+        name1 = 'Best'
+        name2 = 'Worst'
+        lin_space=9
+        nl_space=9
+        intra_dis = 0.112
+        inter_dis = 0.137
     elif vars_to_plot == ['p_shd', 'F1']:
         name1 = 'NSHD'
         name2 = 'F1'
@@ -244,7 +244,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
             showarrow=False,    
             font=dict(
                 # family="Courier New, monospace",
-                size=20,
+                size=font_size,
                 color="black"
                 )
         , bordercolor='#E5ECF6'
@@ -262,7 +262,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
             showarrow=False,    
             font=dict(
                 # family="Courier New, monospace",
-                size=20,
+                size=font_size,
                 color="black"
                 )
         , bordercolor='#E5ECF6'

@@ -1,6 +1,11 @@
 # Argumentative Causal Discovery
 This repository provides the code for the paper "Argumentative Causal Discovery". 
 
+In this paper we propose Causal ABA, which combines statistical tests and expert domain knowledge with non-monotonic reasoning and performs argumentative reasoning to output causal graphs in accordance with the reported causal relationships. Below is an overview of the workflow.
+
+![alt text](workflow.jpg)
+
+We instantiate Causal ABA using the conditional independence tests from the Majority-PC algorithm [(Colombo and Maathuis, 2014)](https://jmlr.org/papers/v15/colombo14a.html) as input, resulting in ABA-PC, a practical Causal Discovery algorithm that, in our experiments, is competitive with state-of-the-art baselines.
 ### Reproduce Experiments
 The experiments in the paper can be reproduced by running ```python experiments_bnlearn.py``` from the root folder. All the plots included in the paper can be inspected interactively from the [results/figs](results/figs) folder. Just download them and open them in a browser. 
 
@@ -49,3 +54,19 @@ ABAPC is integrated in the ```run_method()``` function together with the baselin
 
 ### Environment
 The code was tested with Python 3.10. `requirements.txt` provides the necessary python packages. Run `pip install -r requirements.txt` from a terminal at the root folder to install all packages in your virtual environment. You will need clingo 5.6.2 installed from the potassco repository via conda (command provided in requirements.txt).
+
+
+### Reference
+If you are using this code, please cite our paper
+```
+@inproceedings{KR2024-88,
+    title     = {{Argumentative Causal Discovery}},
+    author    = {Russo, Fabrizio and Rapberger, Anna and Toni, Francesca},
+    booktitle = {{Proceedings of the 21st International Conference on Principles of Knowledge Representation and Reasoning}},
+    pages     = {938--949},
+    year      = {2024},
+    month     = {8},
+    doi       = {10.24963/kr.2024/88},
+    url       = {https://doi.org/10.24963/kr.2024/88},
+  }
+```

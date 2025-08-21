@@ -16,7 +16,7 @@ __author__ = "Fabrizio Russo"
 __email__ = "fabrizio@imperial.ac.uk"
 __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
-import os,gc
+import os,gc,sys
 import logging
 import networkx as nx
 import numpy as np
@@ -25,6 +25,7 @@ from tqdm.auto import tqdm
 from itertools import combinations
 from cd_algorithms.PC import pc
 from causalaba import CausalABA
+# sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 from utils.helpers import logger_setup, random_stability
 from utils.graph_utils import initial_strength, set_of_models_to_set_of_graphs
 
@@ -33,7 +34,8 @@ def ABAPC(data,
           stable=True, conservative=True,
           base_fact_pct=1.0, set_indep_facts=False, 
           scenario="ABAPC", base_location="results",
-          out_mode="opt"):
+          out_mode="opt" , print_models=False,
+          sepsets = None, smoothing_k=0, S_weight=True, skeleton_rules_reduction=True):
     """
     Args:
     data: np.array
@@ -70,16 +72,22 @@ def ABAPC(data,
     n_nodes = data.shape[1]
     random_stability(seed)
     uc_rule = 5 if conservative else 0
-    cg = pc(data=data, alpha=alpha, indep_test=indep_test, uc_rule=uc_rule, stable=stable, show_progress=False, verbose=False)
+    if sepsets == None:
+        logging.info("Running PC algorithm")
+        ## Run PC algorithm
+        cg = pc(data=data, alpha=alpha, indep_test=indep_test, uc_rule=uc_rule, stable=stable, show_progress=False, verbose=False)
+        sepsets = cg.sepset
+    else:
+        logging.info("Using provided cg")
     ## Extract facts from PC
-    facts = []
+    facts = set()
     for X,Y in combinations(range(n_nodes), 2):
-        test_PC = [t for t in cg.sepset[X,Y]]
+        test_PC = [t for t in sepsets[X,Y]]
         for S, p in test_PC:
             dep_type_PC = "indep" if p > alpha else "dep" 
-            I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+            I = initial_strength(p, len(S), alpha, 0.5, n_nodes, smoothing_k=smoothing_k, S_weight=S_weight)
             s_str = 'empty' if len(S)==0 else 's'+'y'.join([str(i) for i in S])
-            facts.append((X,S,Y,dep_type_PC, f"{dep_type_PC}({X},{Y},{s_str}).", I))
+            facts.add((X,S,Y,dep_type_PC, f"{dep_type_PC}({X},{Y},{s_str}).", I))
 
     ### Save external statements
     with open(facts_location, "w") as f:
@@ -90,17 +98,17 @@ def ABAPC(data,
     with open(facts_location_wc, "w") as f:
         for n, s in enumerate(facts):
             if n/len(facts) <= base_fact_pct:
-                f.write(f":~ {s[4]} [-{int(s[5]*1000)}]\n")
+                f.write(f":~ ext_{s[4]} [-{int(s[5]*1000)}]\n")
     ### Save inner strengths
     with open(facts_location_I, "w") as f:
         for n, s in enumerate(facts):
             if n/len(facts) <= base_fact_pct:
-                f.write(f"{s[4]} I={s[5]}, NA\n")
-    
+                f.write(f"ext_{s[4]} I={s[5]}, NA\n")
+
     set_of_model_sets = []
-    model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=True,
+    model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=skeleton_rules_reduction,
                                                 fact_pct=base_fact_pct, search_for_models='first',
-                                                opt_mode='optN', print_models=False, set_indep_facts=set_indep_facts)
+                                                opt_mode='optN', print_models=print_models, set_indep_facts=set_indep_facts)
 
     if multiple_solutions:
         for model in model_sets:
@@ -116,7 +124,7 @@ def ABAPC(data,
     if len(models) > 50000:
         logging.info("Pick the first 50,000 models for I calculation")
         models = set(list(models)[:50000]) ## Limit the number of models to 30,000
-    for n, model in tqdm(enumerate(models), desc="Models from ABAPC"):
+    for n, model in tqdm(enumerate(models), desc="Models from ABAPC", total=len(models)):
         ## derive B_est from the model
         B_est = np.zeros((n_nodes, n_nodes))
         for edge in model:
@@ -127,12 +135,12 @@ def ABAPC(data,
         logging.debug(G_est.edges)
         est_I = 0
         for x,y in combinations(range(n_nodes), 2):
-            I_from_data = list(set(cg.sepset[x,y]))
+            I_from_data = list(set(sepsets[x,y]))
             for s,p in I_from_data:
                 PC_dep_type = 'indep' if p > alpha else 'dep'
                 s_text = [f"X{r+1}" for r in s]
                 dep_type = 'indep' if nx.algorithms.d_separated(G_est, {f"X{x+1}"}, {f"X{y+1}"}, set(s_text)) else 'dep'
-                I = initial_strength(p, len(s), alpha, 0.5, n_nodes)
+                I = initial_strength(p, len(s), alpha, 0.5, n_nodes, smoothing_k=smoothing_k)
                 if dep_type != PC_dep_type:
                     est_I += -I
                 else:
@@ -155,7 +163,7 @@ def ABAPC(data,
     logging.info(B_est)
 
     if out_mode == "opt":
-        del models, model_ranking, model_sets, MECs, cg, facts, I_from_data
+        del models, model_ranking, model_sets, MECs, facts, I_from_data
         gc.collect()
         return B_est
     elif out_mode == "optN":

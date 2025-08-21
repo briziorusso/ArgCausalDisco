@@ -47,6 +47,7 @@ model_list = [
             'abapc'
             # ,'fgs'
             # ,'nt'
+            # ,'spc'
             ]
             ###Start time 17:25
 
