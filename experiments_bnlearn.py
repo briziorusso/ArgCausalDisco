@@ -27,7 +27,7 @@ from utils.data_utils import load_bnlearn_data_dag, simulate_dag
 import warnings
 warnings.filterwarnings("ignore")
 
-version = 'spc_bnlearn_50rep'
+version = 'bnlearn_50rep_test_reproducibility'
 logger_setup(f'results/log_{version}.log')
 data_path = 'datasets'
 sample_size = 5000
@@ -36,19 +36,20 @@ device = 0
 load_res = False
 save_res = True
 dataset_list = [
-                'cancer', 
-                'earthquake', 
-                'survey', 
+                # 'cancer', 
+                # 'earthquake', 
+                # 'survey', 
                 'asia'
                 ]
 model_list = [
             # 'random'
             # ,'mpc'
-            # ,'abapc'
+            'abapc'
             # ,'fgs'
             # ,'nt'
-            'spc'
+            # ,'spc'
             ]
+            ###Start time 17:25
 
 if load_res:         
     mt_res = pd.DataFrame(np.load(f"results/stored_results_{version}.npy", allow_pickle=True), 
