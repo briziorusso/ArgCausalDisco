@@ -1,4 +1,5 @@
 networkx
+rustworkx
 pandas
 numpy
 scikit-learn

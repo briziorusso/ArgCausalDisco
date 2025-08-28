@@ -1250,6 +1250,37 @@ class TestABAPC(unittest.TestCase):
 
         self.assertEqual(B_est[0], expected)
 
+    def test_pre_grounding(self):
+        from collections import defaultdict
+        scenario = "test_pre_grounding"
+        logger_setup(scenario)
+        ## true DAG
+        B_true = np.array( [[ 0,  0,  1],
+                            [ 0,  0,  1],
+                            [ 0,  0,  0]])
+        n_nodes = B_true.shape[0]
+        n_samples = 5000
+        logging.info(B_true)
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        logging.info(G_true.edges)
+        truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
+        ## generate data
+        data = simulate_discrete_data(n_nodes, n_samples, truth_DAG_directed_edges, 42)
+
+        sepset = defaultdict(list)
+
+        sepset.update({
+            (1, 2): [((0,), 1), ((), 0)],
+            (0, 1): [((), 0.02)],
+        })
+        ## run ABAPC
+        B_est = ABAPC(data=data, alpha=0.01, indep_test='fisherz', scenario=scenario, 
+                      sepsets=sepset, out_mode='optN', set_indep_facts=False, print_models=True,
+                      skeleton_rules_reduction=True, pre_grounding=True)
+
+        expected = {frozenset({(0, 2), (1, 2)}),frozenset({(1, 2)}),frozenset({(2, 1)})}
+
+        self.assertEqual(B_est[0], expected)
 
     def test_abapc_four_node_example(self):
         #### ArgCD paper example ####
@@ -1352,7 +1383,7 @@ TestABAPC().test_abapc()
 TestABAPC().test_abapc_indeps()
 TestABAPC().test_abapc_bnlearn()
 
-## Paper Examples
+# Paper Examples
 TestCausalABA().four_node_PC_facts() 
 TestABAPC().test_abapc_four_node_example()
 TestCausalABA().four_node_example_arbitrary()
@@ -1361,5 +1392,6 @@ TestCausalABA().four_node_example_indeps()
 TestABAPC().test_abapc_mock_three_var()
 TestABAPC().test_abapc_mock_three_var_collider()
 TestABAPC().test_incremental_solving()
+TestABAPC().test_pre_grounding()
 
 logging.info(f"Total time={str(datetime.now()-start)}")

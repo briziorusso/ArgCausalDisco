@@ -35,7 +35,8 @@ def ABAPC(data,
           base_fact_pct=1.0, set_indep_facts=False, 
           scenario="ABAPC", base_location="results",
           out_mode="opt" , print_models=False,
-          sepsets = None, smoothing_k=0, S_weight=True, skeleton_rules_reduction=True):
+          sepsets = None, smoothing_k=0, S_weight=True,
+          skeleton_rules_reduction=True, pre_grounding=False):
     """
     Args:
     data: np.array
@@ -108,7 +109,7 @@ def ABAPC(data,
     set_of_model_sets = []
     model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=skeleton_rules_reduction,
                                                 fact_pct=base_fact_pct, search_for_models='first',
-                                                opt_mode='optN', print_models=print_models, set_indep_facts=set_indep_facts)
+                                                opt_mode='optN', print_models=print_models, set_indep_facts=set_indep_facts, pre_grounding=pre_grounding)
 
     if multiple_solutions:
         for model in model_sets:
@@ -139,8 +140,8 @@ def ABAPC(data,
             for s,p in I_from_data:
                 PC_dep_type = 'indep' if p > alpha else 'dep'
                 s_text = [f"X{r+1}" for r in s]
-                dep_type = 'indep' if nx.algorithms.d_separated(G_est, {f"X{x+1}"}, {f"X{y+1}"}, set(s_text)) else 'dep'
-                I = initial_strength(p, len(s), alpha, 0.5, n_nodes, smoothing_k=smoothing_k)
+                dep_type = 'indep' if nx.is_d_separator(G_est, {f"X{x+1}"}, {f"X{y+1}"}, set(s_text)) else 'dep'
+                I = initial_strength(p, len(s), alpha, 0.5, n_nodes, smoothing_k=smoothing_k, S_weight=S_weight)
                 if dep_type != PC_dep_type:
                     est_I += -I
                 else:
