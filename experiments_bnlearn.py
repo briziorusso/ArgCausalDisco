@@ -49,7 +49,7 @@ model_list = [
             # ,'nt'
             # ,'spc'
             ]
-            ###Start time 17:25
+            ###Start time 17:25 - Finished 19:45
 
 if load_res:         
     mt_res = pd.DataFrame(np.load(f"results/stored_results_{version}.npy", allow_pickle=True), 
