@@ -36,7 +36,8 @@ def ABAPC(data,
           scenario="ABAPC", base_location="results",
           out_mode="opt" , print_models=False,
           sepsets = None, smoothing_k=0, S_weight=True,
-          skeleton_rules_reduction=True, pre_grounding=False):
+          skeleton_rules_reduction=True, pre_grounding=False,
+          prior_knowledge=None):
     """
     Args:
     data: np.array
@@ -73,17 +74,29 @@ def ABAPC(data,
     n_nodes = data.shape[1]
     random_stability(seed)
     uc_rule = 5 if conservative else 0
-    if sepsets == None:
+    if sepsets is None:
         logging.info("Running PC algorithm")
+        background_knowledge = (
+            None if prior_knowledge is None else prior_knowledge.background_knowledge
+        )
         ## Run PC algorithm
-        cg = pc(data=data, alpha=alpha, indep_test=indep_test, uc_rule=uc_rule, stable=stable, show_progress=False, verbose=False)
+        cg = pc(
+            data=data,
+            alpha=alpha,
+            indep_test=indep_test,
+            uc_rule=uc_rule,
+            stable=stable,
+            show_progress=False,
+            verbose=False,
+            background_knowledge=background_knowledge,
+        )
         sepsets = cg.sepset
     else:
         logging.info("Using provided cg")
     ## Extract facts from PC
     facts = set()
     for X,Y in combinations(range(n_nodes), 2):
-        test_PC = [t for t in sepsets[X,Y]]
+        test_PC = list(set(sepsets[X,Y]))
         for S, p in test_PC:
             dep_type_PC = "indep" if p > alpha else "dep" 
             I = initial_strength(p, len(S), alpha, 0.5, n_nodes, smoothing_k=smoothing_k, S_weight=S_weight)
@@ -99,17 +112,30 @@ def ABAPC(data,
     with open(facts_location_wc, "w") as f:
         for n, s in enumerate(facts):
             if n/len(facts) <= base_fact_pct:
-                f.write(f":~ ext_{s[4]} [-{int(s[5]*1000)}]\n")
+                f.write(f":~ ext_{s[4]} [-{int(s[5]*1e14)*2}]\n")
     ### Save inner strengths
     with open(facts_location_I, "w") as f:
         for n, s in enumerate(facts):
             if n/len(facts) <= base_fact_pct:
                 f.write(f"ext_{s[4]} I={s[5]}, NA\n")
+    
+    if out_mode == "facts_only":
+        return facts_location_I, sepsets
 
     set_of_model_sets = []
-    model_sets, multiple_solutions = CausalABA(n_nodes, facts_location, weak_constraints=True, skeleton_rules_reduction=skeleton_rules_reduction,
-                                                fact_pct=base_fact_pct, search_for_models='first',
-                                                opt_mode='optN', print_models=print_models, set_indep_facts=set_indep_facts, pre_grounding=pre_grounding)
+    model_sets, multiple_solutions = CausalABA(
+        n_nodes,
+        facts_location,
+        weak_constraints=True,
+        skeleton_rules_reduction=skeleton_rules_reduction,
+        fact_pct=base_fact_pct,
+        search_for_models="first",
+        opt_mode="optN",
+        print_models=print_models,
+        set_indep_facts=set_indep_facts,
+        pre_grounding=pre_grounding,
+        prior_knowledge=prior_knowledge,
+    )
 
     if multiple_solutions:
         for model in model_sets:
@@ -117,6 +143,12 @@ def ABAPC(data,
             set_of_model_sets.append(models)
     else:
         models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes, False)
+
+    if len(models) == 1:
+        B_est = np.zeros((n_nodes, n_nodes))
+        for edge in models.pop():
+            B_est[edge[0], edge[1]] = 1
+        return B_est
 
     if len(set_of_model_sets) > 0:
         logging.info(f"Number of solutions found: {len(set_of_model_sets)}")

@@ -101,7 +101,7 @@ def find_all_d_separations_sets(G, verbose=True, debug=False):
                 for S in combinations(Neigh_x_noy, depth):
                     s = set([int(s.replace('X',''))-1 for s in S])
                     s_str = 'empty' if len(S)==0 else 's'+'y'.join([str(i) for i in s])
-                    if nx.algorithms.d_separated(G, {f"X{x+1}"}, {f"X{y+1}"}, set(S)):
+                    if nx.is_d_separator(G, {f"X{x+1}"}, {f"X{y+1}"}, set(S)):
                         logging.debug(f"X{x+1} and X{y+1} are d-separated by {S}")
                         septests.append(f"indep({x},{y},{s_str}).")
                     else:
