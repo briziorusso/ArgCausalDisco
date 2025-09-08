@@ -1,0 +1,448 @@
+[
+    {
+        "filename":"clinical_pathways_in_cardiac_and_abdominal_health",
+        "title":"clinical_pathways_in_cardiac_and_abdominal_health",
+        "num_nodes":7,
+        "num_edges":7,
+        "variable_descriptions":{
+            "shivering":"An involuntary muscular contraction causing tremors, typically a bodily response to cold or an elevated core temperature.",
+            "ascites":"The pathological accumulation of fluid within the peritoneal cavity, often resulting in abdominal distension and discomfort.",
+            "fever":"An elevated body temperature, often a systemic response to infection, inflammation, or other medical conditions.",
+            "heart_failure":"A chronic medical condition characterized by the heart's inability to pump sufficient blood to meet the body's metabolic demands.",
+            "reduction_in_cardiac_output":"A physiological state indicating a decrease in the volume of blood pumped by the heart per minute, affecting systemic circulation.",
+            "peritonitis":"Inflammation of the peritoneum, the membrane lining the inner abdominal wall and covering the abdominal organs.",
+            "hospital_admission":"The formal process of a patient being admitted to a medical facility for inpatient treatment, monitoring, or diagnostic procedures."
+        },
+        "priors":[
+            [
+                "shivering",
+                "ascites"
+            ],
+            [
+                "shivering",
+                "hospital_admission"
+            ],
+            [
+                "shivering",
+                "peritonitis"
+            ],
+            [
+                "heart_failure",
+                "peritonitis"
+            ],
+            [
+                "fever",
+                "heart_failure"
+            ],
+            [
+                "fever",
+                "reduction_in_cardiac_output"
+            ],
+            [
+                "reduction_in_cardiac_output",
+                "peritonitis"
+            ],
+            [
+                "shivering",
+                "heart_failure"
+            ],
+            [
+                "ascites",
+                "fever"
+            ],
+            [
+                "shivering",
+                "reduction_in_cardiac_output"
+            ]
+        ],
+        "TP":10,
+        "FP":0,
+        "TN":7,
+        "FN":4,
+        "Precision":1.0,
+        "Recall":0.7142857143,
+        "F-beta":0.9848484848,
+        "run_id":4
+    },
+    {
+        "filename":"clinical_variables_in_cardiovascular_and_gastrointestinal_health",
+        "title":"clinical_variables_in_cardiovascular_and_gastrointestinal_health",
+        "num_nodes":5,
+        "num_edges":4,
+        "variable_descriptions":{
+            "rectal_varices":"Abnormally enlarged and tortuous veins located in the rectum, often a consequence of increased pressure in the portal venous system.",
+            "mesenteric_ischemia":"A medical condition characterized by reduced blood flow to the intestines, which can lead to tissue damage and impaired function of the digestive tract.",
+            "heart_failure":"A chronic medical condition where the heart is unable to pump enough blood to meet the body's needs, leading to various symptoms and complications.",
+            "acute_hospital_admission":"An unscheduled entry into a healthcare facility for immediate medical care, typically due to a sudden onset or worsening of a health condition.",
+            "lower_gastrointestinal_bleeding":"The presence of blood loss originating from the lower parts of the digestive tract, including the small intestine, large intestine, rectum, or anus."
+        },
+        "priors":[
+            [
+                "heart_failure",
+                "lower_gastrointestinal_bleeding"
+            ],
+            [
+                "rectal_varices",
+                "acute_hospital_admission"
+            ],
+            [
+                "rectal_varices",
+                "mesenteric_ischemia"
+            ],
+            [
+                "rectal_varices",
+                "heart_failure"
+            ]
+        ],
+        "TP":4,
+        "FP":0,
+        "TN":4,
+        "FN":2,
+        "Precision":1.0,
+        "Recall":0.6666666667,
+        "F-beta":0.9811320755,
+        "run_id":9
+    },
+    {
+        "filename":"factors_influencing_well_being_and_resources",
+        "title":"factors_influencing_well_being_and_resources",
+        "num_nodes":9,
+        "num_edges":8,
+        "variable_descriptions":{
+            "property_damage":"The impairment, destruction, or loss inflicted upon an individual's or entity's physical assets and possessions.",
+            "early_death":"The unfortunate occurrence of an individual's passing at a premature stage of life, relative to typical life expectancy.",
+            "heart_failure":"A severe and chronic medical condition impacting the cardiovascular system's ability to function effectively.",
+            "separation":"A state of being apart from others, which can refer to physical distance, emotional estrangement, or the dissolution of a bond or relationship.",
+            "serious_accidents":"Unplanned and impactful events leading to significant harm, injury, or disruption to individuals or their surroundings.",
+            "disasters":"Large-scale, often sudden, calamitous events, typically natural or man-made, causing extensive damage, loss, or suffering across a wide area.",
+            "demise":"The ultimate cessation of life; an individual's death, signifying the end of their existence.",
+            "hospitalization":"The period during which an individual receives medical care and treatment within a healthcare facility, often requiring an overnight stay.",
+            "expenses":"The financial outlays or costs incurred as a result of various situations, needs, or activities, requiring monetary expenditure."
+        },
+        "priors":[
+            [
+                "early_death",
+                "separation"
+            ],
+            [
+                "heart_failure",
+                "disasters"
+            ],
+            [
+                "separation",
+                "serious_accidents"
+            ],
+            [
+                "separation",
+                "disasters"
+            ],
+            [
+                "disasters",
+                "hospitalization"
+            ],
+            [
+                "disasters",
+                "expenses"
+            ],
+            [
+                "early_death",
+                "expenses"
+            ],
+            [
+                "property_damage",
+                "early_death"
+            ],
+            [
+                "serious_accidents",
+                "expenses"
+            ]
+        ],
+        "TP":9,
+        "FP":0,
+        "TN":8,
+        "FN":19,
+        "Precision":1.0,
+        "Recall":0.3214285714,
+        "F-beta":0.9249011858,
+        "run_id":7
+    },
+    {
+        "filename":"interacting_health_conditions_and_outcomes",
+        "title":"interacting_health_conditions_and_outcomes",
+        "num_nodes":11,
+        "num_edges":10,
+        "variable_descriptions":{
+            "kidney_failure":"A medical condition where the kidneys lose their ability to adequately filter waste products from the blood.",
+            "shortness_of_breath":"A subjective sensation of uncomfortable or difficult breathing, often described as feeling winded or unable to get enough air.",
+            "attack_of_influenza":"A distinct episode of illness caused by the influenza virus, characterized by a specific set of symptoms.",
+            "loss_of_weight":"A measurable decrease in an individual's total body mass over a period of time.",
+            "heart_failure":"A chronic progressive condition in which the heart muscle is unable to pump enough blood to meet the body's needs for blood and oxygen.",
+            "heart_trouble":"A general term indicating the presence of various non-specific issues or irregularities affecting the cardiovascular system.",
+            "morbidity":"The state of being diseased, unhealthy, or suffering from a medical condition, often referring to the incidence of disease in a population or an individual's overall health burden.",
+            "loss_of_appetite":"A significant reduction or complete absence of the desire to consume food.",
+            "demise":"The ultimate cessation of life functions in an individual.",
+            "osteoporosis_associated_fractures":"The occurrence of bone fractures specifically attributed to the weakening of bone tissue, often observed in conditions like osteoporosis.",
+            "lung_disorder":"A broad category encompassing various medical conditions that affect the structure or function of the lungs."
+        },
+        "priors":[
+            [
+                "heart_trouble",
+                "osteoporosis_associated_fractures"
+            ],
+            [
+                "shortness_of_breath",
+                "loss_of_weight"
+            ],
+            [
+                "attack_of_influenza",
+                "osteoporosis_associated_fractures"
+            ],
+            [
+                "heart_trouble",
+                "loss_of_appetite"
+            ],
+            [
+                "loss_of_appetite",
+                "osteoporosis_associated_fractures"
+            ],
+            [
+                "shortness_of_breath",
+                "osteoporosis_associated_fractures"
+            ],
+            [
+                "demise",
+                "osteoporosis_associated_fractures"
+            ],
+            [
+                "morbidity",
+                "lung_disorder"
+            ],
+            [
+                "loss_of_weight",
+                "heart_trouble"
+            ],
+            [
+                "shortness_of_breath",
+                "loss_of_appetite"
+            ],
+            [
+                "loss_of_appetite",
+                "lung_disorder"
+            ],
+            [
+                "heart_failure",
+                "osteoporosis_associated_fractures"
+            ],
+            [
+                "kidney_failure",
+                "attack_of_influenza"
+            ],
+            [
+                "osteoporosis_associated_fractures",
+                "lung_disorder"
+            ]
+        ],
+        "TP":14,
+        "FP":0,
+        "TN":10,
+        "FN":31,
+        "Precision":1.0,
+        "Recall":0.3111111111,
+        "F-beta":0.9215189873,
+        "run_id":1
+    },
+    {
+        "filename":"interconnected_health_and_socio_economic_outcomes",
+        "title":"interconnected_health_and_socio_economic_outcomes",
+        "num_nodes":10,
+        "num_edges":11,
+        "variable_descriptions":{
+            "early_death":"The occurrence of death at an age significantly younger than the average life expectancy for a given population.",
+            "serious_illness":"A severe medical condition that significantly impairs an individual's health and daily functioning.",
+            "heart_failure":"A chronic medical condition where the heart muscle is unable to pump enough blood to meet the body's needs.",
+            "stagnant_economy":"A state of minimal or no economic growth within a region or nation, often marked by low productivity and investment.",
+            "clostridium_difficile_infection":"An infection of the colon caused by the bacterium *Clostridium difficile*, leading to symptoms such as severe diarrhea and inflammation.",
+            "financial_crisis":"A period of severe economic distress, characterized by significant financial instability for an individual, household, or a broader economic system.",
+            "demise":"The end of life; death.",
+            "job_loss":"The involuntary termination of an individual's employment, resulting in unemployment.",
+            "loss_of_income":"A reduction or complete cessation of an individual's earnings from employment, business, or other financial sources.",
+            "hospitalization":"The admission of an individual to a hospital for medical treatment, observation, or surgery."
+        },
+        "priors":[
+            [
+                "stagnant_economy",
+                "hospitalization"
+            ],
+            [
+                "clostridium_difficile_infection",
+                "loss_of_income"
+            ],
+            [
+                "clostridium_difficile_infection",
+                "financial_crisis"
+            ],
+            [
+                "stagnant_economy",
+                "heart_failure"
+            ],
+            [
+                "stagnant_economy",
+                "early_death"
+            ],
+            [
+                "job_loss",
+                "hospitalization"
+            ],
+            [
+                "stagnant_economy",
+                "clostridium_difficile_infection"
+            ],
+            [
+                "stagnant_economy",
+                "demise"
+            ],
+            [
+                "heart_failure",
+                "job_loss"
+            ],
+            [
+                "clostridium_difficile_infection",
+                "job_loss"
+            ],
+            [
+                "heart_failure",
+                "loss_of_income"
+            ],
+            [
+                "heart_failure",
+                "financial_crisis"
+            ]
+        ],
+        "TP":12,
+        "FP":0,
+        "TN":11,
+        "FN":22,
+        "Precision":1.0,
+        "Recall":0.3529411765,
+        "F-beta":0.9341317365,
+        "run_id":3
+    },
+    {
+        "filename":"medical_conditions_and_outcomes",
+        "title":"medical_conditions_and_outcomes",
+        "num_nodes":8,
+        "num_edges":7,
+        "variable_descriptions":{
+            "early_death":"The occurrence of mortality at an age significantly younger than the average life expectancy for a given population.",
+            "heart_failure":"A chronic, progressive condition in which the heart muscle is unable to pump enough blood to meet the body's needs for blood and oxygen.",
+            "coronary_heart_disease":"A medical condition characterized by the narrowing or blockage of the coronary arteries, which supply blood to the heart muscle.",
+            "laminopathies":"A group of rare genetic disorders caused by mutations in genes encoding nuclear lamin proteins, affecting various tissues and organs.",
+            "expenses":"The total financial costs incurred, often related to medical care, treatments, or other associated services.",
+            "serious_health_problems":"A classification encompassing severe medical conditions or significant health impairments that require substantial attention or intervention.",
+            "imbalanced_ph":"A physiological state characterized by deviations of the body's pH levels from their normal, healthy range.",
+            "hospitalization":"The event of being admitted to a medical facility for inpatient care, treatment, or observation."
+        },
+        "priors":[
+            [
+                "coronary_heart_disease",
+                "imbalanced_ph"
+            ],
+            [
+                "laminopathies",
+                "imbalanced_ph"
+            ],
+            [
+                "coronary_heart_disease",
+                "expenses"
+            ],
+            [
+                "laminopathies",
+                "expenses"
+            ],
+            [
+                "coronary_heart_disease",
+                "hospitalization"
+            ],
+            [
+                "laminopathies",
+                "hospitalization"
+            ],
+            [
+                "early_death",
+                "expenses"
+            ],
+            [
+                "early_death",
+                "hospitalization"
+            ],
+            [
+                "imbalanced_ph",
+                "hospitalization"
+            ],
+            [
+                "expenses",
+                "imbalanced_ph"
+            ]
+        ],
+        "TP":10,
+        "FP":0,
+        "TN":7,
+        "FN":11,
+        "Precision":1.0,
+        "Recall":0.4761904762,
+        "F-beta":0.9594095941,
+        "run_id":9
+    },
+    {
+        "filename":"pharmacological_and_cardiac_health_dynamics",
+        "title":"pharmacological_and_cardiac_health_dynamics",
+        "num_nodes":6,
+        "num_edges":6,
+        "variable_descriptions":{
+            "palpitations":"The subjective experience of an abnormally rapid, strong, or irregular heartbeat.",
+            "heart_failure":"A medical condition indicating the heart's reduced ability to pump blood effectively throughout the body.",
+            "appetite_suppression":"A state characterized by a diminished desire or urge to consume food.",
+            "acute_hospital_admission":"The event of a patient being admitted to a medical facility for urgent, short-term treatment or observation.",
+            "stimulants":"The presence or administration of substances known to increase alertness and energy levels.",
+            "sudden_death":"An unexpected and abrupt cessation of life, often occurring without prior warning or within a very short timeframe from the onset of symptoms."
+        },
+        "priors":[
+            [
+                "palpitations",
+                "appetite_suppression"
+            ],
+            [
+                "heart_failure",
+                "stimulants"
+            ],
+            [
+                "heart_failure",
+                "appetite_suppression"
+            ],
+            [
+                "acute_hospital_admission",
+                "stimulants"
+            ],
+            [
+                "appetite_suppression",
+                "sudden_death"
+            ],
+            [
+                "acute_hospital_admission",
+                "sudden_death"
+            ],
+            [
+                "appetite_suppression",
+                "acute_hospital_admission"
+            ]
+        ],
+        "TP":7,
+        "FP":0,
+        "TN":6,
+        "FN":2,
+        "Precision":1.0,
+        "Recall":0.7777777778,
+        "F-beta":0.9891304348,
+        "run_id":1
+    }
+]

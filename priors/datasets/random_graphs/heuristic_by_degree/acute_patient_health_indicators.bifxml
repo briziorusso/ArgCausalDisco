@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Acute Patient Health Indicators</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An inflammatory condition of the lungs, typically caused by infection, leading to fluid accumulation in the air sacs.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>burns</NAME>
+	<PROPERTY>description = A type of tissue damage resulting from exposure to heat, chemicals, electricity, or radiation, varying in severity and extent.</PROPERTY>
+	<PROPERTY>fast = burns[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = The partial or complete loss of vision, affecting one or both eyes.</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = The sudden and complete cessation of the heart's pumping function, leading to a lack of blood circulation.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>redness</NAME>
+	<PROPERTY>description = A visible discoloration of the skin or mucous membranes, often indicative of inflammation, irritation, or increased blood flow.</PROPERTY>
+	<PROPERTY>fast = redness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sepsis</NAME>
+	<PROPERTY>description = A severe, life-threatening medical condition characterized by the body's overwhelming and harmful response to an infection.</PROPERTY>
+	<PROPERTY>fast = sepsis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<TABLE>
+		0.219186 0.780814
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>burns</FOR>
+	<TABLE>
+		0.432857 0.567143
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>burns</GIVEN>
+	<TABLE>
+		0.853521 0.146479
+		0.608847 0.391153
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<TABLE>
+		0.422838 0.577162
+		0.349234 0.650766
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>redness</FOR>
+	<GIVEN>burns</GIVEN>
+	<TABLE>
+		0.512444 0.487556
+		0.631771 0.368229
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sepsis</FOR>
+	<GIVEN>burns</GIVEN>
+	<GIVEN>pneumonia</GIVEN>
+	<TABLE>
+		0.241759 0.758241
+		0.535324 0.464676
+		0.317959 0.682041
+		0.45228 0.54772
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Factors in an Individual's Health Profile</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = This variable describes the experience of persistent or long-lasting physical discomfort that continues for an extended period, affecting an individual's daily life.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>illnesses</NAME>
+	<PROPERTY>description = This variable represents the presence of specific medical conditions, diseases, or infections that manifest with identifiable symptoms in an individual.</PROPERTY>
+	<PROPERTY>fast = illnesses[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>loss_of_appetite</NAME>
+	<PROPERTY>description = This variable signifies a reduced desire or inability to eat, often resulting in decreased food intake and potential nutritional impact for an individual.</PROPERTY>
+	<PROPERTY>fast = loss_of_appetite[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>health_issues</NAME>
+	<PROPERTY>description = This variable broadly encompasses any condition, concern, or problem that negatively impacts an individual's physical or mental well-being, ranging from minor ailments to more significant conditions.</PROPERTY>
+	<PROPERTY>fast = health_issues[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>suppressed_immune_system</NAME>
+	<PROPERTY>description = This variable indicates a state where the body's natural defense mechanisms are operating below their optimal capacity, making an individual more vulnerable.</PROPERTY>
+	<PROPERTY>fast = suppressed_immune_system[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>illnesses</GIVEN>
+	<TABLE>
+		0.258525 0.741475
+		0.71237 0.28763
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>illnesses</FOR>
+	<GIVEN>suppressed_immune_system</GIVEN>
+	<TABLE>
+		0.698394 0.301606
+		0.327476 0.672524
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>loss_of_appetite</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>health_issues</GIVEN>
+	<GIVEN>illnesses</GIVEN>
+	<TABLE>
+		0.537888 0.462112
+		0.724011 0.275989
+		0.373899 0.626101
+		0.687745 0.312255
+		0.202086 0.797914
+		0.391274 0.608726
+		0.517373 0.482627
+		0.475192 0.524808
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>health_issues</FOR>
+	<TABLE>
+		0.414435 0.585565
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>suppressed_immune_system</FOR>
+	<TABLE>
+		0.468211 0.531789
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

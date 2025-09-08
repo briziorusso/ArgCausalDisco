@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unknown</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>Burglary</NAME>
+	<PROPERTY>description = An event involving an unauthorized entry into a specific residence.</PROPERTY>
+	<PROPERTY>fast = Burglary{True|False}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>True</OUTCOME>
+	<OUTCOME>False</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Earthquake</NAME>
+	<PROPERTY>description = The occurrence of seismic activity in the local geographical area.</PROPERTY>
+	<PROPERTY>fast = Earthquake{True|False}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>True</OUTCOME>
+	<OUTCOME>False</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Alarm</NAME>
+	<PROPERTY>description = The activation of a high-decibel security siren at the residence.</PROPERTY>
+	<PROPERTY>fast = Alarm{True|False}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>True</OUTCOME>
+	<OUTCOME>False</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>JohnCalls</NAME>
+	<PROPERTY>description = A phone call placed by a neighbor, John, to the residents of the house.</PROPERTY>
+	<PROPERTY>fast = JohnCalls{True|False}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>True</OUTCOME>
+	<OUTCOME>False</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>MaryCalls</NAME>
+	<PROPERTY>description = A phone call placed by a neighbor, Mary, to the residents of the house.</PROPERTY>
+	<PROPERTY>fast = MaryCalls{True|False}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>True</OUTCOME>
+	<OUTCOME>False</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>Burglary</FOR>
+	<TABLE>
+		0.01 0.99
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Earthquake</FOR>
+	<TABLE>
+		0.02 0.98
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Alarm</FOR>
+	<GIVEN>Burglary</GIVEN>
+	<GIVEN>Earthquake</GIVEN>
+	<TABLE>
+		0.95 0.05
+		0.94 0.06
+		0.29 0.71
+		0.001 0.999
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>JohnCalls</FOR>
+	<GIVEN>Alarm</GIVEN>
+	<TABLE>
+		0.9 0.1
+		0.05 0.95
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>MaryCalls</FOR>
+	<GIVEN>Alarm</GIVEN>
+	<TABLE>
+		0.7 0.3
+		0.01 0.99
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

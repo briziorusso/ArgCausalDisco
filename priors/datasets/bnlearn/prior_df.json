@@ -1,0 +1,303 @@
+[
+    {
+        "filename":"asia",
+        "title":"asia",
+        "num_nodes":8,
+        "num_edges":8,
+        "variable_descriptions":{
+            "smoke":"smoking: whether or not the patient is a smoker",
+            "either":"either tuberculosis or lung cancer: whether or not the patient has either tuberculosis or lung cancer",
+            "asia":"recent visit to asia: whether or not the patient has recently visited asia",
+            "xray":"positive chest xray: whether or not the patient has had a positive chest xray",
+            "bronc":"bronchitis: whether or not the patient has bronchitis",
+            "tub":"tuberculosis: whether or not the patient has tuberculosis",
+            "lung":"lung cancer: whether or not the patient has lung cancer",
+            "dysp":"dyspnoea: whether or not the patient has dyspnoea, also known as shortness of breath"
+        },
+        "priors":[
+            [
+                "bronc",
+                "tub"
+            ],
+            [
+                "xray",
+                "bronc"
+            ],
+            [
+                "smoke",
+                "asia"
+            ],
+            [
+                "xray",
+                "dysp"
+            ],
+            [
+                "smoke",
+                "tub"
+            ],
+            [
+                "lung",
+                "dysp"
+            ],
+            [
+                "smoke",
+                "dysp"
+            ],
+            [
+                "asia",
+                "bronc"
+            ],
+            [
+                "asia",
+                "dysp"
+            ],
+            [
+                "either",
+                "asia"
+            ],
+            [
+                "bronc",
+                "lung"
+            ],
+            [
+                "xray",
+                "lung"
+            ],
+            [
+                "smoke",
+                "xray"
+            ],
+            [
+                "asia",
+                "lung"
+            ],
+            [
+                "asia",
+                "xray"
+            ],
+            [
+                "smoke",
+                "either"
+            ],
+            [
+                "tub",
+                "dysp"
+            ],
+            [
+                "xray",
+                "tub"
+            ]
+        ],
+        "TP":18,
+        "FP":0,
+        "TN":8,
+        "FN":2,
+        "Precision":1.0,
+        "Recall":0.9,
+        "F-beta":0.9957446809,
+        "run_id":0
+    },
+    {
+        "filename":"cancer",
+        "title":"cancer",
+        "num_nodes":5,
+        "num_edges":4,
+        "variable_descriptions":{
+            "Cancer":"Cancer: Indicates whether the person has lung cancer.",
+            "Pollution":"Pollution: Represents the level of environmental air pollution the person is exposed to.",
+            "Xray":"Xray: Represents the result of a chest X-ray test.",
+            "Dyspnoea":"Dyspnoea: Indicates whether the person experiences dyspnoea (shortness of breath).",
+            "Smoker":"Smoker: Indicates whether the person is a smoker."
+        },
+        "priors":[
+            [
+                "Xray",
+                "Dyspnoea"
+            ],
+            [
+                "Dyspnoea",
+                "Smoker"
+            ],
+            [
+                "Pollution",
+                "Xray"
+            ],
+            [
+                "Xray",
+                "Smoker"
+            ],
+            [
+                "Pollution",
+                "Dyspnoea"
+            ]
+        ],
+        "TP":5,
+        "FP":0,
+        "TN":4,
+        "FN":1,
+        "Precision":1.0,
+        "Recall":0.8333333333,
+        "F-beta":0.9923664122,
+        "run_id":2
+    },
+    {
+        "filename":"earthquake",
+        "title":"earthquake",
+        "num_nodes":5,
+        "num_edges":4,
+        "variable_descriptions":{
+            "Earthquake":"The occurrence of seismic activity in the local geographical area.",
+            "Burglary":"An event involving an unauthorized entry into a specific residence.",
+            "JohnCalls":"A phone call placed by a neighbor, John, to the residents of the house.",
+            "Alarm":"The activation of a high-decibel security siren at the residence.",
+            "MaryCalls":"A phone call placed by a neighbor, Mary, to the residents of the house."
+        },
+        "priors":[
+            [
+                "Earthquake",
+                "JohnCalls"
+            ],
+            [
+                "Burglary",
+                "JohnCalls"
+            ],
+            [
+                "Earthquake",
+                "MaryCalls"
+            ],
+            [
+                "Burglary",
+                "MaryCalls"
+            ],
+            [
+                "JohnCalls",
+                "MaryCalls"
+            ]
+        ],
+        "TP":5,
+        "FP":0,
+        "TN":4,
+        "FN":1,
+        "Precision":1.0,
+        "Recall":0.8333333333,
+        "F-beta":0.9923664122,
+        "run_id":0
+    },
+    {
+        "filename":"sachs",
+        "title":"sachs",
+        "num_nodes":11,
+        "num_edges":17,
+        "variable_descriptions":{
+            "PKA":"PKA (Protein Kinase A): cAMP-dependent protein kinase. A serine\/threonine kinase whose activity is primarily regulated by levels of cyclic AMP (cAMP). PKA participates in a wide range of cellular processes and can interact with or modulate other signaling pathways, including potential crosstalk with the MAPK pathway components measured in this dataset.",
+            "Mek":"MEK (MEK1\/2, also MAP2K1\/2): Mitogen-activated protein kinase kinase. A dual-specificity protein kinase (phosphorylates both threonine and tyrosine residues) that lies downstream of Raf and directly upstream of ERK in the MAPK\/ERK pathway. It phosphorylates and activates ERK.",
+            "Jnk":"JNK (c-Jun N-terminal kinase, also SAPK): Stress-activated protein kinase. Another class of MAPKs, also typically activated by cellular stress and inflammatory cytokines. JNK signaling is involved in apoptosis, inflammation, cell proliferation, and metabolism.",
+            "PKC":"PKC (Protein Kinase C): A family of serine\/threonine kinases activated by signals such as increases in diacylglycerol (DAG, produced by PLC) and intracellular calcium concentration. PKC isoforms regulate diverse cellular functions, including proliferation, differentiation, apoptosis, and cytoskeletal organization.",
+            "Plcg":"PLC\u03b3 (Phospholipase C gamma): An enzyme (phospholipase) that hydrolyzes the membrane phospholipid PIP2 into two second messengers: inositol trisphosphate (IP3) and diacylglycerol (DAG). This activation is often triggered by receptor tyrosine kinases and plays a key role in intracellular calcium release and PKC activation.",
+            "Akt":"Akt (Protein Kinase B or PKB): A serine\/threonine-specific protein kinase that is a central node in the PI3K\/Akt signaling pathway. It is activated downstream of PIP3 generation and plays crucial roles in regulating cell survival, growth, proliferation, metabolism, and angiogenesis.",
+            "PIP3":"PIP3 (Phosphatidylinositol (3,4,5)-trisphosphate): A phospholipid second messenger generated from PIP2 by the action of phosphoinositide 3-kinase (PI3K). It plays a critical role in recruiting proteins with PH domains (like Akt\/PKB) to the plasma membrane, activating downstream signaling pathways involved in cell growth, survival, and proliferation (e.g., the PI3K\/Akt pathway).",
+            "P38":"p38 (p38 MAPK): p38 Mitogen-activated protein kinase. A class of MAPKs distinct from ERK, primarily activated by environmental stresses (like UV radiation, osmotic shock) and inflammatory cytokines. p38 signaling pathways are involved in inflammation, apoptosis, cell cycle regulation, and differentiation.",
+            "Erk":"ERK (ERK1\/2, also MAPK3\/1): Extracellular signal-regulated kinase. A key protein kinase in the MAPK\/ERK signaling pathway, lying downstream of MEK. Once activated by MEK phosphorylation, ERK translocates to the nucleus to phosphorylate transcription factors, regulating gene expression related to cell proliferation, differentiation, and survival.",
+            "Raf":"Raf (Raf-1 or c-Raf): A serine\/threonine-specific protein kinase that acts as a central component of the MAPK\/ERK signaling pathway. It is typically activated by Ras GTPases and phosphorylates (activates) MEK.",
+            "PIP2":"PIP2 (Phosphatidylinositol 4,5-bisphosphate): A phospholipid component of cell membranes. It serves as a crucial substrate for enzymes like PLC\u03b3 (producing IP3 and DAG) and PI3K (producing PIP3), making it a branching point for multiple signaling pathways."
+        },
+        "priors":[
+            [
+                "Jnk",
+                "Akt"
+            ],
+            [
+                "PKA",
+                "P38"
+            ],
+            [
+                "Akt",
+                "P38"
+            ],
+            [
+                "Plcg",
+                "P38"
+            ],
+            [
+                "PIP3",
+                "P38"
+            ],
+            [
+                "P38",
+                "Raf"
+            ],
+            [
+                "P38",
+                "PIP2"
+            ],
+            [
+                "Jnk",
+                "PIP3"
+            ],
+            [
+                "Jnk",
+                "Raf"
+            ],
+            [
+                "Jnk",
+                "Plcg"
+            ],
+            [
+                "Jnk",
+                "P38"
+            ],
+            [
+                "PKA",
+                "Jnk"
+            ],
+            [
+                "Jnk",
+                "PIP2"
+            ]
+        ],
+        "TP":11,
+        "FP":2,
+        "TN":15,
+        "FN":27,
+        "Precision":0.8461538462,
+        "Recall":0.2894736842,
+        "F-beta":0.7878787879,
+        "run_id":1
+    },
+    {
+        "filename":"survey",
+        "title":"survey",
+        "num_nodes":6,
+        "num_edges":6,
+        "variable_descriptions":{
+            "A":"Age: the age, recorded as young (young) for individuals below 30 years old, adult (adult) for individuals between 30 and 60 years old, and old (old) for people older than 60.",
+            "T":"Travel: the means of transport favoured by the individual, recorded either as car (car), train (train) or other (other).",
+            "S":"Sex: the biological sex, recorded as male (M) or female (F).",
+            "O":"Occupation: whether the individual is an employee (emp) or a self-employed (self) worker.",
+            "E":"Education: the highest level of education or training successfully completed, recorded as up to high school (high) or university degree (uni).",
+            "R":"Residence: the size of the city the individual lives in, recorded as either small (small) or big (big)."
+        },
+        "priors":[
+            [
+                "A",
+                "S"
+            ],
+            [
+                "A",
+                "R"
+            ],
+            [
+                "A",
+                "O"
+            ]
+        ],
+        "TP":3,
+        "FP":0,
+        "TN":6,
+        "FN":6,
+        "Precision":1.0,
+        "Recall":0.3333333333,
+        "F-beta":0.9285714286,
+        "run_id":3
+    }
+]

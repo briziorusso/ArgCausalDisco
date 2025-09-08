@@ -41,7 +41,7 @@ class PriorKnowledge:
         return bk
 
 
-def generate_priors(dataset_path: str, show_prompt: bool = False) -> PriorKnowledge:
+async def generate_priors(dataset_path: str, show_prompt: bool = False) -> PriorKnowledge:
     """
     Generate prior knowledge from the dataset.
 
@@ -63,5 +63,5 @@ def generate_priors(dataset_path: str, show_prompt: bool = False) -> PriorKnowle
     if show_prompt:
         print(prompt)
 
-    constraint = extract(prompt, Constraints)
+    constraint = await extract(prompt, Constraints)
     return PriorKnowledge(variables=sorted_vars, constraints=constraint)

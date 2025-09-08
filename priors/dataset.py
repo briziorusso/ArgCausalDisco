@@ -1,17 +1,37 @@
 import json
 import re
-from itertools import islice
+from itertools import islice, chain, combinations
 from typing import Callable, Iterable
 from pathlib import Path
 
 import networkx as nx
+import numpy as np
 import pyagrum as gum
 import rustworkx as rx
+from scipy.stats import spearmanr
 
 
+ambiguous_concepts = {
+    "illness",
+    "illnesses",
+    "grief",
+    "early_death",
+    "hospitalization",
+    "serious_problems",
+    "neglect",
+}
 with (Path(__file__).parent / "causal_relationships.json").open("r") as f:
     causal_concepts = json.load(f)
+concepts = sorted(
+    causal_concepts.keys() | set(chain.from_iterable(causal_concepts.values()))
+)
+concepts_indexes = {c: i for i, c in enumerate(concepts)}
+
+embeddings = np.load(Path(__file__).parent / "concept_embeddings.npy")
+assert embeddings.shape[0] == len(concepts)
+
 causal_net_nx = nx.from_dict_of_lists(causal_concepts, create_using=nx.DiGraph)
+causal_net_nx.remove_nodes_from(ambiguous_concepts)
 causal_net: rx.PyDiGraph = rx.networkx_converter(causal_net_nx)
 
 
@@ -27,6 +47,56 @@ def heuristic_by_degrees(candidates: Iterable[dict[int, int]]) -> dict[int, int]
         default=None,
     )
 
+
+def heuristic_by_semantics(
+    candidates: Iterable[dict[int, int]],
+    w_compact: float = 1,
+    w_specificity: float = 1,
+    w_correlation: float = 1,
+) -> dict[int, int] | None:
+    """Heuristic for selecting the most specific concept groups."""
+
+    def _calc_semantic_score(subgraph_mapping: dict[int, int]) -> int:
+        node_indices = list(subgraph_mapping.keys())
+        node_names = [causal_net.get_node_data(i) for i in node_indices]
+        node_vectors = np.array(
+            [embeddings[concepts_indexes[name]] for name in node_names]
+        )
+
+        centroid = np.mean(node_vectors, axis=0)
+        sims = np.dot(node_vectors, centroid) / (
+            np.linalg.norm(node_vectors, axis=1) * np.linalg.norm(centroid)
+        )
+        distances = 1 - sims
+        score_compactness = np.mean(distances)
+
+        degrees = np.array(
+            [causal_net.in_degree(i) + causal_net.out_degree(i) for i in node_indices]
+        )
+        log_degrees = np.log(degrees + 1)  # Add 1 to avoid log(0)
+        score_specificity = np.mean(log_degrees)
+
+        subgraph = nx.induced_subgraph(causal_net_nx, node_names).to_undirected()
+        shortest_paths = dict(nx.all_pairs_shortest_path(subgraph))
+        graph_distances = []
+        semantic_distances = []
+        for i1, i2 in combinations(range(len(node_names)), 2):
+            graph_distances.append(len(shortest_paths[node_names[i1]][node_names[i2]]))
+
+            vec1, vec2 = node_vectors[i1], node_vectors[i2]
+            sim = np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+            semantic_distances.append(1 - sim)
+
+        correlation, _ = spearmanr(semantic_distances, graph_distances)
+
+        return (w_compact * score_compactness) + (w_specificity * score_specificity) + (w_correlation * (1-correlation.item()))
+
+    return min(
+        candidates,
+        # Heuristic for selecting the most specific concept groups
+        key=_calc_semantic_score,
+        default=None,
+    )
 
 def generate_causal_graph(
     n: int,

@@ -1,0 +1,168 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Patient Health Conditions and Outcomes</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An inflammatory condition of the lung primarily affecting the microscopic air sacs (alveoli), often caused by infection.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>shock</NAME>
+	<PROPERTY>description = A severe medical condition characterized by inadequate blood flow to the body's tissues, leading to cellular and organ dysfunction.</PROPERTY>
+	<PROPERTY>fast = shock[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cataracts</NAME>
+	<PROPERTY>description = A medical condition where the natural lens inside the eye becomes cloudy, impairing vision.</PROPERTY>
+	<PROPERTY>fast = cataracts[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>collapse</NAME>
+	<PROPERTY>description = A sudden and profound loss of physical strength or consciousness, often resulting in a fall.</PROPERTY>
+	<PROPERTY>fast = collapse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>radiation</NAME>
+	<PROPERTY>description = Exposure to high-energy particles or electromagnetic waves, which can have biological effects.</PROPERTY>
+	<PROPERTY>fast = radiation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = The abrupt cessation of normal heart function, resulting in the loss of consciousness and absence of breathing.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>old_age</NAME>
+	<PROPERTY>description = The advanced stage of the human life cycle, characterized by physiological changes associated with aging.</PROPERTY>
+	<PROPERTY>fast = old_age[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>massive_bleeding</NAME>
+	<PROPERTY>description = A significant and rapid loss of blood from the circulatory system.</PROPERTY>
+	<PROPERTY>fast = massive_bleeding[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>wounds</NAME>
+	<PROPERTY>description = Physical injuries involving a break in the skin or other bodily tissues.</PROPERTY>
+	<PROPERTY>fast = wounds[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<TABLE>
+		0.532412 0.467588
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>shock</FOR>
+	<GIVEN>massive_bleeding</GIVEN>
+	<TABLE>
+		0.629505 0.370495
+		0.552313 0.447687
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cataracts</FOR>
+	<GIVEN>radiation</GIVEN>
+	<GIVEN>old_age</GIVEN>
+	<TABLE>
+		0.415687 0.584313
+		0.261752 0.738248
+		0.726671 0.273329
+		0.868732 0.131268
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>collapse</FOR>
+	<GIVEN>shock</GIVEN>
+	<TABLE>
+		0.880943 0.119057
+		0.221553 0.778447
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>radiation</FOR>
+	<TABLE>
+		0.347658 0.652342
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>old_age</GIVEN>
+	<GIVEN>pneumonia</GIVEN>
+	<GIVEN>shock</GIVEN>
+	<TABLE>
+		0.265891 0.734109
+		0.241797 0.758203
+		0.047385 0.952615
+		0.499999 0.500001
+		0.171857 0.828143
+		0.76251 0.23749
+		0.125071 0.874929
+		0.454508 0.545492
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>old_age</FOR>
+	<TABLE>
+		0.56473 0.43527
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>massive_bleeding</FOR>
+	<TABLE>
+		0.742043 0.257957
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>wounds</FOR>
+	<GIVEN>radiation</GIVEN>
+	<TABLE>
+		0.992909 0.00709128
+		0.163357 0.836643
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

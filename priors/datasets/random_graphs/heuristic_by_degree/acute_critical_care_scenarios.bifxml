@@ -1,0 +1,145 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Acute Critical Care Scenarios</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An infection causing inflammation in the air sacs of the lungs, often leading to fluid accumulation and breathing difficulties.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = The abrupt and complete cessation of the heart's effective pumping action, leading to a lack of blood circulation.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>myocarditis</NAME>
+	<PROPERTY>description = An inflammatory condition affecting the heart muscle, which can compromise its pumping function.</PROPERTY>
+	<PROPERTY>fast = myocarditis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>septic_shock</NAME>
+	<PROPERTY>description = A life-threatening condition characterized by dangerously low blood pressure and organ dysfunction, triggered by a severe infection.</PROPERTY>
+	<PROPERTY>fast = septic_shock[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blood_clot</NAME>
+	<PROPERTY>description = A localized mass of coagulated blood that forms within a blood vessel, potentially impeding circulation.</PROPERTY>
+	<PROPERTY>fast = blood_clot[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiogenic_shock</NAME>
+	<PROPERTY>description = A severe medical emergency where the heart's ability to pump sufficient blood to the body is critically impaired.</PROPERTY>
+	<PROPERTY>fast = cardiogenic_shock[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypotension</NAME>
+	<PROPERTY>description = A medical state defined by abnormally low blood pressure, which can result in inadequate blood flow to vital organs.</PROPERTY>
+	<PROPERTY>fast = hypotension[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<TABLE>
+		0.831598 0.168402
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<GIVEN>blood_clot</GIVEN>
+	<GIVEN>myocarditis</GIVEN>
+	<GIVEN>septic_shock</GIVEN>
+	<TABLE>
+		0.628084 0.371916
+		0.828377 0.171623
+		0.464878 0.535122
+		0.675514 0.324486
+		0.222086 0.777914
+		0.50682 0.49318
+		0.7311 0.2689
+		0.548402 0.451598
+		0.0544509 0.945549
+		0.728574 0.271426
+		0.308231 0.691769
+		0.743922 0.256078
+		0.248225 0.751775
+		0.76469 0.23531
+		0.0966552 0.903345
+		0.592515 0.407485
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>myocarditis</FOR>
+	<TABLE>
+		0.420511 0.579489
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>septic_shock</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<TABLE>
+		0.818687 0.181313
+		0.427375 0.572625
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blood_clot</FOR>
+	<TABLE>
+		0.573948 0.426052
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiogenic_shock</FOR>
+	<GIVEN>myocarditis</GIVEN>
+	<TABLE>
+		0.182982 0.817018
+		0.795326 0.204674
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypotension</FOR>
+	<GIVEN>septic_shock</GIVEN>
+	<GIVEN>cardiogenic_shock</GIVEN>
+	<TABLE>
+		0.454316 0.545684
+		0.595726 0.404274
+		0.463414 0.536586
+		0.449679 0.550321
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

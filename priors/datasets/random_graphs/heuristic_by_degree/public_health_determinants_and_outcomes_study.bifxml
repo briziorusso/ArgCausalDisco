@@ -1,0 +1,148 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Public Health Determinants and Outcomes Study</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An acute inflammatory condition affecting the lungs, often caused by infection.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = A sudden and complete cessation of the heart's pumping function.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vitamin_d_deficiency</NAME>
+	<PROPERTY>description = Insufficient levels of Vitamin D in the body, essential for various bodily functions.</PROPERTY>
+	<PROPERTY>fast = vitamin_d_deficiency[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug_use</NAME>
+	<PROPERTY>description = The consumption or misuse of substances that alter physiological or psychological function.</PROPERTY>
+	<PROPERTY>fast = drug_use[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hiv</NAME>
+	<PROPERTY>description = Presence of the Human Immunodeficiency Virus in an individual's system.</PROPERTY>
+	<PROPERTY>fast = hiv[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infectious_diseases</NAME>
+	<PROPERTY>description = A broad category of illnesses caused by pathogenic agents, capable of spreading.</PROPERTY>
+	<PROPERTY>fast = infectious_diseases[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>osteoporosis</NAME>
+	<PROPERTY>description = A condition characterized by weakened and brittle bones, increasing fracture risk.</PROPERTY>
+	<PROPERTY>fast = osteoporosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>prostitution</NAME>
+	<PROPERTY>description = Engagement in commercial sexual activities.</PROPERTY>
+	<PROPERTY>fast = prostitution[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>hiv</GIVEN>
+	<TABLE>
+		0.199886 0.800114
+		0.78556 0.21444
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<TABLE>
+		0.80115 0.19885
+		0.355718 0.644282
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vitamin_d_deficiency</FOR>
+	<TABLE>
+		0.245561 0.754439
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug_use</FOR>
+	<TABLE>
+		0.524073 0.475927
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hiv</FOR>
+	<GIVEN>prostitution</GIVEN>
+	<GIVEN>drug_use</GIVEN>
+	<TABLE>
+		0.546114 0.453886
+		0.486398 0.513602
+		0.592011 0.407989
+		0.436882 0.563118
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infectious_diseases</FOR>
+	<GIVEN>hiv</GIVEN>
+	<GIVEN>vitamin_d_deficiency</GIVEN>
+	<TABLE>
+		0.457715 0.542285
+		0.800539 0.199461
+		0.594862 0.405138
+		0.163894 0.836106
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>osteoporosis</FOR>
+	<GIVEN>vitamin_d_deficiency</GIVEN>
+	<TABLE>
+		0.610918 0.389082
+		0.0132484 0.986752
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>prostitution</FOR>
+	<TABLE>
+		0.375816 0.624184
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

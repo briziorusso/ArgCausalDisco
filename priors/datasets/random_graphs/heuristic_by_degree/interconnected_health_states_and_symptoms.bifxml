@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Interconnected Health States and Symptoms</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>anxiety_disorders</NAME>
+	<PROPERTY>description = A category of mental health conditions marked by intense, persistent, and excessive worry and fear about everyday situations, often accompanied by physical symptoms.</PROPERTY>
+	<PROPERTY>fast = anxiety_disorders[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = A persistent or recurrent sensation of discomfort or agony that continues for an extended period, significantly impacting daily life.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sleep_disturbances</NAME>
+	<PROPERTY>description = Any condition or pattern that interferes with the quantity or quality of an individual's sleep, leading to non-restorative rest.</PROPERTY>
+	<PROPERTY>fast = sleep_disturbances[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_fatigue</NAME>
+	<PROPERTY>description = A state of profound and persistent exhaustion that is not relieved by rest and significantly impairs daily functioning, lasting for an extended duration.</PROPERTY>
+	<PROPERTY>fast = chronic_fatigue[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>muscle_tension</NAME>
+	<PROPERTY>description = A condition involving the sustained contraction or stiffness of muscle fibers, often leading to discomfort or reduced flexibility.</PROPERTY>
+	<PROPERTY>fast = muscle_tension[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>magnesium_deficiency</NAME>
+	<PROPERTY>description = A physiological state characterized by lower-than-optimal levels of magnesium in the body, an essential mineral involved in numerous bodily functions.</PROPERTY>
+	<PROPERTY>fast = magnesium_deficiency[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>anxiety_disorders</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.579166 0.420834
+		0.787494 0.212506
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>muscle_tension</GIVEN>
+	<TABLE>
+		0.905546 0.0944544
+		0.526155 0.473845
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sleep_disturbances</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>anxiety_disorders</GIVEN>
+	<TABLE>
+		0.501917 0.498083
+		0.707683 0.292317
+		0.688931 0.311069
+		0.483728 0.516272
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_fatigue</FOR>
+	<GIVEN>magnesium_deficiency</GIVEN>
+	<GIVEN>sleep_disturbances</GIVEN>
+	<TABLE>
+		0.356359 0.643641
+		0.46248 0.53752
+		0.0240957 0.975904
+		0.687616 0.312384
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>muscle_tension</FOR>
+	<GIVEN>magnesium_deficiency</GIVEN>
+	<TABLE>
+		0.934666 0.0653344
+		0.686142 0.313858
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>magnesium_deficiency</FOR>
+	<TABLE>
+		0.425557 0.574443
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

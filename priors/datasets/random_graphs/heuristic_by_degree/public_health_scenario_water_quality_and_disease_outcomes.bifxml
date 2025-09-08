@@ -1,0 +1,115 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Public Health Scenario: Water Quality and Disease Outcomes</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An inflammatory condition of the lung affecting primarily the small air sacs (alveoli).</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>measles</NAME>
+	<PROPERTY>description = A highly contagious infectious disease characterized by a distinctive skin rash, fever, and other symptoms.</PROPERTY>
+	<PROPERTY>fast = measles[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>viruses</NAME>
+	<PROPERTY>description = Microscopic infectious agents that can replicate inside the living cells of an organism.</PROPERTY>
+	<PROPERTY>fast = viruses[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = The state of being unable to see due to disease, injury, or a congenital condition.</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>liver_damage</NAME>
+	<PROPERTY>description = Any injury or impairment affecting the normal function of the liver.</PROPERTY>
+	<PROPERTY>fast = liver_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>unfiltered_water</NAME>
+	<PROPERTY>description = Water that has not undergone a purification process to remove contaminants.</PROPERTY>
+	<PROPERTY>fast = unfiltered_water[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>viruses</GIVEN>
+	<GIVEN>measles</GIVEN>
+	<TABLE>
+		0.499903 0.500097
+		0.291002 0.708998
+		0.00909871 0.990901
+		0.471894 0.528106
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>measles</FOR>
+	<GIVEN>viruses</GIVEN>
+	<TABLE>
+		0.919661 0.080339
+		0.65671 0.34329
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>viruses</FOR>
+	<GIVEN>unfiltered_water</GIVEN>
+	<TABLE>
+		0.867501 0.132499
+		0.341767 0.658233
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>measles</GIVEN>
+	<TABLE>
+		0.505658 0.494342
+		0.450894 0.549106
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>liver_damage</FOR>
+	<GIVEN>viruses</GIVEN>
+	<TABLE>
+		0.642111 0.357889
+		0.463753 0.536247
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>unfiltered_water</FOR>
+	<TABLE>
+		0.419987 0.580013
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

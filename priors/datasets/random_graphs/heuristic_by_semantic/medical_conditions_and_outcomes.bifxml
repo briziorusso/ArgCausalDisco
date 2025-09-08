@@ -1,0 +1,150 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>medical_conditions_and_outcomes</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>expenses</NAME>
+	<PROPERTY>description = The total financial costs incurred, often related to medical care, treatments, or other associated services.</PROPERTY>
+	<PROPERTY>fast = expenses[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coronary_heart_disease</NAME>
+	<PROPERTY>description = A medical condition characterized by the narrowing or blockage of the coronary arteries, which supply blood to the heart muscle.</PROPERTY>
+	<PROPERTY>fast = coronary_heart_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hospitalization</NAME>
+	<PROPERTY>description = The event of being admitted to a medical facility for inpatient care, treatment, or observation.</PROPERTY>
+	<PROPERTY>fast = hospitalization[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>laminopathies</NAME>
+	<PROPERTY>description = A group of rare genetic disorders caused by mutations in genes encoding nuclear lamin proteins, affecting various tissues and organs.</PROPERTY>
+	<PROPERTY>fast = laminopathies[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>early_death</NAME>
+	<PROPERTY>description = The occurrence of mortality at an age significantly younger than the average life expectancy for a given population.</PROPERTY>
+	<PROPERTY>fast = early_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_failure</NAME>
+	<PROPERTY>description = A chronic, progressive condition in which the heart muscle is unable to pump enough blood to meet the body's needs for blood and oxygen.</PROPERTY>
+	<PROPERTY>fast = heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>serious_health_problems</NAME>
+	<PROPERTY>description = A classification encompassing severe medical conditions or significant health impairments that require substantial attention or intervention.</PROPERTY>
+	<PROPERTY>fast = serious_health_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>imbalanced_ph</NAME>
+	<PROPERTY>description = A physiological state characterized by deviations of the body's pH levels from their normal, healthy range.</PROPERTY>
+	<PROPERTY>fast = imbalanced_ph[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>expenses</FOR>
+	<GIVEN>hospitalization</GIVEN>
+	<TABLE>
+		0.29682 0.70318
+		0.471066 0.528934
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coronary_heart_disease</FOR>
+	<TABLE>
+		0.626585 0.373415
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hospitalization</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.155096 0.844904
+		0.52265 0.47735
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>laminopathies</FOR>
+	<TABLE>
+		0.706852 0.293148
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>early_death</FOR>
+	<GIVEN>laminopathies</GIVEN>
+	<GIVEN>heart_failure</GIVEN>
+	<GIVEN>serious_health_problems</GIVEN>
+	<TABLE>
+		0.741652 0.258348
+		0.423205 0.576795
+		0.705378 0.294622
+		0.253723 0.746277
+		0.896076 0.103924
+		0.409909 0.590091
+		0.950394 0.0496063
+		0.94578 0.0542198
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_failure</FOR>
+	<GIVEN>coronary_heart_disease</GIVEN>
+	<TABLE>
+		0.824068 0.175932
+		0.453561 0.546439
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>serious_health_problems</FOR>
+	<GIVEN>imbalanced_ph</GIVEN>
+	<TABLE>
+		0.576804 0.423196
+		0.255918 0.744082
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>imbalanced_ph</FOR>
+	<TABLE>
+		0.137724 0.862276
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

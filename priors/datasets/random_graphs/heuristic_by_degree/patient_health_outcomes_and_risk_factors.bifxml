@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Patient Health Outcomes and Risk Factors</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An inflammatory condition of the lung primarily affecting the small air sacs (alveoli), which may fill with fluid or pus.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug_use</NAME>
+	<PROPERTY>description = The consumption or administration of substances for non-medical purposes, or the misuse of prescribed medications.</PROPERTY>
+	<PROPERTY>fast = drug_use[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hiv</NAME>
+	<PROPERTY>description = A specific viral infection that progressively compromises the immune system.</PROPERTY>
+	<PROPERTY>fast = hiv[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>shock</NAME>
+	<PROPERTY>description = A critical physiological state characterized by inadequate tissue perfusion and oxygen delivery to the body's vital organs.</PROPERTY>
+	<PROPERTY>fast = shock[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = A sudden and complete cessation of effective heart activity, leading to loss of consciousness and breathing.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>hiv</GIVEN>
+	<TABLE>
+		0.160365 0.839635
+		0.445935 0.554065
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug_use</FOR>
+	<TABLE>
+		0.705588 0.294412
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hiv</FOR>
+	<GIVEN>drug_use</GIVEN>
+	<TABLE>
+		0.943702 0.0562975
+		0.310935 0.689065
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>shock</FOR>
+	<TABLE>
+		0.815705 0.184295
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<GIVEN>shock</GIVEN>
+	<TABLE>
+		0.595617 0.404383
+		0.636537 0.363463
+		0.360755 0.639245
+		0.291298 0.708702
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

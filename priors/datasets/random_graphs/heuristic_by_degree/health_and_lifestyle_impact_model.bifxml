@@ -1,0 +1,146 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Health and Lifestyle Impact Model</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An inflammatory condition of the lung affecting primarily the small air sacs (alveoli).</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infectious_diseases</NAME>
+	<PROPERTY>description = Illnesses caused by pathogenic microorganisms, such as bacteria, viruses, fungi, or parasites, that can be spread.</PROPERTY>
+	<PROPERTY>fast = infectious_diseases[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hiv</NAME>
+	<PROPERTY>description = A chronic viral condition that progressively compromises the immune system.</PROPERTY>
+	<PROPERTY>fast = hiv[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cirrhosis</NAME>
+	<PROPERTY>description = A late stage of scarring (fibrosis) of the liver caused by various forms of liver disease and chronic damage.</PROPERTY>
+	<PROPERTY>fast = cirrhosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hiv_infection</NAME>
+	<PROPERTY>description = The process by which an individual contracts the Human Immunodeficiency Virus.</PROPERTY>
+	<PROPERTY>fast = hiv_infection[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>relationship_problems</NAME>
+	<PROPERTY>description = Difficulties or conflicts experienced within personal or intimate connections.</PROPERTY>
+	<PROPERTY>fast = relationship_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = The sudden cessation of the heart's pumping function, leading to loss of consciousness and absence of breathing.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug_use</NAME>
+	<PROPERTY>description = The regular or habitual consumption of illicit substances or misuse of prescription drugs.</PROPERTY>
+	<PROPERTY>fast = drug_use[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>hiv</GIVEN>
+	<TABLE>
+		0.231774 0.768226
+		0.43439 0.56561
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infectious_diseases</FOR>
+	<GIVEN>hiv</GIVEN>
+	<TABLE>
+		0.808951 0.191049
+		0.820748 0.179252
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hiv</FOR>
+	<GIVEN>drug_use</GIVEN>
+	<TABLE>
+		0.560681 0.439319
+		0.414374 0.585626
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cirrhosis</FOR>
+	<GIVEN>hiv_infection</GIVEN>
+	<TABLE>
+		0.701844 0.298156
+		0.149476 0.850524
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hiv_infection</FOR>
+	<GIVEN>drug_use</GIVEN>
+	<TABLE>
+		0.417916 0.582084
+		0.634128 0.365872
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>relationship_problems</FOR>
+	<GIVEN>drug_use</GIVEN>
+	<TABLE>
+		0.388365 0.611635
+		0.957467 0.0425333
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<TABLE>
+		0.781724 0.218276
+		0.714528 0.285472
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug_use</FOR>
+	<TABLE>
+		0.361521 0.638479
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

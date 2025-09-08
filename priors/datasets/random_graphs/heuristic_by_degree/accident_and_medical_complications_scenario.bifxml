@@ -1,0 +1,173 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Accident and Medical Complications Scenario</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = Refers to an infection that inflames the air sacs in one or both lungs, which may fill with fluid or pus.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>paralysis</NAME>
+	<PROPERTY>description = Describes the loss of muscle function in part of your body, often accompanied by a loss of sensation.</PROPERTY>
+	<PROPERTY>fast = paralysis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>death_of_another_person</NAME>
+	<PROPERTY>description = Indicates the unfortunate event where an individual, other than the primary subject, loses their life.</PROPERTY>
+	<PROPERTY>fast = death_of_another_person[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>brain_injury</NAME>
+	<PROPERTY>description = Represents any damage to the brain that impairs its normal function, which can range from mild to severe.</PROPERTY>
+	<PROPERTY>fast = brain_injury[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = Denotes the sudden and complete cessation of the heart's pumping function, leading to a loss of blood flow to the brain and other organs.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>impairments</NAME>
+	<PROPERTY>description = Indicates a reduction or loss of function in a body part, organ, or system, which can be physical, sensory, or cognitive.</PROPERTY>
+	<PROPERTY>fast = impairments[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drunk_driver</NAME>
+	<PROPERTY>description = Refers to an individual operating a motor vehicle while under the influence of alcohol.</PROPERTY>
+	<PROPERTY>fast = drunk_driver[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>spinal_cord_injury</NAME>
+	<PROPERTY>description = Describes damage to the bundle of nerves and tissues that extends from the brain down the back, often leading to various neurological symptoms.</PROPERTY>
+	<PROPERTY>fast = spinal_cord_injury[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>motor_vehicle_accident</NAME>
+	<PROPERTY>description = Represents an event involving one or more vehicles that results in damage, injury, or fatality.</PROPERTY>
+	<PROPERTY>fast = motor_vehicle_accident[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<TABLE>
+		0.582356 0.417644
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>paralysis</FOR>
+	<GIVEN>spinal_cord_injury</GIVEN>
+	<GIVEN>brain_injury</GIVEN>
+	<TABLE>
+		0.147755 0.852245
+		0.963378 0.0366221
+		0.409167 0.590833
+		0.469377 0.530623
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>death_of_another_person</FOR>
+	<GIVEN>drunk_driver</GIVEN>
+	<GIVEN>motor_vehicle_accident</GIVEN>
+	<TABLE>
+		0.660845 0.339155
+		0.232754 0.767246
+		0.110154 0.889846
+		0.227653 0.772347
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>brain_injury</FOR>
+	<GIVEN>motor_vehicle_accident</GIVEN>
+	<GIVEN>cardiac_arrest</GIVEN>
+	<TABLE>
+		0.993234 0.00676613
+		0.505797 0.494203
+		0.153537 0.846463
+		0.896797 0.103203
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<TABLE>
+		0.521468 0.478532
+		0.145669 0.854331
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>impairments</FOR>
+	<GIVEN>brain_injury</GIVEN>
+	<GIVEN>spinal_cord_injury</GIVEN>
+	<TABLE>
+		0.298278 0.701722
+		0.749274 0.250726
+		0.114982 0.885018
+		0.564052 0.435948
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drunk_driver</FOR>
+	<TABLE>
+		0.369026 0.630974
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>spinal_cord_injury</FOR>
+	<GIVEN>motor_vehicle_accident</GIVEN>
+	<TABLE>
+		0.0971791 0.902821
+		0.131952 0.868048
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>motor_vehicle_accident</FOR>
+	<GIVEN>drunk_driver</GIVEN>
+	<TABLE>
+		0.507196 0.492804
+		0.550874 0.449126
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

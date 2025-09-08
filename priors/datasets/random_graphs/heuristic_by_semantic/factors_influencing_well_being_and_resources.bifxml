@@ -1,0 +1,165 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>factors_influencing_well_being_and_resources</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>early_death</NAME>
+	<PROPERTY>description = The unfortunate occurrence of an individual's passing at a premature stage of life, relative to typical life expectancy.</PROPERTY>
+	<PROPERTY>fast = early_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>property_damage</NAME>
+	<PROPERTY>description = The impairment, destruction, or loss inflicted upon an individual's or entity's physical assets and possessions.</PROPERTY>
+	<PROPERTY>fast = property_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>separation</NAME>
+	<PROPERTY>description = A state of being apart from others, which can refer to physical distance, emotional estrangement, or the dissolution of a bond or relationship.</PROPERTY>
+	<PROPERTY>fast = separation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>disasters</NAME>
+	<PROPERTY>description = Large-scale, often sudden, calamitous events, typically natural or man-made, causing extensive damage, loss, or suffering across a wide area.</PROPERTY>
+	<PROPERTY>fast = disasters[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>expenses</NAME>
+	<PROPERTY>description = The financial outlays or costs incurred as a result of various situations, needs, or activities, requiring monetary expenditure.</PROPERTY>
+	<PROPERTY>fast = expenses[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hospitalization</NAME>
+	<PROPERTY>description = The period during which an individual receives medical care and treatment within a healthcare facility, often requiring an overnight stay.</PROPERTY>
+	<PROPERTY>fast = hospitalization[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>demise</NAME>
+	<PROPERTY>description = The ultimate cessation of life; an individual's death, signifying the end of their existence.</PROPERTY>
+	<PROPERTY>fast = demise[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>serious_accidents</NAME>
+	<PROPERTY>description = Unplanned and impactful events leading to significant harm, injury, or disruption to individuals or their surroundings.</PROPERTY>
+	<PROPERTY>fast = serious_accidents[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_failure</NAME>
+	<PROPERTY>description = A severe and chronic medical condition impacting the cardiovascular system's ability to function effectively.</PROPERTY>
+	<PROPERTY>fast = heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>early_death</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.829561 0.170439
+		0.462259 0.537741
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>property_damage</FOR>
+	<GIVEN>serious_accidents</GIVEN>
+	<GIVEN>disasters</GIVEN>
+	<TABLE>
+		0.733548 0.266452
+		0.875899 0.124101
+		0.823876 0.176124
+		0.226752 0.773248
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>separation</FOR>
+	<GIVEN>hospitalization</GIVEN>
+	<TABLE>
+		0.478896 0.521104
+		0.487872 0.512128
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>disasters</FOR>
+	<TABLE>
+		0.574643 0.425357
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>expenses</FOR>
+	<GIVEN>hospitalization</GIVEN>
+	<GIVEN>property_damage</GIVEN>
+	<TABLE>
+		0.902967 0.0970335
+		0.540504 0.459496
+		0.352085 0.647915
+		0.188243 0.811757
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hospitalization</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.800807 0.199193
+		0.632425 0.367575
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>demise</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.147782 0.852218
+		0.910591 0.0894091
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>serious_accidents</FOR>
+	<TABLE>
+		0.372068 0.627932
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_failure</FOR>
+	<TABLE>
+		0.616683 0.383317
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

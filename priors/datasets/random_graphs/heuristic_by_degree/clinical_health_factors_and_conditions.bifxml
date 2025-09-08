@@ -1,0 +1,155 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Clinical Health Factors and Conditions</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An infection that inflames the air sacs in one or both lungs, which may fill with fluid or pus.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug</NAME>
+	<PROPERTY>description = A pharmaceutical or chemical agent administered for various purposes, capable of eliciting physiological responses.</PROPERTY>
+	<PROPERTY>fast = drug[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sinusitis</NAME>
+	<PROPERTY>description = Inflammation of the tissue lining the sinuses, leading to symptoms such as facial pain, pressure, and nasal congestion.</PROPERTY>
+	<PROPERTY>fast = sinusitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heroin_overdose</NAME>
+	<PROPERTY>description = A critical medical emergency resulting from an excessive intake of a specific potent substance.</PROPERTY>
+	<PROPERTY>fast = heroin_overdose[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>allergy</NAME>
+	<PROPERTY>description = An adverse immune system reaction to a substance that is typically harmless to most people.</PROPERTY>
+	<PROPERTY>fast = allergy[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cold</NAME>
+	<PROPERTY>description = A common viral infection of the nose and throat, often characterized by symptoms like sneezing, runny nose, and sore throat.</PROPERTY>
+	<PROPERTY>fast = cold[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>convulsions</NAME>
+	<PROPERTY>description = Involuntary muscle contractions and relaxations, often associated with neurological disturbances.</PROPERTY>
+	<PROPERTY>fast = convulsions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>osteoporosis</NAME>
+	<PROPERTY>description = A medical condition characterized by weakened and brittle bones, increasing the risk of fractures.</PROPERTY>
+	<PROPERTY>fast = osteoporosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>sinusitis</GIVEN>
+	<GIVEN>drug</GIVEN>
+	<GIVEN>cold</GIVEN>
+	<TABLE>
+		0.535981 0.464019
+		0.699653 0.300347
+		0.883074 0.116926
+		0.56893 0.43107
+		0.672396 0.327604
+		0.12057 0.87943
+		0.360329 0.639671
+		0.276252 0.723748
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug</FOR>
+	<TABLE>
+		0.947639 0.0523613
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sinusitis</FOR>
+	<GIVEN>allergy</GIVEN>
+	<TABLE>
+		0.331281 0.668719
+		0.392779 0.607221
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heroin_overdose</FOR>
+	<TABLE>
+		0.859021 0.140979
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>allergy</FOR>
+	<GIVEN>drug</GIVEN>
+	<TABLE>
+		0.372175 0.627825
+		0.432413 0.567587
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cold</FOR>
+	<GIVEN>allergy</GIVEN>
+	<TABLE>
+		0.539059 0.460941
+		0.943845 0.0561554
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>convulsions</FOR>
+	<GIVEN>cold</GIVEN>
+	<GIVEN>heroin_overdose</GIVEN>
+	<TABLE>
+		0.583886 0.416114
+		0.853902 0.146098
+		0.42558 0.57442
+		0.0712104 0.92879
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>osteoporosis</FOR>
+	<GIVEN>drug</GIVEN>
+	<TABLE>
+		0.49456 0.50544
+		0.463534 0.536466
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

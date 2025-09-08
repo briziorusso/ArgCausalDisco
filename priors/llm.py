@@ -2,14 +2,14 @@ import re
 from typing import Annotated, Literal, TypeVar
 
 import instructor
-from openai import OpenAI
+from openai import AsyncOpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from pydantic import BaseModel, Field, computed_field
 
 T_Model = TypeVar("T_Model", bound=BaseModel)
 
 client = instructor.from_openai(
-    OpenAI(base_url="http://localhost:4000", api_key=""), mode=instructor.Mode.MD_JSON
+    AsyncOpenAI(base_url="http://localhost:4000", api_key=""), mode=instructor.Mode.MD_JSON
 )
 
 
@@ -26,14 +26,14 @@ class GraphDescriptionBase(BaseModel):
         return re.sub("\W+|^(?=\d)", "_", self.title.lower())
 
 
-def extract(
+async def extract(
     prompt: str,
     pydantic_model: type[T_Model] | None,
     model="gemini-2.5-flash-lite",
-    temperature=0.3,
+    temperature=0.7,
     max_retries=3,
 ) -> T_Model | ChatCompletion:
-    return client.chat.completions.create(
+    return await client.chat.completions.create(
         model=model,
         messages=[
             {"role": "user", "content": prompt},
@@ -44,7 +44,7 @@ def extract(
     )
 
 
-def parse_graph_description(
+async def parse_graph_description(
     graph_response: str,
     parse_method: Literal["regex", "llm"] = "regex",
     valid_vars: set[str] | None = None,
@@ -71,10 +71,10 @@ def parse_graph_description(
             Annotated[str, Field(pattern=valid_var_pattern)], str
         ]
 
-    return extract(graph_response, GraphDescription)
+    return await extract(graph_response, GraphDescription)
 
 
-def parse_priors(
+async def parse_priors(
     prior_response: str,
     model: str | None = None,
     valid_vars: set[str] | None = None,
@@ -97,7 +97,7 @@ def parse_priors(
 
     VarType = Annotated[str, Field(pattern=valid_var_pattern)]
 
-    return extract(
+    return await extract(
         prompt=prior_response,
         pydantic_model=Annotated[
             set[tuple[VarType, VarType]],
