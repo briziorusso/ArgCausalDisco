@@ -1,0 +1,200 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>interacting_health_conditions_and_outcomes</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>heart_failure</NAME>
+	<PROPERTY>description = A chronic progressive condition in which the heart muscle is unable to pump enough blood to meet the body's needs for blood and oxygen.</PROPERTY>
+	<PROPERTY>fast = heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lung_disorder</NAME>
+	<PROPERTY>description = A broad category encompassing various medical conditions that affect the structure or function of the lungs.</PROPERTY>
+	<PROPERTY>fast = lung_disorder[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>loss_of_appetite</NAME>
+	<PROPERTY>description = A significant reduction or complete absence of the desire to consume food.</PROPERTY>
+	<PROPERTY>fast = loss_of_appetite[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_trouble</NAME>
+	<PROPERTY>description = A general term indicating the presence of various non-specific issues or irregularities affecting the cardiovascular system.</PROPERTY>
+	<PROPERTY>fast = heart_trouble[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>kidney_failure</NAME>
+	<PROPERTY>description = A medical condition where the kidneys lose their ability to adequately filter waste products from the blood.</PROPERTY>
+	<PROPERTY>fast = kidney_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>shortness_of_breath</NAME>
+	<PROPERTY>description = A subjective sensation of uncomfortable or difficult breathing, often described as feeling winded or unable to get enough air.</PROPERTY>
+	<PROPERTY>fast = shortness_of_breath[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>attack_of_influenza</NAME>
+	<PROPERTY>description = A distinct episode of illness caused by the influenza virus, characterized by a specific set of symptoms.</PROPERTY>
+	<PROPERTY>fast = attack_of_influenza[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>demise</NAME>
+	<PROPERTY>description = The ultimate cessation of life functions in an individual.</PROPERTY>
+	<PROPERTY>fast = demise[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>loss_of_weight</NAME>
+	<PROPERTY>description = A measurable decrease in an individual's total body mass over a period of time.</PROPERTY>
+	<PROPERTY>fast = loss_of_weight[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>morbidity</NAME>
+	<PROPERTY>description = The state of being diseased, unhealthy, or suffering from a medical condition, often referring to the incidence of disease in a population or an individual's overall health burden.</PROPERTY>
+	<PROPERTY>fast = morbidity[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>osteoporosis_associated_fractures</NAME>
+	<PROPERTY>description = The occurrence of bone fractures specifically attributed to the weakening of bone tissue, often observed in conditions like osteoporosis.</PROPERTY>
+	<PROPERTY>fast = osteoporosis_associated_fractures[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>heart_failure</FOR>
+	<GIVEN>kidney_failure</GIVEN>
+	<TABLE>
+		0.494717 0.505283
+		0.706256 0.293744
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lung_disorder</FOR>
+	<TABLE>
+		0.216206 0.783794
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>loss_of_appetite</FOR>
+	<GIVEN>kidney_failure</GIVEN>
+	<TABLE>
+		0.0153954 0.984605
+		0.0147769 0.985223
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_trouble</FOR>
+	<GIVEN>attack_of_influenza</GIVEN>
+	<TABLE>
+		0.274108 0.725892
+		0.52194 0.47806
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>kidney_failure</FOR>
+	<TABLE>
+		0.952819 0.0471814
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>shortness_of_breath</FOR>
+	<GIVEN>lung_disorder</GIVEN>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.918701 0.0812994
+		0.492569 0.507431
+		0.165914 0.834086
+		0.541924 0.458076
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>attack_of_influenza</FOR>
+	<TABLE>
+		0.808928 0.191072
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>demise</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<GIVEN>heart_trouble</GIVEN>
+	<TABLE>
+		0.234671 0.765329
+		0.430998 0.569002
+		0.436713 0.563287
+		0.413076 0.586924
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>loss_of_weight</FOR>
+	<GIVEN>loss_of_appetite</GIVEN>
+	<TABLE>
+		0.0139398 0.98606
+		0.700187 0.299813
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>morbidity</FOR>
+	<GIVEN>osteoporosis_associated_fractures</GIVEN>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.630987 0.369013
+		0.27385 0.72615
+		0.428607 0.571393
+		0.538083 0.461917
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>osteoporosis_associated_fractures</FOR>
+	<TABLE>
+		0.213396 0.786604
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

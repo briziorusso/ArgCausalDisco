@@ -1,0 +1,132 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>clinical_pathways_in_cardiac_and_abdominal_health</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>reduction_in_cardiac_output</NAME>
+	<PROPERTY>description = A physiological state indicating a decrease in the volume of blood pumped by the heart per minute, affecting systemic circulation.</PROPERTY>
+	<PROPERTY>fast = reduction_in_cardiac_output[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_failure</NAME>
+	<PROPERTY>description = A chronic medical condition characterized by the heart's inability to pump sufficient blood to meet the body's metabolic demands.</PROPERTY>
+	<PROPERTY>fast = heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>shivering</NAME>
+	<PROPERTY>description = An involuntary muscular contraction causing tremors, typically a bodily response to cold or an elevated core temperature.</PROPERTY>
+	<PROPERTY>fast = shivering[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ascites</NAME>
+	<PROPERTY>description = The pathological accumulation of fluid within the peritoneal cavity, often resulting in abdominal distension and discomfort.</PROPERTY>
+	<PROPERTY>fast = ascites[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>peritonitis</NAME>
+	<PROPERTY>description = Inflammation of the peritoneum, the membrane lining the inner abdominal wall and covering the abdominal organs.</PROPERTY>
+	<PROPERTY>fast = peritonitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hospital_admission</NAME>
+	<PROPERTY>description = The formal process of a patient being admitted to a medical facility for inpatient treatment, monitoring, or diagnostic procedures.</PROPERTY>
+	<PROPERTY>fast = hospital_admission[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fever</NAME>
+	<PROPERTY>description = An elevated body temperature, often a systemic response to infection, inflammation, or other medical conditions.</PROPERTY>
+	<PROPERTY>fast = fever[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>reduction_in_cardiac_output</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.566255 0.433745
+		0.873259 0.126741
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_failure</FOR>
+	<TABLE>
+		0.0127682 0.987232
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>shivering</FOR>
+	<GIVEN>fever</GIVEN>
+	<TABLE>
+		0.670834 0.329166
+		0.842421 0.157579
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ascites</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.323318 0.676682
+		0.66888 0.33112
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>peritonitis</FOR>
+	<GIVEN>ascites</GIVEN>
+	<TABLE>
+		0.28951 0.71049
+		0.551386 0.448614
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hospital_admission</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<GIVEN>fever</GIVEN>
+	<TABLE>
+		0.327599 0.672401
+		0.68103 0.31897
+		0.309067 0.690933
+		0.465775 0.534225
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fever</FOR>
+	<GIVEN>peritonitis</GIVEN>
+	<TABLE>
+		0.0426878 0.957312
+		0.764208 0.235792
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

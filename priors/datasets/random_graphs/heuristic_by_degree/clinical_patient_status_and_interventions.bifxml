@@ -1,0 +1,153 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Clinical Patient Status and Interventions</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An inflammatory condition of the lung affecting primarily the small air sacs (alveoli), often caused by infection.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>surgery</NAME>
+	<PROPERTY>description = An invasive medical intervention performed to treat diseases, injuries, or deformities, requiring manual or instrumental techniques.</PROPERTY>
+	<PROPERTY>fast = surgery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>shock</NAME>
+	<PROPERTY>description = A critical medical state indicating insufficient blood flow to the body's tissues, potentially leading to organ damage.</PROPERTY>
+	<PROPERTY>fast = shock[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>radiotherapy</NAME>
+	<PROPERTY>description = A therapeutic medical procedure involving the use of high-energy radiation to treat certain diseases, often cancer.</PROPERTY>
+	<PROPERTY>fast = radiotherapy[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coma</NAME>
+	<PROPERTY>description = A profound state of unconsciousness from which a person cannot be aroused, characterized by a lack of response to external stimuli.</PROPERTY>
+	<PROPERTY>fast = coma[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypothermia</NAME>
+	<PROPERTY>description = A medical condition characterized by a significantly reduced core body temperature.</PROPERTY>
+	<PROPERTY>fast = hypothermia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>severe_infection</NAME>
+	<PROPERTY>description = A medical condition involving a widespread and intense microbial invasion, posing a significant threat to patient health.</PROPERTY>
+	<PROPERTY>fast = severe_infection[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>bradycardia</NAME>
+	<PROPERTY>description = A physiological condition characterized by an abnormally slow heart rate, typically below 60 beats per minute.</PROPERTY>
+	<PROPERTY>fast = bradycardia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>hypothermia</GIVEN>
+	<GIVEN>severe_infection</GIVEN>
+	<TABLE>
+		0.465519 0.534481
+		0.500304 0.499696
+		0.627062 0.372938
+		0.473738 0.526262
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>surgery</FOR>
+	<GIVEN>radiotherapy</GIVEN>
+	<TABLE>
+		0.198092 0.801908
+		0.559178 0.440822
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>shock</FOR>
+	<GIVEN>hypothermia</GIVEN>
+	<TABLE>
+		0.341621 0.658379
+		0.378193 0.621807
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>radiotherapy</FOR>
+	<TABLE>
+		0.590883 0.409117
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coma</FOR>
+	<GIVEN>severe_infection</GIVEN>
+	<GIVEN>shock</GIVEN>
+	<TABLE>
+		0.755573 0.244427
+		0.699398 0.300602
+		0.747508 0.252492
+		0.390606 0.609394
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypothermia</FOR>
+	<TABLE>
+		0.197445 0.802555
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>severe_infection</FOR>
+	<GIVEN>surgery</GIVEN>
+	<TABLE>
+		0.632995 0.367005
+		0.242296 0.757704
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>bradycardia</FOR>
+	<GIVEN>hypothermia</GIVEN>
+	<GIVEN>surgery</GIVEN>
+	<TABLE>
+		0.663828 0.336172
+		0.421977 0.578023
+		0.0327469 0.967253
+		0.236746 0.763254
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

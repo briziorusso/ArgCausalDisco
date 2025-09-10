@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Acute Neurological and Systemic Compromise</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An inflammatory condition of the lung, primarily affecting the small air sacs (alveoli), often caused by infection.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>central_nervous_system</NAME>
+	<PROPERTY>description = Refers to the functional state or integrity of the brain and spinal cord, which are critical for regulating bodily processes and responses.</PROPERTY>
+	<PROPERTY>fast = central_nervous_system[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypothermia</NAME>
+	<PROPERTY>description = A medical condition characterized by a dangerously low core body temperature, which can impair normal physiological functions.</PROPERTY>
+	<PROPERTY>fast = hypothermia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>unconsciousness</NAME>
+	<PROPERTY>description = A state of being unaware of one's surroundings and unable to respond to external stimuli, often indicating a serious underlying medical condition.</PROPERTY>
+	<PROPERTY>fast = unconsciousness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>convulsions</NAME>
+	<PROPERTY>description = A medical event characterized by sudden, involuntary contractions of muscles, often leading to uncontrolled shaking or movements.</PROPERTY>
+	<PROPERTY>fast = convulsions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = Any injury that results in the destruction or deterioration of brain cells, potentially leading to impaired cognitive, physical, or emotional functions.</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>hypothermia</GIVEN>
+	<TABLE>
+		0.226212 0.773788
+		0.577755 0.422245
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>central_nervous_system</FOR>
+	<TABLE>
+		0.440104 0.559896
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypothermia</FOR>
+	<TABLE>
+		0.537276 0.462724
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>unconsciousness</FOR>
+	<GIVEN>brain_damage</GIVEN>
+	<GIVEN>hypothermia</GIVEN>
+	<GIVEN>central_nervous_system</GIVEN>
+	<TABLE>
+		0.444136 0.555864
+		0.889489 0.110511
+		0.794816 0.205184
+		0.170131 0.829869
+		0.499789 0.500211
+		0.422203 0.577797
+		0.437833 0.562167
+		0.256713 0.743287
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>convulsions</FOR>
+	<GIVEN>central_nervous_system</GIVEN>
+	<TABLE>
+		0.511987 0.488013
+		0.468439 0.531561
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<GIVEN>convulsions</GIVEN>
+	<TABLE>
+		0.439935 0.560065
+		0.242222 0.757778
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

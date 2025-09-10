@@ -1,0 +1,187 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>interconnected_health_and_socio_economic_outcomes</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>demise</NAME>
+	<PROPERTY>description = The end of life; death.</PROPERTY>
+	<PROPERTY>fast = demise[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>early_death</NAME>
+	<PROPERTY>description = The occurrence of death at an age significantly younger than the average life expectancy for a given population.</PROPERTY>
+	<PROPERTY>fast = early_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_failure</NAME>
+	<PROPERTY>description = A chronic medical condition where the heart muscle is unable to pump enough blood to meet the body's needs.</PROPERTY>
+	<PROPERTY>fast = heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>financial_crisis</NAME>
+	<PROPERTY>description = A period of severe economic distress, characterized by significant financial instability for an individual, household, or a broader economic system.</PROPERTY>
+	<PROPERTY>fast = financial_crisis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>serious_illness</NAME>
+	<PROPERTY>description = A severe medical condition that significantly impairs an individual's health and daily functioning.</PROPERTY>
+	<PROPERTY>fast = serious_illness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>loss_of_income</NAME>
+	<PROPERTY>description = A reduction or complete cessation of an individual's earnings from employment, business, or other financial sources.</PROPERTY>
+	<PROPERTY>fast = loss_of_income[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>clostridium_difficile_infection</NAME>
+	<PROPERTY>description = An infection of the colon caused by the bacterium *Clostridium difficile*, leading to symptoms such as severe diarrhea and inflammation.</PROPERTY>
+	<PROPERTY>fast = clostridium_difficile_infection[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>job_loss</NAME>
+	<PROPERTY>description = The involuntary termination of an individual's employment, resulting in unemployment.</PROPERTY>
+	<PROPERTY>fast = job_loss[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hospitalization</NAME>
+	<PROPERTY>description = The admission of an individual to a hospital for medical treatment, observation, or surgery.</PROPERTY>
+	<PROPERTY>fast = hospitalization[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>stagnant_economy</NAME>
+	<PROPERTY>description = A state of minimal or no economic growth within a region or nation, often marked by low productivity and investment.</PROPERTY>
+	<PROPERTY>fast = stagnant_economy[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>demise</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<GIVEN>financial_crisis</GIVEN>
+	<TABLE>
+		0.0618787 0.938121
+		0.726174 0.273826
+		0.110761 0.889239
+		0.265522 0.734478
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>early_death</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.659963 0.340037
+		0.841262 0.158738
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_failure</FOR>
+	<TABLE>
+		0.547746 0.452254
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>financial_crisis</FOR>
+	<GIVEN>job_loss</GIVEN>
+	<TABLE>
+		0.529585 0.470415
+		0.270054 0.729946
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>serious_illness</FOR>
+	<TABLE>
+		0.124345 0.875655
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>loss_of_income</FOR>
+	<GIVEN>job_loss</GIVEN>
+	<GIVEN>hospitalization</GIVEN>
+	<TABLE>
+		0.269879 0.730121
+		0.12998 0.87002
+		0.587132 0.412868
+		0.091768 0.908232
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>clostridium_difficile_infection</FOR>
+	<GIVEN>hospitalization</GIVEN>
+	<TABLE>
+		0.193476 0.806524
+		0.116149 0.883851
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>job_loss</FOR>
+	<GIVEN>serious_illness</GIVEN>
+	<TABLE>
+		0.182606 0.817394
+		0.541341 0.458659
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hospitalization</FOR>
+	<GIVEN>serious_illness</GIVEN>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.528387 0.471613
+		0.904619 0.0953811
+		0.475374 0.524626
+		0.703853 0.296147
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>stagnant_economy</FOR>
+	<GIVEN>financial_crisis</GIVEN>
+	<TABLE>
+		0.488423 0.511577
+		0.573549 0.426451
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

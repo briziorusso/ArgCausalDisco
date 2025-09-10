@@ -1,0 +1,202 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>clinical_manifestations_and_outcomes_in_a_complex_medical_scenario</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>heart_failure</NAME>
+	<PROPERTY>description = A chronic condition where the heart muscle doesn't pump blood as well as it should, leading to insufficient blood flow to meet the body's needs.</PROPERTY>
+	<PROPERTY>fast = heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>malignancy</NAME>
+	<PROPERTY>description = The presence of a cancerous tumor or disease, indicating abnormal and uncontrolled cell growth.</PROPERTY>
+	<PROPERTY>fast = malignancy[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>pheochromocytoma</NAME>
+	<PROPERTY>description = A rare tumor that develops in the adrenal glands, which are located on top of the kidneys, and can produce various hormones.</PROPERTY>
+	<PROPERTY>fast = pheochromocytoma[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>demise</NAME>
+	<PROPERTY>description = The end of life; death.</PROPERTY>
+	<PROPERTY>fast = demise[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>pleural_effusions</NAME>
+	<PROPERTY>description = An accumulation of excess fluid in the space between the lungs and the chest wall, which can impair lung function.</PROPERTY>
+	<PROPERTY>fast = pleural_effusions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>livedo_reticularis</NAME>
+	<PROPERTY>description = A skin condition characterized by a net-like, mottled, purplish discoloration, often more prominent in cold temperatures.</PROPERTY>
+	<PROPERTY>fast = livedo_reticularis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sudden_death</NAME>
+	<PROPERTY>description = An unexpected and abrupt cessation of life, often occurring without prior warning or apparent cause.</PROPERTY>
+	<PROPERTY>fast = sudden_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mvp</NAME>
+	<PROPERTY>description = Mitral Valve Prolapse, a condition in which the two flaps of the mitral valve (located between the left atrium and left ventricle of the heart) don't close smoothly or evenly.</PROPERTY>
+	<PROPERTY>fast = mvp[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>dermatomyositis</NAME>
+	<PROPERTY>description = An autoimmune inflammatory disease primarily affecting muscles and skin, characterized by muscle weakness and a distinctive skin rash.</PROPERTY>
+	<PROPERTY>fast = dermatomyositis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>palpitations</NAME>
+	<PROPERTY>description = A sensation that the heart is beating too hard, too fast, skipping a beat, or fluttering in the chest.</PROPERTY>
+	<PROPERTY>fast = palpitations[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chest_pain</NAME>
+	<PROPERTY>description = Discomfort or pain experienced in the chest region, which can range from mild to severe.</PROPERTY>
+	<PROPERTY>fast = chest_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>heart_failure</FOR>
+	<TABLE>
+		0.574254 0.425746
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>malignancy</FOR>
+	<GIVEN>dermatomyositis</GIVEN>
+	<TABLE>
+		0.777935 0.222065
+		0.52198 0.47802
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>pheochromocytoma</FOR>
+	<TABLE>
+		0.21367 0.78633
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>demise</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.909068 0.0909323
+		0.834576 0.165424
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>pleural_effusions</FOR>
+	<GIVEN>malignancy</GIVEN>
+	<TABLE>
+		0.726193 0.273807
+		0.720276 0.279724
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>livedo_reticularis</FOR>
+	<GIVEN>pheochromocytoma</GIVEN>
+	<GIVEN>dermatomyositis</GIVEN>
+	<TABLE>
+		0.752263 0.247737
+		0.269921 0.730079
+		0.567367 0.432633
+		0.584631 0.415369
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sudden_death</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.385259 0.614741
+		0.938445 0.0615554
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mvp</FOR>
+	<GIVEN>palpitations</GIVEN>
+	<TABLE>
+		0.0469233 0.953077
+		0.523159 0.476841
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>dermatomyositis</FOR>
+	<TABLE>
+		0.412549 0.587451
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>palpitations</FOR>
+	<GIVEN>pheochromocytoma</GIVEN>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.103191 0.896809
+		0.609553 0.390447
+		0.458865 0.541135
+		0.57946 0.42054
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chest_pain</FOR>
+	<GIVEN>palpitations</GIVEN>
+	<GIVEN>pleural_effusions</GIVEN>
+	<TABLE>
+		0.525537 0.474463
+		0.563892 0.436108
+		0.897006 0.102994
+		0.622649 0.377351
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

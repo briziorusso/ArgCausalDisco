@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>clinical_variables_in_cardiovascular_and_gastrointestinal_health</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>acute_hospital_admission</NAME>
+	<PROPERTY>description = An unscheduled entry into a healthcare facility for immediate medical care, typically due to a sudden onset or worsening of a health condition.</PROPERTY>
+	<PROPERTY>fast = acute_hospital_admission[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>rectal_varices</NAME>
+	<PROPERTY>description = Abnormally enlarged and tortuous veins located in the rectum, often a consequence of increased pressure in the portal venous system.</PROPERTY>
+	<PROPERTY>fast = rectal_varices[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mesenteric_ischemia</NAME>
+	<PROPERTY>description = A medical condition characterized by reduced blood flow to the intestines, which can lead to tissue damage and impaired function of the digestive tract.</PROPERTY>
+	<PROPERTY>fast = mesenteric_ischemia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lower_gastrointestinal_bleeding</NAME>
+	<PROPERTY>description = The presence of blood loss originating from the lower parts of the digestive tract, including the small intestine, large intestine, rectum, or anus.</PROPERTY>
+	<PROPERTY>fast = lower_gastrointestinal_bleeding[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_failure</NAME>
+	<PROPERTY>description = A chronic medical condition where the heart is unable to pump enough blood to meet the body's needs, leading to various symptoms and complications.</PROPERTY>
+	<PROPERTY>fast = heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>acute_hospital_admission</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.163801 0.836199
+		0.293322 0.706678
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>rectal_varices</FOR>
+	<TABLE>
+		0.248954 0.751046
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mesenteric_ischemia</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.620618 0.379382
+		0.480689 0.519311
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lower_gastrointestinal_bleeding</FOR>
+	<GIVEN>mesenteric_ischemia</GIVEN>
+	<GIVEN>rectal_varices</GIVEN>
+	<TABLE>
+		0.473084 0.526916
+		0.630133 0.369867
+		0.194108 0.805892
+		0.511564 0.488436
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_failure</FOR>
+	<TABLE>
+		0.671545 0.328455
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

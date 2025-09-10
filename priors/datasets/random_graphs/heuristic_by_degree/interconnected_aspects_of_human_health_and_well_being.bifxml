@@ -1,0 +1,181 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Interconnected Aspects of Human Health and Well-being</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>illnesses</NAME>
+	<PROPERTY>description = The presence of diseases or medical conditions that impair normal bodily function or well-being.</PROPERTY>
+	<PROPERTY>fast = illnesses[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>early_death</NAME>
+	<PROPERTY>description = Mortality occurring at an age significantly younger than the average life expectancy for a given population.</PROPERTY>
+	<PROPERTY>fast = early_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = Persistent or recurrent pain that lasts for an extended period, typically longer than three to six months.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>aggressive_behavior</NAME>
+	<PROPERTY>description = Actions intended to cause harm or injury to another person, animal, or property, or to oneself.</PROPERTY>
+	<PROPERTY>fast = aggressive_behavior[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_concentration</NAME>
+	<PROPERTY>description = Difficulty in sustaining attention or focusing on a specific task or thought for an adequate period.</PROPERTY>
+	<PROPERTY>fast = lack_of_concentration[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>poor_health</NAME>
+	<PROPERTY>description = A general state of diminished physical or mental well-being, indicating a decline in overall health status.</PROPERTY>
+	<PROPERTY>fast = poor_health[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>substance_abuse</NAME>
+	<PROPERTY>description = The harmful or hazardous use of psychoactive substances, including alcohol and illicit drugs.</PROPERTY>
+	<PROPERTY>fast = substance_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infertility</NAME>
+	<PROPERTY>description = The inability to conceive offspring after a certain period of unprotected sexual intercourse.</PROPERTY>
+	<PROPERTY>fast = infertility[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>physical_injury</NAME>
+	<PROPERTY>description = Damage to the body caused by external force, trauma, or accident.</PROPERTY>
+	<PROPERTY>fast = physical_injury[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>behavioral_problems</NAME>
+	<PROPERTY>description = Challenges in regulating one's actions, emotions, or social interactions, often observed as disruptive or maladaptive patterns.</PROPERTY>
+	<PROPERTY>fast = behavioral_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>illnesses</FOR>
+	<GIVEN>substance_abuse</GIVEN>
+	<TABLE>
+		0.660847 0.339153
+		0.631327 0.368673
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>early_death</FOR>
+	<GIVEN>poor_health</GIVEN>
+	<TABLE>
+		0.0730183 0.926982
+		0.864988 0.135012
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>physical_injury</GIVEN>
+	<GIVEN>illnesses</GIVEN>
+	<TABLE>
+		0.11231 0.88769
+		0.449521 0.550479
+		0.72293 0.27707
+		0.978698 0.0213022
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>aggressive_behavior</FOR>
+	<GIVEN>behavioral_problems</GIVEN>
+	<TABLE>
+		0.536658 0.463342
+		0.504046 0.495954
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_concentration</FOR>
+	<GIVEN>poor_health</GIVEN>
+	<TABLE>
+		0.129557 0.870443
+		0.777332 0.222668
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>poor_health</FOR>
+	<GIVEN>substance_abuse</GIVEN>
+	<TABLE>
+		0.689234 0.310766
+		0.0268355 0.973164
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>substance_abuse</FOR>
+	<GIVEN>behavioral_problems</GIVEN>
+	<TABLE>
+		0.691903 0.308097
+		0.48118 0.51882
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infertility</FOR>
+	<GIVEN>illnesses</GIVEN>
+	<TABLE>
+		0.951803 0.048197
+		0.385283 0.614717
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>physical_injury</FOR>
+	<TABLE>
+		0.30767 0.69233
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>behavioral_problems</FOR>
+	<TABLE>
+		0.100021 0.899979
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

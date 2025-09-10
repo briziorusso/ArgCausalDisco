@@ -1,0 +1,116 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>pharmacological_and_cardiac_health_dynamics</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>heart_failure</NAME>
+	<PROPERTY>description = A medical condition indicating the heart's reduced ability to pump blood effectively throughout the body.</PROPERTY>
+	<PROPERTY>fast = heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>appetite_suppression</NAME>
+	<PROPERTY>description = A state characterized by a diminished desire or urge to consume food.</PROPERTY>
+	<PROPERTY>fast = appetite_suppression[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>palpitations</NAME>
+	<PROPERTY>description = The subjective experience of an abnormally rapid, strong, or irregular heartbeat.</PROPERTY>
+	<PROPERTY>fast = palpitations[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>acute_hospital_admission</NAME>
+	<PROPERTY>description = The event of a patient being admitted to a medical facility for urgent, short-term treatment or observation.</PROPERTY>
+	<PROPERTY>fast = acute_hospital_admission[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>stimulants</NAME>
+	<PROPERTY>description = The presence or administration of substances known to increase alertness and energy levels.</PROPERTY>
+	<PROPERTY>fast = stimulants[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sudden_death</NAME>
+	<PROPERTY>description = An unexpected and abrupt cessation of life, often occurring without prior warning or within a very short timeframe from the onset of symptoms.</PROPERTY>
+	<PROPERTY>fast = sudden_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>heart_failure</FOR>
+	<TABLE>
+		0.771084 0.228916
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>appetite_suppression</FOR>
+	<GIVEN>stimulants</GIVEN>
+	<TABLE>
+		0.487096 0.512904
+		0.175032 0.824968
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>palpitations</FOR>
+	<GIVEN>stimulants</GIVEN>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.459785 0.540215
+		0.684844 0.315156
+		0.585144 0.414856
+		0.534243 0.465757
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>acute_hospital_admission</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<TABLE>
+		0.15518 0.84482
+		0.447624 0.552376
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>stimulants</FOR>
+	<TABLE>
+		0.0154018 0.984598
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sudden_death</FOR>
+	<GIVEN>heart_failure</GIVEN>
+	<GIVEN>stimulants</GIVEN>
+	<TABLE>
+		0.339618 0.660382
+		0.541204 0.458796
+		0.38443 0.61557
+		0.532742 0.467258
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,153 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Indoor Environmental Factors and Occupant Health</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An infection that inflames air sacs in one or both lungs, which may fill with fluid or pus, causing cough with phlegm or pus, fever, chills, and difficulty breathing.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mold</NAME>
+	<PROPERTY>description = A type of fungus that grows in damp environments, often found indoors.</PROPERTY>
+	<PROPERTY>fast = mold[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>bronchitis</NAME>
+	<PROPERTY>description = Inflammation of the lining of the bronchial tubes, which carry air to and from the lungs, typically causing a cough with mucus.</PROPERTY>
+	<PROPERTY>fast = bronchitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>illnesses</NAME>
+	<PROPERTY>description = A general term referring to states of being unwell or diseases, encompassing a broad range of health conditions.</PROPERTY>
+	<PROPERTY>fast = illnesses[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>poor_ventilation</NAME>
+	<PROPERTY>description = A condition where the circulation and exchange of air within an enclosed space are inadequate.</PROPERTY>
+	<PROPERTY>fast = poor_ventilation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>pollutants</NAME>
+	<PROPERTY>description = Substances present in the air that can be detrimental to health or environmental quality.</PROPERTY>
+	<PROPERTY>fast = pollutants[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sinusitis</NAME>
+	<PROPERTY>description = Inflammation of the tissue lining the sinuses, often leading to symptoms like nasal congestion, facial pain, and headache.</PROPERTY>
+	<PROPERTY>fast = sinusitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sick_building_syndrome</NAME>
+	<PROPERTY>description = A collection of non-specific symptoms experienced by occupants of a building, often linked to time spent in that building, without a specific identifiable disease or cause.</PROPERTY>
+	<PROPERTY>fast = sick_building_syndrome[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>sinusitis</GIVEN>
+	<GIVEN>bronchitis</GIVEN>
+	<TABLE>
+		0.493156 0.506844
+		0.759978 0.240022
+		0.0261979 0.973802
+		0.249813 0.750187
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mold</FOR>
+	<GIVEN>poor_ventilation</GIVEN>
+	<TABLE>
+		0.485195 0.514805
+		0.79228 0.20772
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>bronchitis</FOR>
+	<GIVEN>sinusitis</GIVEN>
+	<TABLE>
+		0.294828 0.705172
+		0.814487 0.185513
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>illnesses</FOR>
+	<GIVEN>mold</GIVEN>
+	<TABLE>
+		0.322341 0.677659
+		0.717187 0.282813
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>poor_ventilation</FOR>
+	<TABLE>
+		0.505965 0.494035
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>pollutants</FOR>
+	<TABLE>
+		0.411984 0.588016
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sinusitis</FOR>
+	<GIVEN>mold</GIVEN>
+	<GIVEN>pollutants</GIVEN>
+	<TABLE>
+		0.431263 0.568737
+		0.224076 0.775924
+		0.685218 0.314782
+		0.571949 0.428051
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sick_building_syndrome</FOR>
+	<GIVEN>poor_ventilation</GIVEN>
+	<GIVEN>pollutants</GIVEN>
+	<TABLE>
+		0.479704 0.520296
+		0.933033 0.0669672
+		0.285852 0.714148
+		0.509511 0.490489
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

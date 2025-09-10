@@ -1,0 +1,139 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Respiratory Health and Related Factors</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An infection that inflames the air sacs in one or both lungs, which may fill with fluid or pus, causing cough, fever, chills, and difficulty breathing.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tobacco</NAME>
+	<PROPERTY>description = A plant cultivated for its leaves, which are processed and commonly used in various forms for consumption, including smoking.</PROPERTY>
+	<PROPERTY>fast = tobacco[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>bronchitis</NAME>
+	<PROPERTY>description = An inflammation of the lining of the bronchial tubes, which carry air to and from the lungs, often resulting in a cough.</PROPERTY>
+	<PROPERTY>fast = bronchitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_bronchitis</NAME>
+	<PROPERTY>description = A persistent inflammatory condition of the bronchial tubes, marked by a long-term cough that produces mucus.</PROPERTY>
+	<PROPERTY>fast = chronic_bronchitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>copd</NAME>
+	<PROPERTY>description = A progressive and long-term lung disease characterized by obstructed airflow from the lungs, making breathing difficult.</PROPERTY>
+	<PROPERTY>fast = copd[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cigarette_smoke</NAME>
+	<PROPERTY>description = The inhalation of combustion products from tobacco rolled in paper, commonly associated with various health impacts.</PROPERTY>
+	<PROPERTY>fast = cigarette_smoke[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>bronchospasm</NAME>
+	<PROPERTY>description = A sudden and involuntary tightening of the muscles in the walls of the bronchi, leading to a narrowing of the airways and difficulty in breathing.</PROPERTY>
+	<PROPERTY>fast = bronchospasm[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>bronchitis</GIVEN>
+	<GIVEN>copd</GIVEN>
+	<TABLE>
+		0.500002 0.499998
+		0.582576 0.417424
+		0.859906 0.140094
+		0.889972 0.110028
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tobacco</FOR>
+	<TABLE>
+		0.571054 0.428946
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>bronchitis</FOR>
+	<GIVEN>cigarette_smoke</GIVEN>
+	<GIVEN>tobacco</GIVEN>
+	<TABLE>
+		0.715747 0.284253
+		0.865976 0.134024
+		0.128822 0.871178
+		0.380058 0.619942
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_bronchitis</FOR>
+	<GIVEN>copd</GIVEN>
+	<GIVEN>cigarette_smoke</GIVEN>
+	<TABLE>
+		0.0291245 0.970876
+		0.30484 0.69516
+		0.624123 0.375877
+		0.422318 0.577682
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>copd</FOR>
+	<GIVEN>cigarette_smoke</GIVEN>
+	<TABLE>
+		0.50966 0.49034
+		0.514648 0.485352
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cigarette_smoke</FOR>
+	<TABLE>
+		0.197756 0.802244
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>bronchospasm</FOR>
+	<GIVEN>bronchitis</GIVEN>
+	<GIVEN>chronic_bronchitis</GIVEN>
+	<TABLE>
+		0.893105 0.106895
+		0.5823 0.4177
+		0.219739 0.780261
+		0.878385 0.121615
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

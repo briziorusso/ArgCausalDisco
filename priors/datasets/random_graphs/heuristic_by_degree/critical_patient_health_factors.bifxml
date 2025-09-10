@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Critical Patient Health Factors</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = An inflammatory condition of the lung affecting primarily the small air sacs (alveoli), often caused by infection, leading to breathing difficulties.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypothermia</NAME>
+	<PROPERTY>description = A medical condition characterized by a significant drop in core body temperature below the level required for normal metabolism and body function.</PROPERTY>
+	<PROPERTY>fast = hypothermia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = A sudden cessation of the heart's pumping function, leading to the absence of blood circulation throughout the body.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>brain_injury</NAME>
+	<PROPERTY>description = Any damage to the brain that impairs its normal function, which can result from various internal or external factors, affecting cognitive or physical abilities.</PROPERTY>
+	<PROPERTY>fast = brain_injury[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>old_age</NAME>
+	<PROPERTY>description = A demographic characteristic indicating advanced chronological age, often considered in the context of physiological resilience and health.</PROPERTY>
+	<PROPERTY>fast = old_age[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>hypothermia</GIVEN>
+	<TABLE>
+		0.66433 0.33567
+		0.418769 0.581231
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypothermia</FOR>
+	<TABLE>
+		0.323856 0.676144
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>old_age</GIVEN>
+	<GIVEN>pneumonia</GIVEN>
+	<GIVEN>hypothermia</GIVEN>
+	<TABLE>
+		0.689236 0.310764
+		0.541617 0.458383
+		0.792377 0.207623
+		0.744069 0.255931
+		0.505939 0.494061
+		0.025804 0.974196
+		0.913306 0.0866938
+		0.328126 0.671874
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>brain_injury</FOR>
+	<GIVEN>cardiac_arrest</GIVEN>
+	<TABLE>
+		0.817158 0.182842
+		0.357979 0.642021
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>old_age</FOR>
+	<TABLE>
+		0.325297 0.674703
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

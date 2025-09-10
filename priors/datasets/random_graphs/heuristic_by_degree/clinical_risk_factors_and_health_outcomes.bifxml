@@ -1,0 +1,140 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Clinical Risk Factors and Health Outcomes</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = The confirmed diagnosis of an inflammatory condition of the lung affecting the air sacs, often leading to respiratory symptoms.</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypothermia</NAME>
+	<PROPERTY>description = The documented incidence of a physiological state where an individual's core body temperature drops below the level required for normal metabolism and body functions.</PROPERTY>
+	<PROPERTY>fast = hypothermia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>overdose</NAME>
+	<PROPERTY>description = The occurrence of an acute medical event characterized by a toxic reaction to a substance, requiring immediate medical intervention.</PROPERTY>
+	<PROPERTY>fast = overdose[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hiv</NAME>
+	<PROPERTY>description = The confirmed serological status indicating the presence of a specific viral infection that compromises the immune system.</PROPERTY>
+	<PROPERTY>fast = hiv[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = The diagnosed presence or documented history of chronic alcohol dependence in an individual or a segment of the population.</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>measles</NAME>
+	<PROPERTY>description = The confirmed diagnosis or reported incidence of a specific highly contagious viral infection affecting individuals in a population.</PROPERTY>
+	<PROPERTY>fast = measles[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>opioids</NAME>
+	<PROPERTY>description = The observed prevalence or level of opioid substance exposure within a defined patient group or community.</PROPERTY>
+	<PROPERTY>fast = opioids[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>hiv</GIVEN>
+	<GIVEN>hypothermia</GIVEN>
+	<GIVEN>measles</GIVEN>
+	<GIVEN>alcoholism</GIVEN>
+	<TABLE>
+		0.446996 0.553004
+		0.649285 0.350715
+		0.156826 0.843174
+		0.424726 0.575274
+		0.640376 0.359624
+		0.430071 0.569929
+		0.582278 0.417722
+		0.892656 0.107344
+		0.419095 0.580905
+		0.516827 0.483173
+		0.465866 0.534134
+		0.581671 0.418329
+		0.530393 0.469607
+		0.735173 0.264827
+		0.477303 0.522697
+		0.535602 0.464398
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypothermia</FOR>
+	<GIVEN>overdose</GIVEN>
+	<TABLE>
+		0.51503 0.48497
+		0.279179 0.720821
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>overdose</FOR>
+	<GIVEN>opioids</GIVEN>
+	<TABLE>
+		0.438704 0.561296
+		0.486263 0.513737
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hiv</FOR>
+	<TABLE>
+		0.70849 0.29151
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<TABLE>
+		0.261624 0.738376
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>measles</FOR>
+	<TABLE>
+		0.53435 0.46565
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>opioids</FOR>
+	<TABLE>
+		0.235302 0.764698
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>
