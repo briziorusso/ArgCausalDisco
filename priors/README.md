@@ -23,3 +23,7 @@ Bnlearn & Synthetic Datasets including variables and LLM-generated descriptions 
 ## Matplotlib Figures
 
 Scripts to reproduce figures in the thesis can be found under `scripts/`. Only benchmark log plots scripts are not stored, but should be easy to recreate.
+
+## Generate Synthetic Datasets
+
+Scripts to generate synthetic datasets can be found at [generate_causal_graph](dataset.py#generate_causal_graph), along with the heuristic presented in the thesis [heuristic_by_semantics](dataset.py#heuristic_by_semantics).
