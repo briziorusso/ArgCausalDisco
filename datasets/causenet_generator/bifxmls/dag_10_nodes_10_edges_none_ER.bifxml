@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_disease</NAME>
+	<PROPERTY>description = chronic_disease</PROPERTY>
+	<PROPERTY>fast = chronic_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>medical_problems</NAME>
+	<PROPERTY>description = medical_problems</PROPERTY>
+	<PROPERTY>fast = medical_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>numbness</NAME>
+	<PROPERTY>description = numbness</PROPERTY>
+	<PROPERTY>fast = numbness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>serious_health_problems</NAME>
+	<PROPERTY>description = serious_health_problems</PROPERTY>
+	<PROPERTY>fast = serious_health_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>nerve_damage</NAME>
+	<PROPERTY>description = nerve_damage</PROPERTY>
+	<PROPERTY>fast = nerve_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infertility</NAME>
+	<PROPERTY>description = infertility</PROPERTY>
+	<PROPERTY>fast = infertility[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>panic_attack</NAME>
+	<PROPERTY>description = panic_attack</PROPERTY>
+	<PROPERTY>fast = panic_attack[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<TABLE>
+		0.211009 0.788991
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.800038 0.199962
+		0.531839 0.468161
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>medical_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.579488 0.420512
+		0.251582 0.748418
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>numbness</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>nerve_damage</GIVEN>
+	<GIVEN>panic_attack</GIVEN>
+	<TABLE>
+		0.568029 0.431971
+		0.642292 0.357708
+		0.644077 0.355923
+		0.501652 0.498348
+		0.0389085 0.961091
+		0.269067 0.730933
+		0.996475 0.00352538
+		0.0264573 0.973543
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>serious_health_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.853147 0.146853
+		0.883029 0.116971
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>nerve_damage</FOR>
+	<GIVEN>chronic_disease</GIVEN>
+	<TABLE>
+		0.352245 0.647755
+		0.557562 0.442438
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infertility</FOR>
+	<GIVEN>chronic_disease</GIVEN>
+	<GIVEN>medical_problems</GIVEN>
+	<TABLE>
+		0.856581 0.143419
+		0.165437 0.834563
+		0.787805 0.212195
+		0.556517 0.443483
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>panic_attack</FOR>
+	<GIVEN>medical_problems</GIVEN>
+	<TABLE>
+		0.471915 0.528085
+		0.348667 0.651333
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

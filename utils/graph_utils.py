@@ -1,5 +1,7 @@
 import os, sys
 import logging
+from pathlib import Path
+import shutil
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -9,7 +11,12 @@ from itertools import combinations, chain
 from copy import deepcopy
 import warnings
 warnings.filterwarnings("ignore")
-os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
+r_candidate = Path(__file__).resolve().parents[1] / 'R' / 'R-4.1.2'
+bin_candidate = r_candidate / 'bin'
+if bin_candidate.exists():
+    os.environ['R_HOME'] = str(bin_candidate)
+else:
+    os.environ.pop('R_HOME', None)
 ### To not have the WARNING: ignoring environment value of R_HOME 
 ### set the verbose to False in the launch_R_script function in:
 ### CausalDiscoveryToolbox/cdt/utils/R.py#L155
@@ -20,7 +27,14 @@ except:
     sys.path.append('../CausalDiscoveryToolbox/')
     import cdt
 from cdt.metrics import SHD, SID, SID_CPDAG
-cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
+
+rscript_candidate = bin_candidate / 'Rscript'
+if rscript_candidate.exists():
+    cdt.SETTINGS.rpath = str(rscript_candidate)
+else:
+    default_rscript = shutil.which('Rscript')
+    if default_rscript:
+        cdt.SETTINGS.rpath = default_rscript
 
 def model_to_adjacency_matrix(model:list, num_of_nodes:int)->np.ndarray:
     adj_mat = np.zeros((num_of_nodes,num_of_nodes))

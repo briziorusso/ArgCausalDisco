@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>misconduct</NAME>
+	<PROPERTY>description = misconduct</PROPERTY>
+	<PROPERTY>fast = misconduct[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>prejudice</NAME>
+	<PROPERTY>description = prejudice</PROPERTY>
+	<PROPERTY>fast = prejudice[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>substance_abuse</NAME>
+	<PROPERTY>description = substance_abuse</PROPERTY>
+	<PROPERTY>fast = substance_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>impairment</NAME>
+	<PROPERTY>description = impairment</PROPERTY>
+	<PROPERTY>fast = impairment[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>discrimination</NAME>
+	<PROPERTY>description = discrimination</PROPERTY>
+	<PROPERTY>fast = discrimination[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>misconduct</FOR>
+	<GIVEN>impairment</GIVEN>
+	<TABLE>
+		0.372528 0.627472
+		0.242441 0.757559
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>prejudice</FOR>
+	<GIVEN>misconduct</GIVEN>
+	<TABLE>
+		0.597989 0.402011
+		0.692017 0.307983
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>substance_abuse</FOR>
+	<TABLE>
+		0.108467 0.891533
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>impairment</FOR>
+	<GIVEN>substance_abuse</GIVEN>
+	<TABLE>
+		0.29245 0.70755
+		0.744385 0.255615
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>discrimination</FOR>
+	<GIVEN>impairment</GIVEN>
+	<GIVEN>prejudice</GIVEN>
+	<TABLE>
+		0.485095 0.514905
+		0.466015 0.533985
+		0.941207 0.0587926
+		0.337768 0.662232
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

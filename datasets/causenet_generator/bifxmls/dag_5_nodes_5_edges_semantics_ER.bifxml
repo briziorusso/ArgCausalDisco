@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_self-esteem</NAME>
+	<PROPERTY>description = low_self-esteem</PROPERTY>
+	<PROPERTY>fast = low_self-esteem[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_problems</NAME>
+	<PROPERTY>description = social_problems</PROPERTY>
+	<PROPERTY>fast = social_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>gambling</NAME>
+	<PROPERTY>description = gambling</PROPERTY>
+	<PROPERTY>fast = gambling[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>bribes</NAME>
+	<PROPERTY>description = bribes</PROPERTY>
+	<PROPERTY>fast = bribes[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.120878 0.879122
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_self-esteem</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.938429 0.0615707
+		0.616683 0.383317
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_problems</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>low_self-esteem</GIVEN>
+	<GIVEN>gambling</GIVEN>
+	<TABLE>
+		0.291288 0.708712
+		0.387839 0.612161
+		0.185832 0.814168
+		0.263812 0.736188
+		0.480228 0.519772
+		0.387274 0.612726
+		0.91543 0.0845702
+		0.724082 0.275918
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>gambling</FOR>
+	<TABLE>
+		0.338015 0.661985
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>bribes</FOR>
+	<GIVEN>gambling</GIVEN>
+	<TABLE>
+		0.996744 0.00325565
+		0.171497 0.828503
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,210 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_disease</NAME>
+	<PROPERTY>description = chronic_disease</PROPERTY>
+	<PROPERTY>fast = chronic_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_problems</NAME>
+	<PROPERTY>description = heart_problems</PROPERTY>
+	<PROPERTY>fast = heart_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sexual_dysfunction</NAME>
+	<PROPERTY>description = sexual_dysfunction</PROPERTY>
+	<PROPERTY>fast = sexual_dysfunction[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sudden_death</NAME>
+	<PROPERTY>description = sudden_death</PROPERTY>
+	<PROPERTY>fast = sudden_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypothyroidism</NAME>
+	<PROPERTY>description = hypothyroidism</PROPERTY>
+	<PROPERTY>fast = hypothyroidism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>nerve_damage</NAME>
+	<PROPERTY>description = nerve_damage</PROPERTY>
+	<PROPERTY>fast = nerve_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>syndrome</NAME>
+	<PROPERTY>description = syndrome</PROPERTY>
+	<PROPERTY>fast = syndrome[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blood_pressure</NAME>
+	<PROPERTY>description = blood_pressure</PROPERTY>
+	<PROPERTY>fast = blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>prostate_gland_cancer_surgery</NAME>
+	<PROPERTY>description = prostate_gland_cancer_surgery</PROPERTY>
+	<PROPERTY>fast = prostate_gland_cancer_surgery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>syndrome</GIVEN>
+	<GIVEN>blood_pressure</GIVEN>
+	<TABLE>
+		0.766737 0.233263
+		0.5503 0.4497
+		0.104459 0.895541
+		0.454689 0.545311
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.312762 0.687238
+		0.486298 0.513702
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>hypothyroidism</GIVEN>
+	<TABLE>
+		0.513801 0.486199
+		0.370975 0.629025
+		0.943966 0.0560345
+		0.448112 0.551888
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sexual_dysfunction</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>nerve_damage</GIVEN>
+	<TABLE>
+		0.448847 0.551153
+		0.126464 0.873536
+		0.545684 0.454316
+		0.854037 0.145963
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sudden_death</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>heart_problems</GIVEN>
+	<GIVEN>syndrome</GIVEN>
+	<GIVEN>blood_pressure</GIVEN>
+	<TABLE>
+		0.132495 0.867505
+		0.534609 0.465391
+		0.218676 0.781324
+		0.200267 0.799733
+		0.524499 0.475501
+		0.526862 0.473138
+		0.606037 0.393963
+		0.50335 0.49665
+		0.681792 0.318208
+		0.129327 0.870673
+		0.065489 0.934511
+		0.719055 0.280945
+		0.542393 0.457607
+		0.71285 0.28715
+		0.59769 0.40231
+		0.426727 0.573273
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypothyroidism</FOR>
+	<GIVEN>syndrome</GIVEN>
+	<TABLE>
+		0.566887 0.433113
+		0.669747 0.330253
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>nerve_damage</FOR>
+	<GIVEN>chronic_disease</GIVEN>
+	<GIVEN>syndrome</GIVEN>
+	<GIVEN>prostate_gland_cancer_surgery</GIVEN>
+	<TABLE>
+		0.0535265 0.946473
+		0.585338 0.414662
+		0.423632 0.576368
+		0.587217 0.412783
+		0.535364 0.464636
+		0.704702 0.295298
+		0.144468 0.855532
+		0.419627 0.580373
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>syndrome</FOR>
+	<TABLE>
+		0.596955 0.403045
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blood_pressure</FOR>
+	<TABLE>
+		0.382233 0.617767
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>prostate_gland_cancer_surgery</FOR>
+	<TABLE>
+		0.545855 0.454145
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

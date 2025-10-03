@@ -1,0 +1,106 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hemorrhagic_stroke</NAME>
+	<PROPERTY>description = hemorrhagic_stroke</PROPERTY>
+	<PROPERTY>fast = hemorrhagic_stroke[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>intracerebral_hemorrhage</NAME>
+	<PROPERTY>description = intracerebral_hemorrhage</PROPERTY>
+	<PROPERTY>fast = intracerebral_hemorrhage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>subarachnoid_hemorrhage</NAME>
+	<PROPERTY>description = subarachnoid_hemorrhage</PROPERTY>
+	<PROPERTY>fast = subarachnoid_hemorrhage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>decreased_level_of_consciousness</NAME>
+	<PROPERTY>description = decreased_level_of_consciousness</PROPERTY>
+	<PROPERTY>fast = decreased_level_of_consciousness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<TABLE>
+		0.426345 0.573655
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hemorrhagic_stroke</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>subarachnoid_hemorrhage</GIVEN>
+	<GIVEN>intracerebral_hemorrhage</GIVEN>
+	<TABLE>
+		0.486098 0.513902
+		0.473212 0.526788
+		0.825884 0.174116
+		0.422205 0.577795
+		0.312426 0.687574
+		0.611767 0.388233
+		0.913932 0.086068
+		0.43266 0.56734
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>intracerebral_hemorrhage</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.894731 0.105269
+		0.456688 0.543312
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>subarachnoid_hemorrhage</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.932865 0.0671348
+		0.151196 0.848804
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>decreased_level_of_consciousness</FOR>
+	<GIVEN>subarachnoid_hemorrhage</GIVEN>
+	<GIVEN>intracerebral_hemorrhage</GIVEN>
+	<TABLE>
+		0.553815 0.446185
+		0.45541 0.54459
+		0.701491 0.298509
+		0.84948 0.15052
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,329 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiovascular_diseases</NAME>
+	<PROPERTY>description = cardiovascular_diseases</PROPERTY>
+	<PROPERTY>fast = cardiovascular_diseases[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>premature_death</NAME>
+	<PROPERTY>description = premature_death</PROPERTY>
+	<PROPERTY>fast = premature_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = alcoholism</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>overweight</NAME>
+	<PROPERTY>description = overweight</PROPERTY>
+	<PROPERTY>fast = overweight[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>oxidative_stress</NAME>
+	<PROPERTY>description = oxidative_stress</PROPERTY>
+	<PROPERTY>fast = oxidative_stress[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hormonal_imbalances</NAME>
+	<PROPERTY>description = hormonal_imbalances</PROPERTY>
+	<PROPERTY>fast = hormonal_imbalances[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chd</NAME>
+	<PROPERTY>description = chd</PROPERTY>
+	<PROPERTY>fast = chd[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lifestyle</NAME>
+	<PROPERTY>description = lifestyle</PROPERTY>
+	<PROPERTY>fast = lifestyle[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>metabolic_syndrome</NAME>
+	<PROPERTY>description = metabolic_syndrome</PROPERTY>
+	<PROPERTY>fast = metabolic_syndrome[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>hormonal_imbalances</GIVEN>
+	<GIVEN>chd</GIVEN>
+	<GIVEN>metabolic_syndrome</GIVEN>
+	<GIVEN>overweight</GIVEN>
+	<TABLE>
+		0.080153 0.919847
+		0.504065 0.495935
+		0.236291 0.763709
+		0.570727 0.429273
+		0.723668 0.276332
+		0.354462 0.645538
+		0.466151 0.533849
+		0.66175 0.33825
+		0.608555 0.391445
+		0.824425 0.175575
+		0.55158 0.44842
+		0.352749 0.647251
+		0.214395 0.785605
+		0.425116 0.574884
+		0.476427 0.523573
+		0.881218 0.118782
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiovascular_diseases</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>oxidative_stress</GIVEN>
+	<TABLE>
+		0.977819 0.0221805
+		0.580392 0.419608
+		0.295072 0.704928
+		0.106988 0.893012
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>premature_death</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>alcoholism</GIVEN>
+	<GIVEN>cardiovascular_diseases</GIVEN>
+	<GIVEN>oxidative_stress</GIVEN>
+	<GIVEN>chd</GIVEN>
+	<GIVEN>lifestyle</GIVEN>
+	<GIVEN>overweight</GIVEN>
+	<TABLE>
+		0.819657 0.180343
+		0.263538 0.736462
+		0.744396 0.255604
+		0.761167 0.238833
+		0.111422 0.888578
+		0.761177 0.238823
+		0.0571361 0.942864
+		0.309865 0.690135
+		0.478933 0.521067
+		0.383392 0.616608
+		0.770687 0.229313
+		0.439861 0.560139
+		0.982745 0.0172547
+		0.577693 0.422307
+		0.48341 0.51659
+		0.737809 0.262191
+		0.083348 0.916652
+		0.527766 0.472234
+		0.495842 0.504158
+		0.615665 0.384335
+		0.503486 0.496514
+		0.783432 0.216568
+		0.646341 0.353659
+		0.485316 0.514684
+		0.151274 0.848726
+		0.508022 0.491978
+		0.7272 0.2728
+		0.703105 0.296895
+		0.552068 0.447932
+		0.247816 0.752184
+		0.436443 0.563557
+		0.937423 0.0625769
+		0.687934 0.312066
+		0.411974 0.588026
+		0.20864 0.79136
+		0.154213 0.845787
+		0.072451 0.927549
+		0.948231 0.0517694
+		0.475753 0.524247
+		0.440187 0.559813
+		0.316773 0.683227
+		0.17667 0.82333
+		0.514451 0.485549
+		0.903424 0.0965758
+		0.442949 0.557051
+		0.453823 0.546177
+		0.316979 0.683021
+		0.717201 0.282799
+		0.6095 0.3905
+		0.856862 0.143138
+		0.749671 0.250329
+		0.0556191 0.944381
+		0.378841 0.621159
+		0.847562 0.152438
+		0.663344 0.336656
+		0.21303 0.78697
+		0.0818518 0.918148
+		0.984344 0.0156561
+		0.619032 0.380968
+		0.346929 0.653071
+		0.861565 0.138435
+		0.858879 0.141121
+		0.840592 0.159408
+		0.810069 0.189931
+		0.38526 0.61474
+		0.971666 0.0283338
+		0.150437 0.849563
+		0.483977 0.516023
+		0.810469 0.189531
+		0.481675 0.518325
+		0.478285 0.521715
+		0.455076 0.544924
+		0.251868 0.748132
+		0.102679 0.897321
+		0.926628 0.0733716
+		0.329405 0.670595
+		0.521215 0.478785
+		0.39283 0.60717
+		0.238589 0.761411
+		0.413926 0.586074
+		0.714164 0.285836
+		0.187797 0.812203
+		0.0327273 0.967273
+		0.658388 0.341612
+		0.799069 0.200931
+		0.72381 0.27619
+		0.565629 0.434371
+		0.0164506 0.983549
+		0.548904 0.451096
+		0.61425 0.38575
+		0.433315 0.566685
+		0.497463 0.502537
+		0.506315 0.493685
+		0.35858 0.64142
+		0.328708 0.671292
+		0.609155 0.390845
+		0.389462 0.610538
+		0.518082 0.481918
+		0.50446 0.49554
+		0.363805 0.636195
+		0.464526 0.535474
+		0.461887 0.538113
+		0.771684 0.228316
+		0.545647 0.454353
+		0.211425 0.788575
+		0.635625 0.364375
+		0.930682 0.0693179
+		0.751703 0.248297
+		0.681848 0.318152
+		0.872284 0.127716
+		0.459525 0.540475
+		0.512539 0.487461
+		0.683613 0.316387
+		0.990774 0.00922628
+		0.474717 0.525283
+		0.820524 0.179476
+		0.536454 0.463546
+		0.528131 0.471869
+		0.020425 0.979575
+		0.521431 0.478569
+		0.383441 0.616559
+		0.674793 0.325207
+		0.931216 0.068784
+		0.53959 0.46041
+		0.616095 0.383905
+		0.564611 0.435389
+		0.913748 0.0862516
+		0.0674774 0.932523
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<GIVEN>lifestyle</GIVEN>
+	<TABLE>
+		0.575045 0.424955
+		0.314265 0.685735
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>overweight</FOR>
+	<GIVEN>alcoholism</GIVEN>
+	<GIVEN>hormonal_imbalances</GIVEN>
+	<TABLE>
+		0.87197 0.12803
+		0.754288 0.245712
+		0.528305 0.471695
+		0.0726315 0.927369
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>oxidative_stress</FOR>
+	<GIVEN>metabolic_syndrome</GIVEN>
+	<TABLE>
+		0.798377 0.201623
+		0.371986 0.628014
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hormonal_imbalances</FOR>
+	<TABLE>
+		0.396011 0.603989
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chd</FOR>
+	<TABLE>
+		0.431963 0.568037
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lifestyle</FOR>
+	<TABLE>
+		0.242603 0.757397
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>metabolic_syndrome</FOR>
+	<TABLE>
+		0.619435 0.380565
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,238 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>health_risks</NAME>
+	<PROPERTY>description = health_risks</PROPERTY>
+	<PROPERTY>fast = health_risks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_sleep</NAME>
+	<PROPERTY>description = lack_of_sleep</PROPERTY>
+	<PROPERTY>fast = lack_of_sleep[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>toxins</NAME>
+	<PROPERTY>description = toxins</PROPERTY>
+	<PROPERTY>fast = toxins[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug_use</NAME>
+	<PROPERTY>description = drug_use</PROPERTY>
+	<PROPERTY>fast = drug_use[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_self-esteem</NAME>
+	<PROPERTY>description = low_self-esteem</PROPERTY>
+	<PROPERTY>fast = low_self-esteem[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>substance_abuse</NAME>
+	<PROPERTY>description = substance_abuse</PROPERTY>
+	<PROPERTY>fast = substance_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>waste</NAME>
+	<PROPERTY>description = waste</PROPERTY>
+	<PROPERTY>fast = waste[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ulcers</NAME>
+	<PROPERTY>description = ulcers</PROPERTY>
+	<PROPERTY>fast = ulcers[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mildew</NAME>
+	<PROPERTY>description = mildew</PROPERTY>
+	<PROPERTY>fast = mildew[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>lack_of_sleep</GIVEN>
+	<GIVEN>ulcers</GIVEN>
+	<TABLE>
+		0.490034 0.509966
+		0.36376 0.63624
+		0.539781 0.460219
+		0.37993 0.62007
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>health_risks</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>toxins</GIVEN>
+	<GIVEN>drug_use</GIVEN>
+	<GIVEN>substance_abuse</GIVEN>
+	<GIVEN>waste</GIVEN>
+	<GIVEN>mildew</GIVEN>
+	<TABLE>
+		0.550228 0.449772
+		0.847556 0.152444
+		0.938838 0.061162
+		0.966943 0.0330573
+		0.436636 0.563364
+		0.148481 0.851519
+		0.0784954 0.921505
+		0.479722 0.520278
+		0.437638 0.562362
+		0.173486 0.826514
+		0.556115 0.443885
+		0.174871 0.825129
+		0.205123 0.794877
+		0.22373 0.77627
+		0.422443 0.577557
+		0.971918 0.0280817
+		0.470663 0.529337
+		0.162367 0.837633
+		0.385131 0.614869
+		0.838397 0.161603
+		0.559758 0.440242
+		0.0588972 0.941103
+		0.382668 0.617332
+		0.5909 0.4091
+		0.549393 0.450607
+		0.890139 0.109861
+		0.496752 0.503248
+		0.668342 0.331658
+		0.712598 0.287402
+		0.362677 0.637323
+		0.396837 0.603163
+		0.522033 0.477967
+		0.0267415 0.973259
+		0.123168 0.876832
+		0.587487 0.412513
+		0.153265 0.846735
+		0.82888 0.17112
+		0.435897 0.564103
+		0.347296 0.652704
+		0.858234 0.141766
+		0.251948 0.748052
+		0.621533 0.378467
+		0.506704 0.493296
+		0.651711 0.348289
+		0.933287 0.0667133
+		0.47412 0.52588
+		0.756579 0.243421
+		0.797743 0.202257
+		0.566036 0.433964
+		0.216581 0.783419
+		0.0668848 0.933115
+		0.716962 0.283038
+		0.497024 0.502976
+		0.547093 0.452907
+		0.333539 0.666461
+		0.78275 0.21725
+		0.527816 0.472184
+		0.967372 0.0326275
+		0.607989 0.392011
+		0.790101 0.209899
+		0.367841 0.632159
+		0.659202 0.340798
+		0.401296 0.598704
+		0.340222 0.659778
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_sleep</FOR>
+	<TABLE>
+		0.682308 0.317692
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>toxins</FOR>
+	<TABLE>
+		0.31499 0.68501
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug_use</FOR>
+	<TABLE>
+		0.482887 0.517113
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_self-esteem</FOR>
+	<TABLE>
+		0.354068 0.645932
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>substance_abuse</FOR>
+	<GIVEN>low_self-esteem</GIVEN>
+	<TABLE>
+		0.451363 0.548637
+		0.439658 0.560342
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>waste</FOR>
+	<TABLE>
+		0.540876 0.459124
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ulcers</FOR>
+	<TABLE>
+		0.318752 0.681248
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mildew</FOR>
+	<TABLE>
+		0.493912 0.506088
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

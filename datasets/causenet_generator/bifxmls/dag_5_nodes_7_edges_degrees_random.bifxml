@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>stomach_cancer</NAME>
+	<PROPERTY>description = stomach_cancer</PROPERTY>
+	<PROPERTY>fast = stomach_cancer[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>indigestion</NAME>
+	<PROPERTY>description = indigestion</PROPERTY>
+	<PROPERTY>fast = indigestion[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ulcers</NAME>
+	<PROPERTY>description = ulcers</PROPERTY>
+	<PROPERTY>fast = ulcers[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>abdominal_pain</NAME>
+	<PROPERTY>description = abdominal_pain</PROPERTY>
+	<PROPERTY>fast = abdominal_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>stomach_infection</NAME>
+	<PROPERTY>description = stomach_infection</PROPERTY>
+	<PROPERTY>fast = stomach_infection[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>stomach_cancer</FOR>
+	<GIVEN>ulcers</GIVEN>
+	<GIVEN>stomach_infection</GIVEN>
+	<TABLE>
+		0.378793 0.621207
+		0.0277805 0.97222
+		0.925337 0.0746629
+		0.855904 0.144096
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>indigestion</FOR>
+	<GIVEN>stomach_cancer</GIVEN>
+	<GIVEN>ulcers</GIVEN>
+	<TABLE>
+		0.861075 0.138925
+		0.425829 0.574171
+		0.265013 0.734987
+		0.280321 0.719679
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ulcers</FOR>
+	<GIVEN>stomach_infection</GIVEN>
+	<TABLE>
+		0.29581 0.70419
+		0.296155 0.703845
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>abdominal_pain</FOR>
+	<GIVEN>ulcers</GIVEN>
+	<GIVEN>indigestion</GIVEN>
+	<TABLE>
+		0.720364 0.279636
+		0.441275 0.558725
+		0.7339 0.2661
+		0.500283 0.499717
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>stomach_infection</FOR>
+	<TABLE>
+		0.747601 0.252399
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

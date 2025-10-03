@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>loss_of_appetite</NAME>
+	<PROPERTY>description = loss_of_appetite</PROPERTY>
+	<PROPERTY>fast = loss_of_appetite[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>anorexia</NAME>
+	<PROPERTY>description = anorexia</PROPERTY>
+	<PROPERTY>fast = anorexia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vomiting</NAME>
+	<PROPERTY>description = vomiting</PROPERTY>
+	<PROPERTY>fast = vomiting[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>migraines</NAME>
+	<PROPERTY>description = migraines</PROPERTY>
+	<PROPERTY>fast = migraines[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>abdominal_pain</NAME>
+	<PROPERTY>description = abdominal_pain</PROPERTY>
+	<PROPERTY>fast = abdominal_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>loss_of_appetite</FOR>
+	<TABLE>
+		0.549634 0.450366
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>anorexia</FOR>
+	<GIVEN>loss_of_appetite</GIVEN>
+	<GIVEN>vomiting</GIVEN>
+	<GIVEN>abdominal_pain</GIVEN>
+	<TABLE>
+		0.664977 0.335023
+		0.371738 0.628262
+		0.651924 0.348076
+		0.00348395 0.996516
+		0.424937 0.575063
+		0.180741 0.819259
+		0.495654 0.504346
+		0.764089 0.235911
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vomiting</FOR>
+	<GIVEN>migraines</GIVEN>
+	<TABLE>
+		0.394253 0.605747
+		0.0453898 0.95461
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>migraines</FOR>
+	<TABLE>
+		0.436247 0.563753
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>abdominal_pain</FOR>
+	<TABLE>
+		0.840825 0.159175
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

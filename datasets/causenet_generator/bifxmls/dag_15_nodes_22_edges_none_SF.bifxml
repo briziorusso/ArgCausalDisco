@@ -1,0 +1,278 @@
+repl<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>kidney_failure</NAME>
+	<PROPERTY>description = kidney_failure</PROPERTY>
+	<PROPERTY>fast = kidney_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypoglycemia</NAME>
+	<PROPERTY>description = hypoglycemia</PROPERTY>
+	<PROPERTY>fast = hypoglycemia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>surgery</NAME>
+	<PROPERTY>description = surgery</PROPERTY>
+	<PROPERTY>fast = surgery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hormones</NAME>
+	<PROPERTY>description = hormones</PROPERTY>
+	<PROPERTY>fast = hormones[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mood_swings</NAME>
+	<PROPERTY>description = mood_swings</PROPERTY>
+	<PROPERTY>fast = mood_swings[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>environmental_factors</NAME>
+	<PROPERTY>description = environmental_factors</PROPERTY>
+	<PROPERTY>fast = environmental_factors[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>psychiatric_disorders</NAME>
+	<PROPERTY>description = psychiatric_disorders</PROPERTY>
+	<PROPERTY>fast = psychiatric_disorders[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fractures</NAME>
+	<PROPERTY>description = fractures</PROPERTY>
+	<PROPERTY>fast = fractures[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ailments</NAME>
+	<PROPERTY>description = ailments</PROPERTY>
+	<PROPERTY>fast = ailments[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ptsd</NAME>
+	<PROPERTY>description = ptsd</PROPERTY>
+	<PROPERTY>fast = ptsd[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sleep_problems</NAME>
+	<PROPERTY>description = sleep_problems</PROPERTY>
+	<PROPERTY>fast = sleep_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sleep_deprivation</NAME>
+	<PROPERTY>description = sleep_deprivation</PROPERTY>
+	<PROPERTY>fast = sleep_deprivation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>experiences</NAME>
+	<PROPERTY>description = experiences</PROPERTY>
+	<PROPERTY>fast = experiences[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>breathing_problems</NAME>
+	<PROPERTY>description = breathing_problems</PROPERTY>
+	<PROPERTY>fast = breathing_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alkaloids</NAME>
+	<PROPERTY>description = alkaloids</PROPERTY>
+	<PROPERTY>fast = alkaloids[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>kidney_failure</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>ailments</GIVEN>
+	<TABLE>
+		0.978533 0.0214673
+		0.0259772 0.974023
+		0.608724 0.391276
+		0.941552 0.0584479
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypoglycemia</FOR>
+	<GIVEN>kidney_failure</GIVEN>
+	<TABLE>
+		0.232061 0.767939
+		0.211314 0.788686
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>surgery</FOR>
+	<GIVEN>fractures</GIVEN>
+	<TABLE>
+		0.525077 0.474923
+		0.539069 0.460931
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hormones</FOR>
+	<GIVEN>alkaloids</GIVEN>
+	<TABLE>
+		0.0308731 0.969127
+		0.52708 0.47292
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mood_swings</FOR>
+	<GIVEN>hormones</GIVEN>
+	<GIVEN>sleep_deprivation</GIVEN>
+	<GIVEN>hypoglycemia</GIVEN>
+	<GIVEN>sleep_problems</GIVEN>
+	<TABLE>
+		0.436037 0.563963
+		0.645266 0.354734
+		0.754067 0.245933
+		0.164117 0.835883
+		0.609405 0.390595
+		0.395264 0.604736
+		0.167008 0.832992
+		0.154349 0.845651
+		0.5296 0.4704
+		0.077915 0.922085
+		0.422365 0.577635
+		0.71571 0.28429
+		0.189993 0.810007
+		0.230292 0.769708
+		0.812299 0.187701
+		0.311705 0.688295
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>environmental_factors</FOR>
+	<TABLE>
+		0.45931 0.54069
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>psychiatric_disorders</FOR>
+	<GIVEN>environmental_factors</GIVEN>
+	<TABLE>
+		0.673923 0.326077
+		0.188548 0.811452
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fractures</FOR>
+	<TABLE>
+		0.724116 0.275884
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ailments</FOR>
+	<TABLE>
+		0.406606 0.593394
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ptsd</FOR>
+	<GIVEN>experiences</GIVEN>
+	<TABLE>
+		0.729279 0.270721
+		0.485892 0.514108
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sleep_problems</FOR>
+	<GIVEN>ptsd</GIVEN>
+	<GIVEN>psychiatric_disorders</GIVEN>
+	<TABLE>
+		0.575425 0.424575
+		0.485289 0.514711
+		0.521659 0.478341
+		0.527947 0.472053
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sleep_deprivation</FOR>
+	<GIVEN>breathing_problems</GIVEN>
+	<TABLE>
+		0.160138 0.839862
+		0.449015 0.550985
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>experiences</FOR>
+	<TABLE>
+		0.615056 0.384944
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>breathing_problems</FOR>
+	<TABLE>
+		0.766614 0.233386
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alkaloids</FOR>
+	<TABLE>
+		0.342808 0.657192
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

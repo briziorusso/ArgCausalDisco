@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>numbness</NAME>
+	<PROPERTY>description = numbness</PROPERTY>
+	<PROPERTY>fast = numbness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>insulin_resistance</NAME>
+	<PROPERTY>description = insulin_resistance</PROPERTY>
+	<PROPERTY>fast = insulin_resistance[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>neck_pain</NAME>
+	<PROPERTY>description = neck_pain</PROPERTY>
+	<PROPERTY>fast = neck_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>head_and_neck_cancer</NAME>
+	<PROPERTY>description = head_and_neck_cancer</PROPERTY>
+	<PROPERTY>fast = head_and_neck_cancer[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>insulin_resistance</GIVEN>
+	<TABLE>
+		0.461691 0.538309
+		0.855768 0.144232
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>numbness</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>neck_pain</GIVEN>
+	<TABLE>
+		0.107578 0.892422
+		0.563719 0.436281
+		0.0961884 0.903812
+		0.51474 0.48526
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>insulin_resistance</FOR>
+	<TABLE>
+		0.668601 0.331399
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>neck_pain</FOR>
+	<GIVEN>head_and_neck_cancer</GIVEN>
+	<TABLE>
+		0.392959 0.607041
+		0.5135 0.4865
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>head_and_neck_cancer</FOR>
+	<TABLE>
+		0.90311 0.09689
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

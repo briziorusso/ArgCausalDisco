@@ -1,0 +1,235 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>drought</NAME>
+	<PROPERTY>description = drought</PROPERTY>
+	<PROPERTY>fast = drought[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>forest_fires</NAME>
+	<PROPERTY>description = forest_fires</PROPERTY>
+	<PROPERTY>fast = forest_fires[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>habitat_loss</NAME>
+	<PROPERTY>description = habitat_loss</PROPERTY>
+	<PROPERTY>fast = habitat_loss[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lightning</NAME>
+	<PROPERTY>description = lightning</PROPERTY>
+	<PROPERTY>fast = lightning[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>rain</NAME>
+	<PROPERTY>description = rain</PROPERTY>
+	<PROPERTY>fast = rain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>erosion</NAME>
+	<PROPERTY>description = erosion</PROPERTY>
+	<PROPERTY>fast = erosion[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>rising_temperatures</NAME>
+	<PROPERTY>description = rising_temperatures</PROPERTY>
+	<PROPERTY>fast = rising_temperatures[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>urbanization</NAME>
+	<PROPERTY>description = urbanization</PROPERTY>
+	<PROPERTY>fast = urbanization[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>changes_in_land_use</NAME>
+	<PROPERTY>description = changes_in_land_use</PROPERTY>
+	<PROPERTY>fast = changes_in_land_use[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>el_niño</NAME>
+	<PROPERTY>description = el_niño</PROPERTY>
+	<PROPERTY>fast = el_niño[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>drought</FOR>
+	<GIVEN>rain</GIVEN>
+	<GIVEN>rising_temperatures</GIVEN>
+	<GIVEN>el_niño</GIVEN>
+	<TABLE>
+		0.0565901 0.94341
+		0.387197 0.612803
+		0.555145 0.444855
+		0.830357 0.169643
+		0.609272 0.390728
+		0.928893 0.0711067
+		0.145525 0.854475
+		0.610161 0.389839
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>forest_fires</FOR>
+	<GIVEN>drought</GIVEN>
+	<GIVEN>lightning</GIVEN>
+	<GIVEN>rising_temperatures</GIVEN>
+	<TABLE>
+		0.470356 0.529644
+		0.128932 0.871068
+		0.739106 0.260894
+		0.0466146 0.953385
+		0.607115 0.392885
+		0.817738 0.182262
+		0.448817 0.551183
+		0.0355244 0.964476
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>habitat_loss</FOR>
+	<GIVEN>drought</GIVEN>
+	<GIVEN>erosion</GIVEN>
+	<GIVEN>urbanization</GIVEN>
+	<GIVEN>forest_fires</GIVEN>
+	<GIVEN>changes_in_land_use</GIVEN>
+	<TABLE>
+		0.724882 0.275118
+		0.297147 0.702853
+		0.479569 0.520431
+		0.246954 0.753046
+		0.983129 0.0168713
+		0.4464 0.5536
+		0.328788 0.671212
+		0.340135 0.659865
+		0.772505 0.227495
+		0.496346 0.503654
+		0.399077 0.600923
+		0.35794 0.64206
+		0.69582 0.30418
+		0.53169 0.46831
+		0.509021 0.490979
+		0.882131 0.117869
+		0.452543 0.547457
+		0.196488 0.803512
+		0.484165 0.515835
+		0.95478 0.0452201
+		0.344077 0.655923
+		0.450511 0.549489
+		0.36563 0.63437
+		0.230089 0.769911
+		0.874938 0.125062
+		0.408511 0.591489
+		0.729008 0.270992
+		0.854849 0.145151
+		0.800469 0.199531
+		0.366393 0.633607
+		0.315801 0.684199
+		0.438839 0.561161
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lightning</FOR>
+	<TABLE>
+		0.692831 0.307169
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>rain</FOR>
+	<GIVEN>lightning</GIVEN>
+	<GIVEN>el_niño</GIVEN>
+	<TABLE>
+		0.363951 0.636049
+		0.902384 0.0976155
+		0.418453 0.581547
+		0.601113 0.398887
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>erosion</FOR>
+	<GIVEN>rain</GIVEN>
+	<GIVEN>forest_fires</GIVEN>
+	<GIVEN>changes_in_land_use</GIVEN>
+	<TABLE>
+		0.0191205 0.98088
+		0.904348 0.0956521
+		0.179399 0.820601
+		0.115692 0.884308
+		0.616488 0.383512
+		0.486668 0.513332
+		0.539672 0.460328
+		0.295295 0.704705
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>rising_temperatures</FOR>
+	<TABLE>
+		0.552104 0.447896
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>urbanization</FOR>
+	<TABLE>
+		0.585439 0.414561
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>changes_in_land_use</FOR>
+	<GIVEN>urbanization</GIVEN>
+	<TABLE>
+		0.28802 0.71198
+		0.0496522 0.950348
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>el_niño</FOR>
+	<TABLE>
+		0.689721 0.310279
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

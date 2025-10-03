@@ -1,0 +1,275 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = pneumonia</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sepsis</NAME>
+	<PROPERTY>description = sepsis</PROPERTY>
+	<PROPERTY>fast = sepsis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>kidney</NAME>
+	<PROPERTY>description = kidney</PROPERTY>
+	<PROPERTY>fast = kidney[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>wounds</NAME>
+	<PROPERTY>description = wounds</PROPERTY>
+	<PROPERTY>fast = wounds[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = despair</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hyperthermia</NAME>
+	<PROPERTY>description = hyperthermia</PROPERTY>
+	<PROPERTY>fast = hyperthermia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>withdrawal</NAME>
+	<PROPERTY>description = withdrawal</PROPERTY>
+	<PROPERTY>fast = withdrawal[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcohol_abuse</NAME>
+	<PROPERTY>description = alcohol_abuse</PROPERTY>
+	<PROPERTY>fast = alcohol_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>underlying_issues</NAME>
+	<PROPERTY>description = underlying_issues</PROPERTY>
+	<PROPERTY>fast = underlying_issues[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ulcers</NAME>
+	<PROPERTY>description = ulcers</PROPERTY>
+	<PROPERTY>fast = ulcers[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heartburn</NAME>
+	<PROPERTY>description = heartburn</PROPERTY>
+	<PROPERTY>fast = heartburn[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>agitation</NAME>
+	<PROPERTY>description = agitation</PROPERTY>
+	<PROPERTY>fast = agitation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<TABLE>
+		0.0762245 0.923776
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sepsis</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<GIVEN>wounds</GIVEN>
+	<TABLE>
+		0.712802 0.287198
+		0.935837 0.0641635
+		0.341244 0.658756
+		0.00536583 0.994634
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>kidney</FOR>
+	<GIVEN>sepsis</GIVEN>
+	<GIVEN>hyperthermia</GIVEN>
+	<TABLE>
+		0.351273 0.648727
+		0.562068 0.437932
+		0.751564 0.248436
+		0.412567 0.587433
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>wounds</FOR>
+	<TABLE>
+		0.541413 0.458587
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.54317 0.45683
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.678427 0.321573
+		0.206042 0.793958
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>withdrawal</GIVEN>
+	<TABLE>
+		0.175411 0.824589
+		0.0587068 0.941293
+		0.39108 0.60892
+		0.507295 0.492705
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hyperthermia</FOR>
+	<GIVEN>agitation</GIVEN>
+	<TABLE>
+		0.293676 0.706324
+		0.676139 0.323861
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>withdrawal</FOR>
+	<TABLE>
+		0.752803 0.247197
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcohol_abuse</FOR>
+	<GIVEN>despair</GIVEN>
+	<GIVEN>underlying_issues</GIVEN>
+	<TABLE>
+		0.924324 0.0756757
+		0.480309 0.519691
+		0.166355 0.833645
+		0.491299 0.508701
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>alcohol_abuse</GIVEN>
+	<GIVEN>kidney</GIVEN>
+	<GIVEN>ulcers</GIVEN>
+	<TABLE>
+		0.39506 0.60494
+		0.480702 0.519298
+		0.644492 0.355508
+		0.0782766 0.921723
+		0.908966 0.0910344
+		0.540695 0.459305
+		0.299983 0.700017
+		0.691122 0.308878
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>underlying_issues</FOR>
+	<TABLE>
+		0.177501 0.822499
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ulcers</FOR>
+	<GIVEN>heartburn</GIVEN>
+	<TABLE>
+		0.443191 0.556809
+		0.25985 0.74015
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heartburn</FOR>
+	<TABLE>
+		0.543925 0.456075
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>agitation</FOR>
+	<GIVEN>irritability</GIVEN>
+	<TABLE>
+		0.151662 0.848338
+		0.572487 0.427513
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,107 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_exercise</NAME>
+	<PROPERTY>description = lack_of_exercise</PROPERTY>
+	<PROPERTY>fast = lack_of_exercise[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_problems</NAME>
+	<PROPERTY>description = heart_problems</PROPERTY>
+	<PROPERTY>fast = heart_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sudden_death</NAME>
+	<PROPERTY>description = sudden_death</PROPERTY>
+	<PROPERTY>fast = sudden_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>plaque</NAME>
+	<PROPERTY>description = plaque</PROPERTY>
+	<PROPERTY>fast = plaque[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>lack_of_exercise</FOR>
+	<TABLE>
+		0.19478 0.80522
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_problems</FOR>
+	<GIVEN>lack_of_exercise</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>plaque</GIVEN>
+	<TABLE>
+		0.931259 0.0687411
+		0.869741 0.130259
+		0.807848 0.192152
+		0.224857 0.775143
+		0.409246 0.590754
+		0.394523 0.605477
+		0.112716 0.887284
+		0.325494 0.674506
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>lack_of_exercise</GIVEN>
+	<GIVEN>plaque</GIVEN>
+	<TABLE>
+		0.74527 0.25473
+		0.793719 0.206281
+		0.222643 0.777357
+		0.784717 0.215283
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sudden_death</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>heart_problems</GIVEN>
+	<TABLE>
+		0.270347 0.729653
+		0.67691 0.32309
+		0.821948 0.178052
+		0.630342 0.369658
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>plaque</FOR>
+	<TABLE>
+		0.441607 0.558393
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

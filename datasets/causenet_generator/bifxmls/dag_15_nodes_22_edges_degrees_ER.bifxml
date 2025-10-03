@@ -1,0 +1,325 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = cardiac_arrest</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coma</NAME>
+	<PROPERTY>description = coma</PROPERTY>
+	<PROPERTY>fast = coma[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>respiratory_failure</NAME>
+	<PROPERTY>description = respiratory_failure</PROPERTY>
+	<PROPERTY>fast = respiratory_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = blindness</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>intracerebral_hemorrhage</NAME>
+	<PROPERTY>description = intracerebral_hemorrhage</PROPERTY>
+	<PROPERTY>fast = intracerebral_hemorrhage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vision_loss</NAME>
+	<PROPERTY>description = vision_loss</PROPERTY>
+	<PROPERTY>fast = vision_loss[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fever</NAME>
+	<PROPERTY>description = fever</PROPERTY>
+	<PROPERTY>fast = fever[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>convulsions</NAME>
+	<PROPERTY>description = convulsions</PROPERTY>
+	<PROPERTY>fast = convulsions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>diagnosis</NAME>
+	<PROPERTY>description = diagnosis</PROPERTY>
+	<PROPERTY>fast = diagnosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fatal_disease</NAME>
+	<PROPERTY>description = fatal_disease</PROPERTY>
+	<PROPERTY>fast = fatal_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>muscle</NAME>
+	<PROPERTY>description = muscle</PROPERTY>
+	<PROPERTY>fast = muscle[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>multiple_sclerosis</NAME>
+	<PROPERTY>description = multiple_sclerosis</PROPERTY>
+	<PROPERTY>fast = multiple_sclerosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>neck_stiffness</NAME>
+	<PROPERTY>description = neck_stiffness</PROPERTY>
+	<PROPERTY>fast = neck_stiffness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>damage_to_the_eye</NAME>
+	<PROPERTY>description = damage_to_the_eye</PROPERTY>
+	<PROPERTY>fast = damage_to_the_eye[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>respiratory_failure</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.70755 0.29245
+		0.66031 0.33969
+		0.685369 0.314631
+		0.237661 0.762339
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coma</FOR>
+	<GIVEN>cardiac_arrest</GIVEN>
+	<GIVEN>respiratory_failure</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>fever</GIVEN>
+	<GIVEN>convulsions</GIVEN>
+	<TABLE>
+		0.701469 0.298531
+		0.859381 0.140619
+		0.765837 0.234163
+		0.570841 0.429159
+		0.601365 0.398635
+		0.399434 0.600566
+		0.104546 0.895454
+		0.586105 0.413895
+		0.487274 0.512726
+		0.472093 0.527907
+		0.473574 0.526426
+		0.541025 0.458975
+		0.506693 0.493307
+		0.135798 0.864202
+		0.894446 0.105554
+		0.260434 0.739566
+		0.507312 0.492688
+		0.520747 0.479253
+		0.339948 0.660052
+		0.408708 0.591292
+		0.141608 0.858392
+		0.942917 0.0570831
+		0.572305 0.427695
+		0.362443 0.637557
+		0.377486 0.622514
+		0.343007 0.656993
+		0.581802 0.418198
+		0.686683 0.313317
+		0.857479 0.142521
+		0.740072 0.259928
+		0.66925 0.33075
+		0.708741 0.291259
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>respiratory_failure</FOR>
+	<TABLE>
+		0.417681 0.582319
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<TABLE>
+		0.987279 0.0127207
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>diagnosis</GIVEN>
+	<GIVEN>vision_loss</GIVEN>
+	<GIVEN>damage_to_the_eye</GIVEN>
+	<TABLE>
+		0.158812 0.841188
+		0.915601 0.0843985
+		0.795441 0.204559
+		0.645629 0.354371
+		0.0388007 0.961199
+		0.144003 0.855997
+		0.543263 0.456737
+		0.136243 0.863757
+		0.638077 0.361923
+		0.38615 0.61385
+		0.10644 0.89356
+		0.445732 0.554268
+		0.933974 0.0660265
+		0.0235573 0.976443
+		0.48056 0.51944
+		0.898358 0.101642
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>intracerebral_hemorrhage</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.216235 0.783765
+		0.703583 0.296417
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vision_loss</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>multiple_sclerosis</GIVEN>
+	<TABLE>
+		0.475785 0.524215
+		0.494468 0.505532
+		0.331282 0.668718
+		0.641263 0.358737
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fever</FOR>
+	<GIVEN>fatal_disease</GIVEN>
+	<GIVEN>intracerebral_hemorrhage</GIVEN>
+	<TABLE>
+		0.0446793 0.955321
+		0.670445 0.329555
+		0.689989 0.310011
+		0.181863 0.818137
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>convulsions</FOR>
+	<GIVEN>fever</GIVEN>
+	<GIVEN>fatal_disease</GIVEN>
+	<GIVEN>multiple_sclerosis</GIVEN>
+	<TABLE>
+		0.0166296 0.98337
+		0.396042 0.603958
+		0.619288 0.380712
+		0.404143 0.595857
+		0.409526 0.590474
+		0.851751 0.148249
+		0.516131 0.483869
+		0.375172 0.624828
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>diagnosis</FOR>
+	<GIVEN>fever</GIVEN>
+	<TABLE>
+		0.37686 0.62314
+		0.544481 0.455519
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fatal_disease</FOR>
+	<TABLE>
+		0.797742 0.202258
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>muscle</FOR>
+	<GIVEN>fatal_disease</GIVEN>
+	<TABLE>
+		0.343088 0.656912
+		0.327048 0.672952
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>multiple_sclerosis</FOR>
+	<TABLE>
+		0.0990505 0.900949
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>neck_stiffness</FOR>
+	<GIVEN>intracerebral_hemorrhage</GIVEN>
+	<TABLE>
+		0.418471 0.581529
+		0.413087 0.586913
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>damage_to_the_eye</FOR>
+	<TABLE>
+		0.569364 0.430636
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

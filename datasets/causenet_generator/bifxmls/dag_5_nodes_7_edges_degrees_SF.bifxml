@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>eye_problems</NAME>
+	<PROPERTY>description = eye_problems</PROPERTY>
+	<PROPERTY>fast = eye_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>rosacea</NAME>
+	<PROPERTY>description = rosacea</PROPERTY>
+	<PROPERTY>fast = rosacea[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ulcers</NAME>
+	<PROPERTY>description = ulcers</PROPERTY>
+	<PROPERTY>fast = ulcers[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>damage_to_the_intestinal_lining</NAME>
+	<PROPERTY>description = damage_to_the_intestinal_lining</PROPERTY>
+	<PROPERTY>fast = damage_to_the_intestinal_lining[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>ulcers</GIVEN>
+	<TABLE>
+		0.754342 0.245658
+		0.18574 0.81426
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>eye_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>rosacea</GIVEN>
+	<TABLE>
+		0.498711 0.501289
+		0.230579 0.769421
+		0.368676 0.631324
+		0.17032 0.82968
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>rosacea</FOR>
+	<TABLE>
+		0.537218 0.462782
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ulcers</FOR>
+	<GIVEN>damage_to_the_intestinal_lining</GIVEN>
+	<TABLE>
+		0.723516 0.276484
+		0.732356 0.267644
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>damage_to_the_intestinal_lining</FOR>
+	<TABLE>
+		0.00298284 0.997017
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

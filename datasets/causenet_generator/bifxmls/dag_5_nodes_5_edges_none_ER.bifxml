@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>vomiting</NAME>
+	<PROPERTY>description = vomiting</PROPERTY>
+	<PROPERTY>fast = vomiting[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_potassium_levels</NAME>
+	<PROPERTY>description = low_potassium_levels</PROPERTY>
+	<PROPERTY>fast = low_potassium_levels[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>severe_dehydration</NAME>
+	<PROPERTY>description = severe_dehydration</PROPERTY>
+	<PROPERTY>fast = severe_dehydration[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>diarrhoea</NAME>
+	<PROPERTY>description = diarrhoea</PROPERTY>
+	<PROPERTY>fast = diarrhoea[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>kidney_failure</NAME>
+	<PROPERTY>description = kidney_failure</PROPERTY>
+	<PROPERTY>fast = kidney_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>vomiting</FOR>
+	<TABLE>
+		0.805952 0.194048
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_potassium_levels</FOR>
+	<GIVEN>vomiting</GIVEN>
+	<TABLE>
+		0.823245 0.176755
+		0.392818 0.607182
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>severe_dehydration</FOR>
+	<GIVEN>vomiting</GIVEN>
+	<GIVEN>diarrhoea</GIVEN>
+	<TABLE>
+		0.386033 0.613967
+		0.196893 0.803107
+		0.121914 0.878086
+		0.495466 0.504534
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>diarrhoea</FOR>
+	<TABLE>
+		0.26024 0.73976
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>kidney_failure</FOR>
+	<GIVEN>severe_dehydration</GIVEN>
+	<GIVEN>low_potassium_levels</GIVEN>
+	<TABLE>
+		0.301491 0.698509
+		0.561094 0.438906
+		0.659773 0.340227
+		0.498214 0.501786
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

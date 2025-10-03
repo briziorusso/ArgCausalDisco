@@ -1,0 +1,304 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>toxins</NAME>
+	<PROPERTY>description = toxins</PROPERTY>
+	<PROPERTY>fast = toxins[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>medical_problems</NAME>
+	<PROPERTY>description = medical_problems</PROPERTY>
+	<PROPERTY>fast = medical_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>nerve_damage</NAME>
+	<PROPERTY>description = nerve_damage</PROPERTY>
+	<PROPERTY>fast = nerve_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tumors</NAME>
+	<PROPERTY>description = tumors</PROPERTY>
+	<PROPERTY>fast = tumors[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fractures</NAME>
+	<PROPERTY>description = fractures</PROPERTY>
+	<PROPERTY>fast = fractures[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>immobility</NAME>
+	<PROPERTY>description = immobility</PROPERTY>
+	<PROPERTY>fast = immobility[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>severe_pain</NAME>
+	<PROPERTY>description = severe_pain</PROPERTY>
+	<PROPERTY>fast = severe_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>gangrene</NAME>
+	<PROPERTY>description = gangrene</PROPERTY>
+	<PROPERTY>fast = gangrene[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>incontinence</NAME>
+	<PROPERTY>description = incontinence</PROPERTY>
+	<PROPERTY>fast = incontinence[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_disease</NAME>
+	<PROPERTY>description = chronic_disease</PROPERTY>
+	<PROPERTY>fast = chronic_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cachexia</NAME>
+	<PROPERTY>description = cachexia</PROPERTY>
+	<PROPERTY>fast = cachexia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>excess_weight</NAME>
+	<PROPERTY>description = excess_weight</PROPERTY>
+	<PROPERTY>fast = excess_weight[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>skin_breakdown</NAME>
+	<PROPERTY>description = skin_breakdown</PROPERTY>
+	<PROPERTY>fast = skin_breakdown[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>pad</NAME>
+	<PROPERTY>description = pad</PROPERTY>
+	<PROPERTY>fast = pad[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>shear</NAME>
+	<PROPERTY>description = shear</PROPERTY>
+	<PROPERTY>fast = shear[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>toxins</FOR>
+	<TABLE>
+		0.49415 0.50585
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>medical_problems</FOR>
+	<GIVEN>toxins</GIVEN>
+	<GIVEN>excess_weight</GIVEN>
+	<TABLE>
+		0.588165 0.411835
+		0.770464 0.229536
+		0.653767 0.346233
+		0.647517 0.352483
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>nerve_damage</FOR>
+	<GIVEN>toxins</GIVEN>
+	<GIVEN>chronic_disease</GIVEN>
+	<GIVEN>tumors</GIVEN>
+	<TABLE>
+		0.791362 0.208638
+		0.457543 0.542457
+		0.651281 0.348719
+		0.236793 0.763207
+		0.470103 0.529897
+		0.500952 0.499048
+		0.912048 0.0879524
+		0.770798 0.229202
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tumors</FOR>
+	<GIVEN>toxins</GIVEN>
+	<TABLE>
+		0.929373 0.0706275
+		0.602251 0.397749
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fractures</FOR>
+	<GIVEN>tumors</GIVEN>
+	<TABLE>
+		0.522803 0.477197
+		0.644498 0.355502
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>immobility</FOR>
+	<GIVEN>fractures</GIVEN>
+	<GIVEN>cachexia</GIVEN>
+	<GIVEN>severe_pain</GIVEN>
+	<TABLE>
+		0.441374 0.558626
+		0.440109 0.559891
+		0.438878 0.561122
+		0.544244 0.455756
+		0.563358 0.436642
+		0.259709 0.740291
+		0.26619 0.73381
+		0.224753 0.775247
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>severe_pain</FOR>
+	<GIVEN>fractures</GIVEN>
+	<GIVEN>pad</GIVEN>
+	<TABLE>
+		0.661461 0.338539
+		0.290222 0.709778
+		0.381807 0.618193
+		0.920746 0.0792543
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>gangrene</FOR>
+	<GIVEN>nerve_damage</GIVEN>
+	<GIVEN>pad</GIVEN>
+	<TABLE>
+		0.421258 0.578742
+		0.5183 0.4817
+		0.346992 0.653008
+		0.720712 0.279288
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>incontinence</FOR>
+	<GIVEN>nerve_damage</GIVEN>
+	<GIVEN>medical_problems</GIVEN>
+	<TABLE>
+		0.623172 0.376828
+		0.233617 0.766383
+		0.127526 0.872474
+		0.617347 0.382653
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_disease</FOR>
+	<GIVEN>excess_weight</GIVEN>
+	<TABLE>
+		0.521757 0.478243
+		0.372463 0.627537
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cachexia</FOR>
+	<GIVEN>chronic_disease</GIVEN>
+	<TABLE>
+		0.481419 0.518581
+		0.517078 0.482922
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>excess_weight</FOR>
+	<TABLE>
+		0.7452 0.2548
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>skin_breakdown</FOR>
+	<GIVEN>gangrene</GIVEN>
+	<GIVEN>incontinence</GIVEN>
+	<GIVEN>immobility</GIVEN>
+	<GIVEN>shear</GIVEN>
+	<TABLE>
+		0.594354 0.405646
+		0.974058 0.0259418
+		0.840553 0.159447
+		0.426342 0.573658
+		0.561295 0.438705
+		0.709642 0.290358
+		0.47336 0.52664
+		0.885568 0.114432
+		0.183303 0.816697
+		0.101154 0.898846
+		0.369101 0.630899
+		0.3172 0.6828
+		0.887114 0.112886
+		0.299551 0.700449
+		0.465688 0.534312
+		0.199914 0.800086
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>pad</FOR>
+	<TABLE>
+		0.17078 0.82922
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>shear</FOR>
+	<TABLE>
+		0.465244 0.534756
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

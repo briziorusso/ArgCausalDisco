@@ -1,0 +1,224 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>osteoporosis</NAME>
+	<PROPERTY>description = osteoporosis</PROPERTY>
+	<PROPERTY>fast = osteoporosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>degeneration</NAME>
+	<PROPERTY>description = degeneration</PROPERTY>
+	<PROPERTY>fast = degeneration[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = blindness</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>eye_problems</NAME>
+	<PROPERTY>description = eye_problems</PROPERTY>
+	<PROPERTY>fast = eye_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>numbness</NAME>
+	<PROPERTY>description = numbness</PROPERTY>
+	<PROPERTY>fast = numbness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = brain_damage</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>neck_pain</NAME>
+	<PROPERTY>description = neck_pain</PROPERTY>
+	<PROPERTY>fast = neck_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>spinal_stenosis</NAME>
+	<PROPERTY>description = spinal_stenosis</PROPERTY>
+	<PROPERTY>fast = spinal_stenosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>birth_defect</NAME>
+	<PROPERTY>description = birth_defect</PROPERTY>
+	<PROPERTY>fast = birth_defect[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>osteoporosis</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.970515 0.0294849
+		0.353807 0.646193
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>degeneration</FOR>
+	<GIVEN>osteoporosis</GIVEN>
+	<TABLE>
+		0.640697 0.359303
+		0.431547 0.568453
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<TABLE>
+		0.359723 0.640277
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>brain_damage</GIVEN>
+	<GIVEN>degeneration</GIVEN>
+	<GIVEN>eye_problems</GIVEN>
+	<GIVEN>birth_defect</GIVEN>
+	<TABLE>
+		0.450841 0.549159
+		0.107016 0.892984
+		0.488129 0.511871
+		0.390974 0.609026
+		0.734226 0.265774
+		0.0468327 0.953167
+		0.244318 0.755682
+		0.60092 0.39908
+		0.2588 0.7412
+		0.523283 0.476717
+		0.218172 0.781828
+		0.197175 0.802825
+		0.0739801 0.92602
+		0.56685 0.43315
+		0.530441 0.469559
+		0.615481 0.384519
+		0.535343 0.464657
+		0.419043 0.580957
+		0.630216 0.369784
+		0.614298 0.385702
+		0.691233 0.308767
+		0.467367 0.532633
+		0.43025 0.56975
+		0.62212 0.37788
+		0.329713 0.670287
+		0.824222 0.175778
+		0.666415 0.333585
+		0.0643917 0.935608
+		0.556018 0.443982
+		0.26177 0.73823
+		0.650512 0.349488
+		0.688812 0.311188
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>eye_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.513115 0.486885
+		0.422998 0.577002
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>numbness</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>neck_pain</GIVEN>
+	<GIVEN>spinal_stenosis</GIVEN>
+	<TABLE>
+		0.0228977 0.977102
+		0.0846569 0.915343
+		0.82711 0.17289
+		0.601829 0.398171
+		0.419225 0.580775
+		0.0984251 0.901575
+		0.0189131 0.981087
+		0.622028 0.377972
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<TABLE>
+		0.757741 0.242259
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>neck_pain</FOR>
+	<GIVEN>spinal_stenosis</GIVEN>
+	<GIVEN>degeneration</GIVEN>
+	<TABLE>
+		0.299958 0.700042
+		0.842734 0.157266
+		0.281277 0.718723
+		0.0935895 0.90641
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>spinal_stenosis</FOR>
+	<GIVEN>degeneration</GIVEN>
+	<GIVEN>birth_defect</GIVEN>
+	<TABLE>
+		0.795616 0.204384
+		0.620471 0.379529
+		0.772704 0.227296
+		0.443652 0.556348
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>birth_defect</FOR>
+	<TABLE>
+		0.681702 0.318298
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

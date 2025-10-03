@@ -1,0 +1,207 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>hormonal_changes</NAME>
+	<PROPERTY>description = hormonal_changes</PROPERTY>
+	<PROPERTY>fast = hormonal_changes[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>migraines</NAME>
+	<PROPERTY>description = migraines</PROPERTY>
+	<PROPERTY>fast = migraines[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vomiting</NAME>
+	<PROPERTY>description = vomiting</PROPERTY>
+	<PROPERTY>fast = vomiting[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lightheadedness</NAME>
+	<PROPERTY>description = lightheadedness</PROPERTY>
+	<PROPERTY>fast = lightheadedness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypoxia</NAME>
+	<PROPERTY>description = hypoxia</PROPERTY>
+	<PROPERTY>fast = hypoxia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_blood_pressure</NAME>
+	<PROPERTY>description = low_blood_pressure</PROPERTY>
+	<PROPERTY>fast = low_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_levels</NAME>
+	<PROPERTY>description = low_levels</PROPERTY>
+	<PROPERTY>fast = low_levels[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypotension</NAME>
+	<PROPERTY>description = hypotension</PROPERTY>
+	<PROPERTY>fast = hypotension[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>severe_vertigo</NAME>
+	<PROPERTY>description = severe_vertigo</PROPERTY>
+	<PROPERTY>fast = severe_vertigo[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_tamponade</NAME>
+	<PROPERTY>description = cardiac_tamponade</PROPERTY>
+	<PROPERTY>fast = cardiac_tamponade[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>hormonal_changes</FOR>
+	<TABLE>
+		0.553157 0.446843
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>migraines</FOR>
+	<GIVEN>hormonal_changes</GIVEN>
+	<TABLE>
+		0.548911 0.451089
+		0.978367 0.0216334
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vomiting</FOR>
+	<GIVEN>migraines</GIVEN>
+	<GIVEN>severe_vertigo</GIVEN>
+	<TABLE>
+		0.640826 0.359174
+		0.207472 0.792528
+		0.847135 0.152865
+		0.636958 0.363042
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lightheadedness</FOR>
+	<GIVEN>vomiting</GIVEN>
+	<GIVEN>hypoxia</GIVEN>
+	<GIVEN>low_blood_pressure</GIVEN>
+	<GIVEN>hypotension</GIVEN>
+	<GIVEN>cardiac_tamponade</GIVEN>
+	<TABLE>
+		0.662502 0.337498
+		0.660763 0.339237
+		0.0529283 0.947072
+		0.255598 0.744402
+		0.0465309 0.953469
+		0.961894 0.0381058
+		0.678223 0.321777
+		0.775337 0.224663
+		0.962628 0.0373718
+		0.908353 0.0916468
+		0.433023 0.566977
+		0.245867 0.754133
+		0.777056 0.222944
+		0.986123 0.0138766
+		0.858599 0.141401
+		0.674303 0.325697
+		0.604135 0.395865
+		0.562566 0.437434
+		0.586575 0.413425
+		0.503305 0.496695
+		0.995594 0.00440592
+		0.0370592 0.962941
+		0.543893 0.456107
+		0.833663 0.166337
+		0.165357 0.834643
+		0.275965 0.724035
+		0.320267 0.679733
+		0.633096 0.366904
+		0.64623 0.35377
+		0.359982 0.640018
+		0.908432 0.0915684
+		0.248508 0.751492
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypoxia</FOR>
+	<TABLE>
+		0.409666 0.590334
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_blood_pressure</FOR>
+	<GIVEN>low_levels</GIVEN>
+	<TABLE>
+		0.541324 0.458676
+		0.81391 0.18609
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_levels</FOR>
+	<TABLE>
+		0.490445 0.509555
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypotension</FOR>
+	<TABLE>
+		0.550656 0.449344
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>severe_vertigo</FOR>
+	<TABLE>
+		0.606507 0.393493
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiac_tamponade</FOR>
+	<TABLE>
+		0.34018 0.65982
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

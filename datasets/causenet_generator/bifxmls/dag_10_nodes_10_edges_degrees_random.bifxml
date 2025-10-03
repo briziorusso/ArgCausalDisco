@@ -1,0 +1,191 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = alcoholism</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_problems</NAME>
+	<PROPERTY>description = social_problems</PROPERTY>
+	<PROPERTY>fast = social_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_self-esteem</NAME>
+	<PROPERTY>description = low_self-esteem</PROPERTY>
+	<PROPERTY>fast = low_self-esteem[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>toxins</NAME>
+	<PROPERTY>description = toxins</PROPERTY>
+	<PROPERTY>fast = toxins[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>poor_health</NAME>
+	<PROPERTY>description = poor_health</PROPERTY>
+	<PROPERTY>fast = poor_health[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_concentration</NAME>
+	<PROPERTY>description = lack_of_concentration</PROPERTY>
+	<PROPERTY>fast = lack_of_concentration[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fermentation</NAME>
+	<PROPERTY>description = fermentation</PROPERTY>
+	<PROPERTY>fast = fermentation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lovesickness</NAME>
+	<PROPERTY>description = lovesickness</PROPERTY>
+	<PROPERTY>fast = lovesickness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hepatitis_x</NAME>
+	<PROPERTY>description = hepatitis_x</PROPERTY>
+	<PROPERTY>fast = hepatitis_x[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<TABLE>
+		0.440701 0.559299
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_problems</FOR>
+	<GIVEN>alcoholism</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>low_self-esteem</GIVEN>
+	<TABLE>
+		0.414127 0.585873
+		0.402115 0.597885
+		0.827361 0.172639
+		0.774405 0.225595
+		0.53344 0.46656
+		0.424248 0.575752
+		0.707741 0.292259
+		0.825593 0.174407
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.18863 0.81137
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_self-esteem</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.31215 0.68785
+		0.185719 0.814281
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>toxins</FOR>
+	<GIVEN>fermentation</GIVEN>
+	<TABLE>
+		0.470994 0.529006
+		0.418022 0.581978
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>poor_health</FOR>
+	<GIVEN>toxins</GIVEN>
+	<GIVEN>social_problems</GIVEN>
+	<TABLE>
+		0.538569 0.461431
+		0.763486 0.236514
+		0.728349 0.271651
+		0.608312 0.391688
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_concentration</FOR>
+	<GIVEN>poor_health</GIVEN>
+	<GIVEN>lovesickness</GIVEN>
+	<GIVEN>hepatitis_x</GIVEN>
+	<TABLE>
+		0.680873 0.319127
+		0.526901 0.473099
+		0.65132 0.34868
+		0.936786 0.0632145
+		0.23086 0.76914
+		0.954415 0.0455854
+		0.720981 0.279019
+		0.812549 0.187451
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fermentation</FOR>
+	<TABLE>
+		0.776648 0.223352
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lovesickness</FOR>
+	<TABLE>
+		0.62409 0.37591
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hepatitis_x</FOR>
+	<TABLE>
+		0.457952 0.542048
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

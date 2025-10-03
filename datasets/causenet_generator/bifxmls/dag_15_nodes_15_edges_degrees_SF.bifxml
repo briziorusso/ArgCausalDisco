@@ -1,0 +1,294 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = alcoholism</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = brain_damage</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_attacks</NAME>
+	<PROPERTY>description = heart_attacks</PROPERTY>
+	<PROPERTY>fast = heart_attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>memory_loss</NAME>
+	<PROPERTY>description = memory_loss</PROPERTY>
+	<PROPERTY>fast = memory_loss[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_problems</NAME>
+	<PROPERTY>description = heart_problems</PROPERTY>
+	<PROPERTY>fast = heart_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>dysfunction</NAME>
+	<PROPERTY>description = dysfunction</PROPERTY>
+	<PROPERTY>fast = dysfunction[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>withdrawal</NAME>
+	<PROPERTY>description = withdrawal</PROPERTY>
+	<PROPERTY>fast = withdrawal[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>anorexia</NAME>
+	<PROPERTY>description = anorexia</PROPERTY>
+	<PROPERTY>fast = anorexia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>substance_abuse</NAME>
+	<PROPERTY>description = substance_abuse</PROPERTY>
+	<PROPERTY>fast = substance_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cells</NAME>
+	<PROPERTY>description = cells</PROPERTY>
+	<PROPERTY>fast = cells[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>damage_to_the_hippocampus</NAME>
+	<PROPERTY>description = damage_to_the_hippocampus</PROPERTY>
+	<PROPERTY>fast = damage_to_the_hippocampus[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mood_swings</NAME>
+	<PROPERTY>description = mood_swings</PROPERTY>
+	<PROPERTY>fast = mood_swings[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>nerve_injuries</NAME>
+	<PROPERTY>description = nerve_injuries</PROPERTY>
+	<PROPERTY>fast = nerve_injuries[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<TABLE>
+		0.578659 0.421341
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<GIVEN>alcoholism</GIVEN>
+	<GIVEN>heart_attacks</GIVEN>
+	<TABLE>
+		0.989693 0.0103068
+		0.846911 0.153089
+		0.466862 0.533138
+		0.236162 0.763838
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_attacks</FOR>
+	<GIVEN>heart_problems</GIVEN>
+	<TABLE>
+		0.60369 0.39631
+		0.280355 0.719645
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>dysfunction</GIVEN>
+	<GIVEN>nerve_injuries</GIVEN>
+	<TABLE>
+		0.477309 0.522691
+		0.549855 0.450145
+		0.416332 0.583668
+		0.482161 0.517839
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>withdrawal</GIVEN>
+	<TABLE>
+		0.568011 0.431989
+		0.835191 0.164809
+		0.701307 0.298693
+		0.871951 0.128049
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>memory_loss</FOR>
+	<GIVEN>brain_damage</GIVEN>
+	<GIVEN>substance_abuse</GIVEN>
+	<GIVEN>cells</GIVEN>
+	<GIVEN>damage_to_the_hippocampus</GIVEN>
+	<GIVEN>mood_swings</GIVEN>
+	<TABLE>
+		0.906571 0.0934292
+		0.499656 0.500344
+		0.40164 0.59836
+		0.471067 0.528933
+		0.55631 0.44369
+		0.693143 0.306857
+		0.571803 0.428197
+		0.703011 0.296989
+		0.383809 0.616191
+		0.833649 0.166351
+		0.154847 0.845153
+		0.150013 0.849987
+		0.379298 0.620702
+		0.171099 0.828901
+		0.296477 0.703523
+		0.969231 0.0307694
+		0.927747 0.0722528
+		0.513607 0.486393
+		0.622758 0.377242
+		0.800205 0.199795
+		0.408406 0.591594
+		0.522704 0.477296
+		0.407076 0.592924
+		0.163252 0.836748
+		0.712609 0.287391
+		0.539112 0.460888
+		0.24693 0.75307
+		0.973671 0.0263295
+		0.757795 0.242205
+		0.844121 0.155879
+		0.140022 0.859978
+		0.75244 0.24756
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_problems</FOR>
+	<GIVEN>anorexia</GIVEN>
+	<TABLE>
+		0.687934 0.312066
+		0.150571 0.849429
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>dysfunction</FOR>
+	<TABLE>
+		0.0016951 0.998305
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>withdrawal</FOR>
+	<TABLE>
+		0.190365 0.809635
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>anorexia</FOR>
+	<TABLE>
+		0.412329 0.587671
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>substance_abuse</FOR>
+	<TABLE>
+		0.864804 0.135196
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cells</FOR>
+	<TABLE>
+		0.389707 0.610293
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>damage_to_the_hippocampus</FOR>
+	<TABLE>
+		0.187187 0.812813
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mood_swings</FOR>
+	<GIVEN>irritability</GIVEN>
+	<TABLE>
+		0.432677 0.567323
+		0.576228 0.423772
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>nerve_injuries</FOR>
+	<TABLE>
+		0.0346274 0.965373
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

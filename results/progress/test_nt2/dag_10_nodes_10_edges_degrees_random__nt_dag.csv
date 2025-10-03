@@ -1,0 +1,9 @@
+dataset,model,elapsed,nnz,fdr,tpr,fpr,precision,recall,F1,shd,sid,run_idx,seed
+dag_10_nodes_10_edges_degrees_random,NOTEARS-MLP,0.16626811027526855,0,0.0,0.0,0.0,,0.0,,10.0,23.0,0,7816
+dag_10_nodes_10_edges_degrees_random,NOTEARS-MLP,0.2376384735107422,0,0.0,0.0,0.0,,0.0,,10.0,23.0,1,3578
+dag_10_nodes_10_edges_degrees_random,NOTEARS-MLP,0.21616530418395996,0,0.0,0.0,0.0,,0.0,,10.0,23.0,2,2656
+dag_10_nodes_10_edges_degrees_random,NOTEARS-MLP,0.14955353736877441,0,0.0,0.0,0.0,,0.0,,10.0,23.0,3,2688
+dag_10_nodes_10_edges_degrees_random,NOTEARS-MLP,0.1469554901123047,0,0.0,0.0,0.0,,0.0,,10.0,23.0,4,2494
+dag_10_nodes_10_edges_degrees_random,NOTEARS-MLP,0.10030364990234375,0,0.0,0.0,0.0,,0.0,,10.0,23.0,5,183
+dag_10_nodes_10_edges_degrees_random,NOTEARS-MLP,0.33670949935913086,0,0.0,0.0,0.0,,0.0,,10.0,23.0,6,7977
+dag_10_nodes_10_edges_degrees_random,NOTEARS-MLP,0.25384092330932617,0,0.0,0.0,0.0,,0.0,,10.0,23.0,7,3199

@@ -1,0 +1,218 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>blockage</NAME>
+	<PROPERTY>description = blockage</PROPERTY>
+	<PROPERTY>fast = blockage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>abdominal_pain</NAME>
+	<PROPERTY>description = abdominal_pain</PROPERTY>
+	<PROPERTY>fast = abdominal_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>scar_tissue</NAME>
+	<PROPERTY>description = scar_tissue</PROPERTY>
+	<PROPERTY>fast = scar_tissue[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>adhesions</NAME>
+	<PROPERTY>description = adhesions</PROPERTY>
+	<PROPERTY>fast = adhesions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>obstruction</NAME>
+	<PROPERTY>description = obstruction</PROPERTY>
+	<PROPERTY>fast = obstruction[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vitamin_d</NAME>
+	<PROPERTY>description = vitamin_d</PROPERTY>
+	<PROPERTY>fast = vitamin_d[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>kidney_stones</NAME>
+	<PROPERTY>description = kidney_stones</PROPERTY>
+	<PROPERTY>fast = kidney_stones[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fibrosis</NAME>
+	<PROPERTY>description = fibrosis</PROPERTY>
+	<PROPERTY>fast = fibrosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>deposits</NAME>
+	<PROPERTY>description = deposits</PROPERTY>
+	<PROPERTY>fast = deposits[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>demonstrators</NAME>
+	<PROPERTY>description = demonstrators</PROPERTY>
+	<PROPERTY>fast = demonstrators[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>blockage</FOR>
+	<GIVEN>scar_tissue</GIVEN>
+	<GIVEN>kidney_stones</GIVEN>
+	<GIVEN>deposits</GIVEN>
+	<TABLE>
+		0.569412 0.430588
+		0.680138 0.319862
+		0.357066 0.642934
+		0.367252 0.632748
+		0.549842 0.450158
+		0.866742 0.133258
+		0.798858 0.201142
+		0.576081 0.423919
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>abdominal_pain</FOR>
+	<GIVEN>blockage</GIVEN>
+	<GIVEN>adhesions</GIVEN>
+	<GIVEN>obstruction</GIVEN>
+	<GIVEN>vitamin_d</GIVEN>
+	<TABLE>
+		0.490398 0.509602
+		0.683958 0.316042
+		0.544532 0.455468
+		0.553773 0.446227
+		0.294523 0.705477
+		0.888489 0.111511
+		0.271323 0.728677
+		0.0450029 0.954997
+		0.476318 0.523682
+		0.158916 0.841084
+		0.555029 0.444971
+		0.40994 0.59006
+		0.283595 0.716405
+		0.608739 0.391261
+		0.335505 0.664495
+		0.680034 0.319966
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>scar_tissue</FOR>
+	<GIVEN>fibrosis</GIVEN>
+	<TABLE>
+		0.475513 0.524487
+		0.639051 0.360949
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>adhesions</FOR>
+	<GIVEN>scar_tissue</GIVEN>
+	<TABLE>
+		0.592174 0.407826
+		0.86079 0.13921
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>obstruction</FOR>
+	<GIVEN>scar_tissue</GIVEN>
+	<GIVEN>adhesions</GIVEN>
+	<GIVEN>kidney_stones</GIVEN>
+	<GIVEN>demonstrators</GIVEN>
+	<TABLE>
+		0.184168 0.815832
+		0.727058 0.272942
+		0.420963 0.579037
+		0.501681 0.498319
+		0.950029 0.0499712
+		0.582753 0.417247
+		0.464773 0.535227
+		0.120965 0.879035
+		0.457063 0.542937
+		0.330186 0.669814
+		0.266233 0.733767
+		0.582761 0.417239
+		0.183152 0.816848
+		0.125574 0.874426
+		0.805229 0.194771
+		0.485074 0.514926
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vitamin_d</FOR>
+	<TABLE>
+		0.0279589 0.972041
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>kidney_stones</FOR>
+	<GIVEN>vitamin_d</GIVEN>
+	<TABLE>
+		0.746611 0.253389
+		0.109453 0.890547
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fibrosis</FOR>
+	<GIVEN>deposits</GIVEN>
+	<TABLE>
+		0.57636 0.42364
+		0.556491 0.443509
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>deposits</FOR>
+	<TABLE>
+		0.555378 0.444622
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>demonstrators</FOR>
+	<TABLE>
+		0.0211341 0.978866
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -24,6 +24,7 @@ import pandas as pd
 import torch
 import pydot
 import logging
+import numpy as np
 import gc
 gc.set_threshold(0,0,0)
 from abapc import ABAPC
@@ -110,11 +111,27 @@ def run_method(X,
         else:
             start = time.time()
             random_stability(seed)
-            fitted = NotearsMLP(dims=[X.shape[1], 10, 1], bias=True)#, device=device)
-            W_est = notears_nonlinear(fitted, X, lambda1=0.01, lambda2=0.01)
+            fitted = NotearsMLP(dims=[X.shape[1], 10, 1], bias=True, device=device)
+            try:
+                W_est = notears_nonlinear(fitted, X, lambda1=0.01, lambda2=0.01)
+            except Exception as exc:
+                logging.exception('NOTEARS-MLP optimisation failed', exc_info=exc)
+                return None, time.time() - start
 
         elapsed = time.time() - start
         logging.info(f'Time taken for Notears: {round(elapsed,2)}s')
+        if W_est is None:
+            logging.warning('NOTEARS-MLP returned None; skipping run.')
+        else:
+            try:
+                weights = np.asarray(W_est)
+                nnz = int(np.sum(np.abs(weights) > 1e-6))
+                max_abs = float(np.max(np.abs(weights))) if weights.size else 0.0
+                logging.info(f'NOTEARS-MLP weight stats -> nnz={nnz}, max|w|={max_abs:.4f}')
+                if nnz == 0:
+                    logging.warning('NOTEARS-MLP produced an all-zero adjacency matrix.')
+            except Exception:
+                logging.warning('Unable to compute NOTEARS-MLP diagnostics.', exc_info=True)
 
     elif method == 'nt_lin':
         start = time.time()

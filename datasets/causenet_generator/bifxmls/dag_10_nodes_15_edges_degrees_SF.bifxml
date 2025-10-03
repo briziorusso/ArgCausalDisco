@@ -1,0 +1,346 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>atrial_fibrillation</NAME>
+	<PROPERTY>description = atrial_fibrillation</PROPERTY>
+	<PROPERTY>fast = atrial_fibrillation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coronary_artery_disease</NAME>
+	<PROPERTY>description = coronary_artery_disease</PROPERTY>
+	<PROPERTY>fast = coronary_artery_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>shortness_of_breath</NAME>
+	<PROPERTY>description = shortness_of_breath</PROPERTY>
+	<PROPERTY>fast = shortness_of_breath[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_oxygen</NAME>
+	<PROPERTY>description = lack_of_oxygen</PROPERTY>
+	<PROPERTY>fast = lack_of_oxygen[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hyperthyroidism</NAME>
+	<PROPERTY>description = hyperthyroidism</PROPERTY>
+	<PROPERTY>fast = hyperthyroidism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>pericarditis</NAME>
+	<PROPERTY>description = pericarditis</PROPERTY>
+	<PROPERTY>fast = pericarditis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hypertensive_heart_disease</NAME>
+	<PROPERTY>description = hypertensive_heart_disease</PROPERTY>
+	<PROPERTY>fast = hypertensive_heart_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>reduced_blood_flow</NAME>
+	<PROPERTY>description = reduced_blood_flow</PROPERTY>
+	<PROPERTY>fast = reduced_blood_flow[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>excess_fluid</NAME>
+	<PROPERTY>description = excess_fluid</PROPERTY>
+	<PROPERTY>fast = excess_fluid[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>lack_of_oxygen</GIVEN>
+	<GIVEN>hyperthyroidism</GIVEN>
+	<GIVEN>excess_fluid</GIVEN>
+	<TABLE>
+		0.24595 0.75405
+		0.452824 0.547176
+		0.0837633 0.916237
+		0.941426 0.0585741
+		0.823635 0.176365
+		0.646616 0.353384
+		0.893015 0.106985
+		0.375781 0.624219
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>atrial_fibrillation</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>coronary_artery_disease</GIVEN>
+	<GIVEN>hyperthyroidism</GIVEN>
+	<GIVEN>pericarditis</GIVEN>
+	<GIVEN>hypertensive_heart_disease</GIVEN>
+	<TABLE>
+		0.951544 0.0484565
+		0.041902 0.958098
+		0.517674 0.482326
+		0.409889 0.590111
+		0.744196 0.255804
+		0.733834 0.266166
+		0.5972 0.4028
+		0.538031 0.461969
+		0.789186 0.210814
+		0.166836 0.833164
+		0.697877 0.302123
+		0.348122 0.651878
+		0.640028 0.359972
+		0.0709198 0.92908
+		0.601541 0.398459
+		0.969767 0.0302326
+		0.357254 0.642746
+		0.539336 0.460664
+		0.559797 0.440203
+		0.604985 0.395015
+		0.371432 0.628568
+		0.00407736 0.995923
+		0.700537 0.299463
+		0.30639 0.69361
+		0.767747 0.232253
+		0.0593601 0.94064
+		0.985258 0.0147418
+		0.316592 0.683408
+		0.0209791 0.979021
+		0.429672 0.570328
+		0.313866 0.686134
+		0.793222 0.206778
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coronary_artery_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.468323 0.531677
+		0.721861 0.278139
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>shortness_of_breath</FOR>
+	<GIVEN>coronary_artery_disease</GIVEN>
+	<GIVEN>atrial_fibrillation</GIVEN>
+	<GIVEN>lack_of_oxygen</GIVEN>
+	<GIVEN>pericarditis</GIVEN>
+	<GIVEN>hypertensive_heart_disease</GIVEN>
+	<GIVEN>reduced_blood_flow</GIVEN>
+	<GIVEN>excess_fluid</GIVEN>
+	<TABLE>
+		0.378597 0.621403
+		0.289235 0.710765
+		0.0933792 0.906621
+		0.594407 0.405593
+		0.152424 0.847576
+		0.536622 0.463378
+		0.766426 0.233574
+		0.353228 0.646772
+		0.501043 0.498957
+		0.509947 0.490053
+		0.709916 0.290084
+		0.820602 0.179398
+		0.632395 0.367605
+		0.577779 0.422221
+		0.674914 0.325086
+		0.536493 0.463507
+		0.592437 0.407563
+		0.985239 0.0147615
+		0.465906 0.534094
+		0.377403 0.622597
+		0.373211 0.626789
+		0.362742 0.637258
+		0.349399 0.650601
+		0.64375 0.35625
+		0.298721 0.701279
+		0.666067 0.333933
+		0.0576399 0.94236
+		0.33389 0.66611
+		0.145304 0.854696
+		0.805871 0.194129
+		0.444798 0.555202
+		0.396038 0.603962
+		0.347557 0.652443
+		0.436262 0.563738
+		0.557407 0.442593
+		0.310973 0.689027
+		0.428202 0.571798
+		0.602987 0.397013
+		0.105614 0.894386
+		0.608184 0.391816
+		0.163017 0.836983
+		0.383884 0.616116
+		0.533241 0.466759
+		0.101219 0.898781
+		0.668374 0.331626
+		0.0987601 0.90124
+		0.0333814 0.966619
+		0.373267 0.626733
+		0.693052 0.306948
+		0.0831362 0.916864
+		0.582587 0.417413
+		0.185854 0.814146
+		0.235127 0.764873
+		0.388003 0.611997
+		0.268296 0.731704
+		0.536118 0.463882
+		0.535952 0.464048
+		0.956502 0.0434975
+		0.303295 0.696705
+		0.227729 0.772271
+		0.73713 0.26287
+		0.489011 0.510989
+		0.480706 0.519294
+		0.283236 0.716764
+		0.395335 0.604665
+		0.614898 0.385102
+		0.500064 0.499936
+		0.318219 0.681781
+		0.918604 0.0813963
+		0.809416 0.190584
+		0.271479 0.728521
+		0.197537 0.802463
+		0.640669 0.359331
+		0.307991 0.692009
+		0.512612 0.487388
+		0.188667 0.811333
+		0.314991 0.685009
+		0.511475 0.488525
+		0.205878 0.794122
+		0.300555 0.699445
+		0.970534 0.0294661
+		0.89568 0.10432
+		0.62453 0.37547
+		0.495747 0.504253
+		0.700949 0.299051
+		0.583025 0.416975
+		0.354556 0.645444
+		0.208921 0.791079
+		0.61606 0.38394
+		0.57477 0.42523
+		0.518199 0.481801
+		0.959954 0.0400459
+		0.801675 0.198325
+		0.261736 0.738264
+		0.510635 0.489365
+		0.195005 0.804995
+		0.425698 0.574302
+		0.623198 0.376802
+		0.482745 0.517255
+		0.91375 0.0862499
+		0.445908 0.554092
+		0.948315 0.0516852
+		0.40967 0.59033
+		0.677211 0.322789
+		0.336652 0.663348
+		0.203761 0.796239
+		0.284437 0.715563
+		0.142491 0.857509
+		0.471171 0.528829
+		0.510749 0.489251
+		0.161061 0.838939
+		0.661512 0.338488
+		0.49381 0.50619
+		0.398037 0.601963
+		0.181658 0.818342
+		0.455388 0.544612
+		0.844513 0.155487
+		0.822352 0.177648
+		0.276817 0.723183
+		0.78862 0.21138
+		0.43267 0.56733
+		0.562447 0.437553
+		0.647337 0.352663
+		0.479345 0.520655
+		0.383657 0.616343
+		0.575795 0.424205
+		0.58892 0.41108
+		0.564334 0.435666
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_oxygen</FOR>
+	<GIVEN>reduced_blood_flow</GIVEN>
+	<TABLE>
+		0.0511043 0.948896
+		0.931592 0.0684084
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hyperthyroidism</FOR>
+	<TABLE>
+		0.665913 0.334087
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>pericarditis</FOR>
+	<TABLE>
+		0.533528 0.466472
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hypertensive_heart_disease</FOR>
+	<TABLE>
+		0.746239 0.253761
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>reduced_blood_flow</FOR>
+	<TABLE>
+		0.691651 0.308349
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>excess_fluid</FOR>
+	<TABLE>
+		0.527034 0.472966
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

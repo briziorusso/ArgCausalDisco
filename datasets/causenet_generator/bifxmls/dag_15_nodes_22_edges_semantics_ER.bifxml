@@ -1,0 +1,302 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = cardiac_arrest</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>premature_death</NAME>
+	<PROPERTY>description = premature_death</PROPERTY>
+	<PROPERTY>fast = premature_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_cholesterol</NAME>
+	<PROPERTY>description = high_cholesterol</PROPERTY>
+	<PROPERTY>fast = high_cholesterol[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fever</NAME>
+	<PROPERTY>description = fever</PROPERTY>
+	<PROPERTY>fast = fever[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>flushing_(_physiology_)</NAME>
+	<PROPERTY>description = flushing_(_physiology_)</PROPERTY>
+	<PROPERTY>fast = flushing_(_physiology_)[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>seizure</NAME>
+	<PROPERTY>description = seizure</PROPERTY>
+	<PROPERTY>fast = seizure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vomiting</NAME>
+	<PROPERTY>description = vomiting</PROPERTY>
+	<PROPERTY>fast = vomiting[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>arrest</NAME>
+	<PROPERTY>description = arrest</PROPERTY>
+	<PROPERTY>fast = arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>medical_conditions</NAME>
+	<PROPERTY>description = medical_conditions</PROPERTY>
+	<PROPERTY>fast = medical_conditions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>gout</NAME>
+	<PROPERTY>description = gout</PROPERTY>
+	<PROPERTY>fast = gout[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>severe_pain</NAME>
+	<PROPERTY>description = severe_pain</PROPERTY>
+	<PROPERTY>fast = severe_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>intense_pain</NAME>
+	<PROPERTY>description = intense_pain</PROPERTY>
+	<PROPERTY>fast = intense_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lifestyle</NAME>
+	<PROPERTY>description = lifestyle</PROPERTY>
+	<PROPERTY>fast = lifestyle[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>abnormal_electrical_activity_in_the_brain</NAME>
+	<PROPERTY>description = abnormal_electrical_activity_in_the_brain</PROPERTY>
+	<PROPERTY>fast = abnormal_electrical_activity_in_the_brain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>crystals</NAME>
+	<PROPERTY>description = crystals</PROPERTY>
+	<PROPERTY>fast = crystals[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>seizure</GIVEN>
+	<TABLE>
+		0.548184 0.451816
+		0.306619 0.693381
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>premature_death</FOR>
+	<GIVEN>cardiac_arrest</GIVEN>
+	<GIVEN>high_cholesterol</GIVEN>
+	<GIVEN>gout</GIVEN>
+	<GIVEN>lifestyle</GIVEN>
+	<TABLE>
+		0.346609 0.653391
+		0.480797 0.519203
+		0.527462 0.472538
+		0.193139 0.806861
+		0.645987 0.354013
+		0.385517 0.614483
+		0.629909 0.370091
+		0.770543 0.229457
+		0.851898 0.148102
+		0.33687 0.66313
+		0.518713 0.481287
+		0.702053 0.297947
+		0.49092 0.50908
+		0.479169 0.520831
+		0.0553172 0.944683
+		0.825944 0.174056
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_cholesterol</FOR>
+	<GIVEN>medical_conditions</GIVEN>
+	<GIVEN>lifestyle</GIVEN>
+	<TABLE>
+		0.992002 0.00799841
+		0.355997 0.644003
+		0.540654 0.459346
+		0.448769 0.551231
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fever</FOR>
+	<GIVEN>medical_conditions</GIVEN>
+	<TABLE>
+		0.409111 0.590889
+		0.64294 0.35706
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>flushing_(_physiology_)</FOR>
+	<GIVEN>fever</GIVEN>
+	<GIVEN>severe_pain</GIVEN>
+	<TABLE>
+		0.240805 0.759195
+		0.0681968 0.931803
+		0.329353 0.670647
+		0.789238 0.210762
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>seizure</FOR>
+	<GIVEN>fever</GIVEN>
+	<GIVEN>abnormal_electrical_activity_in_the_brain</GIVEN>
+	<TABLE>
+		0.217688 0.782312
+		0.106709 0.893291
+		0.228718 0.771282
+		0.340779 0.659221
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vomiting</FOR>
+	<GIVEN>fever</GIVEN>
+	<GIVEN>severe_pain</GIVEN>
+	<GIVEN>intense_pain</GIVEN>
+	<TABLE>
+		0.662228 0.337772
+		0.748285 0.251715
+		0.352641 0.647359
+		0.162935 0.837065
+		0.294326 0.705674
+		0.777224 0.222776
+		0.429893 0.570107
+		0.346341 0.653659
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>arrest</FOR>
+	<GIVEN>seizure</GIVEN>
+	<TABLE>
+		0.577846 0.422154
+		0.0674978 0.932502
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>medical_conditions</FOR>
+	<TABLE>
+		0.727052 0.272948
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>gout</FOR>
+	<GIVEN>medical_conditions</GIVEN>
+	<GIVEN>crystals</GIVEN>
+	<TABLE>
+		0.567196 0.432804
+		0.820962 0.179038
+		0.0186322 0.981368
+		0.500224 0.499776
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>severe_pain</FOR>
+	<GIVEN>medical_conditions</GIVEN>
+	<GIVEN>gout</GIVEN>
+	<TABLE>
+		0.151186 0.848814
+		0.246094 0.753906
+		0.213819 0.786181
+		0.476066 0.523934
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>intense_pain</FOR>
+	<GIVEN>gout</GIVEN>
+	<GIVEN>crystals</GIVEN>
+	<TABLE>
+		0.832818 0.167182
+		0.783313 0.216687
+		0.652007 0.347993
+		0.856781 0.143219
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lifestyle</FOR>
+	<TABLE>
+		0.484897 0.515103
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>abnormal_electrical_activity_in_the_brain</FOR>
+	<TABLE>
+		0.167646 0.832354
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>crystals</FOR>
+	<TABLE>
+		0.54564 0.45436
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>
