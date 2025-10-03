@@ -2,6 +2,15 @@ import pandas as pd
 
 
 def join_results(json_path, csv_path):
+    """Join the prior JSON and ABAPC-LLM CSV results.
+
+    Args:
+        json_path (str): Path to the JSON file containing prior results.
+        csv_path (str): Path to the CSV file containing ABAPC-LLM results.
+
+    Returns:
+        pd.DataFrame: Merged DataFrame containing results from both sources.
+    """
     json_df = pd.read_json(json_path)
     prior_metrics = ["length", "Precision", "Recall", "F1"]
     forbidden_metrics = [f"forbidden_{m}" for m in prior_metrics]
@@ -28,7 +37,7 @@ def join_results(json_path, csv_path):
     return merged
 
 if __name__ == "__main__":
-    for type_ in ["bnlearn", "synthetic"]:
+    for type_ in ["bnlearn", "synthetic", "child"]:
         json_path = f"{type_}.json"
         csv_path = f"{type_}-results.csv"
         merged_df = join_results(json_path, csv_path)
