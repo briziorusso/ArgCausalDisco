@@ -1,0 +1,358 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>kidney_failure</NAME>
+	<PROPERTY>description = kidney_failure</PROPERTY>
+	<PROPERTY>fast = kidney_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fever</NAME>
+	<PROPERTY>description = fever</PROPERTY>
+	<PROPERTY>fast = fever[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>surgery</NAME>
+	<PROPERTY>description = surgery</PROPERTY>
+	<PROPERTY>fast = surgery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blockage</NAME>
+	<PROPERTY>description = blockage</PROPERTY>
+	<PROPERTY>fast = blockage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>complication</NAME>
+	<PROPERTY>description = complication</PROPERTY>
+	<PROPERTY>fast = complication[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cirrhosis</NAME>
+	<PROPERTY>description = cirrhosis</PROPERTY>
+	<PROPERTY>fast = cirrhosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coma</NAME>
+	<PROPERTY>description = coma</PROPERTY>
+	<PROPERTY>fast = coma[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>insulin_resistance</NAME>
+	<PROPERTY>description = insulin_resistance</PROPERTY>
+	<PROPERTY>fast = insulin_resistance[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hyperglycemia</NAME>
+	<PROPERTY>description = hyperglycemia</PROPERTY>
+	<PROPERTY>fast = hyperglycemia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lethargy</NAME>
+	<PROPERTY>description = lethargy</PROPERTY>
+	<PROPERTY>fast = lethargy[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>leukemia</NAME>
+	<PROPERTY>description = leukemia</PROPERTY>
+	<PROPERTY>fast = leukemia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_exposure</NAME>
+	<PROPERTY>description = chronic_exposure</PROPERTY>
+	<PROPERTY>fast = chronic_exposure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>foods</NAME>
+	<PROPERTY>description = foods</PROPERTY>
+	<PROPERTY>fast = foods[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>rash</NAME>
+	<PROPERTY>description = rash</PROPERTY>
+	<PROPERTY>fast = rash[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>episode</NAME>
+	<PROPERTY>description = episode</PROPERTY>
+	<PROPERTY>fast = episode[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>kidney_failure</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>complication</GIVEN>
+	<GIVEN>blockage</GIVEN>
+	<GIVEN>chronic_exposure</GIVEN>
+	<TABLE>
+		0.214511 0.785489
+		0.213224 0.786776
+		0.542538 0.457462
+		0.685234 0.314766
+		0.918932 0.0810681
+		0.304867 0.695133
+		0.500155 0.499845
+		0.659332 0.340668
+		0.329071 0.670929
+		0.516975 0.483025
+		0.683846 0.316154
+		0.903974 0.0960264
+		0.763673 0.236327
+		0.316474 0.683526
+		0.829539 0.170461
+		0.552342 0.447658
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fever</FOR>
+	<GIVEN>kidney_failure</GIVEN>
+	<GIVEN>leukemia</GIVEN>
+	<GIVEN>rash</GIVEN>
+	<TABLE>
+		0.617172 0.382828
+		0.494268 0.505732
+		0.664462 0.335538
+		0.418398 0.581602
+		0.500634 0.499366
+		0.181205 0.818795
+		0.598048 0.401952
+		0.380086 0.619914
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>surgery</FOR>
+	<TABLE>
+		0.703539 0.296461
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blockage</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>foods</GIVEN>
+	<TABLE>
+		0.270992 0.729008
+		0.562868 0.437132
+		0.66807 0.33193
+		0.672773 0.327227
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>complication</FOR>
+	<GIVEN>surgery</GIVEN>
+	<TABLE>
+		0.644549 0.355451
+		0.510318 0.489682
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cirrhosis</FOR>
+	<TABLE>
+		0.105348 0.894652
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coma</FOR>
+	<GIVEN>cirrhosis</GIVEN>
+	<GIVEN>complication</GIVEN>
+	<GIVEN>fever</GIVEN>
+	<GIVEN>hyperglycemia</GIVEN>
+	<GIVEN>lethargy</GIVEN>
+	<GIVEN>episode</GIVEN>
+	<TABLE>
+		0.323841 0.676159
+		0.744353 0.255647
+		0.240211 0.759789
+		0.687698 0.312302
+		0.396152 0.603848
+		0.322393 0.677607
+		0.665668 0.334332
+		0.513499 0.486501
+		0.988178 0.0118223
+		0.815377 0.184623
+		0.656014 0.343986
+		0.702294 0.297706
+		0.877754 0.122246
+		0.2943 0.7057
+		0.45446 0.54554
+		0.311748 0.688252
+		0.726758 0.273242
+		0.538921 0.461079
+		0.506824 0.493176
+		0.433794 0.566206
+		0.411776 0.588224
+		0.286112 0.713888
+		0.492464 0.507536
+		0.170354 0.829646
+		0.51665 0.48335
+		0.146233 0.853767
+		0.671388 0.328612
+		0.519127 0.480873
+		0.808621 0.191379
+		0.898936 0.101064
+		0.572042 0.427958
+		0.365927 0.634073
+		0.155564 0.844436
+		0.0235024 0.976498
+		0.700532 0.299468
+		0.82796 0.17204
+		0.420476 0.579524
+		0.448447 0.551553
+		0.679971 0.320029
+		0.973262 0.0267379
+		0.0786325 0.921367
+		0.549147 0.450853
+		0.958589 0.0414111
+		0.0143756 0.985624
+		0.214523 0.785477
+		0.238322 0.761678
+		0.0955399 0.90446
+		0.277068 0.722932
+		0.573732 0.426268
+		0.631894 0.368106
+		0.372928 0.627072
+		0.68815 0.31185
+		0.617402 0.382598
+		0.277638 0.722362
+		0.340344 0.659656
+		0.646251 0.353749
+		0.616254 0.383746
+		0.567157 0.432843
+		0.894286 0.105714
+		0.978508 0.0214918
+		0.362515 0.637485
+		0.791946 0.208054
+		0.738067 0.261933
+		0.258869 0.741131
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>insulin_resistance</FOR>
+	<GIVEN>cirrhosis</GIVEN>
+	<GIVEN>chronic_exposure</GIVEN>
+	<GIVEN>foods</GIVEN>
+	<TABLE>
+		0.509882 0.490118
+		0.290056 0.709944
+		0.529206 0.470794
+		0.580167 0.419833
+		0.0128087 0.987191
+		0.212726 0.787274
+		0.506484 0.493516
+		0.806542 0.193458
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hyperglycemia</FOR>
+	<GIVEN>insulin_resistance</GIVEN>
+	<TABLE>
+		0.828043 0.171957
+		0.665369 0.334631
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lethargy</FOR>
+	<GIVEN>insulin_resistance</GIVEN>
+	<TABLE>
+		0.716986 0.283014
+		0.922414 0.0775855
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>leukemia</FOR>
+	<GIVEN>chronic_exposure</GIVEN>
+	<TABLE>
+		0.515525 0.484475
+		0.507678 0.492322
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_exposure</FOR>
+	<TABLE>
+		0.512738 0.487262
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>foods</FOR>
+	<TABLE>
+		0.354269 0.645731
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>rash</FOR>
+	<TABLE>
+		0.786053 0.213947
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>episode</FOR>
+	<TABLE>
+		0.153944 0.846056
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

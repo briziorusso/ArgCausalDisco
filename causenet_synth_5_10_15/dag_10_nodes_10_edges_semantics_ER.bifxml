@@ -1,0 +1,187 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = despair</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>loss_of_appetite</NAME>
+	<PROPERTY>description = loss_of_appetite</PROPERTY>
+	<PROPERTY>fast = loss_of_appetite[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>attacks</NAME>
+	<PROPERTY>description = attacks</PROPERTY>
+	<PROPERTY>fast = attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>unrest</NAME>
+	<PROPERTY>description = unrest</PROPERTY>
+	<PROPERTY>fast = unrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hatred</NAME>
+	<PROPERTY>description = hatred</PROPERTY>
+	<PROPERTY>fast = hatred[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>instability</NAME>
+	<PROPERTY>description = instability</PROPERTY>
+	<PROPERTY>fast = instability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>homophobia</NAME>
+	<PROPERTY>description = homophobia</PROPERTY>
+	<PROPERTY>fast = homophobia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mood_swings</NAME>
+	<PROPERTY>description = mood_swings</PROPERTY>
+	<PROPERTY>fast = mood_swings[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.339782 0.660218
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.589939 0.410061
+		0.663303 0.336697
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.45906 0.54094
+		0.46124 0.53876
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>loss_of_appetite</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>attacks</GIVEN>
+	<TABLE>
+		0.365622 0.634378
+		0.46482 0.53518
+		0.395606 0.604394
+		0.977389 0.0226108
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>attacks</FOR>
+	<TABLE>
+		0.361309 0.638691
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>unrest</FOR>
+	<GIVEN>attacks</GIVEN>
+	<GIVEN>hatred</GIVEN>
+	<GIVEN>despair</GIVEN>
+	<TABLE>
+		0.583152 0.416848
+		0.78133 0.21867
+		0.427064 0.572936
+		0.232502 0.767498
+		0.46633 0.53367
+		0.610567 0.389433
+		0.595845 0.404155
+		0.417376 0.582624
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hatred</FOR>
+	<GIVEN>homophobia</GIVEN>
+	<TABLE>
+		0.679954 0.320046
+		0.515729 0.484271
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>instability</FOR>
+	<GIVEN>unrest</GIVEN>
+	<TABLE>
+		0.0463827 0.953617
+		0.156213 0.843787
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>homophobia</FOR>
+	<TABLE>
+		0.527336 0.472664
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mood_swings</FOR>
+	<GIVEN>irritability</GIVEN>
+	<TABLE>
+		0.464667 0.535333
+		0.749802 0.250198
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

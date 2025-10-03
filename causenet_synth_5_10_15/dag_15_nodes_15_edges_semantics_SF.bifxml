@@ -1,0 +1,294 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>health_risks</NAME>
+	<PROPERTY>description = health_risks</PROPERTY>
+	<PROPERTY>fast = health_risks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hormonal_changes</NAME>
+	<PROPERTY>description = hormonal_changes</PROPERTY>
+	<PROPERTY>fast = hormonal_changes[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>migraines</NAME>
+	<PROPERTY>description = migraines</PROPERTY>
+	<PROPERTY>fast = migraines[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>attacks</NAME>
+	<PROPERTY>description = attacks</PROPERTY>
+	<PROPERTY>fast = attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>financial_losses</NAME>
+	<PROPERTY>description = financial_losses</PROPERTY>
+	<PROPERTY>fast = financial_losses[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vomiting</NAME>
+	<PROPERTY>description = vomiting</PROPERTY>
+	<PROPERTY>fast = vomiting[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>situations</NAME>
+	<PROPERTY>description = situations</PROPERTY>
+	<PROPERTY>fast = situations[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>substance_abuse</NAME>
+	<PROPERTY>description = substance_abuse</PROPERTY>
+	<PROPERTY>fast = substance_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>disasters</NAME>
+	<PROPERTY>description = disasters</PROPERTY>
+	<PROPERTY>fast = disasters[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ulcers</NAME>
+	<PROPERTY>description = ulcers</PROPERTY>
+	<PROPERTY>fast = ulcers[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>health_conditions</NAME>
+	<PROPERTY>description = health_conditions</PROPERTY>
+	<PROPERTY>fast = health_conditions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infringement</NAME>
+	<PROPERTY>description = infringement</PROPERTY>
+	<PROPERTY>fast = infringement[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>foreclosure</NAME>
+	<PROPERTY>description = foreclosure</PROPERTY>
+	<PROPERTY>fast = foreclosure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lawsuits</NAME>
+	<PROPERTY>description = lawsuits</PROPERTY>
+	<PROPERTY>fast = lawsuits[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>ulcers</GIVEN>
+	<GIVEN>health_conditions</GIVEN>
+	<TABLE>
+		0.732968 0.267032
+		0.553816 0.446184
+		0.691045 0.308955
+		0.868366 0.131634
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>health_risks</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>substance_abuse</GIVEN>
+	<TABLE>
+		0.986589 0.0134114
+		0.674506 0.325494
+		0.00728206 0.992718
+		0.0155764 0.984424
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hormonal_changes</FOR>
+	<TABLE>
+		0.514906 0.485094
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>migraines</FOR>
+	<GIVEN>hormonal_changes</GIVEN>
+	<TABLE>
+		0.611914 0.388086
+		0.664049 0.335951
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>attacks</FOR>
+	<GIVEN>vomiting</GIVEN>
+	<GIVEN>situations</GIVEN>
+	<TABLE>
+		0.885258 0.114742
+		0.629372 0.370628
+		0.203753 0.796247
+		0.548354 0.451646
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>financial_losses</FOR>
+	<GIVEN>attacks</GIVEN>
+	<GIVEN>disasters</GIVEN>
+	<GIVEN>infringement</GIVEN>
+	<GIVEN>foreclosure</GIVEN>
+	<GIVEN>lawsuits</GIVEN>
+	<TABLE>
+		0.428069 0.571931
+		0.208403 0.791597
+		0.533713 0.466287
+		0.808819 0.191181
+		0.478391 0.521609
+		0.472473 0.527527
+		0.0950798 0.90492
+		0.868321 0.131679
+		0.660439 0.339561
+		0.314455 0.685545
+		0.621269 0.378731
+		0.809478 0.190522
+		0.155925 0.844075
+		0.162083 0.837917
+		0.74028 0.25972
+		0.868002 0.131998
+		0.927694 0.072306
+		0.61274 0.38726
+		0.287187 0.712813
+		0.136184 0.863816
+		0.151194 0.848806
+		0.494822 0.505178
+		0.947067 0.0529332
+		0.490827 0.509173
+		0.733877 0.266123
+		0.665078 0.334922
+		0.271458 0.728542
+		0.379924 0.620076
+		0.62519 0.37481
+		0.176296 0.823704
+		0.278429 0.721571
+		0.482895 0.517105
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vomiting</FOR>
+	<GIVEN>migraines</GIVEN>
+	<TABLE>
+		0.568266 0.431734
+		0.51407 0.48593
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>situations</FOR>
+	<TABLE>
+		0.29312 0.70688
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>substance_abuse</FOR>
+	<TABLE>
+		0.327837 0.672163
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>disasters</FOR>
+	<TABLE>
+		0.049016 0.950984
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ulcers</FOR>
+	<TABLE>
+		0.521075 0.478925
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>health_conditions</FOR>
+	<TABLE>
+		0.781601 0.218399
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infringement</FOR>
+	<TABLE>
+		0.553976 0.446024
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>foreclosure</FOR>
+	<TABLE>
+		0.162653 0.837347
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lawsuits</FOR>
+	<GIVEN>health_risks</GIVEN>
+	<TABLE>
+		0.86614 0.13386
+		0.189006 0.810994
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

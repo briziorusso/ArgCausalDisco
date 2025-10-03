@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = brain_damage</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = blindness</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>strokes</NAME>
+	<PROPERTY>description = strokes</PROPERTY>
+	<PROPERTY>fast = strokes[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>disabilities</NAME>
+	<PROPERTY>description = disabilities</PROPERTY>
+	<PROPERTY>fast = disabilities[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>obstacles</NAME>
+	<PROPERTY>description = obstacles</PROPERTY>
+	<PROPERTY>fast = obstacles[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<GIVEN>strokes</GIVEN>
+	<TABLE>
+		0.370929 0.629071
+		0.326916 0.673084
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>brain_damage</GIVEN>
+	<GIVEN>strokes</GIVEN>
+	<TABLE>
+		0.563083 0.436917
+		0.394144 0.605856
+		0.161554 0.838446
+		0.286695 0.713305
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>strokes</FOR>
+	<TABLE>
+		0.594729 0.405271
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>disabilities</FOR>
+	<GIVEN>strokes</GIVEN>
+	<GIVEN>blindness</GIVEN>
+	<TABLE>
+		0.513091 0.486909
+		0.43549 0.56451
+		0.823981 0.176019
+		0.769806 0.230194
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>obstacles</FOR>
+	<GIVEN>blindness</GIVEN>
+	<GIVEN>disabilities</GIVEN>
+	<TABLE>
+		0.381458 0.618542
+		0.931998 0.0680019
+		0.470689 0.529311
+		0.519816 0.480184
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

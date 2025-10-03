@@ -1,0 +1,366 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>surgery</NAME>
+	<PROPERTY>description = surgery</PROPERTY>
+	<PROPERTY>fast = surgery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = blindness</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = brain_damage</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>scarring</NAME>
+	<PROPERTY>description = scarring</PROPERTY>
+	<PROPERTY>fast = scarring[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>strokes</NAME>
+	<PROPERTY>description = strokes</PROPERTY>
+	<PROPERTY>fast = strokes[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>congestive_heart_failure</NAME>
+	<PROPERTY>description = congestive_heart_failure</PROPERTY>
+	<PROPERTY>fast = congestive_heart_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>water_retention</NAME>
+	<PROPERTY>description = water_retention</PROPERTY>
+	<PROPERTY>fast = water_retention[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_sleep</NAME>
+	<PROPERTY>description = lack_of_sleep</PROPERTY>
+	<PROPERTY>fast = lack_of_sleep[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>migraines</NAME>
+	<PROPERTY>description = migraines</PROPERTY>
+	<PROPERTY>fast = migraines[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>gum_disease</NAME>
+	<PROPERTY>description = gum_disease</PROPERTY>
+	<PROPERTY>fast = gum_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>rupture</NAME>
+	<PROPERTY>description = rupture</PROPERTY>
+	<PROPERTY>fast = rupture[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sleep_apnea</NAME>
+	<PROPERTY>description = sleep_apnea</PROPERTY>
+	<PROPERTY>fast = sleep_apnea[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ectopic_pregnancy</NAME>
+	<PROPERTY>description = ectopic_pregnancy</PROPERTY>
+	<PROPERTY>fast = ectopic_pregnancy[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>anaerobic_bacteria</NAME>
+	<PROPERTY>description = anaerobic_bacteria</PROPERTY>
+	<PROPERTY>fast = anaerobic_bacteria[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blood_vessels</NAME>
+	<PROPERTY>description = blood_vessels</PROPERTY>
+	<PROPERTY>fast = blood_vessels[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>surgery</FOR>
+	<TABLE>
+		0.0703024 0.929698
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>brain_damage</GIVEN>
+	<GIVEN>strokes</GIVEN>
+	<GIVEN>scarring</GIVEN>
+	<GIVEN>blood_vessels</GIVEN>
+	<TABLE>
+		0.400695 0.599305
+		0.583493 0.416507
+		0.444283 0.555717
+		0.744701 0.255299
+		0.00156069 0.998439
+		0.38337 0.61663
+		0.49561 0.50439
+		0.723279 0.276721
+		0.7073 0.2927
+		0.382561 0.617439
+		0.566152 0.433848
+		0.798527 0.201473
+		0.583366 0.416634
+		0.483557 0.516443
+		0.477122 0.522878
+		0.734151 0.265849
+		0.397052 0.602948
+		0.0720078 0.927992
+		0.072222 0.927778
+		0.459217 0.540783
+		0.476312 0.523688
+		0.242581 0.757419
+		0.600545 0.399455
+		0.327794 0.672206
+		0.466735 0.533265
+		0.434773 0.565227
+		0.49495 0.50505
+		0.438063 0.561937
+		0.816965 0.183035
+		0.89947 0.10053
+		0.77814 0.22186
+		0.526356 0.473644
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>strokes</GIVEN>
+	<TABLE>
+		0.433353 0.566647
+		0.701568 0.298432
+		0.584265 0.415735
+		0.688639 0.311361
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>scarring</FOR>
+	<GIVEN>surgery</GIVEN>
+	<TABLE>
+		0.496224 0.503776
+		0.412153 0.587847
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>strokes</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>gum_disease</GIVEN>
+	<GIVEN>rupture</GIVEN>
+	<GIVEN>sleep_apnea</GIVEN>
+	<GIVEN>migraines</GIVEN>
+	<GIVEN>blood_vessels</GIVEN>
+	<TABLE>
+		0.350212 0.649788
+		0.372474 0.627526
+		0.585491 0.414509
+		0.226625 0.773375
+		0.820159 0.179841
+		0.266771 0.733229
+		0.250215 0.749785
+		0.525511 0.474489
+		0.595802 0.404198
+		0.536429 0.463571
+		0.513774 0.486226
+		0.0739402 0.92606
+		0.547004 0.452996
+		0.549824 0.450176
+		0.986675 0.0133252
+		0.819988 0.180012
+		0.292478 0.707522
+		0.33812 0.66188
+		0.680072 0.319928
+		0.538263 0.461737
+		0.820254 0.179746
+		0.897523 0.102477
+		0.206001 0.793999
+		0.346319 0.653681
+		0.381152 0.618848
+		0.733935 0.266065
+		0.0766262 0.923374
+		0.0782459 0.921754
+		0.322067 0.677933
+		0.0297314 0.970269
+		0.626011 0.373989
+		0.366028 0.633972
+		0.359968 0.640032
+		0.93829 0.0617101
+		0.689938 0.310062
+		0.216514 0.783486
+		0.638668 0.361332
+		0.45352 0.54648
+		0.305788 0.694212
+		0.486289 0.513711
+		0.0323687 0.967631
+		0.972023 0.0279773
+		0.0624948 0.937505
+		0.758924 0.241076
+		0.641083 0.358917
+		0.566593 0.433407
+		0.621957 0.378043
+		0.0974577 0.902542
+		0.116001 0.883999
+		0.72166 0.27834
+		0.743427 0.256573
+		0.424664 0.575336
+		0.624859 0.375141
+		0.873041 0.126959
+		0.991699 0.00830136
+		0.326953 0.673047
+		0.681347 0.318653
+		0.20168 0.79832
+		0.882459 0.117541
+		0.873672 0.126328
+		0.557041 0.442959
+		0.500381 0.499619
+		0.765196 0.234804
+		0.508256 0.491744
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>congestive_heart_failure</FOR>
+	<GIVEN>sleep_apnea</GIVEN>
+	<TABLE>
+		0.475841 0.524159
+		0.395898 0.604102
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>water_retention</FOR>
+	<GIVEN>congestive_heart_failure</GIVEN>
+	<TABLE>
+		0.272389 0.727611
+		0.990211 0.00978891
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_sleep</FOR>
+	<GIVEN>sleep_apnea</GIVEN>
+	<TABLE>
+		0.556728 0.443272
+		0.231363 0.768637
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>migraines</FOR>
+	<GIVEN>lack_of_sleep</GIVEN>
+	<GIVEN>water_retention</GIVEN>
+	<TABLE>
+		0.369752 0.630248
+		0.457219 0.542781
+		0.547276 0.452724
+		0.846701 0.153299
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>gum_disease</FOR>
+	<GIVEN>anaerobic_bacteria</GIVEN>
+	<TABLE>
+		0.890934 0.109066
+		0.767952 0.232048
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>rupture</FOR>
+	<GIVEN>ectopic_pregnancy</GIVEN>
+	<TABLE>
+		0.511402 0.488598
+		0.492755 0.507245
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sleep_apnea</FOR>
+	<TABLE>
+		0.520555 0.479445
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ectopic_pregnancy</FOR>
+	<GIVEN>scarring</GIVEN>
+	<TABLE>
+		0.291186 0.708814
+		0.582072 0.417928
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>anaerobic_bacteria</FOR>
+	<TABLE>
+		0.0358974 0.964103
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blood_vessels</FOR>
+	<TABLE>
+		0.668206 0.331794
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

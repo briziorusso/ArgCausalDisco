@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>degradation_of_neurons</NAME>
+	<PROPERTY>description = degradation_of_neurons</PROPERTY>
+	<PROPERTY>fast = degradation_of_neurons[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>psychological_stress</NAME>
+	<PROPERTY>description = psychological_stress</PROPERTY>
+	<PROPERTY>fast = psychological_stress[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sleep_problems</NAME>
+	<PROPERTY>description = sleep_problems</PROPERTY>
+	<PROPERTY>fast = sleep_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_fatigue_syndrome</NAME>
+	<PROPERTY>description = chronic_fatigue_syndrome</PROPERTY>
+	<PROPERTY>fast = chronic_fatigue_syndrome[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.615041 0.384959
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>degradation_of_neurons</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.421744 0.578256
+		0.484188 0.515812
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>psychological_stress</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.630475 0.369525
+		0.570879 0.429121
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sleep_problems</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>chronic_fatigue_syndrome</GIVEN>
+	<TABLE>
+		0.860218 0.139782
+		0.668517 0.331483
+		0.720973 0.279027
+		0.617667 0.382333
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_fatigue_syndrome</FOR>
+	<GIVEN>psychological_stress</GIVEN>
+	<TABLE>
+		0.508419 0.491581
+		0.662477 0.337523
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

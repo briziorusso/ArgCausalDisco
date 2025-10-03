@@ -1,0 +1,208 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>surgery</NAME>
+	<PROPERTY>description = surgery</PROPERTY>
+	<PROPERTY>fast = surgery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blockage</NAME>
+	<PROPERTY>description = blockage</PROPERTY>
+	<PROPERTY>fast = blockage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>gallstones</NAME>
+	<PROPERTY>description = gallstones</PROPERTY>
+	<PROPERTY>fast = gallstones[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infertility</NAME>
+	<PROPERTY>description = infertility</PROPERTY>
+	<PROPERTY>fast = infertility[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>retrograde_ejaculation</NAME>
+	<PROPERTY>description = retrograde_ejaculation</PROPERTY>
+	<PROPERTY>fast = retrograde_ejaculation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_cholesterol</NAME>
+	<PROPERTY>description = high_cholesterol</PROPERTY>
+	<PROPERTY>fast = high_cholesterol[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>atherosclerosis</NAME>
+	<PROPERTY>description = atherosclerosis</PROPERTY>
+	<PROPERTY>fast = atherosclerosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>obstruction</NAME>
+	<PROPERTY>description = obstruction</PROPERTY>
+	<PROPERTY>fast = obstruction[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>health_conditions</NAME>
+	<PROPERTY>description = health_conditions</PROPERTY>
+	<PROPERTY>fast = health_conditions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>oxidized_cholesterol</NAME>
+	<PROPERTY>description = oxidized_cholesterol</PROPERTY>
+	<PROPERTY>fast = oxidized_cholesterol[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>surgery</FOR>
+	<TABLE>
+		0.550304 0.449696
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blockage</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>atherosclerosis</GIVEN>
+	<TABLE>
+		0.458733 0.541267
+		0.642578 0.357422
+		0.926166 0.0738336
+		0.0681461 0.931854
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>gallstones</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>high_cholesterol</GIVEN>
+	<TABLE>
+		0.492441 0.507559
+		0.420625 0.579375
+		0.490891 0.509109
+		0.34349 0.65651
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infertility</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>blockage</GIVEN>
+	<GIVEN>obstruction</GIVEN>
+	<GIVEN>retrograde_ejaculation</GIVEN>
+	<TABLE>
+		0.528536 0.471464
+		0.494855 0.505145
+		0.522998 0.477002
+		0.948794 0.0512064
+		0.245486 0.754514
+		0.847481 0.152519
+		0.555505 0.444495
+		0.335426 0.664574
+		0.589831 0.410169
+		0.590129 0.409871
+		0.587716 0.412284
+		0.156391 0.843609
+		0.899223 0.100777
+		0.177901 0.822099
+		0.585454 0.414546
+		0.499103 0.500897
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>retrograde_ejaculation</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>health_conditions</GIVEN>
+	<TABLE>
+		0.472289 0.527711
+		0.582758 0.417242
+		0.0593537 0.940646
+		0.58892 0.41108
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_cholesterol</FOR>
+	<GIVEN>health_conditions</GIVEN>
+	<TABLE>
+		0.583166 0.416834
+		0.189116 0.810884
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>atherosclerosis</FOR>
+	<GIVEN>high_cholesterol</GIVEN>
+	<GIVEN>oxidized_cholesterol</GIVEN>
+	<TABLE>
+		0.545338 0.454662
+		0.975174 0.0248261
+		0.426473 0.573527
+		0.433229 0.566771
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>obstruction</FOR>
+	<GIVEN>gallstones</GIVEN>
+	<GIVEN>atherosclerosis</GIVEN>
+	<TABLE>
+		0.644508 0.355492
+		0.835487 0.164513
+		0.90629 0.0937103
+		0.523467 0.476533
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>health_conditions</FOR>
+	<TABLE>
+		0.514733 0.485267
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>oxidized_cholesterol</FOR>
+	<TABLE>
+		0.62496 0.37504
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

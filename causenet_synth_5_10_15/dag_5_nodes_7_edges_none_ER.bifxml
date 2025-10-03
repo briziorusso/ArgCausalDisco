@@ -1,0 +1,106 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>angina</NAME>
+	<PROPERTY>description = angina</PROPERTY>
+	<PROPERTY>fast = angina[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coronary_heart_disease</NAME>
+	<PROPERTY>description = coronary_heart_disease</PROPERTY>
+	<PROPERTY>fast = coronary_heart_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>numbness</NAME>
+	<PROPERTY>description = numbness</PROPERTY>
+	<PROPERTY>fast = numbness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_cholesterol</NAME>
+	<PROPERTY>description = high_cholesterol</PROPERTY>
+	<PROPERTY>fast = high_cholesterol[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>high_cholesterol</GIVEN>
+	<TABLE>
+		0.379996 0.620004
+		0.467541 0.532459
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>angina</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>high_cholesterol</GIVEN>
+	<GIVEN>coronary_heart_disease</GIVEN>
+	<TABLE>
+		0.338838 0.661162
+		0.525762 0.474238
+		0.801703 0.198297
+		0.571086 0.428914
+		0.00103593 0.998964
+		0.473259 0.526741
+		0.483274 0.516726
+		0.209079 0.790921
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coronary_heart_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>high_cholesterol</GIVEN>
+	<TABLE>
+		0.178856 0.821144
+		0.254665 0.745335
+		0.585531 0.414469
+		0.472244 0.527756
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>numbness</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.862955 0.137045
+		0.507406 0.492594
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_cholesterol</FOR>
+	<TABLE>
+		0.463129 0.536871
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

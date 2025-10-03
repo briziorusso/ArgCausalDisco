@@ -1,0 +1,150 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>asia</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>asia</NAME>
+	<PROPERTY>description = recent visit to asia: whether or not the patient has recently visited asia</PROPERTY>
+	<PROPERTY>fast = asia{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tub</NAME>
+	<PROPERTY>description = tuberculosis: whether or not the patient has tuberculosis</PROPERTY>
+	<PROPERTY>fast = tub{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>smoke</NAME>
+	<PROPERTY>description = smoking: whether or not the patient is a smoker</PROPERTY>
+	<PROPERTY>fast = smoke{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lung</NAME>
+	<PROPERTY>description = lung cancer: whether or not the patient has lung cancer</PROPERTY>
+	<PROPERTY>fast = lung{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>bronc</NAME>
+	<PROPERTY>description = bronchitis: whether or not the patient has bronchitis</PROPERTY>
+	<PROPERTY>fast = bronc{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>either</NAME>
+	<PROPERTY>description = either tuberculosis or lung cancer: whether or not the patient has either tuberculosis or lung cancer</PROPERTY>
+	<PROPERTY>fast = either{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>xray</NAME>
+	<PROPERTY>description = positive chest xray: whether or not the patient has had a positive chest xray</PROPERTY>
+	<PROPERTY>fast = xray{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>dysp</NAME>
+	<PROPERTY>description = dyspnoea: whether or not the patient has dyspnoea, also known as shortness of breath</PROPERTY>
+	<PROPERTY>fast = dysp{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>asia</FOR>
+	<TABLE>
+		0.01 0.99
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tub</FOR>
+	<GIVEN>asia</GIVEN>
+	<TABLE>
+		0.05 0.95
+		0.01 0.99
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>smoke</FOR>
+	<TABLE>
+		0.5 0.5
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lung</FOR>
+	<GIVEN>smoke</GIVEN>
+	<TABLE>
+		0.1 0.9
+		0.01 0.99
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>bronc</FOR>
+	<GIVEN>smoke</GIVEN>
+	<TABLE>
+		0.6 0.4
+		0.3 0.7
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>either</FOR>
+	<GIVEN>lung</GIVEN>
+	<GIVEN>tub</GIVEN>
+	<TABLE>
+		1 0
+		1 0
+		1 0
+		0 1
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>xray</FOR>
+	<GIVEN>either</GIVEN>
+	<TABLE>
+		0.98 0.02
+		0.05 0.95
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>dysp</FOR>
+	<GIVEN>bronc</GIVEN>
+	<GIVEN>either</GIVEN>
+	<TABLE>
+		0.9 0.1
+		0.8 0.2
+		0.7 0.3
+		0.1 0.9
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>vomiting</NAME>
+	<PROPERTY>description = vomiting</PROPERTY>
+	<PROPERTY>fast = vomiting[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>electrolyte_imbalance</NAME>
+	<PROPERTY>description = electrolyte_imbalance</PROPERTY>
+	<PROPERTY>fast = electrolyte_imbalance[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>severe_dehydration</NAME>
+	<PROPERTY>description = severe_dehydration</PROPERTY>
+	<PROPERTY>fast = severe_dehydration[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>etec</NAME>
+	<PROPERTY>description = etec</PROPERTY>
+	<PROPERTY>fast = etec[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>acute_watery_diarrhoea</NAME>
+	<PROPERTY>description = acute_watery_diarrhoea</PROPERTY>
+	<PROPERTY>fast = acute_watery_diarrhoea[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>vomiting</FOR>
+	<TABLE>
+		0.347382 0.652618
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>electrolyte_imbalance</FOR>
+	<GIVEN>vomiting</GIVEN>
+	<GIVEN>severe_dehydration</GIVEN>
+	<TABLE>
+		0.553864 0.446136
+		0.213534 0.786466
+		0.434111 0.565889
+		0.546107 0.453893
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>severe_dehydration</FOR>
+	<GIVEN>vomiting</GIVEN>
+	<GIVEN>acute_watery_diarrhoea</GIVEN>
+	<TABLE>
+		0.828091 0.171909
+		0.860234 0.139766
+		0.21299 0.78701
+		0.641622 0.358378
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>etec</FOR>
+	<TABLE>
+		0.404925 0.595075
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>acute_watery_diarrhoea</FOR>
+	<GIVEN>etec</GIVEN>
+	<TABLE>
+		0.792428 0.207572
+		0.0966296 0.90337
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

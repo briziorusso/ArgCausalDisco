@@ -1,0 +1,197 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>asbestos_exposure</NAME>
+	<PROPERTY>description = asbestos_exposure</PROPERTY>
+	<PROPERTY>fast = asbestos_exposure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>serious_health_conditions</NAME>
+	<PROPERTY>description = serious_health_conditions</PROPERTY>
+	<PROPERTY>fast = serious_health_conditions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = alcoholism</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>psychological_problems</NAME>
+	<PROPERTY>description = psychological_problems</PROPERTY>
+	<PROPERTY>fast = psychological_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_self-esteem</NAME>
+	<PROPERTY>description = low_self-esteem</PROPERTY>
+	<PROPERTY>fast = low_self-esteem[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>natural_disasters</NAME>
+	<PROPERTY>description = natural_disasters</PROPERTY>
+	<PROPERTY>fast = natural_disasters[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ulcers</NAME>
+	<PROPERTY>description = ulcers</PROPERTY>
+	<PROPERTY>fast = ulcers[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>toxic_mold</NAME>
+	<PROPERTY>description = toxic_mold</PROPERTY>
+	<PROPERTY>fast = toxic_mold[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>asbestos_exposure</FOR>
+	<GIVEN>natural_disasters</GIVEN>
+	<TABLE>
+		0.654846 0.345154
+		0.0346149 0.965385
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>serious_health_conditions</FOR>
+	<GIVEN>asbestos_exposure</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>psychological_problems</GIVEN>
+	<GIVEN>toxic_mold</GIVEN>
+	<TABLE>
+		0.197483 0.802517
+		0.340185 0.659815
+		0.399754 0.600246
+		0.244115 0.755885
+		0.124 0.876
+		0.384737 0.615263
+		0.541195 0.458805
+		0.708948 0.291052
+		0.754221 0.245779
+		0.739693 0.260307
+		0.831844 0.168156
+		0.813246 0.186754
+		0.192965 0.807035
+		0.566223 0.433777
+		0.503289 0.496711
+		0.449137 0.550863
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>ulcers</GIVEN>
+	<TABLE>
+		0.236456 0.763544
+		0.0159159 0.984084
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<TABLE>
+		0.610726 0.389274
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>psychological_problems</FOR>
+	<GIVEN>alcoholism</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>low_self-esteem</GIVEN>
+	<TABLE>
+		0.842211 0.157789
+		0.185537 0.814463
+		0.502227 0.497773
+		0.669784 0.330216
+		0.717718 0.282282
+		0.327133 0.672867
+		0.616721 0.383279
+		0.512603 0.487397
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.125288 0.874712
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_self-esteem</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.466845 0.533155
+		0.28053 0.71947
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>natural_disasters</FOR>
+	<TABLE>
+		0.267271 0.732729
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ulcers</FOR>
+	<TABLE>
+		0.59178 0.40822
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>toxic_mold</FOR>
+	<TABLE>
+		0.54741 0.45259
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

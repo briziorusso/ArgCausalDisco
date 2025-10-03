@@ -1,0 +1,283 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>sachs</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>Akt</NAME>
+	<PROPERTY>description = Akt (Protein Kinase B or PKB): A serine/threonine-specific protein kinase that is a central node in the PI3K/Akt signaling pathway. It is activated downstream of PIP3 generation and plays crucial roles in regulating cell survival, growth, proliferation, metabolism, and angiogenesis.</PROPERTY>
+	<PROPERTY>fast = Akt{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Erk</NAME>
+	<PROPERTY>description = ERK (ERK1/2, also MAPK3/1): Extracellular signal-regulated kinase. A key protein kinase in the MAPK/ERK signaling pathway, lying downstream of MEK. Once activated by MEK phosphorylation, ERK translocates to the nucleus to phosphorylate transcription factors, regulating gene expression related to cell proliferation, differentiation, and survival.</PROPERTY>
+	<PROPERTY>fast = Erk{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Jnk</NAME>
+	<PROPERTY>description = JNK (c-Jun N-terminal kinase, also SAPK): Stress-activated protein kinase. Another class of MAPKs, also typically activated by cellular stress and inflammatory cytokines. JNK signaling is involved in apoptosis, inflammation, cell proliferation, and metabolism.</PROPERTY>
+	<PROPERTY>fast = Jnk{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Mek</NAME>
+	<PROPERTY>description = MEK (MEK1/2, also MAP2K1/2): Mitogen-activated protein kinase kinase. A dual-specificity protein kinase (phosphorylates both threonine and tyrosine residues) that lies downstream of Raf and directly upstream of ERK in the MAPK/ERK pathway. It phosphorylates and activates ERK.</PROPERTY>
+	<PROPERTY>fast = Mek{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>P38</NAME>
+	<PROPERTY>description = p38 (p38 MAPK): p38 Mitogen-activated protein kinase. A class of MAPKs distinct from ERK, primarily activated by environmental stresses (like UV radiation, osmotic shock) and inflammatory cytokines. p38 signaling pathways are involved in inflammation, apoptosis, cell cycle regulation, and differentiation.</PROPERTY>
+	<PROPERTY>fast = P38{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>PIP2</NAME>
+	<PROPERTY>description = PIP2 (Phosphatidylinositol 4,5-bisphosphate): A phospholipid component of cell membranes. It serves as a crucial substrate for enzymes like PLCγ (producing IP3 and DAG) and PI3K (producing PIP3), making it a branching point for multiple signaling pathways.</PROPERTY>
+	<PROPERTY>fast = PIP2{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>PIP3</NAME>
+	<PROPERTY>description = PIP3 (Phosphatidylinositol (3,4,5)-trisphosphate): A phospholipid second messenger generated from PIP2 by the action of phosphoinositide 3-kinase (PI3K). It plays a critical role in recruiting proteins with PH domains (like Akt/PKB) to the plasma membrane, activating downstream signaling pathways involved in cell growth, survival, and proliferation (e.g., the PI3K/Akt pathway).</PROPERTY>
+	<PROPERTY>fast = PIP3{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>PKA</NAME>
+	<PROPERTY>description = PKA (Protein Kinase A): cAMP-dependent protein kinase. A serine/threonine kinase whose activity is primarily regulated by levels of cyclic AMP (cAMP). PKA participates in a wide range of cellular processes and can interact with or modulate other signaling pathways, including potential crosstalk with the MAPK pathway components measured in this dataset.</PROPERTY>
+	<PROPERTY>fast = PKA{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>PKC</NAME>
+	<PROPERTY>description = PKC (Protein Kinase C): A family of serine/threonine kinases activated by signals such as increases in diacylglycerol (DAG, produced by PLC) and intracellular calcium concentration. PKC isoforms regulate diverse cellular functions, including proliferation, differentiation, apoptosis, and cytoskeletal organization.</PROPERTY>
+	<PROPERTY>fast = PKC{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Plcg</NAME>
+	<PROPERTY>description = PLCγ (Phospholipase C gamma): An enzyme (phospholipase) that hydrolyzes the membrane phospholipid PIP2 into two second messengers: inositol trisphosphate (IP3) and diacylglycerol (DAG). This activation is often triggered by receptor tyrosine kinases and plays a key role in intracellular calcium release and PKC activation.</PROPERTY>
+	<PROPERTY>fast = Plcg{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Raf</NAME>
+	<PROPERTY>description = Raf (Raf-1 or c-Raf): A serine/threonine-specific protein kinase that acts as a central component of the MAPK/ERK signaling pathway. It is typically activated by Ras GTPases and phosphorylates (activates) MEK.</PROPERTY>
+	<PROPERTY>fast = Raf{LOW|AVG|HIGH}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>LOW</OUTCOME>
+	<OUTCOME>AVG</OUTCOME>
+	<OUTCOME>HIGH</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>Akt</FOR>
+	<GIVEN>Erk</GIVEN>
+	<GIVEN>PKA</GIVEN>
+	<TABLE>
+		0.672118 0.32778 0.000102849
+		0.620386 0.379503 0.00011152
+		0.975086 0.024055 0.000859106
+		0.334951 0.66487 0.000179694
+		0.821408 0.178202 0.000389847
+		0.948362 0.0515473 9.07523e-05
+		7.68226e-05 0.118307 0.881616
+		0.177106 0.813733 0.00916148
+		0.170341 0.829396 0.000262467
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Erk</FOR>
+	<GIVEN>Mek</GIVEN>
+	<GIVEN>PKA</GIVEN>
+	<TABLE>
+		0.850513 0.138724 0.0107622
+		0.117712 0.691936 0.190352
+		0.0740599 0.700446 0.225494
+		0.387033 0.483691 0.129276
+		0.0489579 0.72824 0.222803
+		0.003663 0.102564 0.893773
+		0.00868288 0.187959 0.803358
+		0.0011534 0.748558 0.250288
+		0.0333333 0.0333333 0.933333
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Jnk</FOR>
+	<GIVEN>PKA</GIVEN>
+	<GIVEN>PKC</GIVEN>
+	<TABLE>
+		0.289926 0.245764 0.46431
+		0.579444 0.420321 0.000235738
+		0.00456621 0.990868 0.00456621
+		0.57667 0.423287 4.27131e-05
+		0.612904 0.387081 1.54314e-05
+		0.0446898 0.934956 0.0203545
+		0.996124 0.00380675 6.92137e-05
+		0.862301 0.13686 0.000839631
+		0.155367 0.841808 0.00282486
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Mek</FOR>
+	<GIVEN>PKA</GIVEN>
+	<GIVEN>PKC</GIVEN>
+	<GIVEN>Raf</GIVEN>
+	<TABLE>
+		0.745177 0.254598 0.000224316
+		0.384601 0.123137 0.492262
+		0.262181 0.00145027 0.736368
+		0.706658 0.293129 0.000212721
+		0.269276 0.730486 0.000237248
+		0.850656 0.106562 0.0427822
+		0.854386 0.14386 0.00175439
+		0.0119048 0.976191 0.0119048
+		0.333333 0.333333 0.333333
+		0.757692 0.242277 3.18157e-05
+		0.343172 0.649403 0.00742461
+		0.86529 0.101003 0.0337072
+		0.714815 0.285175 9.33838e-06
+		0.274658 0.720027 0.00531511
+		0.281496 0.585116 0.133388
+		0.825646 0.174325 2.83134e-05
+		0.105411 0.894372 0.00021645
+		0.333333 0.333333 0.333333
+		0.997728 0.00224449 2.73718e-05
+		0.999637 0.000181455 0.000181455
+		0.936105 0.000769823 0.0631255
+		0.968984 0.0306427 0.000373692
+		0.854386 0.14386 0.00175439
+		0.498471 0.498471 0.0030581
+		0.725951 0.272931 0.00111857
+		0.00606061 0.987879 0.00606061
+		0.333333 0.333333 0.333333
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>P38</FOR>
+	<GIVEN>PKA</GIVEN>
+	<GIVEN>PKC</GIVEN>
+	<TABLE>
+		0.306912 0.0645865 0.628502
+		0.655823 0.343942 0.000235738
+		0.86758 0.127854 0.00456621
+		0.919187 0.078464 0.00234922
+		0.814978 0.185007 1.54314e-05
+		0.80314 0.192729 0.00413099
+		0.807378 0.091639 0.100983
+		0.38623 0.15953 0.45424
+		0.765537 0.231638 0.00282486
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>PIP2</FOR>
+	<GIVEN>PIP3</GIVEN>
+	<GIVEN>Plcg</GIVEN>
+	<TABLE>
+		0.996791 0.00316982 3.86563e-05
+		0.99789 0.00105485 0.00105485
+		0.221809 0.493649 0.284541
+		0.986711 0.0132699 1.88761e-05
+		0.957165 0.0424455 0.000389408
+		0.0767279 0.391103 0.532169
+		0.872401 0.120071 0.0075281
+		0.52181 0.462455 0.0157353
+		0.0264169 0.0523535 0.92123
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>PIP3</FOR>
+	<GIVEN>Plcg</GIVEN>
+	<TABLE>
+		0.218431 0.447324 0.334245
+		0.0779669 0.211202 0.710831
+		0.423705 0.439653 0.136641
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>PKA</FOR>
+	<GIVEN>PKC</GIVEN>
+	<TABLE>
+		0.386425 0.379424 0.23415
+		0.0603964 0.922647 0.0169571
+		0.0157701 0.958738 0.0254915
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>PKC</FOR>
+	<TABLE>
+		0.423132 0.481639 0.0952293
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Plcg</FOR>
+	<TABLE>
+		0.812134 0.0833796 0.104487
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Raf</FOR>
+	<GIVEN>PKA</GIVEN>
+	<GIVEN>PKC</GIVEN>
+	<TABLE>
+		0.0623218 0.147249 0.790429
+		0.369401 0.331212 0.299387
+		0.86758 0.127854 0.00456621
+		0.447506 0.312575 0.23992
+		0.550823 0.392914 0.0562628
+		0.884257 0.115668 7.51089e-05
+		0.842885 0.127146 0.0299696
+		0.74895 0.15953 0.0915197
+		0.841808 0.155367 0.00282486
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

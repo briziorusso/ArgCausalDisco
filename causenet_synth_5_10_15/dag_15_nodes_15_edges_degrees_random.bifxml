@@ -1,0 +1,281 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_sleep</NAME>
+	<PROPERTY>description = lack_of_sleep</PROPERTY>
+	<PROPERTY>fast = lack_of_sleep[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>behavioral_problems</NAME>
+	<PROPERTY>description = behavioral_problems</PROPERTY>
+	<PROPERTY>fast = behavioral_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = despair</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_problems</NAME>
+	<PROPERTY>description = social_problems</PROPERTY>
+	<PROPERTY>fast = social_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>poor_sleep</NAME>
+	<PROPERTY>description = poor_sleep</PROPERTY>
+	<PROPERTY>fast = poor_sleep[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcohol_abuse</NAME>
+	<PROPERTY>description = alcohol_abuse</PROPERTY>
+	<PROPERTY>fast = alcohol_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infertility</NAME>
+	<PROPERTY>description = infertility</PROPERTY>
+	<PROPERTY>fast = infertility[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>emotional_problems</NAME>
+	<PROPERTY>description = emotional_problems</PROPERTY>
+	<PROPERTY>fast = emotional_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug_abuse</NAME>
+	<PROPERTY>description = drug_abuse</PROPERTY>
+	<PROPERTY>fast = drug_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>substance_abuse</NAME>
+	<PROPERTY>description = substance_abuse</PROPERTY>
+	<PROPERTY>fast = substance_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>burnout</NAME>
+	<PROPERTY>description = burnout</PROPERTY>
+	<PROPERTY>fast = burnout[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>responsibilities</NAME>
+	<PROPERTY>description = responsibilities</PROPERTY>
+	<PROPERTY>fast = responsibilities[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_appropriate_supervision</NAME>
+	<PROPERTY>description = lack_of_appropriate_supervision</PROPERTY>
+	<PROPERTY>fast = lack_of_appropriate_supervision[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>abandoned_child_syndrome</NAME>
+	<PROPERTY>description = abandoned_child_syndrome</PROPERTY>
+	<PROPERTY>fast = abandoned_child_syndrome[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>lack_of_sleep</FOR>
+	<TABLE>
+		0.886703 0.113297
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>behavioral_problems</FOR>
+	<GIVEN>lack_of_sleep</GIVEN>
+	<GIVEN>poor_sleep</GIVEN>
+	<TABLE>
+		0.148437 0.851563
+		0.378832 0.621168
+		0.228476 0.771524
+		0.740687 0.259313
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.566666 0.433334
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.579462 0.420538
+		0.526271 0.473729
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_problems</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>alcohol_abuse</GIVEN>
+	<GIVEN>drug_abuse</GIVEN>
+	<GIVEN>substance_abuse</GIVEN>
+	<TABLE>
+		0.758025 0.241975
+		0.540194 0.459806
+		0.00956854 0.990431
+		0.912412 0.0875881
+		0.215095 0.784905
+		0.303994 0.696006
+		0.618158 0.381842
+		0.516793 0.483207
+		0.34714 0.65286
+		0.842251 0.157749
+		0.556839 0.443161
+		0.916939 0.0830606
+		0.468217 0.531783
+		0.520509 0.479491
+		0.409614 0.590386
+		0.0815446 0.918455
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>poor_sleep</FOR>
+	<TABLE>
+		0.183193 0.816807
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcohol_abuse</FOR>
+	<GIVEN>despair</GIVEN>
+	<GIVEN>abandoned_child_syndrome</GIVEN>
+	<TABLE>
+		0.912777 0.0872234
+		0.687181 0.312819
+		0.265352 0.734648
+		0.310472 0.689528
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infertility</FOR>
+	<TABLE>
+		0.17542 0.82458
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>emotional_problems</FOR>
+	<GIVEN>infertility</GIVEN>
+	<TABLE>
+		0.619994 0.380006
+		0.499158 0.500842
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug_abuse</FOR>
+	<GIVEN>emotional_problems</GIVEN>
+	<TABLE>
+		0.720671 0.279329
+		0.438141 0.561859
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>substance_abuse</FOR>
+	<GIVEN>burnout</GIVEN>
+	<GIVEN>behavioral_problems</GIVEN>
+	<TABLE>
+		0.438823 0.561177
+		0.577288 0.422712
+		0.991749 0.00825118
+		0.417258 0.582742
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>burnout</FOR>
+	<GIVEN>responsibilities</GIVEN>
+	<TABLE>
+		0.781948 0.218052
+		0.421019 0.578981
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>responsibilities</FOR>
+	<TABLE>
+		0.448774 0.551226
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_appropriate_supervision</FOR>
+	<TABLE>
+		0.742225 0.257775
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>abandoned_child_syndrome</FOR>
+	<GIVEN>lack_of_appropriate_supervision</GIVEN>
+	<TABLE>
+		0.438138 0.561862
+		0.735621 0.264379
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

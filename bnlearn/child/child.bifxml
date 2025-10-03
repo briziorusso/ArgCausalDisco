@@ -1,0 +1,451 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>Neonatal Cardiorespiratory Assessment Graph</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>BirthAsphyxia</NAME>
+	<PROPERTY>description = Whether the infant experienced a lack of oxygen during or immediately after birth.</PROPERTY>
+	<PROPERTY>fast = BirthAsphyxia{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>HypDistrib</NAME>
+	<PROPERTY>description = The pattern of oxygen saturation across different regions of the infant's body, indicating uniformity or disparity.</PROPERTY>
+	<PROPERTY>fast = HypDistrib{Equal|Unequal}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>Equal</OUTCOME>
+	<OUTCOME>Unequal</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>HypoxiaInO2</NAME>
+	<PROPERTY>description = The severity of systemic oxygen deprivation experienced by the infant, specifically when receiving supplemental oxygen.</PROPERTY>
+	<PROPERTY>fast = HypoxiaInO2{Mild|Moderate|Severe}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>Mild</OUTCOME>
+	<OUTCOME>Moderate</OUTCOME>
+	<OUTCOME>Severe</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>CO2</NAME>
+	<PROPERTY>description = The measured concentration of carbon dioxide in the infant's blood.</PROPERTY>
+	<PROPERTY>fast = CO2{Normal|Low|High}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>Normal</OUTCOME>
+	<OUTCOME>Low</OUTCOME>
+	<OUTCOME>High</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ChestXray</NAME>
+	<PROPERTY>description = The visual findings observed in a radiographic image of the infant's chest.</PROPERTY>
+	<PROPERTY>fast = ChestXray{Normal|Oligaemic|Plethoric|Grd_Glass|Asy_or_Patch}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>Normal</OUTCOME>
+	<OUTCOME>Oligaemic</OUTCOME>
+	<OUTCOME>Plethoric</OUTCOME>
+	<OUTCOME>Grd_Glass</OUTCOME>
+	<OUTCOME>Asy_or_Patch</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Grunting</NAME>
+	<PROPERTY>description = A distinct audible respiratory effort made by the infant, often associated with breathing difficulties.</PROPERTY>
+	<PROPERTY>fast = Grunting{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>LVHreport</NAME>
+	<PROPERTY>description = The documented diagnostic conclusion regarding the presence or absence of left ventricular hypertrophy.</PROPERTY>
+	<PROPERTY>fast = LVHreport{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>LowerBodyO2</NAME>
+	<PROPERTY>description = The measured oxygen saturation level in the lower half of the infant's body, typically reflecting post-ductal oxygenation.</PROPERTY>
+	<PROPERTY>fast = LowerBodyO2{lt_5|5_to_12|gt_12}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>lt_5</OUTCOME>
+	<OUTCOME>5_to_12</OUTCOME>
+	<OUTCOME>gt_12</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>RUQO2</NAME>
+	<PROPERTY>description = The measured oxygen saturation level in the upper right quadrant of the infant's body, typically reflecting pre-ductal oxygenation.</PROPERTY>
+	<PROPERTY>fast = RUQO2{lt_5|5_to_12|gt_12}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>lt_5</OUTCOME>
+	<OUTCOME>5_to_12</OUTCOME>
+	<OUTCOME>gt_12</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>CO2Report</NAME>
+	<PROPERTY>description = The formal laboratory report detailing the infant's blood carbon dioxide levels.</PROPERTY>
+	<PROPERTY>fast = CO2Report{lt_7.5|ge_7.5}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>lt_7.5</OUTCOME>
+	<OUTCOME>ge_7.5</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>XrayReport</NAME>
+	<PROPERTY>description = The formal radiological interpretation and conclusion derived from a chest X-ray examination.</PROPERTY>
+	<PROPERTY>fast = XrayReport{Normal|Oligaemic|Plethoric|Grd_Glass|Asy_or_Patchy}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>Normal</OUTCOME>
+	<OUTCOME>Oligaemic</OUTCOME>
+	<OUTCOME>Plethoric</OUTCOME>
+	<OUTCOME>Grd_Glass</OUTCOME>
+	<OUTCOME>Asy_or_Patchy</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Disease</NAME>
+	<PROPERTY>description = The primary medical condition affecting the infant, which may include specific congenital cardiac anomalies or pulmonary conditions.</PROPERTY>
+	<PROPERTY>fast = Disease{PFC|TGA|Fallot|PAIVS|TAPVD|Lung}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>PFC</OUTCOME>
+	<OUTCOME>TGA</OUTCOME>
+	<OUTCOME>Fallot</OUTCOME>
+	<OUTCOME>PAIVS</OUTCOME>
+	<OUTCOME>TAPVD</OUTCOME>
+	<OUTCOME>Lung</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>GruntingReport</NAME>
+	<PROPERTY>description = The medical record indicating the presence or absence of grunting respirations observed in the infant.</PROPERTY>
+	<PROPERTY>fast = GruntingReport{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Age</NAME>
+	<PROPERTY>description = The chronological age of the infant at the time of clinical evaluation, categorized into early postnatal periods.</PROPERTY>
+	<PROPERTY>fast = Age{0_to_3_days|4_to_10_days|11_to_30_days}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0_to_3_days</OUTCOME>
+	<OUTCOME>4_to_10_days</OUTCOME>
+	<OUTCOME>11_to_30_days</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>LVH</NAME>
+	<PROPERTY>description = An indication of an enlarged or thickened left ventricle of the heart.</PROPERTY>
+	<PROPERTY>fast = LVH{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>DuctFlow</NAME>
+	<PROPERTY>description = The direction and patency of blood flow through the ductus arteriosus, a transient fetal blood vessel.</PROPERTY>
+	<PROPERTY>fast = DuctFlow{Lt_to_Rt|None|Rt_to_Lt}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>Lt_to_Rt</OUTCOME>
+	<OUTCOME>None</OUTCOME>
+	<OUTCOME>Rt_to_Lt</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>CardiacMixing</NAME>
+	<PROPERTY>description = The degree to which oxygenated and deoxygenated blood streams intermingle within the heart's circulation.</PROPERTY>
+	<PROPERTY>fast = CardiacMixing{None|Mild|Complete|Transp.}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>None</OUTCOME>
+	<OUTCOME>Mild</OUTCOME>
+	<OUTCOME>Complete</OUTCOME>
+	<OUTCOME>Transp.</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>LungParench</NAME>
+	<PROPERTY>description = The structural and functional state of the lung tissue, assessed for conditions like congestion or other abnormalities.</PROPERTY>
+	<PROPERTY>fast = LungParench{Normal|Congested|Abnormal}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>Normal</OUTCOME>
+	<OUTCOME>Congested</OUTCOME>
+	<OUTCOME>Abnormal</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>LungFlow</NAME>
+	<PROPERTY>description = The rate and volume of blood circulation through the pulmonary vascular system.</PROPERTY>
+	<PROPERTY>fast = LungFlow{Normal|Low|High}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>Normal</OUTCOME>
+	<OUTCOME>Low</OUTCOME>
+	<OUTCOME>High</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Sick</NAME>
+	<PROPERTY>description = A general clinical assessment reflecting the infant's overall state of health and well-being, indicating the presence of illness.</PROPERTY>
+	<PROPERTY>fast = Sick{yes|no}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>yes</OUTCOME>
+	<OUTCOME>no</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>BirthAsphyxia</FOR>
+	<TABLE>
+		0.1 0.9
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>HypDistrib</FOR>
+	<GIVEN>DuctFlow</GIVEN>
+	<GIVEN>CardiacMixing</GIVEN>
+	<TABLE>
+		0.95 0.05
+		0.95 0.05
+		0.95 0.05
+		0.95 0.05
+		0.95 0.05
+		0.95 0.05
+		0.95 0.05
+		0.95 0.05
+		0.05 0.95
+		0.5 0.5
+		0.95 0.05
+		0.5 0.5
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>HypoxiaInO2</FOR>
+	<GIVEN>CardiacMixing</GIVEN>
+	<GIVEN>LungParench</GIVEN>
+	<TABLE>
+		0.93 0.05 0.02
+		0.15 0.8 0.05
+		0.7 0.2 0.1
+		0.1 0.8 0.1
+		0.1 0.75 0.15
+		0.1 0.65 0.25
+		0.1 0.7 0.2
+		0.05 0.65 0.3
+		0.1 0.5 0.4
+		0.02 0.18 0.8
+		0.1 0.3 0.6
+		0.02 0.18 0.8
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>CO2</FOR>
+	<GIVEN>LungParench</GIVEN>
+	<TABLE>
+		0.8 0.1 0.1
+		0.65 0.05 0.3
+		0.45 0.05 0.5
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ChestXray</FOR>
+	<GIVEN>LungParench</GIVEN>
+	<GIVEN>LungFlow</GIVEN>
+	<TABLE>
+		0.9 0.03 0.03 0.01 0.03
+		0.14 0.8 0.02 0.02 0.02
+		0.15 0.01 0.79 0.04 0.01
+		0.05 0.02 0.15 0.7 0.08
+		0.05 0.22 0.08 0.5 0.15
+		0.05 0.02 0.4 0.4 0.13
+		0.05 0.05 0.05 0.05 0.8
+		0.05 0.15 0.05 0.05 0.7
+		0.24 0.33 0.03 0.34 0.06
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Grunting</FOR>
+	<GIVEN>LungParench</GIVEN>
+	<GIVEN>Sick</GIVEN>
+	<TABLE>
+		0.2 0.8
+		0.05 0.95
+		0.4 0.6
+		0.2 0.8
+		0.8 0.2
+		0.6 0.4
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>LVHreport</FOR>
+	<GIVEN>LVH</GIVEN>
+	<TABLE>
+		0.9 0.1
+		0.05 0.95
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>LowerBodyO2</FOR>
+	<GIVEN>HypDistrib</GIVEN>
+	<GIVEN>HypoxiaInO2</GIVEN>
+	<TABLE>
+		0.1 0.3 0.6
+		0.3 0.6 0.1
+		0.5 0.4 0.1
+		0.4 0.5 0.1
+		0.5 0.45 0.05
+		0.6 0.35 0.05
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>RUQO2</FOR>
+	<GIVEN>HypoxiaInO2</GIVEN>
+	<TABLE>
+		0.1 0.3 0.6
+		0.3 0.6 0.1
+		0.5 0.4 0.1
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>CO2Report</FOR>
+	<GIVEN>CO2</GIVEN>
+	<TABLE>
+		0.9 0.1
+		0.9 0.1
+		0.1 0.9
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>XrayReport</FOR>
+	<GIVEN>ChestXray</GIVEN>
+	<TABLE>
+		0.8 0.06 0.06 0.02 0.06
+		0.1 0.8 0.02 0.02 0.06
+		0.1 0.02 0.8 0.02 0.06
+		0.08 0.02 0.1 0.6 0.2
+		0.08 0.02 0.1 0.1 0.7
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Disease</FOR>
+	<GIVEN>BirthAsphyxia</GIVEN>
+	<TABLE>
+		0.2 0.3 0.25 0.15 0.05 0.05
+		0.0306122 0.336735 0.295918 0.234694 0.0510204 0.0510204
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>GruntingReport</FOR>
+	<GIVEN>Grunting</GIVEN>
+	<TABLE>
+		0.8 0.2
+		0.1 0.9
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Age</FOR>
+	<GIVEN>Disease</GIVEN>
+	<GIVEN>Sick</GIVEN>
+	<TABLE>
+		0.95 0.03 0.02
+		0.85 0.1 0.05
+		0.8 0.15 0.05
+		0.7 0.2 0.1
+		0.7 0.15 0.15
+		0.25 0.25 0.5
+		0.8 0.15 0.05
+		0.8 0.15 0.05
+		0.8 0.15 0.05
+		0.7 0.2 0.1
+		0.9 0.08 0.02
+		0.8 0.15 0.05
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>LVH</FOR>
+	<GIVEN>Disease</GIVEN>
+	<TABLE>
+		0.1 0.9
+		0.1 0.9
+		0.1 0.9
+		0.9 0.1
+		0.05 0.95
+		0.1 0.9
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>DuctFlow</FOR>
+	<GIVEN>Disease</GIVEN>
+	<TABLE>
+		0.15 0.05 0.8
+		0.1 0.8 0.1
+		0.8 0.2 0
+		1 0 0
+		0.33 0.33 0.34
+		0.2 0.4 0.4
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>CardiacMixing</FOR>
+	<GIVEN>Disease</GIVEN>
+	<TABLE>
+		0.4 0.43 0.15 0.02
+		0.02 0.09 0.09 0.8
+		0.02 0.16 0.8 0.02
+		0.01 0.02 0.95 0.02
+		0.01 0.03 0.95 0.01
+		0.4 0.53 0.05 0.02
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>LungParench</FOR>
+	<GIVEN>Disease</GIVEN>
+	<TABLE>
+		0.6 0.1 0.3
+		0.8 0.05 0.15
+		0.8 0.05 0.15
+		0.8 0.05 0.15
+		0.1 0.6 0.3
+		0.03 0.25 0.72
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>LungFlow</FOR>
+	<GIVEN>Disease</GIVEN>
+	<TABLE>
+		0.3 0.65 0.05
+		0.2 0.05 0.75
+		0.15 0.8 0.05
+		0.1 0.85 0.05
+		0.3 0.1 0.6
+		0.7 0.1 0.2
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Sick</FOR>
+	<GIVEN>Disease</GIVEN>
+	<TABLE>
+		0.4 0.6
+		0.3 0.7
+		0.2 0.8
+		0.3 0.7
+		0.7 0.3
+		0.7 0.3
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

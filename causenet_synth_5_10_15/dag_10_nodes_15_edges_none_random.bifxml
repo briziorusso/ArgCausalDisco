@@ -1,0 +1,256 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = cardiac_arrest</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sudden_death</NAME>
+	<PROPERTY>description = sudden_death</PROPERTY>
+	<PROPERTY>fast = sudden_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>surgery</NAME>
+	<PROPERTY>description = surgery</PROPERTY>
+	<PROPERTY>fast = surgery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>complication</NAME>
+	<PROPERTY>description = complication</PROPERTY>
+	<PROPERTY>fast = complication[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_problems</NAME>
+	<PROPERTY>description = heart_problems</PROPERTY>
+	<PROPERTY>fast = heart_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vomiting</NAME>
+	<PROPERTY>description = vomiting</PROPERTY>
+	<PROPERTY>fast = vomiting[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>gum_disease</NAME>
+	<PROPERTY>description = gum_disease</PROPERTY>
+	<PROPERTY>fast = gum_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>medicines</NAME>
+	<PROPERTY>description = medicines</PROPERTY>
+	<PROPERTY>fast = medicines[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blood_pressure</NAME>
+	<PROPERTY>description = blood_pressure</PROPERTY>
+	<PROPERTY>fast = blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>heart_problems</GIVEN>
+	<TABLE>
+		0.500639 0.499361
+		0.751601 0.248399
+		0.981898 0.018102
+		0.204848 0.795152
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sudden_death</FOR>
+	<GIVEN>cardiac_arrest</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>heart_problems</GIVEN>
+	<GIVEN>complication</GIVEN>
+	<GIVEN>vomiting</GIVEN>
+	<GIVEN>blood_pressure</GIVEN>
+	<TABLE>
+		0.172571 0.827429
+		0.454595 0.545405
+		0.436072 0.563928
+		0.307966 0.692034
+		0.750277 0.249723
+		0.151235 0.848765
+		0.366018 0.633982
+		0.596838 0.403162
+		0.477184 0.522816
+		0.448804 0.551196
+		0.503332 0.496668
+		0.358711 0.641289
+		0.888194 0.111806
+		0.960182 0.0398175
+		0.637134 0.362866
+		0.965291 0.0347092
+		0.0285891 0.971411
+		0.742303 0.257697
+		0.781218 0.218782
+		0.976261 0.023739
+		0.616382 0.383618
+		0.640878 0.359122
+		0.282153 0.717847
+		0.697608 0.302392
+		0.889159 0.110841
+		0.740034 0.259966
+		0.408311 0.591689
+		0.307693 0.692307
+		0.102308 0.897692
+		0.975302 0.0246979
+		0.573527 0.426473
+		0.422418 0.577582
+		0.0631359 0.936864
+		0.502576 0.497424
+		0.275502 0.724498
+		0.545951 0.454049
+		0.833519 0.166481
+		0.546901 0.453099
+		0.546804 0.453196
+		0.267141 0.732859
+		0.197031 0.802969
+		0.378282 0.621718
+		0.306312 0.693688
+		0.575009 0.424991
+		0.537992 0.462008
+		0.381383 0.618617
+		0.525224 0.474776
+		0.479452 0.520548
+		0.455139 0.544861
+		0.919428 0.0805717
+		0.54956 0.45044
+		0.308789 0.691211
+		0.232301 0.767699
+		0.0620529 0.937947
+		0.77498 0.22502
+		0.62214 0.37786
+		0.854423 0.145577
+		0.517407 0.482593
+		0.793025 0.206975
+		0.958418 0.0415819
+		0.619471 0.380529
+		0.594676 0.405324
+		0.707612 0.292388
+		0.515267 0.484733
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>surgery</FOR>
+	<TABLE>
+		0.5973 0.4027
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>complication</FOR>
+	<GIVEN>surgery</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>medicines</GIVEN>
+	<TABLE>
+		0.191461 0.808539
+		0.456917 0.543083
+		0.517067 0.482933
+		0.826586 0.173414
+		0.110819 0.889181
+		0.213006 0.786994
+		0.835914 0.164086
+		0.285435 0.714565
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>medicines</GIVEN>
+	<GIVEN>blood_pressure</GIVEN>
+	<TABLE>
+		0.205479 0.794521
+		0.13498 0.86502
+		0.437339 0.562661
+		0.833534 0.166466
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>gum_disease</GIVEN>
+	<TABLE>
+		0.446853 0.553147
+		0.634367 0.365633
+		0.0275121 0.972488
+		0.420734 0.579266
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vomiting</FOR>
+	<TABLE>
+		0.342569 0.657431
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>gum_disease</FOR>
+	<TABLE>
+		0.46398 0.53602
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>medicines</FOR>
+	<TABLE>
+		0.537231 0.462769
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blood_pressure</FOR>
+	<TABLE>
+		0.301979 0.698021
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

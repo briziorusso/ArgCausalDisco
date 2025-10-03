@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>dysfunction</NAME>
+	<PROPERTY>description = dysfunction</PROPERTY>
+	<PROPERTY>fast = dysfunction[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tumors</NAME>
+	<PROPERTY>description = tumors</PROPERTY>
+	<PROPERTY>fast = tumors[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sleep_apnea</NAME>
+	<PROPERTY>description = sleep_apnea</PROPERTY>
+	<PROPERTY>fast = sleep_apnea[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>dysfunction</GIVEN>
+	<TABLE>
+		0.0497419 0.950258
+		0.352087 0.647913
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>sleep_apnea</GIVEN>
+	<TABLE>
+		0.332455 0.667545
+		0.28958 0.71042
+		0.582595 0.417405
+		0.803848 0.196152
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>dysfunction</FOR>
+	<GIVEN>tumors</GIVEN>
+	<TABLE>
+		0.769501 0.230499
+		0.00025585 0.999744
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tumors</FOR>
+	<TABLE>
+		0.423247 0.576753
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sleep_apnea</FOR>
+	<TABLE>
+		0.192733 0.807267
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

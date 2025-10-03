@@ -1,0 +1,292 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coronary_heart_disease</NAME>
+	<PROPERTY>description = coronary_heart_disease</PROPERTY>
+	<PROPERTY>fast = coronary_heart_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_sleep</NAME>
+	<PROPERTY>description = lack_of_sleep</PROPERTY>
+	<PROPERTY>fast = lack_of_sleep[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>insulin_resistance</NAME>
+	<PROPERTY>description = insulin_resistance</PROPERTY>
+	<PROPERTY>fast = insulin_resistance[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>acid_reflux</NAME>
+	<PROPERTY>description = acid_reflux</PROPERTY>
+	<PROPERTY>fast = acid_reflux[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heartburn</NAME>
+	<PROPERTY>description = heartburn</PROPERTY>
+	<PROPERTY>fast = heartburn[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>reflux</NAME>
+	<PROPERTY>description = reflux</PROPERTY>
+	<PROPERTY>fast = reflux[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ulcerative_colitis</NAME>
+	<PROPERTY>description = ulcerative_colitis</PROPERTY>
+	<PROPERTY>fast = ulcerative_colitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ulcers</NAME>
+	<PROPERTY>description = ulcers</PROPERTY>
+	<PROPERTY>fast = ulcers[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>olanzapine</NAME>
+	<PROPERTY>description = olanzapine</PROPERTY>
+	<PROPERTY>fast = olanzapine[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hyperlipidemia</NAME>
+	<PROPERTY>description = hyperlipidemia</PROPERTY>
+	<PROPERTY>fast = hyperlipidemia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_salt_consumption</NAME>
+	<PROPERTY>description = high_salt_consumption</PROPERTY>
+	<PROPERTY>fast = high_salt_consumption[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>elevated_cholesterol</NAME>
+	<PROPERTY>description = elevated_cholesterol</PROPERTY>
+	<PROPERTY>fast = elevated_cholesterol[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>colitis</NAME>
+	<PROPERTY>description = colitis</PROPERTY>
+	<PROPERTY>fast = colitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>narrowing_of_the_blood_vessels</NAME>
+	<PROPERTY>description = narrowing_of_the_blood_vessels</PROPERTY>
+	<PROPERTY>fast = narrowing_of_the_blood_vessels[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>lack_of_sleep</GIVEN>
+	<GIVEN>insulin_resistance</GIVEN>
+	<GIVEN>ulcers</GIVEN>
+	<GIVEN>high_salt_consumption</GIVEN>
+	<TABLE>
+		0.243421 0.756579
+		0.377371 0.622629
+		0.737238 0.262762
+		0.543233 0.456767
+		0.537032 0.462968
+		0.275755 0.724245
+		0.576648 0.423352
+		0.357881 0.642119
+		0.736326 0.263674
+		0.410198 0.589802
+		0.470562 0.529438
+		0.487717 0.512283
+		0.702542 0.297458
+		0.0415966 0.958403
+		0.32731 0.67269
+		0.780287 0.219713
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coronary_heart_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>elevated_cholesterol</GIVEN>
+	<GIVEN>hyperlipidemia</GIVEN>
+	<GIVEN>narrowing_of_the_blood_vessels</GIVEN>
+	<TABLE>
+		0.230482 0.769518
+		0.169314 0.830686
+		0.146771 0.853229
+		0.519427 0.480573
+		0.271112 0.728888
+		0.0254937 0.974506
+		0.518511 0.481489
+		0.328367 0.671633
+		0.451759 0.548241
+		0.624862 0.375138
+		0.461536 0.538464
+		0.35979 0.64021
+		0.611534 0.388466
+		0.626307 0.373693
+		0.302238 0.697762
+		0.520581 0.479419
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_sleep</FOR>
+	<TABLE>
+		0.263634 0.736366
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>insulin_resistance</FOR>
+	<TABLE>
+		0.171925 0.828075
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>acid_reflux</FOR>
+	<TABLE>
+		0.638256 0.361744
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heartburn</FOR>
+	<GIVEN>acid_reflux</GIVEN>
+	<GIVEN>reflux</GIVEN>
+	<TABLE>
+		0.644822 0.355178
+		0.25737 0.74263
+		0.65836 0.34164
+		0.58899 0.41101
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>reflux</FOR>
+	<TABLE>
+		0.547979 0.452021
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ulcerative_colitis</FOR>
+	<TABLE>
+		0.603833 0.396167
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ulcers</FOR>
+	<GIVEN>ulcerative_colitis</GIVEN>
+	<GIVEN>heartburn</GIVEN>
+	<GIVEN>colitis</GIVEN>
+	<TABLE>
+		0.189437 0.810563
+		0.114792 0.885208
+		0.552155 0.447845
+		0.444156 0.555844
+		0.330434 0.669566
+		0.625257 0.374743
+		0.00187383 0.998126
+		0.37431 0.62569
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>olanzapine</FOR>
+	<TABLE>
+		0.568868 0.431132
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hyperlipidemia</FOR>
+	<GIVEN>olanzapine</GIVEN>
+	<TABLE>
+		0.668057 0.331943
+		0.562035 0.437965
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_salt_consumption</FOR>
+	<TABLE>
+		0.537887 0.462113
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>elevated_cholesterol</FOR>
+	<TABLE>
+		0.0415647 0.958435
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>colitis</FOR>
+	<TABLE>
+		0.473617 0.526383
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>narrowing_of_the_blood_vessels</FOR>
+	<TABLE>
+		0.820945 0.179055
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

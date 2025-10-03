@@ -1,0 +1,332 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>pneumonia</NAME>
+	<PROPERTY>description = pneumonia</PROPERTY>
+	<PROPERTY>fast = pneumonia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chest_pain</NAME>
+	<PROPERTY>description = chest_pain</PROPERTY>
+	<PROPERTY>fast = chest_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>death_in_the_united_states</NAME>
+	<PROPERTY>description = death_in_the_united_states</PROPERTY>
+	<PROPERTY>fast = death_in_the_united_states[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug</NAME>
+	<PROPERTY>description = drug</PROPERTY>
+	<PROPERTY>fast = drug[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiovascular_diseases</NAME>
+	<PROPERTY>description = cardiovascular_diseases</PROPERTY>
+	<PROPERTY>fast = cardiovascular_diseases[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coronary_heart_disease</NAME>
+	<PROPERTY>description = coronary_heart_disease</PROPERTY>
+	<PROPERTY>fast = coronary_heart_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart</NAME>
+	<PROPERTY>description = heart</PROPERTY>
+	<PROPERTY>fast = heart[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cigarette_smoking</NAME>
+	<PROPERTY>description = cigarette_smoking</PROPERTY>
+	<PROPERTY>fast = cigarette_smoking[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>oxidative_stress</NAME>
+	<PROPERTY>description = oxidative_stress</PROPERTY>
+	<PROPERTY>fast = oxidative_stress[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>oxygen</NAME>
+	<PROPERTY>description = oxygen</PROPERTY>
+	<PROPERTY>fast = oxygen[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>exposure_to_secondhand_smoke</NAME>
+	<PROPERTY>description = exposure_to_secondhand_smoke</PROPERTY>
+	<PROPERTY>fast = exposure_to_secondhand_smoke[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>abdominal_fat</NAME>
+	<PROPERTY>description = abdominal_fat</PROPERTY>
+	<PROPERTY>fast = abdominal_fat[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hyperlipidemia</NAME>
+	<PROPERTY>description = hyperlipidemia</PROPERTY>
+	<PROPERTY>fast = hyperlipidemia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>acute_pancreatitis</NAME>
+	<PROPERTY>description = acute_pancreatitis</PROPERTY>
+	<PROPERTY>fast = acute_pancreatitis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>pneumonia</FOR>
+	<GIVEN>drug</GIVEN>
+	<GIVEN>exposure_to_secondhand_smoke</GIVEN>
+	<TABLE>
+		0.453332 0.546668
+		0.631422 0.368578
+		0.742104 0.257896
+		0.459511 0.540489
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chest_pain</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<GIVEN>drug</GIVEN>
+	<GIVEN>heart</GIVEN>
+	<GIVEN>coronary_heart_disease</GIVEN>
+	<GIVEN>oxygen</GIVEN>
+	<TABLE>
+		0.803425 0.196575
+		0.427497 0.572503
+		0.625747 0.374253
+		0.897306 0.102694
+		0.921993 0.0780074
+		0.405288 0.594712
+		0.689796 0.310204
+		0.420978 0.579022
+		0.661505 0.338495
+		0.135348 0.864652
+		0.558064 0.441936
+		0.259663 0.740337
+		0.396917 0.603083
+		0.42405 0.57595
+		0.874836 0.125164
+		0.307264 0.692736
+		0.448652 0.551348
+		0.645814 0.354186
+		0.517208 0.482792
+		0.914339 0.0856609
+		0.221192 0.778808
+		0.821605 0.178395
+		0.56262 0.43738
+		0.971983 0.028017
+		0.886745 0.113255
+		0.456768 0.543232
+		0.174942 0.825058
+		0.825381 0.174619
+		0.819129 0.180871
+		0.851662 0.148338
+		0.247504 0.752496
+		0.657609 0.342391
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>death_in_the_united_states</FOR>
+	<GIVEN>pneumonia</GIVEN>
+	<GIVEN>coronary_heart_disease</GIVEN>
+	<TABLE>
+		0.432447 0.567553
+		0.798257 0.201743
+		0.228553 0.771447
+		0.765299 0.234701
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug</FOR>
+	<TABLE>
+		0.678349 0.321651
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>drug</GIVEN>
+	<GIVEN>cigarette_smoking</GIVEN>
+	<TABLE>
+		0.50426 0.49574
+		0.162638 0.837362
+		0.343062 0.656938
+		0.122439 0.877561
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiovascular_diseases</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>cigarette_smoking</GIVEN>
+	<GIVEN>oxidative_stress</GIVEN>
+	<GIVEN>abdominal_fat</GIVEN>
+	<TABLE>
+		0.454829 0.545171
+		0.706671 0.293329
+		0.967112 0.0328881
+		0.674598 0.325402
+		0.412874 0.587126
+		0.822553 0.177447
+		0.015794 0.984206
+		0.126817 0.873183
+		0.494156 0.505844
+		0.250766 0.749234
+		0.729483 0.270517
+		0.379792 0.620208
+		0.575248 0.424752
+		0.882657 0.117343
+		0.413003 0.586997
+		0.533968 0.466032
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coronary_heart_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>cigarette_smoking</GIVEN>
+	<GIVEN>exposure_to_secondhand_smoke</GIVEN>
+	<GIVEN>hyperlipidemia</GIVEN>
+	<TABLE>
+		0.556263 0.443737
+		0.600028 0.399972
+		0.740988 0.259012
+		0.650961 0.349039
+		0.321686 0.678314
+		0.197169 0.802831
+		0.522942 0.477058
+		0.431582 0.568418
+		0.608371 0.391629
+		0.491153 0.508847
+		0.723561 0.276439
+		0.254958 0.745042
+		0.790357 0.209643
+		0.56944 0.43056
+		0.725644 0.274356
+		0.517292 0.482708
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.52079 0.47921
+		0.637728 0.362272
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cigarette_smoking</FOR>
+	<TABLE>
+		0.363717 0.636283
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>oxidative_stress</FOR>
+	<TABLE>
+		0.645129 0.354871
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>oxygen</FOR>
+	<GIVEN>oxidative_stress</GIVEN>
+	<TABLE>
+		0.205068 0.794932
+		0.434644 0.565356
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>exposure_to_secondhand_smoke</FOR>
+	<TABLE>
+		0.499768 0.500232
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>abdominal_fat</FOR>
+	<TABLE>
+		0.33987 0.66013
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hyperlipidemia</FOR>
+	<TABLE>
+		0.630619 0.369381
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>acute_pancreatitis</FOR>
+	<GIVEN>hyperlipidemia</GIVEN>
+	<TABLE>
+		0.560433 0.439567
+		0.703403 0.296597
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

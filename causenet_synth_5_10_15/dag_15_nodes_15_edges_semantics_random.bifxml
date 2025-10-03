@@ -1,0 +1,279 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = despair</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>attacks</NAME>
+	<PROPERTY>description = attacks</PROPERTY>
+	<PROPERTY>fast = attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>serious_injuries</NAME>
+	<PROPERTY>description = serious_injuries</PROPERTY>
+	<PROPERTY>fast = serious_injuries[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>terrorism</NAME>
+	<PROPERTY>description = terrorism</PROPERTY>
+	<PROPERTY>fast = terrorism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>insecurity</NAME>
+	<PROPERTY>description = insecurity</PROPERTY>
+	<PROPERTY>fast = insecurity[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hatred</NAME>
+	<PROPERTY>description = hatred</PROPERTY>
+	<PROPERTY>fast = hatred[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>discrimination</NAME>
+	<PROPERTY>description = discrimination</PROPERTY>
+	<PROPERTY>fast = discrimination[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>withdrawal</NAME>
+	<PROPERTY>description = withdrawal</PROPERTY>
+	<PROPERTY>fast = withdrawal[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tensions</NAME>
+	<PROPERTY>description = tensions</PROPERTY>
+	<PROPERTY>fast = tensions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>absence</NAME>
+	<PROPERTY>description = absence</PROPERTY>
+	<PROPERTY>fast = absence[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fights</NAME>
+	<PROPERTY>description = fights</PROPERTY>
+	<PROPERTY>fast = fights[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>arguments</NAME>
+	<PROPERTY>description = arguments</PROPERTY>
+	<PROPERTY>fast = arguments[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>bicycle_accidents</NAME>
+	<PROPERTY>description = bicycle_accidents</PROPERTY>
+	<PROPERTY>fast = bicycle_accidents[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.235665 0.764335
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>absence</GIVEN>
+	<TABLE>
+		0.328907 0.671093
+		0.610838 0.389162
+		0.586 0.414
+		0.749555 0.250445
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>withdrawal</GIVEN>
+	<TABLE>
+		0.0536474 0.946353
+		0.385717 0.614283
+		0.510194 0.489806
+		0.260233 0.739767
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>attacks</FOR>
+	<TABLE>
+		0.598263 0.401737
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>serious_injuries</FOR>
+	<GIVEN>attacks</GIVEN>
+	<GIVEN>fights</GIVEN>
+	<GIVEN>bicycle_accidents</GIVEN>
+	<TABLE>
+		0.567325 0.432675
+		0.261692 0.738308
+		0.347047 0.652953
+		0.469636 0.530364
+		0.70958 0.29042
+		0.666242 0.333758
+		0.401797 0.598203
+		0.586013 0.413987
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>terrorism</FOR>
+	<GIVEN>hatred</GIVEN>
+	<GIVEN>despair</GIVEN>
+	<GIVEN>tensions</GIVEN>
+	<TABLE>
+		0.351147 0.648853
+		0.371193 0.628807
+		0.969467 0.030533
+		0.116312 0.883688
+		0.63248 0.36752
+		0.4279 0.5721
+		0.601696 0.398304
+		0.401839 0.598161
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>insecurity</FOR>
+	<GIVEN>terrorism</GIVEN>
+	<GIVEN>discrimination</GIVEN>
+	<TABLE>
+		0.376812 0.623188
+		0.619917 0.380083
+		0.76414 0.23586
+		0.306305 0.693695
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hatred</FOR>
+	<TABLE>
+		0.321045 0.678955
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>discrimination</FOR>
+	<TABLE>
+		0.508764 0.491236
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>withdrawal</FOR>
+	<TABLE>
+		0.676751 0.323249
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tensions</FOR>
+	<TABLE>
+		0.441213 0.558787
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>absence</FOR>
+	<TABLE>
+		0.637164 0.362836
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fights</FOR>
+	<GIVEN>arguments</GIVEN>
+	<TABLE>
+		0.404933 0.595067
+		0.250136 0.749864
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>arguments</FOR>
+	<GIVEN>insecurity</GIVEN>
+	<GIVEN>irritability</GIVEN>
+	<TABLE>
+		0.479637 0.520363
+		0.421248 0.578752
+		0.516399 0.483601
+		0.801383 0.198617
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>bicycle_accidents</FOR>
+	<TABLE>
+		0.70904 0.29096
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,106 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coronary_artery_disease</NAME>
+	<PROPERTY>description = coronary_artery_disease</PROPERTY>
+	<PROPERTY>fast = coronary_artery_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coronary_heart_disease</NAME>
+	<PROPERTY>description = coronary_heart_disease</PROPERTY>
+	<PROPERTY>fast = coronary_heart_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>myocardial_infarction</NAME>
+	<PROPERTY>description = myocardial_infarction</PROPERTY>
+	<PROPERTY>fast = myocardial_infarction[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ventricular_fibrillation</NAME>
+	<PROPERTY>description = ventricular_fibrillation</PROPERTY>
+	<PROPERTY>fast = ventricular_fibrillation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<TABLE>
+		0.829381 0.170619
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coronary_artery_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.377504 0.622496
+		0.670116 0.329884
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coronary_heart_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.923385 0.0766155
+		0.09169 0.90831
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>myocardial_infarction</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>coronary_artery_disease</GIVEN>
+	<GIVEN>coronary_heart_disease</GIVEN>
+	<TABLE>
+		0.352522 0.647478
+		0.615943 0.384057
+		0.649932 0.350068
+		0.682102 0.317898
+		0.841567 0.158433
+		0.823075 0.176925
+		0.619005 0.380995
+		0.538981 0.461019
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ventricular_fibrillation</FOR>
+	<GIVEN>myocardial_infarction</GIVEN>
+	<GIVEN>coronary_heart_disease</GIVEN>
+	<TABLE>
+		0.336024 0.663976
+		0.510657 0.489343
+		0.985118 0.0148821
+		0.594041 0.405959
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

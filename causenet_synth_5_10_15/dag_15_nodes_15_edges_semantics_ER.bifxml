@@ -1,0 +1,284 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>medical_problems</NAME>
+	<PROPERTY>description = medical_problems</PROPERTY>
+	<PROPERTY>fast = medical_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = despair</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>loss_of_appetite</NAME>
+	<PROPERTY>description = loss_of_appetite</PROPERTY>
+	<PROPERTY>fast = loss_of_appetite[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>overeating</NAME>
+	<PROPERTY>description = overeating</PROPERTY>
+	<PROPERTY>fast = overeating[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>excess_weight</NAME>
+	<PROPERTY>description = excess_weight</PROPERTY>
+	<PROPERTY>fast = excess_weight[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>substance_abuse</NAME>
+	<PROPERTY>description = substance_abuse</PROPERTY>
+	<PROPERTY>fast = substance_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>pms</NAME>
+	<PROPERTY>description = pms</PROPERTY>
+	<PROPERTY>fast = pms[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mood_swings</NAME>
+	<PROPERTY>description = mood_swings</PROPERTY>
+	<PROPERTY>fast = mood_swings[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>candida</NAME>
+	<PROPERTY>description = candida</PROPERTY>
+	<PROPERTY>fast = candida[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>panic_attacks</NAME>
+	<PROPERTY>description = panic_attacks</PROPERTY>
+	<PROPERTY>fast = panic_attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>difficulties</NAME>
+	<PROPERTY>description = difficulties</PROPERTY>
+	<PROPERTY>fast = difficulties[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>weight_problems</NAME>
+	<PROPERTY>description = weight_problems</PROPERTY>
+	<PROPERTY>fast = weight_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>excess_weight</GIVEN>
+	<GIVEN>weight_problems</GIVEN>
+	<TABLE>
+		0.420944 0.579056
+		0.314734 0.685266
+		0.416062 0.583938
+		0.558307 0.441693
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>medical_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>excess_weight</GIVEN>
+	<GIVEN>substance_abuse</GIVEN>
+	<TABLE>
+		0.556001 0.443999
+		0.985164 0.0148356
+		0.839845 0.160155
+		0.317784 0.682216
+		0.758862 0.241138
+		0.493417 0.506583
+		0.539025 0.460975
+		0.197166 0.802834
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.200883 0.799117
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>difficulties</GIVEN>
+	<TABLE>
+		0.403525 0.596475
+		0.640667 0.359333
+		0.500696 0.499304
+		0.356719 0.643281
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.291565 0.708435
+		0.302411 0.697589
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>loss_of_appetite</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.493463 0.506537
+		0.26906 0.73094
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>overeating</FOR>
+	<TABLE>
+		0.7995 0.2005
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>excess_weight</FOR>
+	<GIVEN>overeating</GIVEN>
+	<TABLE>
+		0.142589 0.857411
+		0.922417 0.0775827
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>substance_abuse</FOR>
+	<GIVEN>difficulties</GIVEN>
+	<TABLE>
+		0.608803 0.391197
+		0.0628381 0.937162
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>pms</FOR>
+	<TABLE>
+		0.472585 0.527415
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mood_swings</FOR>
+	<GIVEN>pms</GIVEN>
+	<GIVEN>candida</GIVEN>
+	<GIVEN>panic_attacks</GIVEN>
+	<GIVEN>irritability</GIVEN>
+	<TABLE>
+		0.488727 0.511273
+		0.586822 0.413178
+		0.301584 0.698416
+		0.33873 0.66127
+		0.450562 0.549438
+		0.65183 0.34817
+		0.872329 0.127671
+		0.337491 0.662509
+		0.165886 0.834114
+		0.555922 0.444078
+		0.426372 0.573628
+		0.497461 0.502539
+		0.597836 0.402164
+		0.345785 0.654215
+		0.0752084 0.924792
+		0.514405 0.485595
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>candida</FOR>
+	<TABLE>
+		0.715354 0.284646
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>panic_attacks</FOR>
+	<TABLE>
+		0.2798 0.7202
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>difficulties</FOR>
+	<TABLE>
+		0.619228 0.380772
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>weight_problems</FOR>
+	<TABLE>
+		0.326343 0.673657
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

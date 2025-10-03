@@ -1,0 +1,280 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = alcoholism</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>difficulties</NAME>
+	<PROPERTY>description = difficulties</PROPERTY>
+	<PROPERTY>fast = difficulties[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>psychological_problems</NAME>
+	<PROPERTY>description = psychological_problems</PROPERTY>
+	<PROPERTY>fast = psychological_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_attacks</NAME>
+	<PROPERTY>description = heart_attacks</PROPERTY>
+	<PROPERTY>fast = heart_attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chest_pain</NAME>
+	<PROPERTY>description = chest_pain</PROPERTY>
+	<PROPERTY>fast = chest_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_self-esteem</NAME>
+	<PROPERTY>description = low_self-esteem</PROPERTY>
+	<PROPERTY>fast = low_self-esteem[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_inflammation</NAME>
+	<PROPERTY>description = chronic_inflammation</PROPERTY>
+	<PROPERTY>fast = chronic_inflammation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sexual_abuse</NAME>
+	<PROPERTY>description = sexual_abuse</PROPERTY>
+	<PROPERTY>fast = sexual_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_stress</NAME>
+	<PROPERTY>description = chronic_stress</PROPERTY>
+	<PROPERTY>fast = chronic_stress[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tiredness</NAME>
+	<PROPERTY>description = tiredness</PROPERTY>
+	<PROPERTY>fast = tiredness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_stigma</NAME>
+	<PROPERTY>description = social_stigma</PROPERTY>
+	<PROPERTY>fast = social_stigma[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>embarrassment</NAME>
+	<PROPERTY>description = embarrassment</PROPERTY>
+	<PROPERTY>fast = embarrassment[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<GIVEN>chronic_stress</GIVEN>
+	<TABLE>
+		0.613894 0.386106
+		0.939254 0.0607462
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>difficulties</FOR>
+	<GIVEN>alcoholism</GIVEN>
+	<TABLE>
+		0.835373 0.164627
+		0.530273 0.469727
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>psychological_problems</FOR>
+	<GIVEN>alcoholism</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>low_self-esteem</GIVEN>
+	<GIVEN>sexual_abuse</GIVEN>
+	<GIVEN>social_stigma</GIVEN>
+	<TABLE>
+		0.932627 0.0673734
+		0.16447 0.83553
+		0.387053 0.612947
+		0.753904 0.246096
+		0.268618 0.731382
+		0.547719 0.452281
+		0.658656 0.341344
+		0.799355 0.200645
+		0.420377 0.579623
+		0.242689 0.757311
+		0.831515 0.168485
+		0.330828 0.669172
+		0.298661 0.701339
+		0.309861 0.690139
+		0.198014 0.801986
+		0.0279752 0.972025
+		0.356584 0.643416
+		0.821609 0.178391
+		0.884475 0.115525
+		0.0395906 0.960409
+		0.116213 0.883787
+		0.0978254 0.902175
+		0.654208 0.345792
+		0.476732 0.523268
+		0.178165 0.821835
+		0.236129 0.763871
+		0.894812 0.105188
+		0.469423 0.530577
+		0.542926 0.457074
+		0.124206 0.875794
+		0.77439 0.22561
+		0.448051 0.551949
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_attacks</FOR>
+	<GIVEN>chronic_inflammation</GIVEN>
+	<TABLE>
+		0.524845 0.475155
+		0.511813 0.488187
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chest_pain</FOR>
+	<GIVEN>heart_attacks</GIVEN>
+	<TABLE>
+		0.666141 0.333859
+		0.731607 0.268393
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>chronic_stress</GIVEN>
+	<TABLE>
+		0.771001 0.228999
+		0.815952 0.184048
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>tiredness</GIVEN>
+	<TABLE>
+		0.820827 0.179173
+		0.340022 0.659978
+		0.86601 0.13399
+		0.53337 0.46663
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_self-esteem</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>sexual_abuse</GIVEN>
+	<TABLE>
+		0.0318742 0.968126
+		0.807041 0.192959
+		0.708711 0.291289
+		0.902548 0.0974521
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_inflammation</FOR>
+	<TABLE>
+		0.293243 0.706757
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sexual_abuse</FOR>
+	<TABLE>
+		0.516079 0.483921
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_stress</FOR>
+	<TABLE>
+		0.668843 0.331157
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tiredness</FOR>
+	<TABLE>
+		0.606587 0.393413
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_stigma</FOR>
+	<TABLE>
+		0.684903 0.315097
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>embarrassment</FOR>
+	<GIVEN>social_stigma</GIVEN>
+	<TABLE>
+		0.298534 0.701466
+		0.206264 0.793736
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

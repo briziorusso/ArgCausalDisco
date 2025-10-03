@@ -1,0 +1,233 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = cardiac_arrest</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = brain_damage</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>old_age</NAME>
+	<PROPERTY>description = old_age</PROPERTY>
+	<PROPERTY>fast = old_age[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = blindness</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = high_blood_pressure</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_problems</NAME>
+	<PROPERTY>description = heart_problems</PROPERTY>
+	<PROPERTY>fast = heart_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blood_clots</NAME>
+	<PROPERTY>description = blood_clots</PROPERTY>
+	<PROPERTY>fast = blood_clots[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>anorexia</NAME>
+	<PROPERTY>description = anorexia</PROPERTY>
+	<PROPERTY>fast = anorexia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>genetics</NAME>
+	<PROPERTY>description = genetics</PROPERTY>
+	<PROPERTY>fast = genetics[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>progressive_vision_loss</NAME>
+	<PROPERTY>description = progressive_vision_loss</PROPERTY>
+	<PROPERTY>fast = progressive_vision_loss[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>old_age</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>blood_clots</GIVEN>
+	<GIVEN>heart_problems</GIVEN>
+	<GIVEN>anorexia</GIVEN>
+	<TABLE>
+		0.0744339 0.925566
+		0.647142 0.352858
+		0.67338 0.32662
+		0.467407 0.532593
+		0.710301 0.289699
+		0.334017 0.665983
+		0.454352 0.545648
+		0.741501 0.258499
+		0.571866 0.428134
+		0.489047 0.510953
+		0.590951 0.409049
+		0.494482 0.505518
+		0.370939 0.629061
+		0.0779588 0.922041
+		0.673071 0.326929
+		0.494975 0.505025
+		0.746848 0.253152
+		0.563521 0.436479
+		0.488568 0.511432
+		0.638311 0.361689
+		0.674561 0.325439
+		0.379825 0.620175
+		0.641869 0.358131
+		0.700308 0.299692
+		0.373472 0.626528
+		0.310877 0.689123
+		0.123725 0.876275
+		0.750635 0.249365
+		0.550248 0.449752
+		0.391727 0.608273
+		0.995111 0.004889
+		0.198969 0.801031
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<GIVEN>cardiac_arrest</GIVEN>
+	<TABLE>
+		0.407686 0.592314
+		0.873659 0.126341
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>old_age</FOR>
+	<TABLE>
+		0.884247 0.115753
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>old_age</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>brain_damage</GIVEN>
+	<GIVEN>progressive_vision_loss</GIVEN>
+	<TABLE>
+		0.755437 0.244563
+		0.656481 0.343519
+		0.861498 0.138502
+		0.246866 0.753134
+		0.251321 0.748679
+		0.485782 0.514218
+		0.504282 0.495718
+		0.610624 0.389376
+		0.335141 0.664859
+		0.771401 0.228599
+		0.355427 0.644573
+		0.197418 0.802582
+		0.437439 0.562561
+		0.514589 0.485411
+		0.588966 0.411034
+		0.318089 0.681911
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>genetics</GIVEN>
+	<TABLE>
+		0.860116 0.139884
+		0.303076 0.696924
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>blood_clots</GIVEN>
+	<GIVEN>anorexia</GIVEN>
+	<TABLE>
+		0.829014 0.170986
+		0.964826 0.0351745
+		0.76022 0.23978
+		0.453913 0.546087
+		0.644313 0.355687
+		0.743749 0.256251
+		0.496066 0.503934
+		0.539801 0.460199
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blood_clots</FOR>
+	<TABLE>
+		0.749812 0.250188
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>anorexia</FOR>
+	<GIVEN>genetics</GIVEN>
+	<TABLE>
+		0.510097 0.489903
+		0.733897 0.266103
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>genetics</FOR>
+	<TABLE>
+		0.156892 0.843108
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>progressive_vision_loss</FOR>
+	<TABLE>
+		0.507437 0.492563
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

@@ -1,0 +1,95 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>various_diseases</NAME>
+	<PROPERTY>description = various_diseases</PROPERTY>
+	<PROPERTY>fast = various_diseases[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mood_swings</NAME>
+	<PROPERTY>description = mood_swings</PROPERTY>
+	<PROPERTY>fast = mood_swings[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>unhygienic_environment</NAME>
+	<PROPERTY>description = unhygienic_environment</PROPERTY>
+	<PROPERTY>fast = unhygienic_environment[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>various_diseases</GIVEN>
+	<TABLE>
+		0.300053 0.699947
+		0.12174 0.87826
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.322431 0.677569
+		0.921997 0.0780025
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>various_diseases</FOR>
+	<GIVEN>unhygienic_environment</GIVEN>
+	<TABLE>
+		0.476714 0.523286
+		0.250908 0.749092
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mood_swings</FOR>
+	<GIVEN>irritability</GIVEN>
+	<TABLE>
+		0.148712 0.851288
+		0.777282 0.222718
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>unhygienic_environment</FOR>
+	<TABLE>
+		0.578391 0.421609
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

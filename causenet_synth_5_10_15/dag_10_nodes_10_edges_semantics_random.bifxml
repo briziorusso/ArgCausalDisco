@@ -1,0 +1,191 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>unnamedBN</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_sleep</NAME>
+	<PROPERTY>description = lack_of_sleep</PROPERTY>
+	<PROPERTY>fast = lack_of_sleep[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = irritability</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = chronic_pain</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = despair</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>isolation</NAME>
+	<PROPERTY>description = isolation</PROPERTY>
+	<PROPERTY>fast = isolation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hormones</NAME>
+	<PROPERTY>description = hormones</PROPERTY>
+	<PROPERTY>fast = hormones[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sweating</NAME>
+	<PROPERTY>description = sweating</PROPERTY>
+	<PROPERTY>fast = sweating[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>embarrassment</NAME>
+	<PROPERTY>description = embarrassment</PROPERTY>
+	<PROPERTY>fast = embarrassment[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_fatigue</NAME>
+	<PROPERTY>description = chronic_fatigue</PROPERTY>
+	<PROPERTY>fast = chronic_fatigue[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tight_clothing</NAME>
+	<PROPERTY>description = tight_clothing</PROPERTY>
+	<PROPERTY>fast = tight_clothing[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>lack_of_sleep</FOR>
+	<TABLE>
+		0.808583 0.191417
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>lack_of_sleep</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>chronic_fatigue</GIVEN>
+	<TABLE>
+		0.104819 0.895181
+		0.63098 0.36902
+		0.397263 0.602737
+		0.435445 0.564555
+		0.700254 0.299746
+		0.081772 0.918228
+		0.963847 0.0361527
+		0.277136 0.722864
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.6503 0.3497
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>isolation</GIVEN>
+	<TABLE>
+		0.451547 0.548453
+		0.756279 0.243721
+		0.995667 0.00433349
+		0.904846 0.0951537
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>isolation</FOR>
+	<GIVEN>embarrassment</GIVEN>
+	<TABLE>
+		0.971592 0.0284079
+		0.264303 0.735697
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hormones</FOR>
+	<TABLE>
+		0.20531 0.79469
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sweating</FOR>
+	<GIVEN>hormones</GIVEN>
+	<GIVEN>irritability</GIVEN>
+	<GIVEN>tight_clothing</GIVEN>
+	<TABLE>
+		0.488478 0.511522
+		0.732464 0.267536
+		0.923926 0.0760737
+		0.268782 0.731218
+		0.85684 0.14316
+		0.982646 0.0173539
+		0.493877 0.506123
+		0.393603 0.606397
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>embarrassment</FOR>
+	<GIVEN>sweating</GIVEN>
+	<TABLE>
+		0.852164 0.147836
+		0.381606 0.618394
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_fatigue</FOR>
+	<TABLE>
+		0.133939 0.866061
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tight_clothing</FOR>
+	<TABLE>
+		0.600642 0.399358
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>
