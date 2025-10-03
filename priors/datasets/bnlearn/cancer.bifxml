@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>cancer</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>Pollution</NAME>
+	<PROPERTY>description = Pollution: Represents the level of environmental air pollution the person is exposed to.</PROPERTY>
+	<PROPERTY>fast = Pollution{low|high}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>low</OUTCOME>
+	<OUTCOME>high</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Smoker</NAME>
+	<PROPERTY>description = Smoker: Indicates whether the person is a smoker.</PROPERTY>
+	<PROPERTY>fast = Smoker{True|False}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>True</OUTCOME>
+	<OUTCOME>False</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Cancer</NAME>
+	<PROPERTY>description = Cancer: Indicates whether the person has lung cancer.</PROPERTY>
+	<PROPERTY>fast = Cancer{True|False}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>True</OUTCOME>
+	<OUTCOME>False</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Xray</NAME>
+	<PROPERTY>description = Xray: Represents the result of a chest X-ray test.</PROPERTY>
+	<PROPERTY>fast = Xray{positive|negative}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>positive</OUTCOME>
+	<OUTCOME>negative</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>Dyspnoea</NAME>
+	<PROPERTY>description = Dyspnoea: Indicates whether the person experiences dyspnoea (shortness of breath).</PROPERTY>
+	<PROPERTY>fast = Dyspnoea{True|False}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>True</OUTCOME>
+	<OUTCOME>False</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>Pollution</FOR>
+	<TABLE>
+		0.9 0.1
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Smoker</FOR>
+	<TABLE>
+		0.3 0.7
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Cancer</FOR>
+	<GIVEN>Pollution</GIVEN>
+	<GIVEN>Smoker</GIVEN>
+	<TABLE>
+		0.03 0.97
+		0.001 0.999
+		0.05 0.95
+		0.02 0.98
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Xray</FOR>
+	<GIVEN>Cancer</GIVEN>
+	<TABLE>
+		0.9 0.1
+		0.2 0.8
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>Dyspnoea</FOR>
+	<GIVEN>Cancer</GIVEN>
+	<TABLE>
+		0.65 0.35
+		0.3 0.7
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>
