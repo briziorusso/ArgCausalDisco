@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random DAG Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/viz.js@2.1.2/viz.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/viz.js@2.1.2/full.render.min.js"></script>
+    <style>
+        /* Custom scrollbar for webkit browsers */
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: #4a4a4a;
+            border-radius: 4px;
+            border: 2px solid #1a1a1a;
+        }
+    </style>
+</head>
+<body class="bg-zinc-900 text-white">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-80 bg-zinc-950 p-6 border-r border-zinc-800 overflow-y-auto">
+            <h1 class="text-2xl font-bold mb-6">Settings</h1>
+            <div class="space-y-6">
+                <div>
+                    <label for="n_nodes" class="block text-sm font-medium text-zinc-400">Number of Nodes: <span id="n_nodes_value" class="font-semibold text-white">6</span></label>
+                    <input id="n_nodes" type="range" min="4" max="20" value="6" class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                </div>
+                <div>
+                    <label for="n_edges" class="block text-sm font-medium text-zinc-400">Number of Edges: <span id="n_edges_value" class="font-semibold text-white">6</span></label>
+                    <input id="n_edges" type="range" min="4" max="50" value="6" class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                </div>
+                <div>
+                    <label for="quality" class="block text-sm font-medium text-zinc-400">Quality: <span id="quality_value" class="font-semibold text-white">1</span></label>
+                    <input id="quality" type="range" min="1" max="10" value="1" class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                </div>
+                <div>
+                    <label for="heuristic" class="block text-sm font-medium text-zinc-400">Heuristic</label>
+                    <select id="heuristic" class="w-full bg-zinc-800 border border-zinc-700 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="none">None</option>
+                        <option value="degrees">Degrees</option>
+                        <option value="semantics">Semantics</option>
+                    </select>
+                </div>
+                <div id="semantics_weights" class="space-y-4" style="display: none;">
+                    <div>
+                        <label for="w_compact" class="block text-sm font-medium text-zinc-400">Compactness weight: <span id="w_compact_value" class="font-semibold text-white">0.0</span></label>
+                        <input id="w_compact" type="range" min="0" max="5" step="0.1" value="0" class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                    </div>
+                    <div>
+                        <label for="w_specificity" class="block text-sm font-medium text-zinc-400">Specificity weight: <span id="w_specificity_value" class="font-semibold text-white">0.0</span></label>
+                        <input id="w_specificity" type="range" min="0" max="5" step="0.1" value="0" class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                    </div>
+                    <div>
+                        <label for="w_correlation" class="block text-sm font-medium text-zinc-400">Correlation weight: <span id="w_correlation_value" class="font-semibold text-white">1.0</span></label>
+                        <input id="w_correlation" type="range" min="0" max="5" step="0.1" value="1" class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="graph_type" class="block text-sm font-medium text-zinc-400">Graph Type</label>
+                    <select id="graph_type" class="w-full bg-zinc-800 border border-zinc-700 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="random">Random</option>
+                        <option value="ER">Erdos-Renyi</option>
+                        <option value="SF">Scale-Free</option>
+                        <!-- <option value="BP">Bipartite</option> -->
+                    </select>
+                </div>
+                <div>
+                    <label for="excluded_concepts" class="block text-sm font-medium text-zinc-400">Excluded Concepts</label>
+                    <textarea id="excluded_concepts" rows="3" class="w-full bg-zinc-800 border border-zinc-700 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter comma-separated concepts to exclude"></textarea>
+                </div>
+            </div>
+            <button id="generate" class="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 disabled:bg-zinc-700 disabled:cursor-not-allowed">
+                Generate
+            </button>
+            <button id="download" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 disabled:bg-zinc-700 disabled:cursor-not-allowed" disabled>
+                Download DOT
+            </button>
+            <button id="download_bifxml" class="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 disabled:bg-zinc-700 disabled:cursor-not-allowed" disabled>
+                Download BIFXML
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex items-center justify-center p-6">
+            <div id="graph" class="w-full h-full rounded-lg border-2 border-dashed border-zinc-800 flex items-center justify-center text-zinc-500" style="background-color: #eee9e8;">
+                Graph will be displayed here
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nNodesSlider = document.getElementById('n_nodes');
+        const nEdgesSlider = document.getElementById('n_edges');
+        const qualitySlider = document.getElementById('quality');
+        const heuristicSelect = document.getElementById('heuristic');
+        const graphTypeSelect = document.getElementById('graph_type');
+        const semanticsWeightsDiv = document.getElementById('semantics_weights');
+        const wCompactSlider = document.getElementById('w_compact');
+        const wSpecificitySlider = document.getElementById('w_specificity');
+        const wCorrelationSlider = document.getElementById('w_correlation');
+        const nNodesValue = document.getElementById('n_nodes_value');
+        const nEdgesValue = document.getElementById('n_edges_value');
+        const qualityValue = document.getElementById('quality_value');
+        const wCompactValue = document.getElementById('w_compact_value');
+        const wSpecificityValue = document.getElementById('w_specificity_value');
+        const wCorrelationValue = document.getElementById('w_correlation_value');
+        const generateBtn = document.getElementById('generate');
+        const downloadBtn = document.getElementById('download');
+        const downloadBifxmlBtn = document.getElementById('download_bifxml');
+        const graphDiv = document.getElementById('graph');
+        
+        let currentDotContent = null;
+
+        function updateEdgeSlider() {
+            const n_nodes = parseInt(nNodesSlider.value);
+            const max_edges = n_nodes * (n_nodes - 1) / 2;
+            nEdgesSlider.min = n_nodes - 1;
+            nEdgesSlider.max = max_edges;
+            if (parseInt(nEdgesSlider.value) > max_edges) {
+                nEdgesSlider.value = max_edges;
+            }
+            if (parseInt(nEdgesSlider.value) < n_nodes - 1) {
+                nEdgesSlider.value = n_nodes - 1;
+            }
+            nEdgesValue.textContent = nEdgesSlider.value;
+        }
+
+        nNodesSlider.addEventListener('input', () => {
+            nNodesValue.textContent = nNodesSlider.value;
+            updateEdgeSlider();
+        });
+
+        nEdgesSlider.addEventListener('input', () => {
+            nEdgesValue.textContent = nEdgesSlider.value;
+        });
+
+        qualitySlider.addEventListener('input', () => {
+            qualityValue.textContent = qualitySlider.value;
+        });
+
+        function toggleSemanticsWeights() {
+            if (heuristicSelect.value === 'semantics') {
+                semanticsWeightsDiv.style.display = '';
+            } else {
+                semanticsWeightsDiv.style.display = 'none';
+            }
+        }
+
+        heuristicSelect.addEventListener('change', toggleSemanticsWeights);
+
+        wCompactSlider?.addEventListener('input', () => {
+            wCompactValue.textContent = Number(wCompactSlider.value).toFixed(1);
+        });
+        wSpecificitySlider?.addEventListener('input', () => {
+            wSpecificityValue.textContent = Number(wSpecificitySlider.value).toFixed(1);
+        });
+        wCorrelationSlider?.addEventListener('input', () => {
+            wCorrelationValue.textContent = Number(wCorrelationSlider.value).toFixed(1);
+        });
+
+        heuristicSelect.addEventListener('change', toggleSemanticsWeights);
+
+        function downloadDotFile() {
+            if (!currentDotContent) {
+                alert('No graph generated yet. Please generate a graph first.');
+                return;
+            }
+            
+            const blob = new Blob([currentDotContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dag_${nNodesSlider.value}_nodes_${nEdgesSlider.value}_edges_${heuristicSelect.value}_${graphTypeSelect.value}.dot`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        downloadBtn.addEventListener('click', downloadDotFile);
+
+        function downloadBifxmlFile() {
+            if (!currentDotContent) {
+                alert('No graph generated yet. Please generate a graph first.');
+                return;
+            }
+            
+            downloadBifxmlBtn.disabled = true;
+            downloadBifxmlBtn.textContent = 'Converting...';
+            
+            fetch('/api/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    dot: currentDotContent
+                })
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to convert DOT to BIFXML');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const blob = new Blob([data.bifxml], { type: 'application/xml' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dag_${nNodesSlider.value}_nodes_${nEdgesSlider.value}_edges_${heuristicSelect.value}_${graphTypeSelect.value}.bifxml`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error converting to BIFXML:', error);
+                alert(`Error converting to BIFXML: ${error.message}`);
+            })
+            .finally(() => {
+                downloadBifxmlBtn.disabled = false;
+                downloadBifxmlBtn.textContent = 'Download BIFXML';
+            });
+        }
+
+        downloadBifxmlBtn.addEventListener('click', downloadBifxmlFile);
+
+
+        generateBtn.addEventListener('click', () => {
+            const n_nodes = nNodesSlider.value;
+            const n_edges = nEdgesSlider.value;
+            const quality = qualitySlider.value;
+            const heuristic = heuristicSelect.value;
+            const graph_type = graphTypeSelect.value;
+            const w_compact = wCompactSlider ? wCompactSlider.value : 0;
+            const w_specificity = wSpecificitySlider ? wSpecificitySlider.value : 0;
+            const w_correlation = wCorrelationSlider ? wCorrelationSlider.value : 1;
+            const excluded_concepts = document.getElementById('excluded_concepts').value;
+            
+            graphDiv.innerHTML = '<span class="text-zinc-500">Generating...</span>';
+            generateBtn.disabled = true;
+            downloadBtn.disabled = true;
+            downloadBifxmlBtn.disabled = true;
+
+            const params = new URLSearchParams({
+                n_nodes,
+                n_edges,
+                quality,
+                heuristic,
+                graph_type,
+            });
+            if (heuristic === 'semantics') {
+                params.append('w_compact', w_compact);
+                params.append('w_specificity', w_specificity);
+                params.append('w_correlation', w_correlation);
+            }
+            if (excluded_concepts.trim() !== '') {
+                params.append('excluded_concepts', excluded_concepts.trim());
+            }
+
+            fetch(`/generate_dag?${params.toString()}`)
+                .then(async response => {
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        let errorDetail = errorText;
+                        try {
+                            const errorJson = JSON.parse(errorText);
+                            errorDetail = errorJson.detail || errorText;
+                        } catch (e) {
+                            // Not a JSON error, use the raw text
+                        }
+                        throw new Error(errorDetail);
+                    }
+                    return response.text();
+                })
+                .then(dot => {
+                    // Store the DOT content for download
+                    currentDotContent = dot;
+                    
+                    var viz = new Viz();
+                    viz.renderSVGElement(dot)
+                        .then(function(element) {
+                            graphDiv.innerHTML = '';
+                            element.style.width = '100%';
+                            element.style.height = '100%';
+                            graphDiv.appendChild(element);
+                            // Enable download buttons after successful generation
+                            downloadBtn.disabled = false;
+                            downloadBifxmlBtn.disabled = false;
+                        })
+                        .catch(error => {
+                            viz = new Viz();
+                            console.error(error);
+                            graphDiv.innerHTML = `<span class="text-red-500">Error rendering graph: ${error}</span>`;
+                            // Don't enable download button if rendering failed
+                        });
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    graphDiv.innerHTML = `<span class="text-red-500">Error: ${error.message}</span>`;
+                    // Don't enable download button if generation failed
+                })
+                .finally(() => {
+                    generateBtn.disabled = false;
+                });
+        });
+
+        // Initial setup
+        updateEdgeSlider();
+        nNodesValue.textContent = nNodesSlider.value;
+        nEdgesValue.textContent = nEdgesSlider.value;
+        qualityValue.textContent = qualitySlider.value;
+        toggleSemanticsWeights();
+        if (wCompactSlider && wSpecificitySlider && wCorrelationSlider) {
+            wCompactValue.textContent = Number(wCompactSlider.value).toFixed(1);
+            wSpecificityValue.textContent = Number(wSpecificitySlider.value).toFixed(1);
+            wCorrelationValue.textContent = Number(wCorrelationSlider.value).toFixed(1);
+        }
+    </script>
+</body>
+</html>

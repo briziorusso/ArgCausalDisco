@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+networkx
+rustworkx
+numpy
+jinja2
+requests
+igraph
+scipy
+httpx
+pyagrum
+pydot

@@ -1,5 +1,3 @@
-from itertools import combinations
-
 import pyagrum as gum
 
 PROMPT_GRAPH_DESC = """You are tasked with generating descriptions for causal variables in a randomly generated causal graph used for synthetic dataset evaluations of causal discovery algorithms. Your goal is to create meaningful descriptions for each variable that accurately reflect their role in the graph without revealing their relationships with other variables.
