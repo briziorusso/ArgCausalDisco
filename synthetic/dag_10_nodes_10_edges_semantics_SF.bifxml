@@ -1,0 +1,210 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_10_nodes_10_edges_semantics_SF</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>surgery</NAME>
+	<PROPERTY>description = A medical procedure involving manual or instrumental intervention on the body to treat diseases, injuries, or deformities, requiring a controlled invasive technique.</PROPERTY>
+	<PROPERTY>fast = surgery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = Any injury or destruction to brain cells that impairs its normal functioning, potentially affecting cognitive, physical, or emotional abilities.</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = A chronic and progressive disease characterized by an impaired ability to control alcohol use despite adverse consequences to health, social life, or work.</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_attacks</NAME>
+	<PROPERTY>description = An acute medical emergency that occurs when blood flow to a part of the heart muscle is severely reduced or blocked, causing damage to heart tissue.</PROPERTY>
+	<PROPERTY>fast = heart_attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>cardiovascular_disease</NAME>
+	<PROPERTY>description = A broad category encompassing conditions that affect the heart and blood vessels, impacting their structure and function.</PROPERTY>
+	<PROPERTY>fast = cardiovascular_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>seizure</NAME>
+	<PROPERTY>description = A sudden, uncontrolled electrical disturbance in the brain, which can lead to temporary changes in behavior, movement, feelings, or states of consciousness.</PROPERTY>
+	<PROPERTY>fast = seizure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blockages</NAME>
+	<PROPERTY>description = Obstructions or impediments that can occur within various bodily passages, such as blood vessels, airways, or other ducts, hindering normal flow or function.</PROPERTY>
+	<PROPERTY>fast = blockages[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>radiotherapy</NAME>
+	<PROPERTY>description = A medical treatment method that utilizes high-energy radiation to target and damage specific types of cells within the body, often used in cancer treatment.</PROPERTY>
+	<PROPERTY>fast = radiotherapy[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>premature_birth</NAME>
+	<PROPERTY>description = The event of an infant being born before the completion of the full gestational period, typically before 37 weeks of pregnancy.</PROPERTY>
+	<PROPERTY>fast = premature_birth[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>reduced_blood_flow</NAME>
+	<PROPERTY>description = A physiological state characterized by a diminished volume of blood circulating through the body's vessels or specific organs.</PROPERTY>
+	<PROPERTY>fast = reduced_blood_flow[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>surgery</FOR>
+	<GIVEN>radiotherapy</GIVEN>
+	<TABLE>
+		0.5369 0.4631
+		0.0308508 0.969149
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<GIVEN>premature_birth</GIVEN>
+	<GIVEN>seizure</GIVEN>
+	<GIVEN>heart_attacks</GIVEN>
+	<GIVEN>alcoholism</GIVEN>
+	<GIVEN>surgery</GIVEN>
+	<TABLE>
+		0.154539 0.845461
+		0.431878 0.568122
+		0.892825 0.107175
+		0.446361 0.553639
+		0.447521 0.552479
+		0.106439 0.893561
+		0.775226 0.224774
+		0.496148 0.503852
+		0.961381 0.0386194
+		0.718641 0.281359
+		0.162812 0.837188
+		0.539275 0.460725
+		0.584345 0.415655
+		0.377382 0.622618
+		0.632608 0.367392
+		0.543784 0.456216
+		0.586769 0.413231
+		0.031884 0.968116
+		0.517656 0.482344
+		0.528594 0.471406
+		0.167296 0.832704
+		0.525749 0.474251
+		0.0511642 0.948836
+		0.271111 0.728889
+		0.560752 0.439248
+		0.114184 0.885816
+		0.870286 0.129714
+		0.140796 0.859204
+		0.019377 0.980623
+		0.738444 0.261556
+		0.809547 0.190453
+		0.518538 0.481462
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<TABLE>
+		0.571057 0.428943
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_attacks</FOR>
+	<GIVEN>reduced_blood_flow</GIVEN>
+	<GIVEN>blockages</GIVEN>
+	<GIVEN>cardiovascular_disease</GIVEN>
+	<TABLE>
+		0.361419 0.638581
+		0.386282 0.613718
+		0.42714 0.57286
+		0.089169 0.910831
+		0.463035 0.536965
+		0.802552 0.197448
+		0.656999 0.343001
+		0.863022 0.136978
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>cardiovascular_disease</FOR>
+	<TABLE>
+		0.900459 0.0995411
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>seizure</FOR>
+	<TABLE>
+		0.956039 0.0439614
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blockages</FOR>
+	<TABLE>
+		0.672957 0.327043
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>radiotherapy</FOR>
+	<TABLE>
+		0.465511 0.534489
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>premature_birth</FOR>
+	<TABLE>
+		0.130963 0.869037
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>reduced_blood_flow</FOR>
+	<TABLE>
+		0.290868 0.709132
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

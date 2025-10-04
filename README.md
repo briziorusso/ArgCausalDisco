@@ -3,7 +3,7 @@
 ## Overview
 
 - Causal discovery with ABAPC/Causal ABA + LLM priors.
-- Datasets: `bnlearn/*.bifxml`, `causenet_synth_5_10_15/*.bifxml`.
+- Datasets: `bnlearn/*.bifxml`, `synthetic/*.bifxml`.
 
 ## Key scripts
 

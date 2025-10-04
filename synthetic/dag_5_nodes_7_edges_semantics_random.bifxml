@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_5_nodes_7_edges_semantics_random</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = An injury or destruction of brain cells that can lead to a decline in various cognitive, physical, or emotional functions.</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = A severe impairment of sight, which may range from partial vision loss to a complete absence of light perception.</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>strokes</NAME>
+	<PROPERTY>description = A sudden interruption of blood flow to a part of the brain, or bleeding into the brain tissue itself.</PROPERTY>
+	<PROPERTY>fast = strokes[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>disabilities</NAME>
+	<PROPERTY>description = Enduring limitations in a person's physical, sensory, cognitive, or mental functions that can affect their ability to perform daily activities or participate fully in society.</PROPERTY>
+	<PROPERTY>fast = disabilities[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>obstacles</NAME>
+	<PROPERTY>description = Challenges or barriers encountered by individuals in their environment or in their pursuit of daily activities and personal goals.</PROPERTY>
+	<PROPERTY>fast = obstacles[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<GIVEN>strokes</GIVEN>
+	<TABLE>
+		0.370929 0.629071
+		0.326916 0.673084
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>strokes</GIVEN>
+	<GIVEN>brain_damage</GIVEN>
+	<TABLE>
+		0.563083 0.436917
+		0.161554 0.838446
+		0.394144 0.605856
+		0.286695 0.713305
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>strokes</FOR>
+	<TABLE>
+		0.594729 0.405271
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>disabilities</FOR>
+	<GIVEN>blindness</GIVEN>
+	<GIVEN>strokes</GIVEN>
+	<TABLE>
+		0.513091 0.486909
+		0.823981 0.176019
+		0.43549 0.56451
+		0.769806 0.230194
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>obstacles</FOR>
+	<GIVEN>disabilities</GIVEN>
+	<GIVEN>blindness</GIVEN>
+	<TABLE>
+		0.381458 0.618542
+		0.470689 0.529311
+		0.931998 0.0680019
+		0.519816 0.480184
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

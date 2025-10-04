@@ -1,0 +1,278 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_15_nodes_22_edges_semantics_SF</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = Persistent pain lasting for an extended period, typically three months or longer.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = A state of being easily annoyed, provoked, or angered.</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>situations</NAME>
+	<PROPERTY>description = Specific external circumstances, events, or environmental contexts that an individual encounters.</PROPERTY>
+	<PROPERTY>fast = situations[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>panic_attacks</NAME>
+	<PROPERTY>description = Discrete episodes of intense fear or discomfort accompanied by various physical and cognitive symptoms.</PROPERTY>
+	<PROPERTY>fast = panic_attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>dysfunction</NAME>
+	<PROPERTY>description = An impairment or abnormality in the normal operation of a bodily system, organ, or a person's behavior.</PROPERTY>
+	<PROPERTY>fast = dysfunction[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcohol_abuse</NAME>
+	<PROPERTY>description = A pattern of excessive alcohol consumption leading to adverse health, social, or professional consequences.</PROPERTY>
+	<PROPERTY>fast = alcohol_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>mood_swings</NAME>
+	<PROPERTY>description = Noticeable and often rapid fluctuations in an individual's emotional state or disposition.</PROPERTY>
+	<PROPERTY>fast = mood_swings[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug_abuse</NAME>
+	<PROPERTY>description = The detrimental use of psychoactive substances, encompassing both illicit drugs and the misuse of prescription medications.</PROPERTY>
+	<PROPERTY>fast = drug_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hormonal_imbalances</NAME>
+	<PROPERTY>description = A state characterized by disrupted levels of hormones within the body, potentially affecting various physiological functions.</PROPERTY>
+	<PROPERTY>fast = hormonal_imbalances[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>neck_pain</NAME>
+	<PROPERTY>description = Discomfort, ache, or stiffness experienced in the cervical region of the spine.</PROPERTY>
+	<PROPERTY>fast = neck_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>ear_infections</NAME>
+	<PROPERTY>description = An inflammatory condition or infection affecting the structures of the ear.</PROPERTY>
+	<PROPERTY>fast = ear_infections[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tensions</NAME>
+	<PROPERTY>description = A state of mental, emotional, or interpersonal strain and unease.</PROPERTY>
+	<PROPERTY>fast = tensions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>underlying_issues</NAME>
+	<PROPERTY>description = Deep-seated, often unresolved problems or conditions that contribute to an individual's current state or behavior.</PROPERTY>
+	<PROPERTY>fast = underlying_issues[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>obsession</NAME>
+	<PROPERTY>description = A persistent, intrusive thought, urge, or image that is experienced as unwanted and causes significant distress or anxiety.</PROPERTY>
+	<PROPERTY>fast = obsession[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>phthalates</NAME>
+	<PROPERTY>description = A class of chemical compounds commonly found in various consumer products and the environment.</PROPERTY>
+	<PROPERTY>fast = phthalates[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>neck_pain</GIVEN>
+	<GIVEN>dysfunction</GIVEN>
+	<TABLE>
+		0.856741 0.143259
+		0.354144 0.645856
+		0.626221 0.373779
+		0.45384 0.54616
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.620626 0.379374
+		0.633654 0.366346
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>situations</FOR>
+	<GIVEN>tensions</GIVEN>
+	<TABLE>
+		0.354483 0.645517
+		0.310628 0.689372
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>panic_attacks</FOR>
+	<GIVEN>drug_abuse</GIVEN>
+	<GIVEN>situations</GIVEN>
+	<TABLE>
+		0.252738 0.747262
+		0.73845 0.26155
+		0.460885 0.539115
+		0.513078 0.486922
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>dysfunction</FOR>
+	<GIVEN>ear_infections</GIVEN>
+	<TABLE>
+		0.127082 0.872918
+		0.75164 0.24836
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcohol_abuse</FOR>
+	<GIVEN>underlying_issues</GIVEN>
+	<TABLE>
+		0.732782 0.267218
+		0.466716 0.533284
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>mood_swings</FOR>
+	<GIVEN>irritability</GIVEN>
+	<GIVEN>panic_attacks</GIVEN>
+	<GIVEN>hormonal_imbalances</GIVEN>
+	<GIVEN>alcohol_abuse</GIVEN>
+	<TABLE>
+		0.784209 0.215791
+		0.520551 0.479449
+		0.351853 0.648147
+		0.555228 0.444772
+		0.867425 0.132575
+		0.414692 0.585308
+		0.40858 0.59142
+		0.262934 0.737066
+		0.0844657 0.915534
+		0.353176 0.646824
+		0.458162 0.541838
+		0.838235 0.161765
+		0.416547 0.583453
+		0.419645 0.580355
+		0.481401 0.518599
+		0.992595 0.00740523
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug_abuse</FOR>
+	<GIVEN>obsession</GIVEN>
+	<TABLE>
+		0.759274 0.240726
+		0.433704 0.566296
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hormonal_imbalances</FOR>
+	<GIVEN>phthalates</GIVEN>
+	<TABLE>
+		0.602831 0.397169
+		0.448383 0.551617
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>neck_pain</FOR>
+	<TABLE>
+		0.426195 0.573805
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>ear_infections</FOR>
+	<TABLE>
+		0.696907 0.303093
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tensions</FOR>
+	<TABLE>
+		0.652227 0.347773
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>underlying_issues</FOR>
+	<TABLE>
+		0.384834 0.615166
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>obsession</FOR>
+	<TABLE>
+		0.173136 0.826864
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>phthalates</FOR>
+	<TABLE>
+		0.915484 0.0845156
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

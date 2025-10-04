@@ -1,0 +1,280 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_15_nodes_15_edges_degrees_ER</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = A chronic disease characterized by an impaired ability to stop or control alcohol use despite adverse consequences.</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>difficulties</NAME>
+	<PROPERTY>description = Obstacles, hardships, or problems encountered in various aspects of daily life, tasks, or relationships.</PROPERTY>
+	<PROPERTY>fast = difficulties[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>psychological_problems</NAME>
+	<PROPERTY>description = A range of mental health conditions, disorders, or significant distress that affect mood, thinking, and behavior.</PROPERTY>
+	<PROPERTY>fast = psychological_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>heart_attacks</NAME>
+	<PROPERTY>description = A severe medical event where blood supply to a part of the heart is interrupted, leading to damage to the heart muscle.</PROPERTY>
+	<PROPERTY>fast = heart_attacks[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chest_pain</NAME>
+	<PROPERTY>description = Discomfort or a sensation of pressure experienced in the chest area, which can manifest in various forms.</PROPERTY>
+	<PROPERTY>fast = chest_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = Persistent physical discomfort or agony lasting for an extended duration, beyond typical recovery time.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = A heightened tendency to become easily annoyed, frustrated, or agitated by minor issues.</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_self-esteem</NAME>
+	<PROPERTY>description = A diminished sense of one's own worth or capabilities; a negative overall self-perception.</PROPERTY>
+	<PROPERTY>fast = low_self-esteem[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_inflammation</NAME>
+	<PROPERTY>description = A prolonged inflammatory response within the body, which can be an underlying factor in various health issues.</PROPERTY>
+	<PROPERTY>fast = chronic_inflammation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>sexual_abuse</NAME>
+	<PROPERTY>description = Any sexual act without consent, often involving power imbalances, which can have profound and lasting impacts on an individual.</PROPERTY>
+	<PROPERTY>fast = sexual_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_stress</NAME>
+	<PROPERTY>description = Persistent and prolonged mental or emotional pressure and tension experienced over an extended period.</PROPERTY>
+	<PROPERTY>fast = chronic_stress[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>tiredness</NAME>
+	<PROPERTY>description = A state of physical or mental fatigue and lack of energy, often affecting daily functioning.</PROPERTY>
+	<PROPERTY>fast = tiredness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_stigma</NAME>
+	<PROPERTY>description = The negative societal perception or disapproval associated with certain personal circumstances or characteristics.</PROPERTY>
+	<PROPERTY>fast = social_stigma[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>embarrassment</NAME>
+	<PROPERTY>description = A feeling of self-consciousness, shame, or awkwardness in social situations or regarding personal matters.</PROPERTY>
+	<PROPERTY>fast = embarrassment[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<GIVEN>chronic_stress</GIVEN>
+	<TABLE>
+		0.613894 0.386106
+		0.939254 0.0607462
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>difficulties</FOR>
+	<GIVEN>alcoholism</GIVEN>
+	<TABLE>
+		0.835373 0.164627
+		0.530273 0.469727
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>psychological_problems</FOR>
+	<GIVEN>social_stigma</GIVEN>
+	<GIVEN>sexual_abuse</GIVEN>
+	<GIVEN>low_self-esteem</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>alcoholism</GIVEN>
+	<TABLE>
+		0.932627 0.0673734
+		0.356584 0.643416
+		0.420377 0.579623
+		0.178165 0.821835
+		0.268618 0.731382
+		0.116213 0.883787
+		0.298661 0.701339
+		0.542926 0.457074
+		0.387053 0.612947
+		0.884475 0.115525
+		0.831515 0.168485
+		0.894812 0.105188
+		0.658656 0.341344
+		0.654208 0.345792
+		0.198014 0.801986
+		0.77439 0.22561
+		0.16447 0.83553
+		0.821609 0.178391
+		0.242689 0.757311
+		0.236129 0.763871
+		0.547719 0.452281
+		0.0978254 0.902175
+		0.309861 0.690139
+		0.124206 0.875794
+		0.753904 0.246096
+		0.0395906 0.960409
+		0.330828 0.669172
+		0.469423 0.530577
+		0.799355 0.200645
+		0.476732 0.523268
+		0.0279752 0.972025
+		0.448051 0.551949
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>heart_attacks</FOR>
+	<GIVEN>chronic_inflammation</GIVEN>
+	<TABLE>
+		0.524845 0.475155
+		0.511813 0.488187
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chest_pain</FOR>
+	<GIVEN>heart_attacks</GIVEN>
+	<TABLE>
+		0.666141 0.333859
+		0.731607 0.268393
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<GIVEN>chronic_stress</GIVEN>
+	<TABLE>
+		0.771001 0.228999
+		0.815952 0.184048
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>tiredness</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.820827 0.179173
+		0.86601 0.13399
+		0.340022 0.659978
+		0.53337 0.46663
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_self-esteem</FOR>
+	<GIVEN>sexual_abuse</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.0318742 0.968126
+		0.708711 0.291289
+		0.807041 0.192959
+		0.902548 0.0974521
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_inflammation</FOR>
+	<TABLE>
+		0.293243 0.706757
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>sexual_abuse</FOR>
+	<TABLE>
+		0.516079 0.483921
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_stress</FOR>
+	<TABLE>
+		0.668843 0.331157
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>tiredness</FOR>
+	<TABLE>
+		0.606587 0.393413
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_stigma</FOR>
+	<TABLE>
+		0.684903 0.315097
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>embarrassment</FOR>
+	<GIVEN>social_stigma</GIVEN>
+	<TABLE>
+		0.298534 0.701466
+		0.206264 0.793736
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

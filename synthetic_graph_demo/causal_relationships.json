@@ -5940,7 +5940,7 @@
         "fecal_impaction",
         "feelings_of_fatigue",
         "fever",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "functional_decline",
         "fuzzy_thinking",
         "gallbladder_disease",
@@ -14695,7 +14695,7 @@
         "fluid_accumulation",
         "fluid_buildup",
         "fluid_retention",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "formation",
         "formation_of_scar_tissue",
         "formation_of_tumors",
@@ -21382,7 +21382,7 @@
         "fights",
         "flare-up",
         "flushing",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "free_radical_damage",
         "free_radicals",
         "frequent_urination",
@@ -29567,7 +29567,7 @@
         "feelings_of_guilt",
         "fight",
         "fight_or_flight_``_response",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "forgiveness",
         "frustration",
         "groundswell_of_socialist_activism",
@@ -32960,7 +32960,7 @@
         "fever",
         "fluid_retention",
         "flushing",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "gastrointestinal_symptoms",
         "hair_loss",
         "hay_fever",
@@ -39304,7 +39304,7 @@
         "flu",
         "flushed",
         "flushing",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "hair_loss",
         "hallucinations",
         "headache",
@@ -41560,7 +41560,7 @@
         "fatalities",
         "fires",
         "flu-like_symptoms",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "headache",
         "headaches",
         "illness",
@@ -41847,7 +41847,7 @@
         "fatigue",
         "feeling_tired",
         "fibromyalgia",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "headaches",
         "heat_intolerance",
         "increased_pain",
@@ -49618,7 +49618,7 @@
         "dilated_cardiomyopathy",
         "drug-related_deaths",
         "euphoria",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "gastritis",
         "health_problems",
         "heart_attack",
@@ -56751,7 +56751,7 @@
         "childbirth",
         "conception",
         "discomfort",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "hepatitis_b",
         "infection",
         "infections",
@@ -61465,7 +61465,7 @@
         "disease",
         "fever",
         "first-degree_burns",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "hair_loss",
         "inflammation",
         "injury",
@@ -68205,7 +68205,7 @@
         "excessive_sweating",
         "fast_heartbeat",
         "fatigue",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "goiter",
         "hair_loss",
         "heart_disease",
@@ -71630,7 +71630,7 @@
         "facial_redness",
         "facial_spider_veins",
         "flushing",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "inflammation",
         "irritation",
         "persistent_redness",
@@ -75496,7 +75496,7 @@
         "discomfort",
         "flare-ups",
         "flushing",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "heartburn",
         "hot_flashes",
         "indigestion",
@@ -79316,7 +79316,7 @@
         "complications",
         "endometrial_cancer",
         "fatty_liver",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "fractures",
         "hot_flashes",
         "liver_cancer",
@@ -85037,7 +85037,7 @@
         "destruction_of_the_lungs",
         "disease",
         "diseases",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "heart_attack",
         "hemoglobinemia",
         "inflammation",
@@ -86329,7 +86329,7 @@
         "diseases",
         "euphoria",
         "euphoric_effects",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "harm",
         "low_birth_weight",
         "misery",
@@ -86605,7 +86605,7 @@
         "diseases",
         "disorders",
         "fever",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "headache",
         "headaches",
         "heart_failure",
@@ -93055,7 +93055,7 @@
         "death",
         "death_in_the_united_states",
         "deaths",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "hernia",
         "hospitalizations",
         "illness",
@@ -111692,7 +111692,7 @@
         "allergic_reaction",
         "allergic_reactions",
         "allergies",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "headaches",
         "inflammation",
         "itching",
@@ -129192,7 +129192,7 @@
     "tachycardia": [
         "asystole",
         "death",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "low_blood_pressure",
         "pulseless_electrical_activity",
         "st_depression",
@@ -132626,7 +132626,7 @@
     "pheochromocytoma": [
         "diaphoresis",
         "flank_pain",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "headaches",
         "high_blood_pressure",
         "hypertension",
@@ -132898,7 +132898,7 @@
         "anger",
         "depression",
         "enlightenment",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "isolation",
         "pallor",
         "problems"
@@ -133894,7 +133894,7 @@
         "condition",
         "death",
         "delirium",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "hospitalization",
         "immobility",
         "nausea",
@@ -134720,7 +134720,7 @@
         "problems"
     ],
     "caffeine_consumption": [
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "hypertension",
         "insomnia",
         "restless_leg_syndrome"
@@ -139505,7 +139505,7 @@
         "death",
         "depression",
         "dizziness",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "hallucinations",
         "heart_palpitations",
         "high_blood_pressure",
@@ -146180,7 +146180,7 @@
     ],
     "orgasm": [
         "contractions",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "pain",
         "pleasure",
         "uterine_contractions",
@@ -159841,7 +159841,7 @@
         "diabetes_mellitus",
         "exophthalmos",
         "fat_lump_between_the_shoulders",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "fragile_skin",
         "high_blood_pressure",
         "hirsutism",
@@ -175241,7 +175241,7 @@
         "casualties"
     ],
     "dysautonomia": [
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "heat_intolerance",
         "symptoms",
         "tachycardia"
@@ -184512,7 +184512,7 @@
     "horner_'s_syndrome": [
         "anhidrosis",
         "anisocoria",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "heterochromia_iridum",
         "loss_of_ciliospinal_reflex",
         "miosis",
@@ -187174,7 +187174,7 @@
     ],
     "carcinoid_tumor": [
         "carcinoid_syndrome",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "symptoms"
     ],
     "lack_of_moisture_in_the_air": [
@@ -204021,7 +204021,7 @@
     ],
     "hyperglycaemia": [
         "diabetic_ketoacidosis",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "increase"
     ],
     "low_literacy": [
@@ -206714,7 +206714,7 @@
     ],
     "recreational_drugs": [
         "ed",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "problems"
     ],
     "outsiders": [
@@ -216320,7 +216320,7 @@
     ],
     "homocystinuria": [
         "cerebral_venous_sinus_thrombosis",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "mental_retardation",
         "osteoporosis"
     ],
@@ -223126,7 +223126,7 @@
     ],
     "sexual_arousal": [
         "erections",
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "coconut": [
         "reaction"
@@ -236740,7 +236740,7 @@
         "complications"
     ],
     "vagus_nerve": [
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "heart_to_stop"
     ],
     "insect_infestation": [
@@ -289880,7 +289880,7 @@
         "ear/nose/throat_inflammation",
         "episodes_of_very_low_blood_pressureand_faintness",
         "fatigue",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "headache",
         "hepatosplenomegally",
         "itching",
@@ -291023,69 +291023,69 @@
         "smoking_fetishism"
     ],
     "abrupt_cessation_of_physical_exertion": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "alcohol_flush_reaction": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "antiestrogens": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "atropine_poisoning": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "body_contact_with_warm_or_hot_water": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "butorphanol_reaction_with_some_narcotic_analgesics": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "cluster_headache_attack": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "compression_of_the_nerve_by_the_sixth_thoracic_vertebrae": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "high_doses_of_non_flush_free_niacin": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "hot_flush": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "hyperstimulation_of_the_parasympathetic_nervous_system": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "iron_poisoning": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "jarisch-herxheimer_reaction": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "keratosis_pilaris_rubra_faceii": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "limerence": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "medullary_thyroid_cancer": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "polycythemia_vera": [
         "cerebral_venous_sinus_thrombosis",
-        "flushing_(_physiology_)",
+        "flushing_in_physiology",
         "hemoglobinemia"
     ],
     "powerful_vasodilators": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "dihydropyridine_calcium_channel_blockers": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "sneezing": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "vinpocetine": [
-        "flushing_(_physiology_)"
+        "flushing_in_physiology"
     ],
     "sympathetic_overdrive": [
         "palpitations"

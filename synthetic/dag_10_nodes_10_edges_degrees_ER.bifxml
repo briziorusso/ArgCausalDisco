@@ -1,0 +1,185 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_10_nodes_10_edges_degrees_ER</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = A physiological state where the arterial blood pressure is consistently elevated above normal levels.</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>premature_death</NAME>
+	<PROPERTY>description = An outcome signifying mortality occurring at an age significantly younger than the average life expectancy within a given population.</PROPERTY>
+	<PROPERTY>fast = premature_death[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = A persistent or recurrent unpleasant sensory and emotional experience associated with actual or potential tissue damage, lasting for an extended period.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = A profound psychological state encompassing a complete loss or absence of hope, often accompanied by feelings of hopelessness and futility.</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = An emotional disposition characterized by an increased tendency to become easily annoyed, frustrated, or agitated by minor disturbances.</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>loss_of_appetite</NAME>
+	<PROPERTY>description = A diminished desire or interest in consuming food.</PROPERTY>
+	<PROPERTY>fast = loss_of_appetite[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_isolation</NAME>
+	<PROPERTY>description = A state characterized by a lack of social contact, engagement, or interaction with others.</PROPERTY>
+	<PROPERTY>fast = social_isolation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>anorexia</NAME>
+	<PROPERTY>description = A severe medical condition marked by an unhealthy and substantial reduction in food intake, often leading to significant weight loss and malnourishment.</PROPERTY>
+	<PROPERTY>fast = anorexia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lymphoma</NAME>
+	<PROPERTY>description = A type of cancer originating in the lymphocytes, a component of the body's immune system.</PROPERTY>
+	<PROPERTY>fast = lymphoma[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>renal_diseases</NAME>
+	<PROPERTY>description = A group of medical conditions characterized by impaired kidney function or damage to the kidneys.</PROPERTY>
+	<PROPERTY>fast = renal_diseases[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<GIVEN>renal_diseases</GIVEN>
+	<TABLE>
+		0.360613 0.639387
+		0.48215 0.51785
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>premature_death</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.468581 0.531419
+		0.0839552 0.916045
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.536641 0.463359
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.512951 0.487049
+		0.46375 0.53625
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.487986 0.512014
+		0.539314 0.460686
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>loss_of_appetite</FOR>
+	<GIVEN>lymphoma</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.451397 0.548603
+		0.683738 0.316262
+		0.470094 0.529906
+		0.386208 0.613792
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_isolation</FOR>
+	<GIVEN>anorexia</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.402355 0.597645
+		0.696144 0.303856
+		0.523247 0.476753
+		0.0127155 0.987285
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>anorexia</FOR>
+	<GIVEN>lymphoma</GIVEN>
+	<GIVEN>loss_of_appetite</GIVEN>
+	<TABLE>
+		0.394694 0.605306
+		0.323187 0.676813
+		0.796677 0.203323
+		0.430302 0.569698
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lymphoma</FOR>
+	<TABLE>
+		0.625534 0.374466
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>renal_diseases</FOR>
+	<TABLE>
+		0.484424 0.515576
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

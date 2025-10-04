@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_10_nodes_10_edges_none_ER</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = Refers to a physiological state where the force of blood against artery walls is consistently elevated.</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_disease</NAME>
+	<PROPERTY>description = Identifies a long-lasting health condition that typically cannot be cured but can be controlled over an extended period.</PROPERTY>
+	<PROPERTY>fast = chronic_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>medical_problems</NAME>
+	<PROPERTY>description = Denotes a general classification for various health issues, ailments, or disorders that an individual might experience.</PROPERTY>
+	<PROPERTY>fast = medical_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>numbness</NAME>
+	<PROPERTY>description = Characterizes a loss of sensation, or a feeling of tingling or 'pins and needles,' in a specific part of the body.</PROPERTY>
+	<PROPERTY>fast = numbness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>serious_health_problems</NAME>
+	<PROPERTY>description = Represents significant and potentially life-altering health conditions that require considerable medical attention or management.</PROPERTY>
+	<PROPERTY>fast = serious_health_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>nerve_damage</NAME>
+	<PROPERTY>description = Pertains to an injury or impairment affecting the nerves, which are responsible for transmitting signals throughout the body.</PROPERTY>
+	<PROPERTY>fast = nerve_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infertility</NAME>
+	<PROPERTY>description = Describes the inability to conceive or produce offspring despite regular unprotected sexual intercourse over a defined period.</PROPERTY>
+	<PROPERTY>fast = infertility[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>panic_attack</NAME>
+	<PROPERTY>description = Describes an abrupt surge of intense fear or discomfort, often accompanied by physical symptoms like heart palpitations, shortness of breath, or dizziness.</PROPERTY>
+	<PROPERTY>fast = panic_attack[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<TABLE>
+		0.211009 0.788991
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_disease</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.800038 0.199962
+		0.531839 0.468161
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>medical_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.579488 0.420512
+		0.251582 0.748418
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>numbness</FOR>
+	<GIVEN>panic_attack</GIVEN>
+	<GIVEN>nerve_damage</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.568029 0.431971
+		0.0389085 0.961091
+		0.644077 0.355923
+		0.996475 0.00352538
+		0.642292 0.357708
+		0.269067 0.730933
+		0.501652 0.498348
+		0.0264573 0.973543
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>serious_health_problems</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.853147 0.146853
+		0.883029 0.116971
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>nerve_damage</FOR>
+	<GIVEN>chronic_disease</GIVEN>
+	<TABLE>
+		0.352245 0.647755
+		0.557562 0.442438
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infertility</FOR>
+	<GIVEN>medical_problems</GIVEN>
+	<GIVEN>chronic_disease</GIVEN>
+	<TABLE>
+		0.856581 0.143419
+		0.787805 0.212195
+		0.165437 0.834563
+		0.556517 0.443483
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>panic_attack</FOR>
+	<GIVEN>medical_problems</GIVEN>
+	<TABLE>
+		0.471915 0.528085
+		0.348667 0.651333
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

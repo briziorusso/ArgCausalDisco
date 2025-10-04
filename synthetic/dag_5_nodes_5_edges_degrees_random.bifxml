@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_5_nodes_5_edges_degrees_random</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>vomiting</NAME>
+	<PROPERTY>description = The involuntary, forceful expulsion of the contents of the stomach through the mouth.</PROPERTY>
+	<PROPERTY>fast = vomiting[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>electrolyte_imbalance</NAME>
+	<PROPERTY>description = A physiological disturbance where the concentrations of essential mineral salts (electrolytes) in the body are outside healthy ranges.</PROPERTY>
+	<PROPERTY>fast = electrolyte_imbalance[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>severe_dehydration</NAME>
+	<PROPERTY>description = A critical physiological state resulting from an extreme loss of body fluids, significantly impairing bodily functions.</PROPERTY>
+	<PROPERTY>fast = severe_dehydration[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>etec</NAME>
+	<PROPERTY>description = Enterotoxigenic Escherichia coli (ETEC), a specific strain of bacteria known to affect the digestive system.</PROPERTY>
+	<PROPERTY>fast = etec[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>acute_watery_diarrhoea</NAME>
+	<PROPERTY>description = A medical condition characterized by the sudden onset of frequent, loose, and watery bowel movements.</PROPERTY>
+	<PROPERTY>fast = acute_watery_diarrhoea[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>vomiting</FOR>
+	<TABLE>
+		0.347382 0.652618
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>electrolyte_imbalance</FOR>
+	<GIVEN>severe_dehydration</GIVEN>
+	<GIVEN>vomiting</GIVEN>
+	<TABLE>
+		0.553864 0.446136
+		0.434111 0.565889
+		0.213534 0.786466
+		0.546107 0.453893
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>severe_dehydration</FOR>
+	<GIVEN>acute_watery_diarrhoea</GIVEN>
+	<GIVEN>vomiting</GIVEN>
+	<TABLE>
+		0.828091 0.171909
+		0.21299 0.78701
+		0.860234 0.139766
+		0.641622 0.358378
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>etec</FOR>
+	<TABLE>
+		0.404925 0.595075
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>acute_watery_diarrhoea</FOR>
+	<GIVEN>etec</GIVEN>
+	<TABLE>
+		0.792428 0.207572
+		0.0966296 0.90337
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

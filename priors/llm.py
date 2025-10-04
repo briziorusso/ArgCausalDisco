@@ -33,7 +33,7 @@ async def extract(
     pydantic_model: type[T_Model] | None,
     model="gemini-2.5-flash-lite",
     temperature=1,
-    max_retries=3,
+    max_retries=5,
 ) -> T_Model | ChatCompletion:
     return await client.chat.completions.create(
         model=model,
@@ -48,32 +48,19 @@ async def extract(
 
 async def parse_graph_description(
     graph_response: str,
-    parse_method: Literal["regex", "llm"] = "regex",
+    model: str,
     valid_vars: set[str] | None = None,
 ) -> dict[str, str] | GraphDescriptionBase:
     valid_var_pattern = (
         r"|".join(re.escape(var) for var in valid_vars) if valid_vars else r"\w+"
     )
-    if parse_method == "regex":
-        vars_desc_text = re.search(
-            r"<variable_descriptions>(.*?)</variable_descriptions>",
-            graph_response,
-            re.DOTALL,
-        )
-        if vars_desc_text is not None:
-            return dict(
-                re.findall(
-                    rf"({valid_var_pattern})(?:\W*?):(?:(?:\s|\W)*)(.+)\n",
-                    vars_desc_text.group(1),
-                )
-            )
-
+    
     class GraphDescription(GraphDescriptionBase):
         variable_descriptions: dict[
             Annotated[str, Field(pattern=valid_var_pattern)], str
         ]
 
-    return await extract(graph_response, GraphDescription)
+    return await extract(graph_response, GraphDescription, model=model)
 
 
 async def parse_priors(

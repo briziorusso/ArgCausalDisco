@@ -1,0 +1,281 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_15_nodes_15_edges_degrees_random</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_sleep</NAME>
+	<PROPERTY>description = A state of insufficient sleep duration, meaning an individual consistently does not obtain the recommended number of hours of sleep.</PROPERTY>
+	<PROPERTY>fast = lack_of_sleep[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>behavioral_problems</NAME>
+	<PROPERTY>description = Maladaptive or disruptive patterns of conduct and actions that deviate from expected social norms or cause distress.</PROPERTY>
+	<PROPERTY>fast = behavioral_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = Persistent or recurrent pain that lasts for an extended period, typically beyond three to six months, despite treatment or normal healing processes.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = A profound state of hopelessness, an extreme loss of hope or confidence in one's future or circumstances.</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_problems</NAME>
+	<PROPERTY>description = Difficulties or challenges that individuals encounter in their interactions with others or in their integration into community structures and societal norms.</PROPERTY>
+	<PROPERTY>fast = social_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>poor_sleep</NAME>
+	<PROPERTY>description = A condition characterized by inadequate quality or restorative capacity of sleep, irrespective of the duration.</PROPERTY>
+	<PROPERTY>fast = poor_sleep[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcohol_abuse</NAME>
+	<PROPERTY>description = The harmful consumption of alcoholic beverages, leading to negative health, social, or occupational outcomes.</PROPERTY>
+	<PROPERTY>fast = alcohol_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>infertility</NAME>
+	<PROPERTY>description = The biological inability to conceive or reproduce, affecting individuals or couples.</PROPERTY>
+	<PROPERTY>fast = infertility[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>emotional_problems</NAME>
+	<PROPERTY>description = A broad category encompassing various difficulties with mood regulation, emotional stability, and psychological distress.</PROPERTY>
+	<PROPERTY>fast = emotional_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>drug_abuse</NAME>
+	<PROPERTY>description = The harmful or hazardous use of psychoactive substances for non-medical purposes, leading to adverse consequences.</PROPERTY>
+	<PROPERTY>fast = drug_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>substance_abuse</NAME>
+	<PROPERTY>description = A general term referring to the harmful or hazardous use of any psychoactive substance, encompassing both illicit drugs and alcohol.</PROPERTY>
+	<PROPERTY>fast = substance_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>burnout</NAME>
+	<PROPERTY>description = A state of emotional, physical, and mental exhaustion caused by prolonged or excessive stress, often characterized by feelings of being overwhelmed, depleted, and lacking motivation.</PROPERTY>
+	<PROPERTY>fast = burnout[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>responsibilities</NAME>
+	<PROPERTY>description = The duties or obligations that an individual is expected or required to fulfill, often associated with work, family, or personal commitments.</PROPERTY>
+	<PROPERTY>fast = responsibilities[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_appropriate_supervision</NAME>
+	<PROPERTY>description = The absence or inadequacy of oversight and guidance provided to an individual, particularly during formative or vulnerable periods.</PROPERTY>
+	<PROPERTY>fast = lack_of_appropriate_supervision[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>abandoned_child_syndrome</NAME>
+	<PROPERTY>description = A complex set of psychological and emotional difficulties stemming from perceived or actual emotional or physical abandonment during childhood.</PROPERTY>
+	<PROPERTY>fast = abandoned_child_syndrome[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>lack_of_sleep</FOR>
+	<TABLE>
+		0.886703 0.113297
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>behavioral_problems</FOR>
+	<GIVEN>poor_sleep</GIVEN>
+	<GIVEN>lack_of_sleep</GIVEN>
+	<TABLE>
+		0.148437 0.851563
+		0.228476 0.771524
+		0.378832 0.621168
+		0.740687 0.259313
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.566666 0.433334
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.579462 0.420538
+		0.526271 0.473729
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_problems</FOR>
+	<GIVEN>substance_abuse</GIVEN>
+	<GIVEN>drug_abuse</GIVEN>
+	<GIVEN>alcohol_abuse</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.758025 0.241975
+		0.34714 0.65286
+		0.215095 0.784905
+		0.468217 0.531783
+		0.00956854 0.990431
+		0.556839 0.443161
+		0.618158 0.381842
+		0.409614 0.590386
+		0.540194 0.459806
+		0.842251 0.157749
+		0.303994 0.696006
+		0.520509 0.479491
+		0.912412 0.0875881
+		0.916939 0.0830606
+		0.516793 0.483207
+		0.0815446 0.918455
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>poor_sleep</FOR>
+	<TABLE>
+		0.183193 0.816807
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcohol_abuse</FOR>
+	<GIVEN>abandoned_child_syndrome</GIVEN>
+	<GIVEN>despair</GIVEN>
+	<TABLE>
+		0.912777 0.0872234
+		0.265352 0.734648
+		0.687181 0.312819
+		0.310472 0.689528
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>infertility</FOR>
+	<TABLE>
+		0.17542 0.82458
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>emotional_problems</FOR>
+	<GIVEN>infertility</GIVEN>
+	<TABLE>
+		0.619994 0.380006
+		0.499158 0.500842
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>drug_abuse</FOR>
+	<GIVEN>emotional_problems</GIVEN>
+	<TABLE>
+		0.720671 0.279329
+		0.438141 0.561859
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>substance_abuse</FOR>
+	<GIVEN>behavioral_problems</GIVEN>
+	<GIVEN>burnout</GIVEN>
+	<TABLE>
+		0.438823 0.561177
+		0.991749 0.00825118
+		0.577288 0.422712
+		0.417258 0.582742
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>burnout</FOR>
+	<GIVEN>responsibilities</GIVEN>
+	<TABLE>
+		0.781948 0.218052
+		0.421019 0.578981
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>responsibilities</FOR>
+	<TABLE>
+		0.448774 0.551226
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_appropriate_supervision</FOR>
+	<TABLE>
+		0.742225 0.257775
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>abandoned_child_syndrome</FOR>
+	<GIVEN>lack_of_appropriate_supervision</GIVEN>
+	<TABLE>
+		0.438138 0.561862
+		0.735621 0.264379
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

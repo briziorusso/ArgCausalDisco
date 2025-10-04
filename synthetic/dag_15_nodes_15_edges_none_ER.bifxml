@@ -1,0 +1,261 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_15_nodes_15_edges_none_ER</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = Persistent physical discomfort that lasts for an extended period, often beyond typical healing time.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>despair</NAME>
+	<PROPERTY>description = A complete and overwhelming loss of hope, often accompanied by feelings of hopelessness and futility regarding one's situation.</PROPERTY>
+	<PROPERTY>fast = despair[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>irritability</NAME>
+	<PROPERTY>description = A pervasive tendency to be easily annoyed, frustrated, or provoked by minor issues.</PROPERTY>
+	<PROPERTY>fast = irritability[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_problems</NAME>
+	<PROPERTY>description = Difficulties or challenges encountered by an individual in their interactions with others, within their community, or in adapting to broader societal structures.</PROPERTY>
+	<PROPERTY>fast = social_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>discrimination</NAME>
+	<PROPERTY>description = Unfair or prejudicial treatment of an individual or group based on certain characteristics or categories.</PROPERTY>
+	<PROPERTY>fast = discrimination[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>emotional_problems</NAME>
+	<PROPERTY>description = Difficulties in managing, regulating, or healthily experiencing one's feelings, leading to distress or functional impairment.</PROPERTY>
+	<PROPERTY>fast = emotional_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>misery</NAME>
+	<PROPERTY>description = A profound state of extreme unhappiness, suffering, or discomfort.</PROPERTY>
+	<PROPERTY>fast = misery[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>alcohol_abuse</NAME>
+	<PROPERTY>description = A problematic pattern of excessive or harmful alcohol consumption that leads to significant impairment or distress.</PROPERTY>
+	<PROPERTY>fast = alcohol_abuse[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>apathy</NAME>
+	<PROPERTY>description = A lack of interest, enthusiasm, or concern for things that would typically elicit an emotional or behavioral response.</PROPERTY>
+	<PROPERTY>fast = apathy[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>separation</NAME>
+	<PROPERTY>description = The state where married individuals live apart, often marking a significant phase in the dissolution of a marriage.</PROPERTY>
+	<PROPERTY>fast = separation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>belief</NAME>
+	<PROPERTY>description = A strongly held personal principle, opinion, or conviction that an individual accepts as true or right.</PROPERTY>
+	<PROPERTY>fast = belief[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>conviction</NAME>
+	<PROPERTY>description = The formal declaration by a judicial body that an individual is guilty of a criminal offense.</PROPERTY>
+	<PROPERTY>fast = conviction[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>great_depression</NAME>
+	<PROPERTY>description = A profound and pervasive state of severe low mood, sadness, and a significant loss of interest or pleasure in daily activities.</PROPERTY>
+	<PROPERTY>fast = great_depression[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>marital_problems</NAME>
+	<PROPERTY>description = Significant difficulties or unresolved conflicts experienced within a marital relationship.</PROPERTY>
+	<PROPERTY>fast = marital_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.660544 0.339456
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>despair</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.785218 0.214782
+		0.524151 0.475849
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>irritability</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.274177 0.725823
+		0.554168 0.445832
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_problems</FOR>
+	<GIVEN>great_depression</GIVEN>
+	<GIVEN>alcohol_abuse</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.459209 0.540791
+		0.0784743 0.921526
+		0.565343 0.434657
+		0.673457 0.326543
+		0.180386 0.819614
+		0.809859 0.190141
+		0.12998 0.87002
+		0.607855 0.392145
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>discrimination</FOR>
+	<GIVEN>belief</GIVEN>
+	<TABLE>
+		0.564541 0.435459
+		0.819483 0.180517
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>emotional_problems</FOR>
+	<GIVEN>discrimination</GIVEN>
+	<TABLE>
+		0.598481 0.401519
+		0.724413 0.275587
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>misery</FOR>
+	<GIVEN>great_depression</GIVEN>
+	<GIVEN>separation</GIVEN>
+	<GIVEN>discrimination</GIVEN>
+	<TABLE>
+		0.79205 0.20795
+		0.830144 0.169856
+		0.459487 0.540513
+		0.557635 0.442365
+		0.523755 0.476245
+		0.410495 0.589505
+		0.732804 0.267196
+		0.415197 0.584803
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>alcohol_abuse</FOR>
+	<GIVEN>despair</GIVEN>
+	<TABLE>
+		0.335056 0.664944
+		0.549655 0.450345
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>apathy</FOR>
+	<GIVEN>belief</GIVEN>
+	<GIVEN>despair</GIVEN>
+	<TABLE>
+		0.738539 0.261461
+		0.543239 0.456761
+		0.476984 0.523016
+		0.612766 0.387234
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>separation</FOR>
+	<GIVEN>marital_problems</GIVEN>
+	<TABLE>
+		0.430522 0.569478
+		0.833571 0.166429
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>belief</FOR>
+	<GIVEN>conviction</GIVEN>
+	<TABLE>
+		0.3707 0.6293
+		0.370326 0.629674
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>conviction</FOR>
+	<TABLE>
+		0.591148 0.408852
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>great_depression</FOR>
+	<TABLE>
+		0.481173 0.518827
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>marital_problems</FOR>
+	<TABLE>
+		0.661222 0.338778
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

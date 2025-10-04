@@ -1,0 +1,191 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_10_nodes_10_edges_degrees_random</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>alcoholism</NAME>
+	<PROPERTY>description = A severe and progressive disorder characterized by a compulsive need to consume alcohol, leading to significant personal, social, and health consequences.</PROPERTY>
+	<PROPERTY>fast = alcoholism[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>social_problems</NAME>
+	<PROPERTY>description = Difficulties or challenges encountered in interpersonal relationships, community integration, or adherence to societal norms, often leading to isolation or conflict.</PROPERTY>
+	<PROPERTY>fast = social_problems[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>chronic_pain</NAME>
+	<PROPERTY>description = Persistent physical discomfort or distress that lasts for an extended period, significantly impacting an individual's daily life.</PROPERTY>
+	<PROPERTY>fast = chronic_pain[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>low_self-esteem</NAME>
+	<PROPERTY>description = A psychological state characterized by a lack of confidence and a negative perception of one's own worth and abilities.</PROPERTY>
+	<PROPERTY>fast = low_self-esteem[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>toxins</NAME>
+	<PROPERTY>description = Harmful substances that can be present in the body or environment, potentially interfering with normal biological processes and health.</PROPERTY>
+	<PROPERTY>fast = toxins[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>poor_health</NAME>
+	<PROPERTY>description = A general state of diminished physical or mental well-being, indicating a departure from optimal functioning and vitality.</PROPERTY>
+	<PROPERTY>fast = poor_health[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lack_of_concentration</NAME>
+	<PROPERTY>description = A cognitive difficulty characterized by an inability to focus attention, sustain mental effort, or maintain clarity of thought on a specific task or idea.</PROPERTY>
+	<PROPERTY>fast = lack_of_concentration[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fermentation</NAME>
+	<PROPERTY>description = A metabolic process involving microorganisms, which can occur in various biological contexts, including within the body or during the processing of organic matter.</PROPERTY>
+	<PROPERTY>fast = fermentation[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>lovesickness</NAME>
+	<PROPERTY>description = A state of intense emotional preoccupation and longing, often related to romantic feelings, which can lead to significant emotional distress.</PROPERTY>
+	<PROPERTY>fast = lovesickness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hepatitis_x</NAME>
+	<PROPERTY>description = A specific medical condition affecting the liver, characterized by inflammation and potential impairment of liver function.</PROPERTY>
+	<PROPERTY>fast = hepatitis_x[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>alcoholism</FOR>
+	<TABLE>
+		0.440701 0.559299
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>social_problems</FOR>
+	<GIVEN>low_self-esteem</GIVEN>
+	<GIVEN>chronic_pain</GIVEN>
+	<GIVEN>alcoholism</GIVEN>
+	<TABLE>
+		0.414127 0.585873
+		0.53344 0.46656
+		0.827361 0.172639
+		0.707741 0.292259
+		0.402115 0.597885
+		0.424248 0.575752
+		0.774405 0.225595
+		0.825593 0.174407
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>chronic_pain</FOR>
+	<TABLE>
+		0.18863 0.81137
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>low_self-esteem</FOR>
+	<GIVEN>chronic_pain</GIVEN>
+	<TABLE>
+		0.31215 0.68785
+		0.185719 0.814281
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>toxins</FOR>
+	<GIVEN>fermentation</GIVEN>
+	<TABLE>
+		0.470994 0.529006
+		0.418022 0.581978
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>poor_health</FOR>
+	<GIVEN>social_problems</GIVEN>
+	<GIVEN>toxins</GIVEN>
+	<TABLE>
+		0.538569 0.461431
+		0.728349 0.271651
+		0.763486 0.236514
+		0.608312 0.391688
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lack_of_concentration</FOR>
+	<GIVEN>hepatitis_x</GIVEN>
+	<GIVEN>lovesickness</GIVEN>
+	<GIVEN>poor_health</GIVEN>
+	<TABLE>
+		0.680873 0.319127
+		0.23086 0.76914
+		0.65132 0.34868
+		0.720981 0.279019
+		0.526901 0.473099
+		0.954415 0.0455854
+		0.936786 0.0632145
+		0.812549 0.187451
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fermentation</FOR>
+	<TABLE>
+		0.776648 0.223352
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>lovesickness</FOR>
+	<TABLE>
+		0.62409 0.37591
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hepatitis_x</FOR>
+	<TABLE>
+		0.457952 0.542048
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

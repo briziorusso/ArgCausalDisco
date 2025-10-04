@@ -1,0 +1,325 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_15_nodes_22_edges_degrees_ER</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>cardiac_arrest</NAME>
+	<PROPERTY>description = An abrupt and complete cessation of the heart's effective pumping action.</PROPERTY>
+	<PROPERTY>fast = cardiac_arrest[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>coma</NAME>
+	<PROPERTY>description = A profound state of prolonged unconsciousness from which an individual cannot be aroused and is unresponsive to stimuli.</PROPERTY>
+	<PROPERTY>fast = coma[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>respiratory_failure</NAME>
+	<PROPERTY>description = A severe medical condition where the lungs cannot adequately perform their function of gas exchange.</PROPERTY>
+	<PROPERTY>fast = respiratory_failure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>high_blood_pressure</NAME>
+	<PROPERTY>description = A persistent medical condition characterized by an elevated force of blood against the artery walls.</PROPERTY>
+	<PROPERTY>fast = high_blood_pressure[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>blindness</NAME>
+	<PROPERTY>description = The profound or complete absence of sight, resulting in an inability to perceive light or form.</PROPERTY>
+	<PROPERTY>fast = blindness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>intracerebral_hemorrhage</NAME>
+	<PROPERTY>description = Describes bleeding that occurs directly within the brain tissue itself.</PROPERTY>
+	<PROPERTY>fast = intracerebral_hemorrhage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>vision_loss</NAME>
+	<PROPERTY>description = Any degree of decreased visual acuity or reduction in the field of vision.</PROPERTY>
+	<PROPERTY>fast = vision_loss[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fever</NAME>
+	<PROPERTY>description = An abnormal elevation of the body's core temperature above the normal range.</PROPERTY>
+	<PROPERTY>fast = fever[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>convulsions</NAME>
+	<PROPERTY>description = Characterized by sudden, involuntary, and often violent contractions of muscle groups.</PROPERTY>
+	<PROPERTY>fast = convulsions[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>diagnosis</NAME>
+	<PROPERTY>description = The process of identifying the nature of a medical condition, disease, or illness through assessment.</PROPERTY>
+	<PROPERTY>fast = diagnosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>fatal_disease</NAME>
+	<PROPERTY>description = Pertains to an illness or medical condition characterized by an inherently high risk of mortality.</PROPERTY>
+	<PROPERTY>fast = fatal_disease[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>muscle</NAME>
+	<PROPERTY>description = Relates to the physiological state or functional capacity of the body's musculature.</PROPERTY>
+	<PROPERTY>fast = muscle[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>multiple_sclerosis</NAME>
+	<PROPERTY>description = A chronic neurological disorder impacting the central nervous system, characterized by demyelination.</PROPERTY>
+	<PROPERTY>fast = multiple_sclerosis[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>neck_stiffness</NAME>
+	<PROPERTY>description = Refers to a symptom involving reduced flexibility and discomfort in the cervical region of the spine.</PROPERTY>
+	<PROPERTY>fast = neck_stiffness[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>damage_to_the_eye</NAME>
+	<PROPERTY>description = Refers to any form of injury, trauma, or deterioration affecting the ocular structures.</PROPERTY>
+	<PROPERTY>fast = damage_to_the_eye[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>cardiac_arrest</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>respiratory_failure</GIVEN>
+	<TABLE>
+		0.70755 0.29245
+		0.685369 0.314631
+		0.66031 0.33969
+		0.237661 0.762339
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>coma</FOR>
+	<GIVEN>convulsions</GIVEN>
+	<GIVEN>fever</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<GIVEN>respiratory_failure</GIVEN>
+	<GIVEN>cardiac_arrest</GIVEN>
+	<TABLE>
+		0.701469 0.298531
+		0.507312 0.492688
+		0.487274 0.512726
+		0.377486 0.622514
+		0.601365 0.398635
+		0.141608 0.858392
+		0.506693 0.493307
+		0.857479 0.142521
+		0.765837 0.234163
+		0.339948 0.660052
+		0.473574 0.526426
+		0.581802 0.418198
+		0.104546 0.895454
+		0.572305 0.427695
+		0.894446 0.105554
+		0.66925 0.33075
+		0.859381 0.140619
+		0.520747 0.479253
+		0.472093 0.527907
+		0.343007 0.656993
+		0.399434 0.600566
+		0.942917 0.0570831
+		0.135798 0.864202
+		0.740072 0.259928
+		0.570841 0.429159
+		0.408708 0.591292
+		0.541025 0.458975
+		0.686683 0.313317
+		0.586105 0.413895
+		0.362443 0.637557
+		0.260434 0.739566
+		0.708741 0.291259
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>respiratory_failure</FOR>
+	<TABLE>
+		0.417681 0.582319
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>high_blood_pressure</FOR>
+	<TABLE>
+		0.987279 0.0127207
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>blindness</FOR>
+	<GIVEN>damage_to_the_eye</GIVEN>
+	<GIVEN>vision_loss</GIVEN>
+	<GIVEN>diagnosis</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.158812 0.841188
+		0.638077 0.361923
+		0.0388007 0.961199
+		0.933974 0.0660265
+		0.795441 0.204559
+		0.10644 0.89356
+		0.543263 0.456737
+		0.48056 0.51944
+		0.915601 0.0843985
+		0.38615 0.61385
+		0.144003 0.855997
+		0.0235573 0.976443
+		0.645629 0.354371
+		0.445732 0.554268
+		0.136243 0.863757
+		0.898358 0.101642
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>intracerebral_hemorrhage</FOR>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.216235 0.783765
+		0.703583 0.296417
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>vision_loss</FOR>
+	<GIVEN>multiple_sclerosis</GIVEN>
+	<GIVEN>high_blood_pressure</GIVEN>
+	<TABLE>
+		0.475785 0.524215
+		0.331282 0.668718
+		0.494468 0.505532
+		0.641263 0.358737
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fever</FOR>
+	<GIVEN>intracerebral_hemorrhage</GIVEN>
+	<GIVEN>fatal_disease</GIVEN>
+	<TABLE>
+		0.0446793 0.955321
+		0.689989 0.310011
+		0.670445 0.329555
+		0.181863 0.818137
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>convulsions</FOR>
+	<GIVEN>multiple_sclerosis</GIVEN>
+	<GIVEN>fatal_disease</GIVEN>
+	<GIVEN>fever</GIVEN>
+	<TABLE>
+		0.0166296 0.98337
+		0.409526 0.590474
+		0.619288 0.380712
+		0.516131 0.483869
+		0.396042 0.603958
+		0.851751 0.148249
+		0.404143 0.595857
+		0.375172 0.624828
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>diagnosis</FOR>
+	<GIVEN>fever</GIVEN>
+	<TABLE>
+		0.37686 0.62314
+		0.544481 0.455519
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>fatal_disease</FOR>
+	<TABLE>
+		0.797742 0.202258
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>muscle</FOR>
+	<GIVEN>fatal_disease</GIVEN>
+	<TABLE>
+		0.343088 0.656912
+		0.327048 0.672952
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>multiple_sclerosis</FOR>
+	<TABLE>
+		0.0990505 0.900949
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>neck_stiffness</FOR>
+	<GIVEN>intracerebral_hemorrhage</GIVEN>
+	<TABLE>
+		0.418471 0.581529
+		0.413087 0.586913
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>damage_to_the_eye</FOR>
+	<TABLE>
+		0.569364 0.430636
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

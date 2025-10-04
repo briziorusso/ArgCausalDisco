@@ -678,7 +678,7 @@ bnlearn_report.to_csv("bnlearn-report.csv")
 # ### Synthetic datasets
 
 # %%
-synthetic_datasets = list(Path("causenet_synth_5_10_15/").glob("*.bifxml"))
+synthetic_datasets = list(Path("synthetic/").glob("*.bifxml"))
 synthetic_prior_df = pd.read_json("synthetic.json")
 
 # %%

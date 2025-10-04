@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>dag_5_nodes_5_edges_semantics_random</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>brain_damage</NAME>
+	<PROPERTY>description = An observable neurological condition characterized by structural or functional impairment of brain tissue, potentially impacting various cognitive and behavioral processes.</PROPERTY>
+	<PROPERTY>fast = brain_damage[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>hallucinations</NAME>
+	<PROPERTY>description = The occurrence of sensory perceptions (e.g., visual, auditory, tactile) experienced as real by an individual in the absence of corresponding external stimuli.</PROPERTY>
+	<PROPERTY>fast = hallucinations[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>violent_behavior</NAME>
+	<PROPERTY>description = The frequency, intensity, or likelihood of actions intended to cause physical harm, injury, or destruction to individuals, animals, or property.</PROPERTY>
+	<PROPERTY>fast = violent_behavior[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>paranoia</NAME>
+	<PROPERTY>description = A psychological state marked by persistent distrust and suspicion of others, often accompanied by delusions of persecution, conspiracy, or an exaggerated sense of threat.</PROPERTY>
+	<PROPERTY>fast = paranoia[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>violent_video_games</NAME>
+	<PROPERTY>description = A quantitative measure reflecting an individual's habitual exposure to or engagement with interactive digital entertainment content featuring overtly aggressive or combative themes.</PROPERTY>
+	<PROPERTY>fast = violent_video_games[2]</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>0</OUTCOME>
+	<OUTCOME>1</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>brain_damage</FOR>
+	<TABLE>
+		0.528823 0.471177
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>hallucinations</FOR>
+	<GIVEN>brain_damage</GIVEN>
+	<TABLE>
+		0.809764 0.190236
+		0.960713 0.0392866
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>violent_behavior</FOR>
+	<GIVEN>violent_video_games</GIVEN>
+	<GIVEN>paranoia</GIVEN>
+	<GIVEN>brain_damage</GIVEN>
+	<TABLE>
+		0.75663 0.24337
+		0.457698 0.542302
+		0.449098 0.550902
+		0.300086 0.699914
+		0.685482 0.314518
+		0.598266 0.401734
+		0.408121 0.591879
+		0.679772 0.320228
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>paranoia</FOR>
+	<GIVEN>hallucinations</GIVEN>
+	<TABLE>
+		0.691369 0.308631
+		0.446367 0.553633
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>violent_video_games</FOR>
+	<TABLE>
+		0.768066 0.231934
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>
