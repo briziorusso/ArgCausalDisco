@@ -17,29 +17,29 @@
                     "tumors"
                 ],
                 [
-                    "irritability",
+                    "sleep_apnea",
                     "tumors"
                 ],
                 [
-                    "sleep_apnea",
+                    "irritability",
                     "tumors"
                 ]
             ],
             "required":[
-                [
-                    "tumors",
-                    "dysfunction"
-                ],
                 [
                     "chronic_pain",
                     "irritability"
                 ],
                 [
                     "sleep_apnea",
-                    "irritability"
+                    "dysfunction"
                 ],
                 [
                     "sleep_apnea",
+                    "irritability"
+                ],
+                [
+                    "tumors",
                     "dysfunction"
                 ]
             ]
@@ -119,12 +119,16 @@
                     "high_blood_pressure"
                 ],
                 [
-                    "myocardial_infarction",
-                    "coronary_artery_disease"
+                    "ventricular_fibrillation",
+                    "coronary_heart_disease"
                 ],
                 [
                     "coronary_heart_disease",
-                    "high_blood_pressure"
+                    "coronary_artery_disease"
+                ],
+                [
+                    "ventricular_fibrillation",
+                    "coronary_artery_disease"
                 ],
                 [
                     "ventricular_fibrillation",
@@ -132,7 +136,7 @@
                 ],
                 [
                     "coronary_heart_disease",
-                    "coronary_artery_disease"
+                    "high_blood_pressure"
                 ],
                 [
                     "ventricular_fibrillation",
@@ -143,15 +147,15 @@
                     "high_blood_pressure"
                 ],
                 [
-                    "ventricular_fibrillation",
-                    "coronary_heart_disease"
-                ],
-                [
-                    "ventricular_fibrillation",
+                    "myocardial_infarction",
                     "coronary_artery_disease"
                 ]
             ],
             "required":[
+                [
+                    "high_blood_pressure",
+                    "coronary_artery_disease"
+                ],
                 [
                     "myocardial_infarction",
                     "ventricular_fibrillation"
@@ -159,10 +163,6 @@
                 [
                     "coronary_artery_disease",
                     "coronary_heart_disease"
-                ],
-                [
-                    "high_blood_pressure",
-                    "coronary_artery_disease"
                 ],
                 [
                     "coronary_artery_disease",
@@ -204,12 +204,12 @@
             ],
             "required":[
                 [
-                    "reduced_blood_flow",
-                    "brain_damage"
-                ],
-                [
                     "blockages",
                     "reduced_blood_flow"
+                ],
+                [
+                    "reduced_blood_flow",
+                    "brain_damage"
                 ]
             ]
         },
@@ -246,11 +246,11 @@
         "priors":{
             "forbidden":[
                 [
-                    "dysfunction",
+                    "chronic_pain",
                     "underlying_issues"
                 ],
                 [
-                    "chronic_pain",
+                    "dysfunction",
                     "underlying_issues"
                 ]
             ],
@@ -258,26 +258,6 @@
                 [
                     "tensions",
                     "irritability"
-                ],
-                [
-                    "underlying_issues",
-                    "dysfunction"
-                ],
-                [
-                    "underlying_issues",
-                    "chronic_pain"
-                ],
-                [
-                    "hormonal_imbalances",
-                    "mood_swings"
-                ],
-                [
-                    "hormonal_imbalances",
-                    "irritability"
-                ],
-                [
-                    "underlying_issues",
-                    "hormonal_imbalances"
                 ],
                 [
                     "chronic_pain",
@@ -288,16 +268,36 @@
                     "dysfunction"
                 ],
                 [
-                    "drug_abuse",
-                    "dysfunction"
-                ],
-                [
                     "phthalates",
                     "hormonal_imbalances"
                 ],
                 [
+                    "hormonal_imbalances",
+                    "irritability"
+                ],
+                [
+                    "drug_abuse",
+                    "dysfunction"
+                ],
+                [
+                    "hormonal_imbalances",
+                    "mood_swings"
+                ],
+                [
+                    "underlying_issues",
+                    "hormonal_imbalances"
+                ],
+                [
+                    "underlying_issues",
+                    "dysfunction"
+                ],
+                [
                     "situations",
                     "tensions"
+                ],
+                [
+                    "underlying_issues",
+                    "chronic_pain"
                 ]
             ]
         },
@@ -329,28 +329,8 @@
         "priors":{
             "forbidden":[
                 [
-                    "kidney_stones",
-                    "vitamin_d"
-                ],
-                [
                     "abdominal_pain",
                     "kidney_stones"
-                ],
-                [
-                    "deposits",
-                    "demonstrators"
-                ],
-                [
-                    "abdominal_pain",
-                    "obstruction"
-                ],
-                [
-                    "blockage",
-                    "deposits"
-                ],
-                [
-                    "obstruction",
-                    "deposits"
                 ],
                 [
                     "demonstrators",
@@ -359,6 +339,26 @@
                 [
                     "abdominal_pain",
                     "blockage"
+                ],
+                [
+                    "deposits",
+                    "demonstrators"
+                ],
+                [
+                    "obstruction",
+                    "deposits"
+                ],
+                [
+                    "abdominal_pain",
+                    "obstruction"
+                ],
+                [
+                    "kidney_stones",
+                    "vitamin_d"
+                ],
+                [
+                    "blockage",
+                    "deposits"
                 ]
             ],
             "required":[
@@ -398,8 +398,8 @@
         "priors":{
             "forbidden":[
                 [
-                    "ptsd",
-                    "experiences"
+                    "breathing_problems",
+                    "environmental_factors"
                 ],
                 [
                     "ailments",
@@ -410,18 +410,18 @@
                     "hormones"
                 ],
                 [
-                    "breathing_problems",
-                    "environmental_factors"
+                    "ptsd",
+                    "experiences"
                 ]
             ],
             "required":[
                 [
-                    "sleep_deprivation",
-                    "sleep_problems"
-                ],
-                [
                     "experiences",
                     "ptsd"
+                ],
+                [
+                    "sleep_deprivation",
+                    "sleep_problems"
                 ]
             ]
         },
@@ -449,11 +449,7 @@
             "forbidden":[
                 [
                     "sudden_death",
-                    "high_blood_pressure"
-                ],
-                [
-                    "sudden_death",
-                    "heart_problems"
+                    "plaque"
                 ],
                 [
                     "sudden_death",
@@ -461,13 +457,21 @@
                 ],
                 [
                     "sudden_death",
-                    "plaque"
+                    "high_blood_pressure"
+                ],
+                [
+                    "sudden_death",
+                    "heart_problems"
                 ]
             ],
             "required":[
                 [
-                    "plaque",
+                    "lack_of_exercise",
                     "high_blood_pressure"
+                ],
+                [
+                    "plaque",
+                    "heart_problems"
                 ],
                 [
                     "high_blood_pressure",
@@ -478,16 +482,12 @@
                     "plaque"
                 ],
                 [
+                    "plaque",
+                    "high_blood_pressure"
+                ],
+                [
                     "heart_problems",
                     "sudden_death"
-                ],
-                [
-                    "plaque",
-                    "heart_problems"
-                ],
-                [
-                    "lack_of_exercise",
-                    "high_blood_pressure"
                 ]
             ]
         },
@@ -519,8 +519,36 @@
         "priors":{
             "forbidden":[
                 [
+                    "brain_damage",
+                    "old_age"
+                ],
+                [
+                    "heart_problems",
+                    "genetics"
+                ],
+                [
                     "old_age",
                     "genetics"
+                ],
+                [
+                    "blood_clots",
+                    "genetics"
+                ],
+                [
+                    "high_blood_pressure",
+                    "genetics"
+                ],
+                [
+                    "brain_damage",
+                    "genetics"
+                ],
+                [
+                    "blood_clots",
+                    "old_age"
+                ],
+                [
+                    "progressive_vision_loss",
+                    "old_age"
                 ],
                 [
                     "heart_problems",
@@ -529,54 +557,26 @@
                 [
                     "cardiac_arrest",
                     "old_age"
+                ],
+                [
+                    "high_blood_pressure",
+                    "old_age"
+                ],
+                [
+                    "progressive_vision_loss",
+                    "genetics"
+                ],
+                [
+                    "cardiac_arrest",
+                    "genetics"
                 ],
                 [
                     "anorexia",
                     "old_age"
                 ],
                 [
-                    "heart_problems",
-                    "genetics"
-                ],
-                [
-                    "progressive_vision_loss",
-                    "old_age"
-                ],
-                [
-                    "blood_clots",
-                    "old_age"
-                ],
-                [
                     "blindness",
                     "progressive_vision_loss"
-                ],
-                [
-                    "brain_damage",
-                    "old_age"
-                ],
-                [
-                    "brain_damage",
-                    "genetics"
-                ],
-                [
-                    "progressive_vision_loss",
-                    "genetics"
-                ],
-                [
-                    "high_blood_pressure",
-                    "old_age"
-                ],
-                [
-                    "blood_clots",
-                    "genetics"
-                ],
-                [
-                    "high_blood_pressure",
-                    "genetics"
-                ],
-                [
-                    "cardiac_arrest",
-                    "genetics"
                 ]
             ],
             "required":[
@@ -623,19 +623,11 @@
                 ],
                 [
                     "sudden_death",
+                    "high_blood_pressure"
+                ],
+                [
+                    "sudden_death",
                     "sexual_dysfunction"
-                ],
-                [
-                    "sexual_dysfunction",
-                    "prostate_gland_cancer_surgery"
-                ],
-                [
-                    "sudden_death",
-                    "hypothyroidism"
-                ],
-                [
-                    "sudden_death",
-                    "heart_problems"
                 ],
                 [
                     "nerve_damage",
@@ -647,21 +639,29 @@
                 ],
                 [
                     "sudden_death",
-                    "high_blood_pressure"
+                    "syndrome"
                 ],
                 [
                     "sudden_death",
-                    "syndrome"
+                    "heart_problems"
+                ],
+                [
+                    "sudden_death",
+                    "hypothyroidism"
+                ],
+                [
+                    "sexual_dysfunction",
+                    "prostate_gland_cancer_surgery"
                 ]
             ],
             "required":[
                 [
-                    "high_blood_pressure",
-                    "heart_problems"
-                ],
-                [
                     "nerve_damage",
                     "sexual_dysfunction"
+                ],
+                [
+                    "high_blood_pressure",
+                    "heart_problems"
                 ],
                 [
                     "prostate_gland_cancer_surgery",
@@ -692,12 +692,8 @@
         "priors":{
             "forbidden":[
                 [
-                    "abdominal_pain",
-                    "migraines"
-                ],
-                [
                     "loss_of_appetite",
-                    "migraines"
+                    "vomiting"
                 ],
                 [
                     "vomiting",
@@ -705,7 +701,11 @@
                 ],
                 [
                     "loss_of_appetite",
-                    "vomiting"
+                    "migraines"
+                ],
+                [
+                    "abdominal_pain",
+                    "migraines"
                 ]
             ],
             "required":[
@@ -735,41 +735,41 @@
         "priors":{
             "forbidden":[
                 [
+                    "brain_damage",
+                    "strokes"
+                ],
+                [
                     "blindness",
                     "brain_damage"
                 ],
                 [
-                    "brain_damage",
-                    "strokes"
-                ],
-                [
                     "disabilities",
                     "strokes"
-                ],
-                [
-                    "disabilities",
-                    "brain_damage"
                 ],
                 [
                     "obstacles",
                     "disabilities"
+                ],
+                [
+                    "disabilities",
+                    "brain_damage"
                 ]
             ],
             "required":[
                 [
-                    "brain_damage",
-                    "disabilities"
-                ],
-                [
                     "disabilities",
                     "obstacles"
+                ],
+                [
+                    "blindness",
+                    "disabilities"
                 ],
                 [
                     "strokes",
                     "brain_damage"
                 ],
                 [
-                    "blindness",
+                    "brain_damage",
                     "disabilities"
                 ]
             ]
@@ -807,7 +807,15 @@
         "priors":{
             "forbidden":[
                 [
+                    "chronic_pain",
+                    "serious_injuries"
+                ],
+                [
                     "discrimination",
+                    "bicycle_accidents"
+                ],
+                [
+                    "serious_injuries",
                     "bicycle_accidents"
                 ],
                 [
@@ -817,56 +825,48 @@
                 [
                     "absence",
                     "chronic_pain"
-                ],
-                [
-                    "serious_injuries",
-                    "bicycle_accidents"
-                ],
-                [
-                    "chronic_pain",
-                    "serious_injuries"
                 ]
             ],
             "required":[
                 [
                     "discrimination",
-                    "insecurity"
+                    "despair"
                 ],
                 [
-                    "despair",
-                    "withdrawal"
+                    "serious_injuries",
+                    "chronic_pain"
                 ],
                 [
                     "attacks",
                     "serious_injuries"
                 ],
                 [
-                    "discrimination",
-                    "despair"
-                ],
-                [
-                    "terrorism",
-                    "serious_injuries"
-                ],
-                [
-                    "irritability",
-                    "arguments"
+                    "despair",
+                    "withdrawal"
                 ],
                 [
                     "fights",
                     "serious_injuries"
                 ],
                 [
-                    "bicycle_accidents",
-                    "serious_injuries"
+                    "discrimination",
+                    "insecurity"
                 ],
                 [
-                    "serious_injuries",
-                    "chronic_pain"
+                    "irritability",
+                    "arguments"
                 ],
                 [
                     "hatred",
                     "attacks"
+                ],
+                [
+                    "terrorism",
+                    "serious_injuries"
+                ],
+                [
+                    "bicycle_accidents",
+                    "serious_injuries"
                 ]
             ]
         },
@@ -903,12 +903,12 @@
         "priors":{
             "forbidden":[
                 [
-                    "heartburn",
-                    "acid_reflux"
-                ],
-                [
                     "insulin_resistance",
                     "olanzapine"
+                ],
+                [
+                    "heartburn",
+                    "acid_reflux"
                 ]
             ],
             "required":[
@@ -917,12 +917,12 @@
                     "hyperlipidemia"
                 ],
                 [
-                    "ulcerative_colitis",
-                    "colitis"
-                ],
-                [
                     "acid_reflux",
                     "heartburn"
+                ],
+                [
+                    "ulcerative_colitis",
+                    "colitis"
                 ]
             ]
         },
@@ -949,15 +949,11 @@
         "priors":{
             "forbidden":[
                 [
-                    "electrolyte_imbalance",
+                    "acute_watery_diarrhoea",
                     "etec"
                 ],
                 [
                     "severe_dehydration",
-                    "acute_watery_diarrhoea"
-                ],
-                [
-                    "acute_watery_diarrhoea",
                     "etec"
                 ],
                 [
@@ -965,8 +961,12 @@
                     "etec"
                 ],
                 [
-                    "severe_dehydration",
+                    "electrolyte_imbalance",
                     "etec"
+                ],
+                [
+                    "severe_dehydration",
+                    "acute_watery_diarrhoea"
                 ]
             ],
             "required":[
@@ -1007,19 +1007,15 @@
         "priors":{
             "forbidden":[
                 [
-                    "mood_swings",
+                    "irritability",
                     "chronic_pain"
                 ],
                 [
-                    "irritability",
+                    "mood_swings",
                     "chronic_pain"
                 ]
             ],
             "required":[
-                [
-                    "chronic_pain",
-                    "mood_swings"
-                ],
                 [
                     "chronic_pain",
                     "irritability"
@@ -1027,6 +1023,10 @@
                 [
                     "unhygienic_environment",
                     "various_diseases"
+                ],
+                [
+                    "chronic_pain",
+                    "mood_swings"
                 ]
             ]
         },
@@ -1063,12 +1063,12 @@
         "priors":{
             "forbidden":[
                 [
-                    "death_in_the_united_states",
-                    "high_blood_pressure"
+                    "oxygen",
+                    "cigarette_smoking"
                 ],
                 [
                     "death_in_the_united_states",
-                    "cardiovascular_diseases"
+                    "chest_pain"
                 ],
                 [
                     "death_in_the_united_states",
@@ -1076,11 +1076,15 @@
                 ],
                 [
                     "death_in_the_united_states",
-                    "coronary_heart_disease"
+                    "exposure_to_secondhand_smoke"
                 ],
                 [
-                    "death_in_the_united_states",
-                    "acute_pancreatitis"
+                    "oxygen",
+                    "pneumonia"
+                ],
+                [
+                    "heart",
+                    "coronary_heart_disease"
                 ],
                 [
                     "heart",
@@ -1088,35 +1092,19 @@
                 ],
                 [
                     "death_in_the_united_states",
-                    "chest_pain"
-                ],
-                [
-                    "oxygen",
-                    "abdominal_fat"
-                ],
-                [
-                    "oxygen",
-                    "cigarette_smoking"
-                ],
-                [
-                    "death_in_the_united_states",
-                    "hyperlipidemia"
-                ],
-                [
-                    "death_in_the_united_states",
                     "abdominal_fat"
                 ],
                 [
                     "death_in_the_united_states",
-                    "cigarette_smoking"
-                ],
-                [
-                    "heart",
                     "coronary_heart_disease"
                 ],
                 [
-                    "oxygen",
-                    "pneumonia"
+                    "death_in_the_united_states",
+                    "cigarette_smoking"
+                ],
+                [
+                    "death_in_the_united_states",
+                    "cardiovascular_diseases"
                 ],
                 [
                     "death_in_the_united_states",
@@ -1124,7 +1112,15 @@
                 ],
                 [
                     "death_in_the_united_states",
-                    "pneumonia"
+                    "hyperlipidemia"
+                ],
+                [
+                    "oxygen",
+                    "abdominal_fat"
+                ],
+                [
+                    "death_in_the_united_states",
+                    "high_blood_pressure"
                 ],
                 [
                     "chest_pain",
@@ -1132,16 +1128,20 @@
                 ],
                 [
                     "death_in_the_united_states",
-                    "exposure_to_secondhand_smoke"
+                    "acute_pancreatitis"
+                ],
+                [
+                    "death_in_the_united_states",
+                    "pneumonia"
                 ]
             ],
             "required":[
                 [
-                    "exposure_to_secondhand_smoke",
+                    "cigarette_smoking",
                     "oxidative_stress"
                 ],
                 [
-                    "cigarette_smoking",
+                    "exposure_to_secondhand_smoke",
                     "oxidative_stress"
                 ]
             ]
@@ -1210,12 +1210,12 @@
         "priors":{
             "forbidden":[
                 [
-                    "high_cholesterol",
-                    "lifestyle"
-                ],
-                [
                     "premature_death",
                     "cardiac_arrest"
+                ],
+                [
+                    "high_cholesterol",
+                    "lifestyle"
                 ],
                 [
                     "gout",
@@ -1224,8 +1224,12 @@
             ],
             "required":[
                 [
+                    "lifestyle",
+                    "high_cholesterol"
+                ],
+                [
                     "medical_conditions",
-                    "fever"
+                    "vomiting"
                 ],
                 [
                     "severe_pain",
@@ -1236,6 +1240,10 @@
                     "gout"
                 ],
                 [
+                    "fever",
+                    "flushing_in_physiology"
+                ],
+                [
                     "lifestyle",
                     "medical_conditions"
                 ],
@@ -1244,24 +1252,16 @@
                     "seizure"
                 ],
                 [
-                    "medical_conditions",
-                    "vomiting"
+                    "cardiac_arrest",
+                    "premature_death"
                 ],
                 [
                     "medical_conditions",
                     "severe_pain"
                 ],
                 [
-                    "lifestyle",
-                    "high_cholesterol"
-                ],
-                [
-                    "fever",
-                    "flushing_(_physiology_)"
-                ],
-                [
-                    "cardiac_arrest",
-                    "premature_death"
+                    "medical_conditions",
+                    "fever"
                 ]
             ]
         },
@@ -1305,15 +1305,15 @@
                     "substance_abuse"
                 ],
                 [
+                    "abandoned_child_syndrome",
+                    "emotional_problems"
+                ],
+                [
                     "drug_abuse",
                     "substance_abuse"
                 ],
                 [
                     "despair",
-                    "emotional_problems"
-                ],
-                [
-                    "abandoned_child_syndrome",
                     "emotional_problems"
                 ]
             ]
@@ -1353,16 +1353,16 @@
             ],
             "required":[
                 [
-                    "discrimination",
-                    "social_problems"
-                ],
-                [
                     "chronic_pain",
                     "irritability"
                 ],
                 [
                     "great_depression",
                     "despair"
+                ],
+                [
+                    "discrimination",
+                    "social_problems"
                 ],
                 [
                     "marital_problems",
@@ -1429,19 +1429,11 @@
         "priors":{
             "forbidden":[
                 [
-                    "chronic_pain",
+                    "attacks",
                     "homophobia"
                 ],
                 [
-                    "irritability",
-                    "chronic_pain"
-                ],
-                [
-                    "despair",
-                    "chronic_pain"
-                ],
-                [
-                    "attacks",
+                    "chronic_pain",
                     "homophobia"
                 ],
                 [
@@ -1451,16 +1443,24 @@
                 [
                     "loss_of_appetite",
                     "chronic_pain"
+                ],
+                [
+                    "despair",
+                    "chronic_pain"
+                ],
+                [
+                    "irritability",
+                    "chronic_pain"
                 ]
             ],
             "required":[
                 [
-                    "homophobia",
-                    "hatred"
-                ],
-                [
                     "unrest",
                     "instability"
+                ],
+                [
+                    "homophobia",
+                    "hatred"
                 ]
             ]
         },
@@ -1497,24 +1497,24 @@
         "priors":{
             "forbidden":[
                 [
+                    "vision_loss",
+                    "damage_to_the_eye"
+                ],
+                [
                     "diagnosis",
                     "convulsions"
                 ],
                 [
-                    "blindness",
-                    "damage_to_the_eye"
-                ],
-                [
-                    "vision_loss",
-                    "damage_to_the_eye"
+                    "diagnosis",
+                    "coma"
                 ],
                 [
                     "diagnosis",
                     "multiple_sclerosis"
                 ],
                 [
-                    "diagnosis",
-                    "coma"
+                    "blindness",
+                    "damage_to_the_eye"
                 ],
                 [
                     "diagnosis",
@@ -1592,16 +1592,16 @@
                     "severe_dehydration"
                 ],
                 [
-                    "diarrhoea",
-                    "severe_dehydration"
+                    "severe_dehydration",
+                    "kidney_failure"
                 ],
                 [
                     "vomiting",
                     "low_potassium_levels"
                 ],
                 [
-                    "severe_dehydration",
-                    "kidney_failure"
+                    "diarrhoea",
+                    "severe_dehydration"
                 ],
                 [
                     "diarrhoea",
@@ -1642,24 +1642,24 @@
         "priors":{
             "forbidden":[
                 [
-                    "ulcers",
-                    "alcohol_abuse"
-                ],
-                [
-                    "irritability",
-                    "chronic_pain"
-                ],
-                [
-                    "despair",
-                    "chronic_pain"
+                    "hyperthermia",
+                    "sepsis"
                 ],
                 [
                     "withdrawal",
                     "alcohol_abuse"
                 ],
                 [
-                    "hyperthermia",
-                    "sepsis"
+                    "ulcers",
+                    "alcohol_abuse"
+                ],
+                [
+                    "despair",
+                    "chronic_pain"
+                ],
+                [
+                    "irritability",
+                    "chronic_pain"
                 ]
             ],
             "required":[
@@ -1668,16 +1668,16 @@
                     "hyperthermia"
                 ],
                 [
-                    "sepsis",
-                    "kidney"
+                    "withdrawal",
+                    "agitation"
                 ],
                 [
                     "alcohol_abuse",
                     "withdrawal"
                 ],
                 [
-                    "withdrawal",
-                    "agitation"
+                    "sepsis",
+                    "kidney"
                 ]
             ]
         },
@@ -1714,7 +1714,7 @@
         "priors":{
             "forbidden":[
                 [
-                    "fever",
+                    "episode",
                     "chronic_exposure"
                 ],
                 [
@@ -1722,11 +1722,11 @@
                     "leukemia"
                 ],
                 [
-                    "episode",
-                    "chronic_exposure"
+                    "insulin_resistance",
+                    "foods"
                 ],
                 [
-                    "cirrhosis",
+                    "fever",
                     "chronic_exposure"
                 ],
                 [
@@ -1734,8 +1734,8 @@
                     "chronic_exposure"
                 ],
                 [
-                    "insulin_resistance",
-                    "foods"
+                    "cirrhosis",
+                    "chronic_exposure"
                 ]
             ],
             "required":[
@@ -1744,12 +1744,16 @@
                     "complication"
                 ],
                 [
-                    "hyperglycemia",
-                    "coma"
-                ],
-                [
                     "foods",
                     "hyperglycemia"
+                ],
+                [
+                    "insulin_resistance",
+                    "hyperglycemia"
+                ],
+                [
+                    "hyperglycemia",
+                    "coma"
                 ],
                 [
                     "chronic_exposure",
@@ -1758,10 +1762,6 @@
                 [
                     "hyperglycemia",
                     "complication"
-                ],
-                [
-                    "insulin_resistance",
-                    "hyperglycemia"
                 ],
                 [
                     "chronic_exposure",
@@ -1797,46 +1797,46 @@
         "priors":{
             "forbidden":[
                 [
-                    "drought",
-                    "rain"
+                    "forest_fires",
+                    "lightning"
                 ],
                 [
                     "rain",
                     "drought"
                 ],
                 [
-                    "forest_fires",
-                    "lightning"
+                    "drought",
+                    "rain"
                 ]
             ],
             "required":[
+                [
+                    "urbanization",
+                    "changes_in_land_use"
+                ],
                 [
                     "changes_in_land_use",
                     "habitat_loss"
                 ],
                 [
-                    "drought",
-                    "forest_fires"
+                    "forest_fires",
+                    "habitat_loss"
                 ],
                 [
                     "rising_temperatures",
                     "drought"
                 ],
                 [
-                    "forest_fires",
-                    "habitat_loss"
-                ],
-                [
-                    "el_ni\u00f1o",
-                    "rising_temperatures"
-                ],
-                [
-                    "urbanization",
-                    "changes_in_land_use"
+                    "drought",
+                    "forest_fires"
                 ],
                 [
                     "lightning",
                     "forest_fires"
+                ],
+                [
+                    "el_ni\u00f1o",
+                    "rising_temperatures"
                 ]
             ]
         },
@@ -1876,30 +1876,18 @@
                     "pericarditis"
                 ],
                 [
-                    "hypertensive_heart_disease",
-                    "high_blood_pressure"
-                ],
-                [
                     "atrial_fibrillation",
                     "hyperthyroidism"
+                ],
+                [
+                    "hypertensive_heart_disease",
+                    "high_blood_pressure"
                 ]
             ],
             "required":[
                 [
                     "high_blood_pressure",
                     "hypertensive_heart_disease"
-                ],
-                [
-                    "reduced_blood_flow",
-                    "lack_of_oxygen"
-                ],
-                [
-                    "lack_of_oxygen",
-                    "shortness_of_breath"
-                ],
-                [
-                    "excess_fluid",
-                    "reduced_blood_flow"
                 ],
                 [
                     "coronary_artery_disease",
@@ -1910,8 +1898,20 @@
                     "excess_fluid"
                 ],
                 [
+                    "lack_of_oxygen",
+                    "shortness_of_breath"
+                ],
+                [
                     "hyperthyroidism",
                     "atrial_fibrillation"
+                ],
+                [
+                    "reduced_blood_flow",
+                    "lack_of_oxygen"
+                ],
+                [
+                    "excess_fluid",
+                    "reduced_blood_flow"
                 ]
             ]
         },
@@ -1999,17 +1999,29 @@
         "priors":{
             "forbidden":[
                 [
-                    "embarrassment",
+                    "sweating",
                     "tight_clothing"
                 ],
                 [
-                    "sweating",
+                    "embarrassment",
                     "tight_clothing"
                 ]
             ],
             "required":[
                 [
-                    "hormones",
+                    "chronic_pain",
+                    "lack_of_sleep"
+                ],
+                [
+                    "chronic_pain",
+                    "irritability"
+                ],
+                [
+                    "sweating",
+                    "embarrassment"
+                ],
+                [
+                    "tight_clothing",
                     "sweating"
                 ],
                 [
@@ -2017,28 +2029,16 @@
                     "chronic_fatigue"
                 ],
                 [
-                    "tight_clothing",
-                    "sweating"
-                ],
-                [
-                    "sweating",
-                    "embarrassment"
+                    "lack_of_sleep",
+                    "irritability"
                 ],
                 [
                     "hormones",
                     "irritability"
                 ],
                 [
-                    "lack_of_sleep",
-                    "irritability"
-                ],
-                [
-                    "chronic_pain",
-                    "irritability"
-                ],
-                [
-                    "chronic_pain",
-                    "lack_of_sleep"
+                    "hormones",
+                    "sweating"
                 ]
             ]
         },
@@ -2070,29 +2070,29 @@
                 ],
                 [
                     "memory_problems",
-                    "hypothyroidism"
+                    "brain_damage"
                 ],
                 [
                     "memory_problems",
-                    "brain_damage"
+                    "hypothyroidism"
                 ]
             ],
             "required":[
+                [
+                    "high_blood_pressure",
+                    "brain_damage"
+                ],
+                [
+                    "high_blood_pressure",
+                    "memory_problems"
+                ],
                 [
                     "hypothyroidism",
                     "memory_problems"
                 ],
                 [
-                    "high_blood_pressure",
-                    "memory_problems"
-                ],
-                [
                     "brain_damage",
                     "memory_problems"
-                ],
-                [
-                    "high_blood_pressure",
-                    "brain_damage"
                 ]
             ]
         },
@@ -2128,31 +2128,19 @@
         "priors":{
             "forbidden":[
                 [
-                    "chronic_pain",
-                    "sexual_abuse"
-                ],
-                [
-                    "chronic_stress",
-                    "sexual_abuse"
-                ],
-                [
-                    "chronic_inflammation",
-                    "sexual_abuse"
-                ],
-                [
-                    "low_self-esteem",
-                    "sexual_abuse"
-                ],
-                [
                     "tiredness",
                     "sexual_abuse"
                 ],
                 [
-                    "irritability",
+                    "alcoholism",
                     "sexual_abuse"
                 ],
                 [
-                    "alcoholism",
+                    "heart_attacks",
+                    "sexual_abuse"
+                ],
+                [
+                    "difficulties",
                     "sexual_abuse"
                 ],
                 [
@@ -2160,62 +2148,74 @@
                     "sexual_abuse"
                 ],
                 [
-                    "psychological_problems",
+                    "chronic_stress",
                     "sexual_abuse"
                 ],
                 [
-                    "heart_attacks",
+                    "low_self-esteem",
                     "sexual_abuse"
                 ],
                 [
-                    "difficulties",
+                    "chronic_pain",
+                    "sexual_abuse"
+                ],
+                [
+                    "irritability",
                     "sexual_abuse"
                 ],
                 [
                     "chest_pain",
                     "heart_attacks"
+                ],
+                [
+                    "psychological_problems",
+                    "sexual_abuse"
+                ],
+                [
+                    "chronic_inflammation",
+                    "sexual_abuse"
                 ]
             ],
             "required":[
                 [
-                    "tiredness",
-                    "irritability"
+                    "chronic_stress",
+                    "chronic_inflammation"
                 ],
                 [
-                    "heart_attacks",
-                    "chest_pain"
+                    "difficulties",
+                    "chronic_stress"
                 ],
                 [
                     "chronic_inflammation",
                     "heart_attacks"
                 ],
                 [
-                    "difficulties",
-                    "chronic_stress"
-                ],
-                [
-                    "sexual_abuse",
-                    "chronic_stress"
-                ],
-                [
-                    "psychological_problems",
-                    "difficulties"
+                    "heart_attacks",
+                    "chest_pain"
                 ],
                 [
                     "alcoholism",
                     "difficulties"
                 ],
                 [
-                    "chronic_stress",
-                    "chronic_inflammation"
-                ],
-                [
                     "sexual_abuse",
                     "low_self-esteem"
                 ],
                 [
+                    "psychological_problems",
+                    "difficulties"
+                ],
+                [
+                    "tiredness",
+                    "irritability"
+                ],
+                [
                     "sexual_abuse",
                     "psychological_problems"
+                ],
+                [
+                    "sexual_abuse",
+                    "chronic_stress"
                 ]
             ]
         },
@@ -2250,29 +2250,25 @@
                     "brain_damage"
                 ],
                 [
-                    "hallucinations",
-                    "brain_damage"
-                ],
-                [
                     "paranoia",
                     "violent_video_games"
                 ],
                 [
-                    "violent_video_games",
-                    "hallucinations"
-                ],
-                [
                     "paranoia",
                     "brain_damage"
+                ],
+                [
+                    "hallucinations",
+                    "brain_damage"
+                ],
+                [
+                    "violent_video_games",
+                    "hallucinations"
                 ]
             ],
             "required":[
                 [
-                    "brain_damage",
-                    "hallucinations"
-                ],
-                [
-                    "hallucinations",
+                    "paranoia",
                     "violent_behavior"
                 ],
                 [
@@ -2280,8 +2276,12 @@
                     "paranoia"
                 ],
                 [
-                    "paranoia",
+                    "hallucinations",
                     "violent_behavior"
+                ],
+                [
+                    "brain_damage",
+                    "hallucinations"
                 ]
             ]
         },
@@ -2356,12 +2356,20 @@
         "priors":{
             "forbidden":[
                 [
-                    "indigestion",
+                    "abdominal_pain",
                     "stomach_cancer"
                 ],
                 [
                     "abdominal_pain",
+                    "ulcers"
+                ],
+                [
+                    "indigestion",
                     "stomach_cancer"
+                ],
+                [
+                    "indigestion",
+                    "ulcers"
                 ],
                 [
                     "indigestion",
@@ -2370,14 +2378,6 @@
                 [
                     "abdominal_pain",
                     "stomach_infection"
-                ],
-                [
-                    "abdominal_pain",
-                    "ulcers"
-                ],
-                [
-                    "indigestion",
-                    "ulcers"
                 ],
                 [
                     "stomach_cancer",
@@ -2419,12 +2419,16 @@
         "priors":{
             "forbidden":[
                 [
-                    "overweight",
+                    "alcoholism",
                     "lifestyle"
                 ],
                 [
-                    "alcoholism",
-                    "lifestyle"
+                    "cardiovascular_diseases",
+                    "chd"
+                ],
+                [
+                    "metabolic_syndrome",
+                    "overweight"
                 ],
                 [
                     "premature_death",
@@ -2432,19 +2436,19 @@
                 ],
                 [
                     "premature_death",
-                    "oxidative_stress"
+                    "hormonal_imbalances"
                 ],
                 [
-                    "metabolic_syndrome",
-                    "overweight"
-                ],
-                [
-                    "cardiovascular_diseases",
-                    "chd"
+                    "overweight",
+                    "lifestyle"
                 ],
                 [
                     "premature_death",
-                    "lifestyle"
+                    "cardiovascular_diseases"
+                ],
+                [
+                    "premature_death",
+                    "chd"
                 ],
                 [
                     "hormonal_imbalances",
@@ -2452,19 +2456,7 @@
                 ],
                 [
                     "premature_death",
-                    "overweight"
-                ],
-                [
-                    "premature_death",
-                    "chd"
-                ],
-                [
-                    "premature_death",
-                    "cardiovascular_diseases"
-                ],
-                [
-                    "premature_death",
-                    "alcoholism"
+                    "oxidative_stress"
                 ],
                 [
                     "oxidative_stress",
@@ -2472,21 +2464,25 @@
                 ],
                 [
                     "premature_death",
-                    "hormonal_imbalances"
+                    "lifestyle"
                 ],
                 [
                     "premature_death",
                     "high_blood_pressure"
+                ],
+                [
+                    "premature_death",
+                    "alcoholism"
+                ],
+                [
+                    "premature_death",
+                    "overweight"
                 ]
             ],
             "required":[
                 [
-                    "alcoholism",
-                    "oxidative_stress"
-                ],
-                [
                     "high_blood_pressure",
-                    "chd"
+                    "cardiovascular_diseases"
                 ],
                 [
                     "cardiovascular_diseases",
@@ -2494,7 +2490,11 @@
                 ],
                 [
                     "high_blood_pressure",
-                    "cardiovascular_diseases"
+                    "chd"
+                ],
+                [
+                    "alcoholism",
+                    "oxidative_stress"
                 ]
             ]
         },
@@ -2526,108 +2526,104 @@
         "priors":{
             "forbidden":[
                 [
-                    "serious_health_conditions",
-                    "natural_disasters"
-                ],
-                [
-                    "high_blood_pressure",
-                    "asbestos_exposure"
-                ],
-                [
-                    "serious_health_conditions",
-                    "toxic_mold"
-                ],
-                [
-                    "chronic_pain",
-                    "natural_disasters"
-                ],
-                [
-                    "psychological_problems",
-                    "asbestos_exposure"
-                ],
-                [
-                    "ulcers",
-                    "asbestos_exposure"
-                ],
-                [
-                    "chronic_pain",
-                    "toxic_mold"
-                ],
-                [
-                    "high_blood_pressure",
-                    "natural_disasters"
-                ],
-                [
-                    "high_blood_pressure",
-                    "toxic_mold"
-                ],
-                [
-                    "psychological_problems",
-                    "natural_disasters"
-                ],
-                [
-                    "ulcers",
-                    "natural_disasters"
-                ],
-                [
-                    "alcoholism",
-                    "asbestos_exposure"
-                ],
-                [
-                    "psychological_problems",
-                    "toxic_mold"
-                ],
-                [
-                    "ulcers",
-                    "toxic_mold"
-                ],
-                [
-                    "alcoholism",
-                    "natural_disasters"
-                ],
-                [
-                    "low_self-esteem",
-                    "asbestos_exposure"
-                ],
-                [
-                    "alcoholism",
-                    "toxic_mold"
-                ],
-                [
-                    "toxic_mold",
-                    "asbestos_exposure"
-                ],
-                [
-                    "low_self-esteem",
-                    "natural_disasters"
-                ],
-                [
-                    "low_self-esteem",
-                    "toxic_mold"
-                ],
-                [
                     "asbestos_exposure",
                     "natural_disasters"
                 ],
                 [
-                    "toxic_mold",
+                    "psychological_problems",
+                    "asbestos_exposure"
+                ],
+                [
+                    "ulcers",
                     "natural_disasters"
+                ],
+                [
+                    "serious_health_conditions",
+                    "natural_disasters"
+                ],
+                [
+                    "high_blood_pressure",
+                    "asbestos_exposure"
+                ],
+                [
+                    "chronic_pain",
+                    "toxic_mold"
+                ],
+                [
+                    "low_self-esteem",
+                    "toxic_mold"
+                ],
+                [
+                    "low_self-esteem",
+                    "natural_disasters"
+                ],
+                [
+                    "chronic_pain",
+                    "natural_disasters"
+                ],
+                [
+                    "alcoholism",
+                    "toxic_mold"
+                ],
+                [
+                    "alcoholism",
+                    "natural_disasters"
+                ],
+                [
+                    "toxic_mold",
+                    "asbestos_exposure"
+                ],
+                [
+                    "psychological_problems",
+                    "toxic_mold"
+                ],
+                [
+                    "high_blood_pressure",
+                    "toxic_mold"
+                ],
+                [
+                    "ulcers",
+                    "asbestos_exposure"
                 ],
                 [
                     "serious_health_conditions",
                     "asbestos_exposure"
                 ],
                 [
+                    "psychological_problems",
+                    "natural_disasters"
+                ],
+                [
+                    "high_blood_pressure",
+                    "natural_disasters"
+                ],
+                [
                     "chronic_pain",
                     "asbestos_exposure"
+                ],
+                [
+                    "low_self-esteem",
+                    "asbestos_exposure"
+                ],
+                [
+                    "serious_health_conditions",
+                    "toxic_mold"
+                ],
+                [
+                    "alcoholism",
+                    "asbestos_exposure"
+                ],
+                [
+                    "ulcers",
+                    "toxic_mold"
+                ],
+                [
+                    "toxic_mold",
+                    "natural_disasters"
                 ]
             ],
             "required":[
                 [
-                    "natural_disasters",
-                    "psychological_problems"
-                ],
-                [
                     "high_blood_pressure",
                     "serious_health_conditions"
                 ],
@@ -2646,6 +2642,10 @@
                 [
                     "alcoholism",
                     "serious_health_conditions"
+                ],
+                [
+                    "natural_disasters",
+                    "psychological_problems"
                 ]
             ]
         },
@@ -2673,10 +2673,10 @@
             "forbidden":[
                 [
                     "hemorrhagic_stroke",
-                    "intracerebral_hemorrhage"
+                    "subarachnoid_hemorrhage"
                 ],
                 [
-                    "decreased_level_of_consciousness",
+                    "hemorrhagic_stroke",
                     "intracerebral_hemorrhage"
                 ],
                 [
@@ -2688,8 +2688,8 @@
                     "hemorrhagic_stroke"
                 ],
                 [
-                    "hemorrhagic_stroke",
-                    "subarachnoid_hemorrhage"
+                    "decreased_level_of_consciousness",
+                    "intracerebral_hemorrhage"
                 ]
             ],
             "required":[
@@ -2731,8 +2731,12 @@
         "priors":{
             "forbidden":[
                 [
-                    "atherosclerosis",
-                    "high_cholesterol"
+                    "obstruction",
+                    "gallstones"
+                ],
+                [
+                    "infertility",
+                    "retrograde_ejaculation"
                 ],
                 [
                     "blockage",
@@ -2743,12 +2747,8 @@
                     "high_cholesterol"
                 ],
                 [
-                    "infertility",
-                    "retrograde_ejaculation"
-                ],
-                [
-                    "obstruction",
-                    "gallstones"
+                    "atherosclerosis",
+                    "high_cholesterol"
                 ]
             ],
             "required":[
@@ -2794,12 +2794,24 @@
         "priors":{
             "forbidden":[
                 [
-                    "loss_of_appetite",
-                    "lymphoma"
+                    "premature_death",
+                    "renal_diseases"
                 ],
                 [
                     "premature_death",
                     "loss_of_appetite"
+                ],
+                [
+                    "premature_death",
+                    "chronic_pain"
+                ],
+                [
+                    "premature_death",
+                    "lymphoma"
+                ],
+                [
+                    "premature_death",
+                    "social_isolation"
                 ],
                 [
                     "premature_death",
@@ -2811,23 +2823,11 @@
                 ],
                 [
                     "premature_death",
-                    "social_isolation"
-                ],
-                [
-                    "premature_death",
-                    "lymphoma"
-                ],
-                [
-                    "premature_death",
-                    "chronic_pain"
-                ],
-                [
-                    "premature_death",
                     "high_blood_pressure"
                 ],
                 [
-                    "premature_death",
-                    "renal_diseases"
+                    "loss_of_appetite",
+                    "lymphoma"
                 ],
                 [
                     "premature_death",
@@ -2869,36 +2869,36 @@
             ],
             "required":[
                 [
-                    "lovesickness",
-                    "lack_of_concentration"
+                    "toxins",
+                    "hepatitis_x"
+                ],
+                [
+                    "alcoholism",
+                    "hepatitis_x"
+                ],
+                [
+                    "alcoholism",
+                    "poor_health"
                 ],
                 [
                     "fermentation",
                     "toxins"
                 ],
                 [
-                    "toxins",
-                    "hepatitis_x"
-                ],
-                [
-                    "alcoholism",
-                    "hepatitis_x"
-                ],
-                [
-                    "toxins",
-                    "poor_health"
+                    "lovesickness",
+                    "lack_of_concentration"
                 ],
                 [
                     "hepatitis_x",
                     "poor_health"
                 ],
                 [
-                    "chronic_pain",
-                    "lack_of_concentration"
+                    "toxins",
+                    "poor_health"
                 ],
                 [
-                    "alcoholism",
-                    "poor_health"
+                    "chronic_pain",
+                    "lack_of_concentration"
                 ]
             ]
         },
@@ -2930,31 +2930,7 @@
         "priors":{
             "forbidden":[
                 [
-                    "neck_pain",
-                    "spinal_stenosis"
-                ],
-                [
                     "osteoporosis",
-                    "birth_defect"
-                ],
-                [
-                    "numbness",
-                    "brain_damage"
-                ],
-                [
-                    "degeneration",
-                    "birth_defect"
-                ],
-                [
-                    "numbness",
-                    "spinal_stenosis"
-                ],
-                [
-                    "eye_problems",
-                    "birth_defect"
-                ],
-                [
-                    "brain_damage",
                     "birth_defect"
                 ],
                 [
@@ -2964,12 +2940,36 @@
                 [
                     "spinal_stenosis",
                     "birth_defect"
+                ],
+                [
+                    "degeneration",
+                    "birth_defect"
+                ],
+                [
+                    "brain_damage",
+                    "birth_defect"
+                ],
+                [
+                    "numbness",
+                    "spinal_stenosis"
+                ],
+                [
+                    "numbness",
+                    "brain_damage"
+                ],
+                [
+                    "neck_pain",
+                    "spinal_stenosis"
+                ],
+                [
+                    "eye_problems",
+                    "birth_defect"
                 ]
             ],
             "required":[
                 [
-                    "eye_problems",
-                    "blindness"
+                    "birth_defect",
+                    "eye_problems"
                 ],
                 [
                     "degeneration",
@@ -2980,8 +2980,8 @@
                     "brain_damage"
                 ],
                 [
-                    "birth_defect",
-                    "eye_problems"
+                    "eye_problems",
+                    "blindness"
                 ]
             ]
         },
@@ -3024,52 +3024,12 @@
             ],
             "required":[
                 [
-                    "tumors",
-                    "cachexia"
-                ],
-                [
-                    "skin_breakdown",
-                    "severe_pain"
-                ],
-                [
-                    "fractures",
-                    "medical_problems"
-                ],
-                [
-                    "skin_breakdown",
-                    "medical_problems"
-                ],
-                [
-                    "fractures",
-                    "immobility"
-                ],
-                [
-                    "nerve_damage",
-                    "severe_pain"
-                ],
-                [
-                    "tumors",
-                    "medical_problems"
-                ],
-                [
-                    "incontinence",
-                    "skin_breakdown"
-                ],
-                [
                     "immobility",
                     "skin_breakdown"
                 ],
                 [
-                    "nerve_damage",
-                    "immobility"
-                ],
-                [
-                    "shear",
+                    "incontinence",
                     "skin_breakdown"
-                ],
-                [
-                    "chronic_disease",
-                    "medical_problems"
                 ],
                 [
                     "tumors",
@@ -3080,16 +3040,56 @@
                     "medical_problems"
                 ],
                 [
-                    "fractures",
+                    "chronic_disease",
+                    "medical_problems"
+                ],
+                [
+                    "skin_breakdown",
                     "severe_pain"
+                ],
+                [
+                    "skin_breakdown",
+                    "medical_problems"
+                ],
+                [
+                    "tumors",
+                    "medical_problems"
+                ],
+                [
+                    "tumors",
+                    "cachexia"
+                ],
+                [
+                    "chronic_disease",
+                    "cachexia"
                 ],
                 [
                     "cachexia",
                     "medical_problems"
                 ],
                 [
-                    "chronic_disease",
-                    "cachexia"
+                    "nerve_damage",
+                    "severe_pain"
+                ],
+                [
+                    "nerve_damage",
+                    "immobility"
+                ],
+                [
+                    "fractures",
+                    "immobility"
+                ],
+                [
+                    "shear",
+                    "skin_breakdown"
+                ],
+                [
+                    "fractures",
+                    "severe_pain"
+                ],
+                [
+                    "fractures",
+                    "medical_problems"
                 ]
             ]
         },
@@ -3119,12 +3119,12 @@
         "priors":{
             "forbidden":[
                 [
-                    "medical_problems",
-                    "chronic_disease"
-                ],
-                [
                     "numbness",
                     "nerve_damage"
+                ],
+                [
+                    "medical_problems",
+                    "chronic_disease"
                 ],
                 [
                     "medical_problems",
@@ -3137,6 +3137,10 @@
             ],
             "required":[
                 [
+                    "nerve_damage",
+                    "numbness"
+                ],
+                [
                     "chronic_disease",
                     "medical_problems"
                 ],
@@ -3147,10 +3151,6 @@
                 [
                     "high_blood_pressure",
                     "medical_problems"
-                ],
-                [
-                    "nerve_damage",
-                    "numbness"
                 ]
             ]
         },
@@ -3187,46 +3187,42 @@
         "priors":{
             "forbidden":[
                 [
-                    "water_retention",
-                    "congestive_heart_failure"
-                ],
-                [
-                    "blindness",
-                    "brain_damage"
+                    "rupture",
+                    "ectopic_pregnancy"
                 ],
                 [
                     "brain_damage",
                     "strokes"
                 ],
                 [
-                    "lack_of_sleep",
-                    "sleep_apnea"
+                    "blindness",
+                    "brain_damage"
                 ],
                 [
-                    "rupture",
-                    "ectopic_pregnancy"
+                    "water_retention",
+                    "congestive_heart_failure"
+                ],
+                [
+                    "lack_of_sleep",
+                    "sleep_apnea"
                 ]
             ],
             "required":[
-                [
-                    "anaerobic_bacteria",
-                    "gum_disease"
-                ],
-                [
-                    "ectopic_pregnancy",
-                    "rupture"
-                ],
-                [
-                    "surgery",
-                    "scarring"
-                ],
                 [
                     "sleep_apnea",
                     "lack_of_sleep"
                 ],
                 [
+                    "anaerobic_bacteria",
+                    "gum_disease"
+                ],
+                [
                     "congestive_heart_failure",
                     "water_retention"
+                ],
+                [
+                    "surgery",
+                    "scarring"
                 ],
                 [
                     "strokes",
@@ -3235,6 +3231,10 @@
                 [
                     "rupture",
                     "scarring"
+                ],
+                [
+                    "ectopic_pregnancy",
+                    "rupture"
                 ]
             ]
         },
@@ -3272,7 +3272,7 @@
             "forbidden":[
                 [
                     "cells",
-                    "brain_damage"
+                    "nerve_injuries"
                 ],
                 [
                     "withdrawal",
@@ -3280,14 +3280,10 @@
                 ],
                 [
                     "cells",
-                    "nerve_injuries"
+                    "brain_damage"
                 ]
             ],
             "required":[
-                [
-                    "brain_damage",
-                    "dysfunction"
-                ],
                 [
                     "alcoholism",
                     "substance_abuse"
@@ -3298,6 +3294,10 @@
                 ],
                 [
                     "nerve_injuries",
+                    "dysfunction"
+                ],
+                [
+                    "brain_damage",
                     "dysfunction"
                 ],
                 [
@@ -3346,12 +3346,12 @@
             ],
             "required":[
                 [
-                    "excess_weight",
-                    "high_blood_pressure"
-                ],
-                [
                     "overeating",
                     "excess_weight"
+                ],
+                [
+                    "excess_weight",
+                    "high_blood_pressure"
                 ]
             ]
         },
@@ -3420,32 +3420,32 @@
                     "angina"
                 ],
                 [
-                    "coronary_heart_disease",
-                    "high_blood_pressure"
-                ],
-                [
-                    "numbness",
-                    "high_cholesterol"
-                ],
-                [
-                    "numbness",
-                    "coronary_heart_disease"
-                ],
-                [
-                    "numbness",
-                    "high_blood_pressure"
-                ],
-                [
                     "angina",
                     "coronary_heart_disease"
-                ],
-                [
-                    "coronary_heart_disease",
-                    "high_cholesterol"
                 ],
                 [
                     "angina",
                     "numbness"
+                ],
+                [
+                    "numbness",
+                    "coronary_heart_disease"
+                ],
+                [
+                    "coronary_heart_disease",
+                    "high_cholesterol"
+                ],
+                [
+                    "coronary_heart_disease",
+                    "high_blood_pressure"
+                ],
+                [
+                    "numbness",
+                    "high_blood_pressure"
+                ],
+                [
+                    "numbness",
+                    "high_cholesterol"
                 ]
             ],
             "required":[
@@ -3491,25 +3491,29 @@
         "priors":{
             "forbidden":[
                 [
+                    "low_blood_pressure",
+                    "cardiac_tamponade"
+                ],
+                [
                     "hypoxia",
                     "cardiac_tamponade"
                 ],
                 [
                     "vomiting",
                     "migraines"
-                ],
-                [
-                    "low_blood_pressure",
-                    "cardiac_tamponade"
                 ]
             ],
             "required":[
                 [
-                    "low_blood_pressure",
-                    "lightheadedness"
+                    "migraines",
+                    "vomiting"
                 ],
                 [
-                    "hypoxia",
+                    "cardiac_tamponade",
+                    "low_blood_pressure"
+                ],
+                [
+                    "low_blood_pressure",
                     "lightheadedness"
                 ],
                 [
@@ -3517,12 +3521,8 @@
                     "migraines"
                 ],
                 [
-                    "cardiac_tamponade",
-                    "low_blood_pressure"
-                ],
-                [
-                    "migraines",
-                    "vomiting"
+                    "hypoxia",
+                    "lightheadedness"
                 ]
             ]
         },
@@ -3585,20 +3585,20 @@
         "priors":{
             "forbidden":[
                 [
-                    "sudden_death",
-                    "vomiting"
-                ],
-                [
                     "complication",
                     "surgery"
                 ],
                 [
-                    "blood_pressure",
-                    "high_blood_pressure"
+                    "sudden_death",
+                    "cardiac_arrest"
                 ],
                 [
                     "sudden_death",
-                    "cardiac_arrest"
+                    "vomiting"
+                ],
+                [
+                    "blood_pressure",
+                    "high_blood_pressure"
                 ]
             ],
             "required":[
