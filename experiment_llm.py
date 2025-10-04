@@ -697,7 +697,7 @@ synthetic_report.to_csv("synthetic-report.csv")
 
 
 child_res_df, _ = run_experiment(
-    prior_df=pd.read_json("child.json"), datasets=[Path("child.bifxml")]
+    prior_df=pd.read_json("child.json"), datasets=[Path("bnlearn/child/child.bifxml")]
 )
 child_res_df.to_csv("child-results.csv", index=False)
 child_report = show_report(child_res_df)
