@@ -94,6 +94,105 @@ def load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=1, standard
     return df_le_s, B_true
 
 
+def load_causenet_data_dag(file_path, sample_size, seed=1, standardise=True, print_info=False, simulate_with='internal'):
+    """
+    Load a DAG from an aGrUM/pyAgrum-style BIFXML file and produce data + true DAG.
+
+    - Parses variables and arcs using pyAgrum if available, else a robust text parser.
+    - Simulates discrete data consistent with the DAG using the internal simulator by default.
+      Optionally attempts to sample using pyAgrum if simulate_with='pyagrum'.
+
+    Args:
+        file_path (str): Path to .bifxml file (as generated in datasets/causenet_generator/bifxmls).
+        sample_size (int): Number of samples to generate.
+        seed (int): RNG seed.
+        standardise (bool): If True, z-score standardise the simulated (label-encoded) data.
+        print_info (bool): Verbose logging.
+        simulate_with (str): 'internal' (default) or 'pyagrum'.
+
+    Returns:
+        X (np.ndarray): Simulated data of shape [sample_size, d].
+        B_true (np.ndarray): Binary adjacency matrix [d, d] matching column order of X.
+    """
+    import re
+    logging.info(f"==================Loading BIFXML from {file_path}==================")
+    random_stability(seed)
+
+    var_names = []
+    name_to_idx = {}
+    edges_idx = []
+    bn_pyagrum = None
+
+    # Try pyAgrum for parsing
+    try:
+        import pyAgrum as gum
+        bn_pyagrum = gum.loadBN(file_path)
+        var_names = sorted(bn_pyagrum.names())
+        name_to_idx = {n: i for i, n in enumerate(var_names)}
+        for (u, v) in bn_pyagrum.arcs():
+            pu = bn_pyagrum.variable(u).name()
+            pv = bn_pyagrum.variable(v).name()
+            if pu in name_to_idx and pv in name_to_idx:
+                edges_idx.append((name_to_idx[pu], name_to_idx[pv]))
+    except Exception:
+        # Fallback text parser
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            txt = f.read()
+        txt = re.sub(r'<!-.*?>', '', txt, flags=re.S)
+        blocks = re.findall(r'<VARIABLE[^>]*>(.*?)</VARIABLE>', txt, flags=re.S | re.I)
+        for var_block in blocks:
+            m = re.search(r'<NAME>(.*?)</NAME>', var_block, flags=re.S | re.I)
+            if m:
+                var_names.append(m.group(1).strip())
+        var_names = sorted(set(var_names))
+        name_to_idx = {v: i for i, v in enumerate(var_names)}
+        for def_block in re.findall(r'<DEFINITION>(.*?)</DEFINITION>', txt, flags=re.S | re.I):
+            mfor = re.search(r'<FOR>(.*?)</FOR>', def_block, flags=re.S | re.I)
+            if not mfor:
+                continue
+            target = mfor.group(1).strip()
+            for g in re.findall(r'<GIVEN>(.*?)</GIVEN>', def_block, flags=re.S | re.I):
+                parent = g.strip()
+                if parent in name_to_idx and target in name_to_idx:
+                    edges_idx.append((name_to_idx[parent], name_to_idx[target]))
+
+    d = len(var_names)
+    B_true = np.zeros((d, d), dtype=int)
+    for u, v in edges_idx:
+        B_true[u, v] = 1
+
+    # Simulate data
+    X = None
+    if simulate_with == 'pyagrum' and bn_pyagrum is not None:
+        try:
+            import pyAgrum as gum
+            # Use pyAgrum database generator to sample
+            gen = gum.BNDatabaseGenerator(bn_pyagrum)
+            gen.generate(sample_size, seed)
+            df = gen.toPandas()
+            # Align columns to alphabetical var_names
+            df = df[var_names]
+            # Label-encode to integers to match internal expectations
+            enc = LabelEncoder()
+            for c in df.columns:
+                df[c] = enc.fit_transform(df[c])
+            X = df.to_numpy().astype(float)
+        except Exception as e:
+            logging.info(f"pyAgrum sampling failed ({e}); falling back to internal simulator.")
+
+    if X is None:
+        X = simulate_discrete_data(num_of_nodes=d, sample_size=sample_size,
+                                   truth_DAG_directed_edges=edges_idx, random_seed=seed)
+        X = X.astype(float)
+
+    if standardise:
+        X = StandardScaler().fit_transform(X)
+
+    if print_info:
+        logging.info(f"BIFXML vars: {d}, edges: {len(edges_idx)}; DAG? {is_dag(B_true)}")
+
+    return X, B_true
+
 
 ### From notears repo: https://github.com/xunzheng/notears
 def simulate_dag(d, s0, graph_type):
@@ -151,6 +250,9 @@ def simulate_discrete_data(
     from pgmpy.factors.discrete import TabularCPD
     from pgmpy.sampling import BayesianModelSampling
 
+    logging.getLogger('pgmpy').setLevel(logging.ERROR)
+    logging.getLogger('pgmpy.mathext').setLevel(logging.ERROR)
+
     def _simulate_cards():
         '''
         why we need this: to calculate cpd of a node with k parents,
@@ -191,10 +293,18 @@ def simulate_discrete_data(
         if node not in bn.nodes(): bn.add_node(node) # add node if it is isolated
         parents = np.where(adjacency_matrix[node])[0].tolist()
         parents_card = [cards[prt] for prt in parents]
-        rand_ps = np.array([np.random.dirichlet(np.ones(cards[node]) * _random_alpha()) for _ in
-                            range(int(np.prod(parents_card)))]).T.tolist()
+        raw_ps = np.array([
+            np.random.dirichlet(np.ones(cards[node]) * _random_alpha())
+            for _ in range(int(np.prod(parents_card)))
+        ])
+        if raw_ps.ndim == 1:
+            raw_ps = raw_ps[np.newaxis, :]
+        rand_ps = raw_ps.T
+        column_sums = rand_ps.sum(axis=0, keepdims=True)
+        column_sums[column_sums == 0] = 1
+        rand_ps = rand_ps / column_sums
 
-        cpd = TabularCPD(node, cards[node], rand_ps, evidence=parents, evidence_card=parents_card)
+        cpd = TabularCPD(node, cards[node], rand_ps.tolist(), evidence=parents, evidence_card=parents_card)
         bn.add_cpds(cpd)
     inference = BayesianModelSampling(bn)
     df = inference.forward_sample(size=sample_size, show_progress=False)

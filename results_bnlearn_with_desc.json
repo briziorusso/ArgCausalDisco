@@ -617,87 +617,677 @@
         "run_id":0
     },
     {
-        "title":"survey",
-        "filename":"survey",
-        "num_nodes":6,
-        "num_edges":6,
+        "title":"child",
+        "filename":"child",
+        "num_nodes":20,
+        "num_edges":25,
         "variable_descriptions":{
-            "O":"Occupation: whether the individual is an employee (emp) or a self-employed (self) worker.",
-            "E":"Education: the highest level of education or training successfully completed, recorded as up to high school (high) or university degree (uni).",
-            "A":"Age: the age, recorded as young (young) for individuals below 30 years old, adult (adult) for individuals between 30 and 60 years old, and old (old) for people older than 60.",
-            "T":"Travel: the means of transport favoured by the individual, recorded either as car (car), train (train) or other (other).",
-            "S":"Sex: the biological sex, recorded as male (M) or female (F).",
-            "R":"Residence: the size of the city the individual lives in, recorded as either small (small) or big (big)."
+            "XrayReport":"The formal radiological interpretation and conclusion derived from a chest X-ray examination.",
+            "LungParench":"The structural and functional state of the lung tissue, assessed for conditions like congestion or other abnormalities.",
+            "CO2":"The measured concentration of carbon dioxide in the infant's blood.",
+            "GruntingReport":"The medical record indicating the presence or absence of grunting respirations observed in the infant.",
+            "Sick":"A general clinical assessment reflecting the infant's overall state of health and well-being, indicating the presence of illness.",
+            "HypoxiaInO2":"The severity of systemic oxygen deprivation experienced by the infant, specifically when receiving supplemental oxygen.",
+            "Disease":"The primary medical condition affecting the infant, which may include specific congenital cardiac anomalies or pulmonary conditions.",
+            "CardiacMixing":"The degree to which oxygenated and deoxygenated blood streams intermingle within the heart's circulation.",
+            "LVHreport":"The documented diagnostic conclusion regarding the presence or absence of left ventricular hypertrophy.",
+            "CO2Report":"The formal laboratory report detailing the infant's blood carbon dioxide levels.",
+            "BirthAsphyxia":"Whether the infant experienced a lack of oxygen during or immediately after birth.",
+            "RUQO2":"The measured oxygen saturation level in the upper right quadrant of the infant's body, typically reflecting pre-ductal oxygenation.",
+            "LVH":"An indication of an enlarged or thickened left ventricle of the heart.",
+            "Age":"The chronological age of the infant at the time of clinical evaluation, categorized into early postnatal periods.",
+            "DuctFlow":"The direction and patency of blood flow through the ductus arteriosus, a transient fetal blood vessel.",
+            "ChestXray":"The visual findings observed in a radiographic image of the infant's chest.",
+            "LowerBodyO2":"The measured oxygen saturation level in the lower half of the infant's body, typically reflecting post-ductal oxygenation.",
+            "HypDistrib":"The pattern of oxygen saturation across different regions of the infant's body, indicating uniformity or disparity.",
+            "Grunting":"A distinct audible respiratory effort made by the infant, often associated with breathing difficulties.",
+            "LungFlow":"The rate and volume of blood circulation through the pulmonary vascular system."
         },
         "priors":{
             "forbidden":[
                 [
-                    "O",
-                    "E"
+                    "CO2Report",
+                    "Age"
                 ],
                 [
-                    "T",
-                    "A"
+                    "ChestXray",
+                    "Age"
                 ],
                 [
-                    "S",
-                    "A"
+                    "Disease",
+                    "BirthAsphyxia"
                 ],
                 [
-                    "E",
-                    "A"
+                    "CardiacMixing",
+                    "BirthAsphyxia"
                 ],
                 [
-                    "E",
-                    "S"
+                    "CO2Report",
+                    "Disease"
                 ],
                 [
-                    "O",
-                    "S"
+                    "LVHreport",
+                    "GruntingReport"
                 ],
                 [
-                    "T",
-                    "R"
+                    "CO2Report",
+                    "CardiacMixing"
                 ],
                 [
-                    "O",
-                    "A"
+                    "CO2Report",
+                    "LowerBodyO2"
                 ],
                 [
-                    "R",
-                    "A"
+                    "LVH",
+                    "Age"
                 ],
                 [
-                    "R",
-                    "S"
+                    "XrayReport",
+                    "LungParench"
                 ],
                 [
-                    "T",
-                    "S"
+                    "LungParench",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LVHreport",
+                    "Disease"
+                ],
+                [
+                    "LVHreport",
+                    "CardiacMixing"
+                ],
+                [
+                    "LVHreport",
+                    "HypDistrib"
+                ],
+                [
+                    "XrayReport",
+                    "LungFlow"
+                ],
+                [
+                    "GruntingReport",
+                    "XrayReport"
+                ],
+                [
+                    "CO2Report",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Age"
+                ],
+                [
+                    "CO2Report",
+                    "RUQO2"
+                ],
+                [
+                    "GruntingReport",
+                    "Grunting"
+                ],
+                [
+                    "GruntingReport",
+                    "Age"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Disease"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "XrayReport",
+                    "LVHreport"
+                ],
+                [
+                    "LVHreport",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "GruntingReport",
+                    "LowerBodyO2"
+                ],
+                [
+                    "XrayReport",
+                    "CO2"
+                ],
+                [
+                    "CO2",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "Disease",
+                    "Age"
+                ],
+                [
+                    "GruntingReport",
+                    "RUQO2"
+                ],
+                [
+                    "XrayReport",
+                    "LVH"
+                ],
+                [
+                    "CO2Report",
+                    "GruntingReport"
+                ],
+                [
+                    "XrayReport",
+                    "DuctFlow"
+                ],
+                [
+                    "CO2Report",
+                    "LungFlow"
+                ],
+                [
+                    "LungParench",
+                    "Age"
+                ],
+                [
+                    "LVHreport",
+                    "LungParench"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Age"
+                ],
+                [
+                    "XrayReport",
+                    "Sick"
+                ],
+                [
+                    "CO2Report",
+                    "HypDistrib"
+                ],
+                [
+                    "Grunting",
+                    "Age"
+                ],
+                [
+                    "LVHreport",
+                    "LungFlow"
+                ],
+                [
+                    "CO2Report",
+                    "CO2"
+                ],
+                [
+                    "Grunting",
+                    "Disease"
+                ],
+                [
+                    "LVH",
+                    "Disease"
+                ],
+                [
+                    "LVHreport",
+                    "LVHreport"
+                ],
+                [
+                    "GruntingReport",
+                    "GruntingReport"
+                ],
+                [
+                    "XrayReport",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "RUQO2",
+                    "Age"
+                ],
+                [
+                    "XrayReport",
+                    "ChestXray"
+                ],
+                [
+                    "XrayReport",
+                    "CO2Report"
+                ],
+                [
+                    "LVHreport",
+                    "CO2"
+                ],
+                [
+                    "CO2",
+                    "Age"
+                ],
+                [
+                    "RUQO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "LowerBodyO2",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "CO2",
+                    "Disease"
+                ],
+                [
+                    "GruntingReport",
+                    "Disease"
+                ],
+                [
+                    "CO2Report",
+                    "DuctFlow"
+                ],
+                [
+                    "GruntingReport",
+                    "CardiacMixing"
+                ],
+                [
+                    "GruntingReport",
+                    "HypDistrib"
+                ],
+                [
+                    "Sick",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LungFlow",
+                    "Age"
+                ],
+                [
+                    "LVHreport",
+                    "LVH"
+                ],
+                [
+                    "LVHreport",
+                    "DuctFlow"
+                ],
+                [
+                    "GruntingReport",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "CO2Report",
+                    "LungParench"
+                ],
+                [
+                    "CardiacMixing",
+                    "Age"
+                ],
+                [
+                    "ChestXray",
+                    "LungParench"
+                ],
+                [
+                    "LVHreport",
+                    "Sick"
+                ],
+                [
+                    "HypDistrib",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "CardiacMixing",
+                    "Disease"
+                ],
+                [
+                    "DuctFlow",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "GruntingReport",
+                    "DuctFlow"
+                ],
+                [
+                    "Grunting",
+                    "LungParench"
+                ],
+                [
+                    "XrayReport",
+                    "XrayReport"
+                ],
+                [
+                    "LungParench",
+                    "Disease"
+                ],
+                [
+                    "CO2Report",
+                    "LVHreport"
+                ],
+                [
+                    "XrayReport",
+                    "Grunting"
+                ],
+                [
+                    "LVHreport",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LVHreport",
+                    "ChestXray"
+                ],
+                [
+                    "LVHreport",
+                    "CO2Report"
+                ],
+                [
+                    "GruntingReport",
+                    "LungParench"
+                ],
+                [
+                    "XrayReport",
+                    "LowerBodyO2"
+                ],
+                [
+                    "LowerBodyO2",
+                    "Age"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LowerBodyO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "GruntingReport",
+                    "LungFlow"
+                ],
+                [
+                    "CO2Report",
+                    "LVH"
+                ],
+                [
+                    "GruntingReport",
+                    "LVHreport"
+                ],
+                [
+                    "XrayReport",
+                    "RUQO2"
+                ],
+                [
+                    "GruntingReport",
+                    "CO2"
+                ],
+                [
+                    "CO2Report",
+                    "Sick"
+                ],
+                [
+                    "HypDistrib",
+                    "Age"
+                ],
+                [
+                    "DuctFlow",
+                    "Age"
+                ],
+                [
+                    "CO2Report",
+                    "Grunting"
+                ],
+                [
+                    "HypDistrib",
+                    "LowerBodyO2"
+                ],
+                [
+                    "DuctFlow",
+                    "Disease"
+                ],
+                [
+                    "LVHreport",
+                    "XrayReport"
+                ],
+                [
+                    "GruntingReport",
+                    "LVH"
+                ],
+                [
+                    "LVHreport",
+                    "Grunting"
+                ],
+                [
+                    "LVHreport",
+                    "Age"
+                ],
+                [
+                    "Age",
+                    "Age"
+                ],
+                [
+                    "CO2Report",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "ChestXray",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "CO2Report",
+                    "ChestXray"
+                ],
+                [
+                    "CO2Report",
+                    "CO2Report"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "XrayReport",
+                    "GruntingReport"
+                ],
+                [
+                    "HypDistrib",
+                    "RUQO2"
+                ],
+                [
+                    "LVHreport",
+                    "LowerBodyO2"
+                ],
+                [
+                    "GruntingReport",
+                    "Sick"
+                ],
+                [
+                    "Grunting",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "XrayReport",
+                    "Age"
+                ],
+                [
+                    "LVH",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LungFlow",
+                    "DuctFlow"
+                ],
+                [
+                    "XrayReport",
+                    "Disease"
+                ],
+                [
+                    "CO2",
+                    "LungParench"
+                ],
+                [
+                    "XrayReport",
+                    "CardiacMixing"
+                ],
+                [
+                    "XrayReport",
+                    "HypDistrib"
+                ],
+                [
+                    "RUQO2",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LVHreport",
+                    "RUQO2"
+                ],
+                [
+                    "Sick",
+                    "Age"
+                ],
+                [
+                    "GruntingReport",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "GruntingReport",
+                    "ChestXray"
+                ],
+                [
+                    "GruntingReport",
+                    "CO2Report"
+                ],
+                [
+                    "Sick",
+                    "Disease"
+                ],
+                [
+                    "XrayReport",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "LungFlow",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "CO2Report",
+                    "XrayReport"
                 ]
             ],
             "required":[
                 [
-                    "A",
-                    "O"
+                    "Disease",
+                    "CardiacMixing"
                 ],
                 [
-                    "A",
-                    "E"
+                    "LungParench",
+                    "Grunting"
                 ],
                 [
-                    "E",
-                    "O"
+                    "DuctFlow",
+                    "LowerBodyO2"
                 ],
                 [
-                    "R",
-                    "T"
+                    "LungFlow",
+                    "CO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "LowerBodyO2"
+                ],
+                [
+                    "LungFlow",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Grunting",
+                    "GruntingReport"
+                ],
+                [
+                    "Disease",
+                    "CO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Sick"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Disease"
+                ],
+                [
+                    "LungParench",
+                    "ChestXray"
+                ],
+                [
+                    "Disease",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Age",
+                    "Disease"
+                ],
+                [
+                    "CardiacMixing",
+                    "RUQO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Grunting"
+                ],
+                [
+                    "LungParench",
+                    "CO2"
+                ],
+                [
+                    "LVH",
+                    "LVHreport"
+                ],
+                [
+                    "Disease",
+                    "LVH"
+                ],
+                [
+                    "LungParench",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Disease",
+                    "DuctFlow"
+                ],
+                [
+                    "RUQO2",
+                    "HypDistrib"
+                ],
+                [
+                    "LowerBodyO2",
+                    "HypDistrib"
+                ],
+                [
+                    "CO2",
+                    "CO2Report"
+                ],
+                [
+                    "Disease",
+                    "Sick"
+                ],
+                [
+                    "Age",
+                    "DuctFlow"
+                ],
+                [
+                    "Disease",
+                    "Grunting"
+                ],
+                [
+                    "Disease",
+                    "LungParench"
+                ],
+                [
+                    "DuctFlow",
+                    "LungFlow"
+                ],
+                [
+                    "ChestXray",
+                    "XrayReport"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Sick"
                 ]
             ]
         },
-        "forbidden_Precision":1.0,
-        "required_Precision":0.75,
-        "run_id":1
+        "forbidden_Precision":0.9765625,
+        "required_Precision":0.4838709677,
+        "run_id":0
     },
     {
         "title":"cancer",
@@ -790,175 +1380,86 @@
         "run_id":1
     },
     {
-        "title":"sachs",
-        "filename":"sachs",
-        "num_nodes":11,
-        "num_edges":17,
+        "title":"survey",
+        "filename":"survey",
+        "num_nodes":6,
+        "num_edges":6,
         "variable_descriptions":{
-            "P38":"p38 (p38 MAPK): p38 Mitogen-activated protein kinase. A class of MAPKs distinct from ERK, primarily activated by environmental stresses (like UV radiation, osmotic shock) and inflammatory cytokines. p38 signaling pathways are involved in inflammation, apoptosis, cell cycle regulation, and differentiation.",
-            "Plcg":"PLC\u03b3 (Phospholipase C gamma): An enzyme (phospholipase) that hydrolyzes the membrane phospholipid PIP2 into two second messengers: inositol trisphosphate (IP3) and diacylglycerol (DAG). This activation is often triggered by receptor tyrosine kinases and plays a key role in intracellular calcium release and PKC activation.",
-            "Mek":"MEK (MEK1\/2, also MAP2K1\/2): Mitogen-activated protein kinase kinase. A dual-specificity protein kinase (phosphorylates both threonine and tyrosine residues) that lies downstream of Raf and directly upstream of ERK in the MAPK\/ERK pathway. It phosphorylates and activates ERK.",
-            "Jnk":"JNK (c-Jun N-terminal kinase, also SAPK): Stress-activated protein kinase. Another class of MAPKs, also typically activated by cellular stress and inflammatory cytokines. JNK signaling is involved in apoptosis, inflammation, cell proliferation, and metabolism.",
-            "PKA":"PKA (Protein Kinase A): cAMP-dependent protein kinase. A serine\/threonine kinase whose activity is primarily regulated by levels of cyclic AMP (cAMP). PKA participates in a wide range of cellular processes and can interact with or modulate other signaling pathways, including potential crosstalk with the MAPK pathway components measured in this dataset.",
-            "PKC":"PKC (Protein Kinase C): A family of serine\/threonine kinases activated by signals such as increases in diacylglycerol (DAG, produced by PLC) and intracellular calcium concentration. PKC isoforms regulate diverse cellular functions, including proliferation, differentiation, apoptosis, and cytoskeletal organization.",
-            "PIP3":"PIP3 (Phosphatidylinositol (3,4,5)-trisphosphate): A phospholipid second messenger generated from PIP2 by the action of phosphoinositide 3-kinase (PI3K). It plays a critical role in recruiting proteins with PH domains (like Akt\/PKB) to the plasma membrane, activating downstream signaling pathways involved in cell growth, survival, and proliferation (e.g., the PI3K\/Akt pathway).",
-            "Raf":"Raf (Raf-1 or c-Raf): A serine\/threonine-specific protein kinase that acts as a central component of the MAPK\/ERK signaling pathway. It is typically activated by Ras GTPases and phosphorylates (activates) MEK.",
-            "PIP2":"PIP2 (Phosphatidylinositol 4,5-bisphosphate): A phospholipid component of cell membranes. It serves as a crucial substrate for enzymes like PLC\u03b3 (producing IP3 and DAG) and PI3K (producing PIP3), making it a branching point for multiple signaling pathways.",
-            "Akt":"Akt (Protein Kinase B or PKB): A serine\/threonine-specific protein kinase that is a central node in the PI3K\/Akt signaling pathway. It is activated downstream of PIP3 generation and plays crucial roles in regulating cell survival, growth, proliferation, metabolism, and angiogenesis.",
-            "Erk":"ERK (ERK1\/2, also MAPK3\/1): Extracellular signal-regulated kinase. A key protein kinase in the MAPK\/ERK signaling pathway, lying downstream of MEK. Once activated by MEK phosphorylation, ERK translocates to the nucleus to phosphorylate transcription factors, regulating gene expression related to cell proliferation, differentiation, and survival."
+            "O":"Occupation: whether the individual is an employee (emp) or a self-employed (self) worker.",
+            "E":"Education: the highest level of education or training successfully completed, recorded as up to high school (high) or university degree (uni).",
+            "A":"Age: the age, recorded as young (young) for individuals below 30 years old, adult (adult) for individuals between 30 and 60 years old, and old (old) for people older than 60.",
+            "T":"Travel: the means of transport favoured by the individual, recorded either as car (car), train (train) or other (other).",
+            "S":"Sex: the biological sex, recorded as male (M) or female (F).",
+            "R":"Residence: the size of the city the individual lives in, recorded as either small (small) or big (big)."
         },
         "priors":{
             "forbidden":[
                 [
-                    "Jnk",
-                    "PIP3"
+                    "O",
+                    "E"
                 ],
                 [
-                    "Plcg",
-                    "PKA"
+                    "T",
+                    "A"
                 ],
                 [
-                    "Plcg",
-                    "Raf"
+                    "S",
+                    "A"
                 ],
                 [
-                    "Plcg",
-                    "Erk"
+                    "E",
+                    "A"
                 ],
                 [
-                    "Jnk",
-                    "PKA"
+                    "E",
+                    "S"
                 ],
                 [
-                    "P38",
-                    "PIP3"
+                    "O",
+                    "S"
                 ],
                 [
-                    "P38",
-                    "PKA"
+                    "T",
+                    "R"
                 ],
                 [
-                    "PIP2",
-                    "P38"
+                    "O",
+                    "A"
                 ],
                 [
-                    "Plcg",
-                    "PIP2"
+                    "R",
+                    "A"
                 ],
                 [
-                    "PKA",
-                    "PIP2"
+                    "R",
+                    "S"
                 ],
                 [
-                    "Jnk",
-                    "PIP2"
-                ],
-                [
-                    "PIP3",
-                    "PIP2"
-                ],
-                [
-                    "P38",
-                    "PIP2"
-                ],
-                [
-                    "PIP2",
-                    "Akt"
-                ],
-                [
-                    "Akt",
-                    "PIP3"
-                ],
-                [
-                    "PKC",
-                    "Plcg"
-                ],
-                [
-                    "PIP2",
-                    "Mek"
-                ],
-                [
-                    "Plcg",
-                    "P38"
-                ],
-                [
-                    "PIP2",
-                    "PKA"
-                ],
-                [
-                    "Erk",
-                    "PIP3"
-                ],
-                [
-                    "PIP2",
-                    "Raf"
-                ],
-                [
-                    "PIP2",
-                    "Jnk"
-                ],
-                [
-                    "Erk",
-                    "PKA"
-                ],
-                [
-                    "Erk",
-                    "Mek"
-                ],
-                [
-                    "PIP2",
-                    "Erk"
-                ],
-                [
-                    "Mek",
-                    "Raf"
-                ],
-                [
-                    "Plcg",
-                    "Jnk"
-                ],
-                [
-                    "Plcg",
-                    "Akt"
-                ],
-                [
-                    "Erk",
-                    "PIP2"
-                ],
-                [
-                    "PIP2",
-                    "PKC"
-                ],
-                [
-                    "Plcg",
-                    "Mek"
-                ],
-                [
-                    "PKA",
-                    "PIP3"
+                    "T",
+                    "S"
                 ]
             ],
             "required":[
                 [
-                    "Mek",
-                    "Erk"
+                    "A",
+                    "O"
                 ],
                 [
-                    "Raf",
-                    "Mek"
+                    "A",
+                    "E"
                 ],
                 [
-                    "PIP3",
-                    "Akt"
+                    "E",
+                    "O"
                 ],
                 [
-                    "Plcg",
-                    "PKC"
+                    "R",
+                    "T"
                 ]
             ]
         },
-        "forbidden_Precision":0.9375,
-        "required_Precision":0.5,
+        "forbidden_Precision":1.0,
+        "required_Precision":0.75,
         "run_id":1
     },
     {
@@ -1181,205 +1682,545 @@
         "run_id":1
     },
     {
-        "title":"survey",
-        "filename":"survey",
-        "num_nodes":6,
-        "num_edges":6,
+        "title":"child",
+        "filename":"child",
+        "num_nodes":20,
+        "num_edges":25,
         "variable_descriptions":{
-            "O":"Occupation: whether the individual is an employee (emp) or a self-employed (self) worker.",
-            "E":"Education: the highest level of education or training successfully completed, recorded as up to high school (high) or university degree (uni).",
-            "A":"Age: the age, recorded as young (young) for individuals below 30 years old, adult (adult) for individuals between 30 and 60 years old, and old (old) for people older than 60.",
-            "T":"Travel: the means of transport favoured by the individual, recorded either as car (car), train (train) or other (other).",
-            "S":"Sex: the biological sex, recorded as male (M) or female (F).",
-            "R":"Residence: the size of the city the individual lives in, recorded as either small (small) or big (big)."
+            "XrayReport":"The formal radiological interpretation and conclusion derived from a chest X-ray examination.",
+            "LungParench":"The structural and functional state of the lung tissue, assessed for conditions like congestion or other abnormalities.",
+            "CO2":"The measured concentration of carbon dioxide in the infant's blood.",
+            "GruntingReport":"The medical record indicating the presence or absence of grunting respirations observed in the infant.",
+            "Sick":"A general clinical assessment reflecting the infant's overall state of health and well-being, indicating the presence of illness.",
+            "HypoxiaInO2":"The severity of systemic oxygen deprivation experienced by the infant, specifically when receiving supplemental oxygen.",
+            "Disease":"The primary medical condition affecting the infant, which may include specific congenital cardiac anomalies or pulmonary conditions.",
+            "CardiacMixing":"The degree to which oxygenated and deoxygenated blood streams intermingle within the heart's circulation.",
+            "LVHreport":"The documented diagnostic conclusion regarding the presence or absence of left ventricular hypertrophy.",
+            "CO2Report":"The formal laboratory report detailing the infant's blood carbon dioxide levels.",
+            "BirthAsphyxia":"Whether the infant experienced a lack of oxygen during or immediately after birth.",
+            "RUQO2":"The measured oxygen saturation level in the upper right quadrant of the infant's body, typically reflecting pre-ductal oxygenation.",
+            "LVH":"An indication of an enlarged or thickened left ventricle of the heart.",
+            "Age":"The chronological age of the infant at the time of clinical evaluation, categorized into early postnatal periods.",
+            "DuctFlow":"The direction and patency of blood flow through the ductus arteriosus, a transient fetal blood vessel.",
+            "ChestXray":"The visual findings observed in a radiographic image of the infant's chest.",
+            "LowerBodyO2":"The measured oxygen saturation level in the lower half of the infant's body, typically reflecting post-ductal oxygenation.",
+            "HypDistrib":"The pattern of oxygen saturation across different regions of the infant's body, indicating uniformity or disparity.",
+            "Grunting":"A distinct audible respiratory effort made by the infant, often associated with breathing difficulties.",
+            "LungFlow":"The rate and volume of blood circulation through the pulmonary vascular system."
         },
         "priors":{
             "forbidden":[
                 [
-                    "A",
-                    "S"
+                    "Age",
+                    "Sick"
                 ],
                 [
-                    "O",
-                    "E"
+                    "ChestXray",
+                    "Age"
                 ],
                 [
-                    "T",
-                    "A"
+                    "CardiacMixing",
+                    "BirthAsphyxia"
                 ],
                 [
-                    "R",
-                    "E"
+                    "CardiacMixing",
+                    "Disease"
                 ],
                 [
-                    "T",
-                    "E"
+                    "DuctFlow",
+                    "BirthAsphyxia"
                 ],
                 [
-                    "S",
-                    "A"
+                    "LungParench",
+                    "Age"
                 ],
                 [
-                    "E",
-                    "A"
+                    "Age",
+                    "LungParench"
                 ],
                 [
-                    "E",
-                    "S"
+                    "Grunting",
+                    "LungParench"
                 ],
                 [
-                    "O",
-                    "S"
+                    "BirthAsphyxia",
+                    "Age"
                 ],
                 [
-                    "R",
-                    "O"
+                    "Age",
+                    "Grunting"
                 ],
                 [
-                    "T",
-                    "O"
+                    "LVH",
+                    "Age"
                 ],
                 [
-                    "O",
-                    "A"
+                    "Grunting",
+                    "Age"
                 ],
                 [
-                    "R",
-                    "A"
+                    "LungParench",
+                    "BirthAsphyxia"
                 ],
                 [
-                    "T",
-                    "R"
+                    "Age",
+                    "LungFlow"
                 ],
                 [
-                    "R",
-                    "S"
+                    "HypDistrib",
+                    "RUQO2"
                 ],
                 [
-                    "T",
-                    "S"
+                    "Age",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "CO2Report",
+                    "CO2"
+                ],
+                [
+                    "Grunting",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "Age",
+                    "CardiacMixing"
+                ],
+                [
+                    "Age",
+                    "HypDistrib"
+                ],
+                [
+                    "Age",
+                    "ChestXray"
+                ],
+                [
+                    "LVH",
+                    "Disease"
+                ],
+                [
+                    "LVH",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Age"
+                ],
+                [
+                    "LowerBodyO2",
+                    "Age"
+                ],
+                [
+                    "GruntingReport",
+                    "Grunting"
+                ],
+                [
+                    "RUQO2",
+                    "Age"
+                ],
+                [
+                    "XrayReport",
+                    "ChestXray"
+                ],
+                [
+                    "CO2",
+                    "LungParench"
+                ],
+                [
+                    "Sick",
+                    "LungParench"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "CO2",
+                    "Age"
+                ],
+                [
+                    "Age",
+                    "CO2"
+                ],
+                [
+                    "Age",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Sick",
+                    "Age"
+                ],
+                [
+                    "CO2",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "Sick",
+                    "Disease"
+                ],
+                [
+                    "Sick",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LungFlow",
+                    "Age"
+                ],
+                [
+                    "LVHreport",
+                    "LVH"
+                ],
+                [
+                    "Age",
+                    "LVH"
+                ],
+                [
+                    "Age",
+                    "DuctFlow"
+                ],
+                [
+                    "HypDistrib",
+                    "Age"
+                ],
+                [
+                    "LungFlow",
+                    "Disease"
+                ],
+                [
+                    "Disease",
+                    "Age"
+                ],
+                [
+                    "DuctFlow",
+                    "Age"
+                ],
+                [
+                    "CardiacMixing",
+                    "Age"
+                ],
+                [
+                    "ChestXray",
+                    "LungParench"
+                ],
+                [
+                    "HypDistrib",
+                    "LowerBodyO2"
+                ],
+                [
+                    "DuctFlow",
+                    "Disease"
                 ]
             ],
             "required":[
                 [
-                    "A",
-                    "E"
+                    "Disease",
+                    "CardiacMixing"
                 ],
                 [
-                    "O",
-                    "R"
+                    "LungParench",
+                    "Grunting"
                 ],
                 [
-                    "E",
-                    "O"
+                    "DuctFlow",
+                    "LowerBodyO2"
                 ],
                 [
-                    "O",
-                    "T"
+                    "DuctFlow",
+                    "HypDistrib"
                 ],
                 [
-                    "R",
-                    "T"
+                    "LungFlow",
+                    "CO2"
                 ],
                 [
-                    "A",
-                    "O"
+                    "LungParench",
+                    "LungFlow"
+                ],
+                [
+                    "LungFlow",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Sick"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Disease"
+                ],
+                [
+                    "LungParench",
+                    "ChestXray"
+                ],
+                [
+                    "LVH",
+                    "LungFlow"
+                ],
+                [
+                    "CO2Report",
+                    "CO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Grunting"
+                ],
+                [
+                    "CO2",
+                    "Sick"
+                ],
+                [
+                    "LungParench",
+                    "CO2"
+                ],
+                [
+                    "LVH",
+                    "ChestXray"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "CO2"
+                ],
+                [
+                    "CO2",
+                    "Grunting"
+                ],
+                [
+                    "GruntingReport",
+                    "Grunting"
+                ],
+                [
+                    "Disease",
+                    "LVH"
+                ],
+                [
+                    "XrayReport",
+                    "ChestXray"
+                ],
+                [
+                    "LungParench",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "LVH"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "RUQO2",
+                    "HypDistrib"
+                ],
+                [
+                    "LowerBodyO2",
+                    "HypDistrib"
+                ],
+                [
+                    "CardiacMixing",
+                    "LungFlow"
+                ],
+                [
+                    "Disease",
+                    "Sick"
+                ],
+                [
+                    "LVHreport",
+                    "LVH"
+                ],
+                [
+                    "Disease",
+                    "LungParench"
+                ],
+                [
+                    "Disease",
+                    "LungFlow"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Sick"
                 ]
             ]
         },
-        "forbidden_Precision":1.0,
-        "required_Precision":0.6666666667,
-        "run_id":2
+        "forbidden_Precision":0.94,
+        "required_Precision":0.3636363636,
+        "run_id":1
     },
     {
-        "title":"cancer",
-        "filename":"cancer",
-        "num_nodes":5,
-        "num_edges":4,
+        "title":"sachs",
+        "filename":"sachs",
+        "num_nodes":11,
+        "num_edges":17,
         "variable_descriptions":{
-            "Cancer":"Cancer: Indicates whether the person has lung cancer.",
-            "Pollution":"Pollution: Represents the level of environmental air pollution the person is exposed to.",
-            "Smoker":"Smoker: Indicates whether the person is a smoker.",
-            "Xray":"Xray: Represents the result of a chest X-ray test.",
-            "Dyspnoea":"Dyspnoea: Indicates whether the person experiences dyspnoea (shortness of breath)."
+            "P38":"p38 (p38 MAPK): p38 Mitogen-activated protein kinase. A class of MAPKs distinct from ERK, primarily activated by environmental stresses (like UV radiation, osmotic shock) and inflammatory cytokines. p38 signaling pathways are involved in inflammation, apoptosis, cell cycle regulation, and differentiation.",
+            "Plcg":"PLC\u03b3 (Phospholipase C gamma): An enzyme (phospholipase) that hydrolyzes the membrane phospholipid PIP2 into two second messengers: inositol trisphosphate (IP3) and diacylglycerol (DAG). This activation is often triggered by receptor tyrosine kinases and plays a key role in intracellular calcium release and PKC activation.",
+            "Mek":"MEK (MEK1\/2, also MAP2K1\/2): Mitogen-activated protein kinase kinase. A dual-specificity protein kinase (phosphorylates both threonine and tyrosine residues) that lies downstream of Raf and directly upstream of ERK in the MAPK\/ERK pathway. It phosphorylates and activates ERK.",
+            "Jnk":"JNK (c-Jun N-terminal kinase, also SAPK): Stress-activated protein kinase. Another class of MAPKs, also typically activated by cellular stress and inflammatory cytokines. JNK signaling is involved in apoptosis, inflammation, cell proliferation, and metabolism.",
+            "PKA":"PKA (Protein Kinase A): cAMP-dependent protein kinase. A serine\/threonine kinase whose activity is primarily regulated by levels of cyclic AMP (cAMP). PKA participates in a wide range of cellular processes and can interact with or modulate other signaling pathways, including potential crosstalk with the MAPK pathway components measured in this dataset.",
+            "PKC":"PKC (Protein Kinase C): A family of serine\/threonine kinases activated by signals such as increases in diacylglycerol (DAG, produced by PLC) and intracellular calcium concentration. PKC isoforms regulate diverse cellular functions, including proliferation, differentiation, apoptosis, and cytoskeletal organization.",
+            "PIP3":"PIP3 (Phosphatidylinositol (3,4,5)-trisphosphate): A phospholipid second messenger generated from PIP2 by the action of phosphoinositide 3-kinase (PI3K). It plays a critical role in recruiting proteins with PH domains (like Akt\/PKB) to the plasma membrane, activating downstream signaling pathways involved in cell growth, survival, and proliferation (e.g., the PI3K\/Akt pathway).",
+            "Raf":"Raf (Raf-1 or c-Raf): A serine\/threonine-specific protein kinase that acts as a central component of the MAPK\/ERK signaling pathway. It is typically activated by Ras GTPases and phosphorylates (activates) MEK.",
+            "PIP2":"PIP2 (Phosphatidylinositol 4,5-bisphosphate): A phospholipid component of cell membranes. It serves as a crucial substrate for enzymes like PLC\u03b3 (producing IP3 and DAG) and PI3K (producing PIP3), making it a branching point for multiple signaling pathways.",
+            "Akt":"Akt (Protein Kinase B or PKB): A serine\/threonine-specific protein kinase that is a central node in the PI3K\/Akt signaling pathway. It is activated downstream of PIP3 generation and plays crucial roles in regulating cell survival, growth, proliferation, metabolism, and angiogenesis.",
+            "Erk":"ERK (ERK1\/2, also MAPK3\/1): Extracellular signal-regulated kinase. A key protein kinase in the MAPK\/ERK signaling pathway, lying downstream of MEK. Once activated by MEK phosphorylation, ERK translocates to the nucleus to phosphorylate transcription factors, regulating gene expression related to cell proliferation, differentiation, and survival."
         },
         "priors":{
             "forbidden":[
                 [
-                    "Smoker",
-                    "Pollution"
+                    "Jnk",
+                    "PIP3"
                 ],
                 [
-                    "Dyspnoea",
-                    "Pollution"
+                    "Plcg",
+                    "PKA"
                 ],
                 [
-                    "Dyspnoea",
-                    "Smoker"
+                    "Plcg",
+                    "Raf"
                 ],
                 [
-                    "Xray",
-                    "Pollution"
+                    "Plcg",
+                    "Erk"
                 ],
                 [
-                    "Xray",
-                    "Cancer"
+                    "Jnk",
+                    "PKA"
                 ],
                 [
-                    "Xray",
-                    "Smoker"
+                    "P38",
+                    "PIP3"
                 ],
                 [
-                    "Pollution",
-                    "Smoker"
+                    "P38",
+                    "PKA"
                 ],
                 [
-                    "Xray",
-                    "Dyspnoea"
+                    "PIP2",
+                    "P38"
                 ],
                 [
-                    "Dyspnoea",
-                    "Xray"
+                    "Plcg",
+                    "PIP2"
                 ],
                 [
-                    "Cancer",
-                    "Pollution"
+                    "PKA",
+                    "PIP2"
                 ],
                 [
-                    "Dyspnoea",
-                    "Cancer"
+                    "Jnk",
+                    "PIP2"
                 ],
                 [
-                    "Cancer",
-                    "Smoker"
+                    "PIP3",
+                    "PIP2"
+                ],
+                [
+                    "P38",
+                    "PIP2"
+                ],
+                [
+                    "PIP2",
+                    "Akt"
+                ],
+                [
+                    "Akt",
+                    "PIP3"
+                ],
+                [
+                    "PKC",
+                    "Plcg"
+                ],
+                [
+                    "PIP2",
+                    "Mek"
+                ],
+                [
+                    "Plcg",
+                    "P38"
+                ],
+                [
+                    "PIP2",
+                    "PKA"
+                ],
+                [
+                    "Erk",
+                    "PIP3"
+                ],
+                [
+                    "PIP2",
+                    "Raf"
+                ],
+                [
+                    "PIP2",
+                    "Jnk"
+                ],
+                [
+                    "Erk",
+                    "PKA"
+                ],
+                [
+                    "Erk",
+                    "Mek"
+                ],
+                [
+                    "PIP2",
+                    "Erk"
+                ],
+                [
+                    "Mek",
+                    "Raf"
+                ],
+                [
+                    "Plcg",
+                    "Jnk"
+                ],
+                [
+                    "Plcg",
+                    "Akt"
+                ],
+                [
+                    "Erk",
+                    "PIP2"
+                ],
+                [
+                    "PIP2",
+                    "PKC"
+                ],
+                [
+                    "Plcg",
+                    "Mek"
+                ],
+                [
+                    "PKA",
+                    "PIP3"
                 ]
             ],
             "required":[
                 [
-                    "Cancer",
-                    "Dyspnoea"
+                    "Mek",
+                    "Erk"
                 ],
                 [
-                    "Pollution",
-                    "Cancer"
+                    "Raf",
+                    "Mek"
                 ],
                 [
-                    "Cancer",
-                    "Xray"
+                    "PIP3",
+                    "Akt"
                 ],
                 [
-                    "Smoker",
-                    "Dyspnoea"
-                ],
-                [
-                    "Smoker",
-                    "Cancer"
+                    "Plcg",
+                    "PKC"
                 ]
             ]
         },
-        "forbidden_Precision":1.0,
-        "required_Precision":0.8,
-        "run_id":2
+        "forbidden_Precision":0.9375,
+        "required_Precision":0.5,
+        "run_id":1
     },
     {
         "title":"sachs",
@@ -1711,6 +2552,544 @@
         "run_id":2
     },
     {
+        "title":"survey",
+        "filename":"survey",
+        "num_nodes":6,
+        "num_edges":6,
+        "variable_descriptions":{
+            "O":"Occupation: whether the individual is an employee (emp) or a self-employed (self) worker.",
+            "E":"Education: the highest level of education or training successfully completed, recorded as up to high school (high) or university degree (uni).",
+            "A":"Age: the age, recorded as young (young) for individuals below 30 years old, adult (adult) for individuals between 30 and 60 years old, and old (old) for people older than 60.",
+            "T":"Travel: the means of transport favoured by the individual, recorded either as car (car), train (train) or other (other).",
+            "S":"Sex: the biological sex, recorded as male (M) or female (F).",
+            "R":"Residence: the size of the city the individual lives in, recorded as either small (small) or big (big)."
+        },
+        "priors":{
+            "forbidden":[
+                [
+                    "A",
+                    "S"
+                ],
+                [
+                    "O",
+                    "E"
+                ],
+                [
+                    "T",
+                    "A"
+                ],
+                [
+                    "R",
+                    "E"
+                ],
+                [
+                    "T",
+                    "E"
+                ],
+                [
+                    "S",
+                    "A"
+                ],
+                [
+                    "E",
+                    "A"
+                ],
+                [
+                    "E",
+                    "S"
+                ],
+                [
+                    "O",
+                    "S"
+                ],
+                [
+                    "R",
+                    "O"
+                ],
+                [
+                    "T",
+                    "O"
+                ],
+                [
+                    "O",
+                    "A"
+                ],
+                [
+                    "R",
+                    "A"
+                ],
+                [
+                    "T",
+                    "R"
+                ],
+                [
+                    "R",
+                    "S"
+                ],
+                [
+                    "T",
+                    "S"
+                ]
+            ],
+            "required":[
+                [
+                    "A",
+                    "E"
+                ],
+                [
+                    "O",
+                    "R"
+                ],
+                [
+                    "E",
+                    "O"
+                ],
+                [
+                    "O",
+                    "T"
+                ],
+                [
+                    "R",
+                    "T"
+                ],
+                [
+                    "A",
+                    "O"
+                ]
+            ]
+        },
+        "forbidden_Precision":1.0,
+        "required_Precision":0.6666666667,
+        "run_id":2
+    },
+    {
+        "title":"cancer",
+        "filename":"cancer",
+        "num_nodes":5,
+        "num_edges":4,
+        "variable_descriptions":{
+            "Cancer":"Cancer: Indicates whether the person has lung cancer.",
+            "Pollution":"Pollution: Represents the level of environmental air pollution the person is exposed to.",
+            "Smoker":"Smoker: Indicates whether the person is a smoker.",
+            "Xray":"Xray: Represents the result of a chest X-ray test.",
+            "Dyspnoea":"Dyspnoea: Indicates whether the person experiences dyspnoea (shortness of breath)."
+        },
+        "priors":{
+            "forbidden":[
+                [
+                    "Smoker",
+                    "Pollution"
+                ],
+                [
+                    "Dyspnoea",
+                    "Pollution"
+                ],
+                [
+                    "Dyspnoea",
+                    "Smoker"
+                ],
+                [
+                    "Xray",
+                    "Pollution"
+                ],
+                [
+                    "Xray",
+                    "Cancer"
+                ],
+                [
+                    "Xray",
+                    "Smoker"
+                ],
+                [
+                    "Pollution",
+                    "Smoker"
+                ],
+                [
+                    "Xray",
+                    "Dyspnoea"
+                ],
+                [
+                    "Dyspnoea",
+                    "Xray"
+                ],
+                [
+                    "Cancer",
+                    "Pollution"
+                ],
+                [
+                    "Dyspnoea",
+                    "Cancer"
+                ],
+                [
+                    "Cancer",
+                    "Smoker"
+                ]
+            ],
+            "required":[
+                [
+                    "Cancer",
+                    "Dyspnoea"
+                ],
+                [
+                    "Pollution",
+                    "Cancer"
+                ],
+                [
+                    "Cancer",
+                    "Xray"
+                ],
+                [
+                    "Smoker",
+                    "Dyspnoea"
+                ],
+                [
+                    "Smoker",
+                    "Cancer"
+                ]
+            ]
+        },
+        "forbidden_Precision":1.0,
+        "required_Precision":0.8,
+        "run_id":2
+    },
+    {
+        "title":"child",
+        "filename":"child",
+        "num_nodes":20,
+        "num_edges":25,
+        "variable_descriptions":{
+            "XrayReport":"The formal radiological interpretation and conclusion derived from a chest X-ray examination.",
+            "LungParench":"The structural and functional state of the lung tissue, assessed for conditions like congestion or other abnormalities.",
+            "CO2":"The measured concentration of carbon dioxide in the infant's blood.",
+            "GruntingReport":"The medical record indicating the presence or absence of grunting respirations observed in the infant.",
+            "Sick":"A general clinical assessment reflecting the infant's overall state of health and well-being, indicating the presence of illness.",
+            "HypoxiaInO2":"The severity of systemic oxygen deprivation experienced by the infant, specifically when receiving supplemental oxygen.",
+            "Disease":"The primary medical condition affecting the infant, which may include specific congenital cardiac anomalies or pulmonary conditions.",
+            "CardiacMixing":"The degree to which oxygenated and deoxygenated blood streams intermingle within the heart's circulation.",
+            "LVHreport":"The documented diagnostic conclusion regarding the presence or absence of left ventricular hypertrophy.",
+            "CO2Report":"The formal laboratory report detailing the infant's blood carbon dioxide levels.",
+            "BirthAsphyxia":"Whether the infant experienced a lack of oxygen during or immediately after birth.",
+            "RUQO2":"The measured oxygen saturation level in the upper right quadrant of the infant's body, typically reflecting pre-ductal oxygenation.",
+            "LVH":"An indication of an enlarged or thickened left ventricle of the heart.",
+            "Age":"The chronological age of the infant at the time of clinical evaluation, categorized into early postnatal periods.",
+            "DuctFlow":"The direction and patency of blood flow through the ductus arteriosus, a transient fetal blood vessel.",
+            "ChestXray":"The visual findings observed in a radiographic image of the infant's chest.",
+            "LowerBodyO2":"The measured oxygen saturation level in the lower half of the infant's body, typically reflecting post-ductal oxygenation.",
+            "HypDistrib":"The pattern of oxygen saturation across different regions of the infant's body, indicating uniformity or disparity.",
+            "Grunting":"A distinct audible respiratory effort made by the infant, often associated with breathing difficulties.",
+            "LungFlow":"The rate and volume of blood circulation through the pulmonary vascular system."
+        },
+        "priors":{
+            "forbidden":[
+                [
+                    "Sick",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "Disease"
+                ],
+                [
+                    "Disease",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LowerBodyO2",
+                    "DuctFlow"
+                ],
+                [
+                    "Sick",
+                    "LVH"
+                ],
+                [
+                    "LVH",
+                    "Age"
+                ],
+                [
+                    "LungParench",
+                    "Disease"
+                ],
+                [
+                    "XrayReport",
+                    "LungParench"
+                ],
+                [
+                    "LungParench",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "HypDistrib",
+                    "RUQO2"
+                ],
+                [
+                    "Age",
+                    "Disease"
+                ],
+                [
+                    "CO2Report",
+                    "CO2"
+                ],
+                [
+                    "Grunting",
+                    "Disease"
+                ],
+                [
+                    "LVH",
+                    "Disease"
+                ],
+                [
+                    "GruntingReport",
+                    "Grunting"
+                ],
+                [
+                    "CO2",
+                    "LungParench"
+                ],
+                [
+                    "XrayReport",
+                    "ChestXray"
+                ],
+                [
+                    "HypDistrib",
+                    "DuctFlow"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Disease"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "Sick",
+                    "LungParench"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "Grunting",
+                    "CO2"
+                ],
+                [
+                    "Sick",
+                    "Grunting"
+                ],
+                [
+                    "CO2",
+                    "Disease"
+                ],
+                [
+                    "Sick",
+                    "Disease"
+                ],
+                [
+                    "Sick",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "Sick",
+                    "CardiacMixing"
+                ],
+                [
+                    "LVHreport",
+                    "LVH"
+                ],
+                [
+                    "LungFlow",
+                    "Disease"
+                ],
+                [
+                    "LungFlow",
+                    "CardiacMixing"
+                ],
+                [
+                    "DuctFlow",
+                    "Age"
+                ],
+                [
+                    "Sick",
+                    "CO2"
+                ],
+                [
+                    "ChestXray",
+                    "LungParench"
+                ],
+                [
+                    "HypDistrib",
+                    "LowerBodyO2"
+                ],
+                [
+                    "DuctFlow",
+                    "Disease"
+                ]
+            ],
+            "required":[
+                [
+                    "LungParench",
+                    "XrayReport"
+                ],
+                [
+                    "Disease",
+                    "CardiacMixing"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "LungParench"
+                ],
+                [
+                    "LungParench",
+                    "Grunting"
+                ],
+                [
+                    "DuctFlow",
+                    "LowerBodyO2"
+                ],
+                [
+                    "DuctFlow",
+                    "HypDistrib"
+                ],
+                [
+                    "LVH",
+                    "Sick"
+                ],
+                [
+                    "Grunting",
+                    "Sick"
+                ],
+                [
+                    "CardiacMixing",
+                    "HypDistrib"
+                ],
+                [
+                    "LungFlow",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Grunting",
+                    "GruntingReport"
+                ],
+                [
+                    "Disease",
+                    "CO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Sick"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Disease"
+                ],
+                [
+                    "LungParench",
+                    "ChestXray"
+                ],
+                [
+                    "Disease",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Grunting"
+                ],
+                [
+                    "CO2",
+                    "Sick"
+                ],
+                [
+                    "LungParench",
+                    "CO2"
+                ],
+                [
+                    "LVH",
+                    "LVHreport"
+                ],
+                [
+                    "Disease",
+                    "LVH"
+                ],
+                [
+                    "Disease",
+                    "DuctFlow"
+                ],
+                [
+                    "CardiacMixing",
+                    "LVH"
+                ],
+                [
+                    "RUQO2",
+                    "HypDistrib"
+                ],
+                [
+                    "LowerBodyO2",
+                    "HypDistrib"
+                ],
+                [
+                    "CO2",
+                    "CO2Report"
+                ],
+                [
+                    "CardiacMixing",
+                    "LungFlow"
+                ],
+                [
+                    "Disease",
+                    "Sick"
+                ],
+                [
+                    "Age",
+                    "DuctFlow"
+                ],
+                [
+                    "Age",
+                    "LVH"
+                ],
+                [
+                    "CardiacMixing",
+                    "Sick"
+                ],
+                [
+                    "Disease",
+                    "Grunting"
+                ],
+                [
+                    "Disease",
+                    "LungParench"
+                ],
+                [
+                    "LowerBodyO2",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "RUQO2",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Disease",
+                    "LungFlow"
+                ],
+                [
+                    "ChestXray",
+                    "XrayReport"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Sick"
+                ]
+            ]
+        },
+        "forbidden_Precision":0.9444444444,
+        "required_Precision":0.4358974359,
+        "run_id":2
+    },
+    {
         "title":"earthquake",
         "filename":"earthquake",
         "num_nodes":5,
@@ -2007,6 +3386,383 @@
         },
         "forbidden_Precision":1.0,
         "required_Precision":0.5,
+        "run_id":3
+    },
+    {
+        "title":"child",
+        "filename":"child",
+        "num_nodes":20,
+        "num_edges":25,
+        "variable_descriptions":{
+            "XrayReport":"The formal radiological interpretation and conclusion derived from a chest X-ray examination.",
+            "LungParench":"The structural and functional state of the lung tissue, assessed for conditions like congestion or other abnormalities.",
+            "CO2":"The measured concentration of carbon dioxide in the infant's blood.",
+            "GruntingReport":"The medical record indicating the presence or absence of grunting respirations observed in the infant.",
+            "Sick":"A general clinical assessment reflecting the infant's overall state of health and well-being, indicating the presence of illness.",
+            "HypoxiaInO2":"The severity of systemic oxygen deprivation experienced by the infant, specifically when receiving supplemental oxygen.",
+            "Disease":"The primary medical condition affecting the infant, which may include specific congenital cardiac anomalies or pulmonary conditions.",
+            "CardiacMixing":"The degree to which oxygenated and deoxygenated blood streams intermingle within the heart's circulation.",
+            "LVHreport":"The documented diagnostic conclusion regarding the presence or absence of left ventricular hypertrophy.",
+            "CO2Report":"The formal laboratory report detailing the infant's blood carbon dioxide levels.",
+            "BirthAsphyxia":"Whether the infant experienced a lack of oxygen during or immediately after birth.",
+            "RUQO2":"The measured oxygen saturation level in the upper right quadrant of the infant's body, typically reflecting pre-ductal oxygenation.",
+            "LVH":"An indication of an enlarged or thickened left ventricle of the heart.",
+            "Age":"The chronological age of the infant at the time of clinical evaluation, categorized into early postnatal periods.",
+            "DuctFlow":"The direction and patency of blood flow through the ductus arteriosus, a transient fetal blood vessel.",
+            "ChestXray":"The visual findings observed in a radiographic image of the infant's chest.",
+            "LowerBodyO2":"The measured oxygen saturation level in the lower half of the infant's body, typically reflecting post-ductal oxygenation.",
+            "HypDistrib":"The pattern of oxygen saturation across different regions of the infant's body, indicating uniformity or disparity.",
+            "Grunting":"A distinct audible respiratory effort made by the infant, often associated with breathing difficulties.",
+            "LungFlow":"The rate and volume of blood circulation through the pulmonary vascular system."
+        },
+        "priors":{
+            "forbidden":[
+                [
+                    "Sick",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "DuctFlow"
+                ],
+                [
+                    "LowerBodyO2",
+                    "DuctFlow"
+                ],
+                [
+                    "ChestXray",
+                    "LungFlow"
+                ],
+                [
+                    "RUQO2",
+                    "DuctFlow"
+                ],
+                [
+                    "HypDistrib",
+                    "CardiacMixing"
+                ],
+                [
+                    "Grunting",
+                    "LungParench"
+                ],
+                [
+                    "ChestXray",
+                    "Disease"
+                ],
+                [
+                    "CO2",
+                    "DuctFlow"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Age"
+                ],
+                [
+                    "Sick",
+                    "LVH"
+                ],
+                [
+                    "Sick",
+                    "DuctFlow"
+                ],
+                [
+                    "HypDistrib",
+                    "RUQO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "LungParench"
+                ],
+                [
+                    "Age",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "CO2Report",
+                    "CO2"
+                ],
+                [
+                    "Grunting",
+                    "Disease"
+                ],
+                [
+                    "ChestXray",
+                    "CO2"
+                ],
+                [
+                    "LVH",
+                    "Disease"
+                ],
+                [
+                    "LVH",
+                    "CardiacMixing"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "LungFlow"
+                ],
+                [
+                    "CO2",
+                    "LungParench"
+                ],
+                [
+                    "GruntingReport",
+                    "Grunting"
+                ],
+                [
+                    "XrayReport",
+                    "ChestXray"
+                ],
+                [
+                    "HypDistrib",
+                    "DuctFlow"
+                ],
+                [
+                    "Sick",
+                    "LungParench"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "Sick",
+                    "Grunting"
+                ],
+                [
+                    "LowerBodyO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "RUQO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "RUQO2",
+                    "LowerBodyO2"
+                ],
+                [
+                    "CO2",
+                    "Disease"
+                ],
+                [
+                    "CO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "LungFlow",
+                    "LungParench"
+                ],
+                [
+                    "Sick",
+                    "LungFlow"
+                ],
+                [
+                    "Sick",
+                    "Disease"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "CO2"
+                ],
+                [
+                    "Sick",
+                    "CardiacMixing"
+                ],
+                [
+                    "Sick",
+                    "HypDistrib"
+                ],
+                [
+                    "LVHreport",
+                    "LVH"
+                ],
+                [
+                    "LungFlow",
+                    "Disease"
+                ],
+                [
+                    "LowerBodyO2",
+                    "RUQO2"
+                ],
+                [
+                    "LVH",
+                    "DuctFlow"
+                ],
+                [
+                    "Sick",
+                    "CO2"
+                ],
+                [
+                    "ChestXray",
+                    "Grunting"
+                ],
+                [
+                    "ChestXray",
+                    "LungParench"
+                ],
+                [
+                    "HypDistrib",
+                    "LowerBodyO2"
+                ]
+            ],
+            "required":[
+                [
+                    "Disease",
+                    "CardiacMixing"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "LungParench"
+                ],
+                [
+                    "LungParench",
+                    "Grunting"
+                ],
+                [
+                    "DuctFlow",
+                    "LowerBodyO2"
+                ],
+                [
+                    "DuctFlow",
+                    "HypDistrib"
+                ],
+                [
+                    "LVH",
+                    "Sick"
+                ],
+                [
+                    "LungFlow",
+                    "CO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "LowerBodyO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "HypDistrib"
+                ],
+                [
+                    "Grunting",
+                    "Sick"
+                ],
+                [
+                    "Age",
+                    "LungParench"
+                ],
+                [
+                    "LungParench",
+                    "LungFlow"
+                ],
+                [
+                    "LungFlow",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Grunting",
+                    "GruntingReport"
+                ],
+                [
+                    "Disease",
+                    "CO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Sick"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Disease"
+                ],
+                [
+                    "LungParench",
+                    "ChestXray"
+                ],
+                [
+                    "Disease",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Age",
+                    "Disease"
+                ],
+                [
+                    "CardiacMixing",
+                    "RUQO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "CO2",
+                    "Sick"
+                ],
+                [
+                    "LungParench",
+                    "CO2"
+                ],
+                [
+                    "LVH",
+                    "LVHreport"
+                ],
+                [
+                    "Disease",
+                    "LVH"
+                ],
+                [
+                    "LungParench",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Disease",
+                    "DuctFlow"
+                ],
+                [
+                    "HypDistrib",
+                    "Sick"
+                ],
+                [
+                    "CO2",
+                    "CO2Report"
+                ],
+                [
+                    "Disease",
+                    "Sick"
+                ],
+                [
+                    "Age",
+                    "DuctFlow"
+                ],
+                [
+                    "Age",
+                    "LVH"
+                ],
+                [
+                    "Disease",
+                    "Grunting"
+                ],
+                [
+                    "Disease",
+                    "LungParench"
+                ],
+                [
+                    "Disease",
+                    "LungFlow"
+                ],
+                [
+                    "ChestXray",
+                    "XrayReport"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Sick"
+                ]
+            ]
+        },
+        "forbidden_Precision":0.9574468085,
+        "required_Precision":0.4736842105,
         "run_id":3
     },
     {
@@ -2437,188 +4193,124 @@
         "run_id":3
     },
     {
-        "title":"survey",
-        "filename":"survey",
-        "num_nodes":6,
-        "num_edges":6,
+        "title":"asia",
+        "filename":"asia",
+        "num_nodes":8,
+        "num_edges":8,
         "variable_descriptions":{
-            "O":"Occupation: whether the individual is an employee (emp) or a self-employed (self) worker.",
-            "E":"Education: the highest level of education or training successfully completed, recorded as up to high school (high) or university degree (uni).",
-            "A":"Age: the age, recorded as young (young) for individuals below 30 years old, adult (adult) for individuals between 30 and 60 years old, and old (old) for people older than 60.",
-            "T":"Travel: the means of transport favoured by the individual, recorded either as car (car), train (train) or other (other).",
-            "S":"Sex: the biological sex, recorded as male (M) or female (F).",
-            "R":"Residence: the size of the city the individual lives in, recorded as either small (small) or big (big)."
+            "smoke":"smoking: whether or not the patient is a smoker",
+            "asia":"recent visit to asia: whether or not the patient has recently visited asia",
+            "bronc":"bronchitis: whether or not the patient has bronchitis",
+            "either":"either tuberculosis or lung cancer: whether or not the patient has either tuberculosis or lung cancer",
+            "lung":"lung cancer: whether or not the patient has lung cancer",
+            "xray":"positive chest xray: whether or not the patient has had a positive chest xray",
+            "dysp":"dyspnoea: whether or not the patient has dyspnoea, also known as shortness of breath",
+            "tub":"tuberculosis: whether or not the patient has tuberculosis"
         },
         "priors":{
             "forbidden":[
                 [
-                    "A",
-                    "S"
+                    "dysp",
+                    "lung"
                 ],
                 [
-                    "T",
-                    "A"
+                    "xray",
+                    "lung"
                 ],
                 [
-                    "S",
-                    "R"
+                    "xray",
+                    "dysp"
                 ],
                 [
-                    "S",
-                    "T"
+                    "lung",
+                    "smoke"
                 ],
                 [
-                    "S",
-                    "O"
+                    "tub",
+                    "asia"
                 ],
                 [
-                    "S",
-                    "A"
+                    "dysp",
+                    "tub"
                 ],
                 [
-                    "E",
-                    "A"
+                    "xray",
+                    "tub"
                 ],
                 [
-                    "E",
-                    "S"
+                    "bronc",
+                    "smoke"
                 ],
                 [
-                    "O",
-                    "S"
+                    "dysp",
+                    "bronc"
                 ],
                 [
-                    "S",
-                    "E"
+                    "either",
+                    "lung"
                 ],
                 [
-                    "O",
-                    "A"
+                    "dysp",
+                    "smoke"
                 ],
                 [
-                    "R",
-                    "A"
+                    "dysp",
+                    "xray"
                 ],
                 [
-                    "R",
-                    "S"
-                ],
-                [
-                    "T",
-                    "S"
+                    "either",
+                    "tub"
                 ]
             ],
             "required":[
                 [
-                    "O",
-                    "T"
+                    "tub",
+                    "xray"
                 ],
                 [
-                    "R",
-                    "T"
+                    "smoke",
+                    "bronc"
                 ],
                 [
-                    "E",
-                    "O"
-                ]
-            ]
-        },
-        "forbidden_Precision":0.9285714286,
-        "required_Precision":1.0,
-        "run_id":4
-    },
-    {
-        "title":"cancer",
-        "filename":"cancer",
-        "num_nodes":5,
-        "num_edges":4,
-        "variable_descriptions":{
-            "Cancer":"Cancer: Indicates whether the person has lung cancer.",
-            "Pollution":"Pollution: Represents the level of environmental air pollution the person is exposed to.",
-            "Smoker":"Smoker: Indicates whether the person is a smoker.",
-            "Xray":"Xray: Represents the result of a chest X-ray test.",
-            "Dyspnoea":"Dyspnoea: Indicates whether the person experiences dyspnoea (shortness of breath)."
-        },
-        "priors":{
-            "forbidden":[
-                [
-                    "Smoker",
-                    "Pollution"
+                    "tub",
+                    "either"
                 ],
                 [
-                    "Dyspnoea",
-                    "Pollution"
+                    "bronc",
+                    "dysp"
                 ],
                 [
-                    "Dyspnoea",
-                    "Smoker"
+                    "asia",
+                    "tub"
                 ],
                 [
-                    "Xray",
-                    "Pollution"
+                    "tub",
+                    "dysp"
                 ],
                 [
-                    "Xray",
-                    "Cancer"
+                    "smoke",
+                    "lung"
                 ],
                 [
-                    "Dyspnoea",
-                    "Xray"
+                    "smoke",
+                    "dysp"
                 ],
                 [
-                    "Pollution",
-                    "Smoker"
+                    "lung",
+                    "xray"
                 ],
                 [
-                    "Xray",
-                    "Dyspnoea"
+                    "lung",
+                    "either"
                 ],
                 [
-                    "Xray",
-                    "Smoker"
-                ],
-                [
-                    "Cancer",
-                    "Pollution"
-                ],
-                [
-                    "Dyspnoea",
-                    "Cancer"
-                ],
-                [
-                    "Cancer",
-                    "Smoker"
-                ]
-            ],
-            "required":[
-                [
-                    "Cancer",
-                    "Dyspnoea"
-                ],
-                [
-                    "Pollution",
-                    "Cancer"
-                ],
-                [
-                    "Cancer",
-                    "Xray"
-                ],
-                [
-                    "Smoker",
-                    "Dyspnoea"
-                ],
-                [
-                    "Pollution",
-                    "Dyspnoea"
-                ],
-                [
-                    "Smoker",
-                    "Cancer"
+                    "lung",
+                    "dysp"
                 ]
             ]
         },
         "forbidden_Precision":1.0,
-        "required_Precision":0.6666666667,
+        "required_Precision":0.5454545455,
         "run_id":4
     },
     {
@@ -2782,124 +4474,188 @@
         "run_id":4
     },
     {
-        "title":"asia",
-        "filename":"asia",
-        "num_nodes":8,
-        "num_edges":8,
+        "title":"cancer",
+        "filename":"cancer",
+        "num_nodes":5,
+        "num_edges":4,
         "variable_descriptions":{
-            "smoke":"smoking: whether or not the patient is a smoker",
-            "asia":"recent visit to asia: whether or not the patient has recently visited asia",
-            "bronc":"bronchitis: whether or not the patient has bronchitis",
-            "either":"either tuberculosis or lung cancer: whether or not the patient has either tuberculosis or lung cancer",
-            "lung":"lung cancer: whether or not the patient has lung cancer",
-            "xray":"positive chest xray: whether or not the patient has had a positive chest xray",
-            "dysp":"dyspnoea: whether or not the patient has dyspnoea, also known as shortness of breath",
-            "tub":"tuberculosis: whether or not the patient has tuberculosis"
+            "Cancer":"Cancer: Indicates whether the person has lung cancer.",
+            "Pollution":"Pollution: Represents the level of environmental air pollution the person is exposed to.",
+            "Smoker":"Smoker: Indicates whether the person is a smoker.",
+            "Xray":"Xray: Represents the result of a chest X-ray test.",
+            "Dyspnoea":"Dyspnoea: Indicates whether the person experiences dyspnoea (shortness of breath)."
         },
         "priors":{
             "forbidden":[
                 [
-                    "dysp",
-                    "lung"
+                    "Smoker",
+                    "Pollution"
                 ],
                 [
-                    "xray",
-                    "lung"
+                    "Dyspnoea",
+                    "Pollution"
                 ],
                 [
-                    "xray",
-                    "dysp"
+                    "Dyspnoea",
+                    "Smoker"
                 ],
                 [
-                    "lung",
-                    "smoke"
+                    "Xray",
+                    "Pollution"
                 ],
                 [
-                    "tub",
-                    "asia"
+                    "Xray",
+                    "Cancer"
                 ],
                 [
-                    "dysp",
-                    "tub"
+                    "Dyspnoea",
+                    "Xray"
                 ],
                 [
-                    "xray",
-                    "tub"
+                    "Pollution",
+                    "Smoker"
                 ],
                 [
-                    "bronc",
-                    "smoke"
+                    "Xray",
+                    "Dyspnoea"
                 ],
                 [
-                    "dysp",
-                    "bronc"
+                    "Xray",
+                    "Smoker"
                 ],
                 [
-                    "either",
-                    "lung"
+                    "Cancer",
+                    "Pollution"
                 ],
                 [
-                    "dysp",
-                    "smoke"
+                    "Dyspnoea",
+                    "Cancer"
                 ],
                 [
-                    "dysp",
-                    "xray"
-                ],
-                [
-                    "either",
-                    "tub"
+                    "Cancer",
+                    "Smoker"
                 ]
             ],
             "required":[
                 [
-                    "tub",
-                    "xray"
+                    "Cancer",
+                    "Dyspnoea"
                 ],
                 [
-                    "smoke",
-                    "bronc"
+                    "Pollution",
+                    "Cancer"
                 ],
                 [
-                    "tub",
-                    "either"
+                    "Cancer",
+                    "Xray"
                 ],
                 [
-                    "bronc",
-                    "dysp"
+                    "Smoker",
+                    "Dyspnoea"
                 ],
                 [
-                    "asia",
-                    "tub"
+                    "Pollution",
+                    "Dyspnoea"
                 ],
                 [
-                    "tub",
-                    "dysp"
-                ],
-                [
-                    "smoke",
-                    "lung"
-                ],
-                [
-                    "smoke",
-                    "dysp"
-                ],
-                [
-                    "lung",
-                    "xray"
-                ],
-                [
-                    "lung",
-                    "either"
-                ],
-                [
-                    "lung",
-                    "dysp"
+                    "Smoker",
+                    "Cancer"
                 ]
             ]
         },
         "forbidden_Precision":1.0,
-        "required_Precision":0.5454545455,
+        "required_Precision":0.6666666667,
+        "run_id":4
+    },
+    {
+        "title":"survey",
+        "filename":"survey",
+        "num_nodes":6,
+        "num_edges":6,
+        "variable_descriptions":{
+            "O":"Occupation: whether the individual is an employee (emp) or a self-employed (self) worker.",
+            "E":"Education: the highest level of education or training successfully completed, recorded as up to high school (high) or university degree (uni).",
+            "A":"Age: the age, recorded as young (young) for individuals below 30 years old, adult (adult) for individuals between 30 and 60 years old, and old (old) for people older than 60.",
+            "T":"Travel: the means of transport favoured by the individual, recorded either as car (car), train (train) or other (other).",
+            "S":"Sex: the biological sex, recorded as male (M) or female (F).",
+            "R":"Residence: the size of the city the individual lives in, recorded as either small (small) or big (big)."
+        },
+        "priors":{
+            "forbidden":[
+                [
+                    "A",
+                    "S"
+                ],
+                [
+                    "T",
+                    "A"
+                ],
+                [
+                    "S",
+                    "R"
+                ],
+                [
+                    "S",
+                    "T"
+                ],
+                [
+                    "S",
+                    "O"
+                ],
+                [
+                    "S",
+                    "A"
+                ],
+                [
+                    "E",
+                    "A"
+                ],
+                [
+                    "E",
+                    "S"
+                ],
+                [
+                    "O",
+                    "S"
+                ],
+                [
+                    "S",
+                    "E"
+                ],
+                [
+                    "O",
+                    "A"
+                ],
+                [
+                    "R",
+                    "A"
+                ],
+                [
+                    "R",
+                    "S"
+                ],
+                [
+                    "T",
+                    "S"
+                ]
+            ],
+            "required":[
+                [
+                    "O",
+                    "T"
+                ],
+                [
+                    "R",
+                    "T"
+                ],
+                [
+                    "E",
+                    "O"
+                ]
+            ]
+        },
+        "forbidden_Precision":0.9285714286,
+        "required_Precision":1.0,
         "run_id":4
     },
     {
@@ -2966,6 +4722,419 @@
         },
         "forbidden_Precision":1.0,
         "required_Precision":1.0,
+        "run_id":4
+    },
+    {
+        "title":"child",
+        "filename":"child",
+        "num_nodes":20,
+        "num_edges":25,
+        "variable_descriptions":{
+            "XrayReport":"The formal radiological interpretation and conclusion derived from a chest X-ray examination.",
+            "LungParench":"The structural and functional state of the lung tissue, assessed for conditions like congestion or other abnormalities.",
+            "CO2":"The measured concentration of carbon dioxide in the infant's blood.",
+            "GruntingReport":"The medical record indicating the presence or absence of grunting respirations observed in the infant.",
+            "Sick":"A general clinical assessment reflecting the infant's overall state of health and well-being, indicating the presence of illness.",
+            "HypoxiaInO2":"The severity of systemic oxygen deprivation experienced by the infant, specifically when receiving supplemental oxygen.",
+            "Disease":"The primary medical condition affecting the infant, which may include specific congenital cardiac anomalies or pulmonary conditions.",
+            "CardiacMixing":"The degree to which oxygenated and deoxygenated blood streams intermingle within the heart's circulation.",
+            "LVHreport":"The documented diagnostic conclusion regarding the presence or absence of left ventricular hypertrophy.",
+            "CO2Report":"The formal laboratory report detailing the infant's blood carbon dioxide levels.",
+            "BirthAsphyxia":"Whether the infant experienced a lack of oxygen during or immediately after birth.",
+            "RUQO2":"The measured oxygen saturation level in the upper right quadrant of the infant's body, typically reflecting pre-ductal oxygenation.",
+            "LVH":"An indication of an enlarged or thickened left ventricle of the heart.",
+            "Age":"The chronological age of the infant at the time of clinical evaluation, categorized into early postnatal periods.",
+            "DuctFlow":"The direction and patency of blood flow through the ductus arteriosus, a transient fetal blood vessel.",
+            "ChestXray":"The visual findings observed in a radiographic image of the infant's chest.",
+            "LowerBodyO2":"The measured oxygen saturation level in the lower half of the infant's body, typically reflecting post-ductal oxygenation.",
+            "HypDistrib":"The pattern of oxygen saturation across different regions of the infant's body, indicating uniformity or disparity.",
+            "Grunting":"A distinct audible respiratory effort made by the infant, often associated with breathing difficulties.",
+            "LungFlow":"The rate and volume of blood circulation through the pulmonary vascular system."
+        },
+        "priors":{
+            "forbidden":[
+                [
+                    "CO2Report",
+                    "Age"
+                ],
+                [
+                    "ChestXray",
+                    "LungParench"
+                ],
+                [
+                    "CardiacMixing",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "LowerBodyO2",
+                    "DuctFlow"
+                ],
+                [
+                    "DuctFlow",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "ChestXray",
+                    "Age"
+                ],
+                [
+                    "LungParench",
+                    "Age"
+                ],
+                [
+                    "Grunting",
+                    "LungParench"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Age"
+                ],
+                [
+                    "LVHreport",
+                    "Grunting"
+                ],
+                [
+                    "LVHreport",
+                    "Age"
+                ],
+                [
+                    "Sick",
+                    "LVH"
+                ],
+                [
+                    "LVH",
+                    "Age"
+                ],
+                [
+                    "Grunting",
+                    "Age"
+                ],
+                [
+                    "Sick",
+                    "DuctFlow"
+                ],
+                [
+                    "LungParench",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "XrayReport",
+                    "Grunting"
+                ],
+                [
+                    "HypDistrib",
+                    "RUQO2"
+                ],
+                [
+                    "Age",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "CO2Report",
+                    "CO2"
+                ],
+                [
+                    "ChestXray",
+                    "CO2"
+                ],
+                [
+                    "XrayReport",
+                    "Age"
+                ],
+                [
+                    "LVH",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Age"
+                ],
+                [
+                    "LowerBodyO2",
+                    "Age"
+                ],
+                [
+                    "CO2",
+                    "LungParench"
+                ],
+                [
+                    "GruntingReport",
+                    "Grunting"
+                ],
+                [
+                    "XrayReport",
+                    "ChestXray"
+                ],
+                [
+                    "HypDistrib",
+                    "DuctFlow"
+                ],
+                [
+                    "GruntingReport",
+                    "Age"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Disease"
+                ],
+                [
+                    "Sick",
+                    "LungParench"
+                ],
+                [
+                    "RUQO2",
+                    "Age"
+                ],
+                [
+                    "CO2",
+                    "Age"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "LowerBodyO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "HypDistrib"
+                ],
+                [
+                    "LowerBodyO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "RUQO2",
+                    "CardiacMixing"
+                ],
+                [
+                    "Sick",
+                    "Age"
+                ],
+                [
+                    "Sick",
+                    "LungFlow"
+                ],
+                [
+                    "Sick",
+                    "Disease"
+                ],
+                [
+                    "Sick",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "Sick",
+                    "CardiacMixing"
+                ],
+                [
+                    "LungFlow",
+                    "Age"
+                ],
+                [
+                    "LVHreport",
+                    "LVH"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "RUQO2"
+                ],
+                [
+                    "GruntingReport",
+                    "CO2"
+                ],
+                [
+                    "HypDistrib",
+                    "Age"
+                ],
+                [
+                    "LungFlow",
+                    "BirthAsphyxia"
+                ],
+                [
+                    "Disease",
+                    "Age"
+                ],
+                [
+                    "LungFlow",
+                    "ChestXray"
+                ],
+                [
+                    "DuctFlow",
+                    "Age"
+                ],
+                [
+                    "CO2Report",
+                    "Grunting"
+                ],
+                [
+                    "CardiacMixing",
+                    "Age"
+                ],
+                [
+                    "ChestXray",
+                    "Grunting"
+                ],
+                [
+                    "HypDistrib",
+                    "CardiacMixing"
+                ],
+                [
+                    "HypDistrib",
+                    "LowerBodyO2"
+                ]
+            ],
+            "required":[
+                [
+                    "Disease",
+                    "CardiacMixing"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "LungParench"
+                ],
+                [
+                    "LungParench",
+                    "Grunting"
+                ],
+                [
+                    "DuctFlow",
+                    "LowerBodyO2"
+                ],
+                [
+                    "DuctFlow",
+                    "HypDistrib"
+                ],
+                [
+                    "LVH",
+                    "Sick"
+                ],
+                [
+                    "Grunting",
+                    "Sick"
+                ],
+                [
+                    "CardiacMixing",
+                    "LowerBodyO2"
+                ],
+                [
+                    "Age",
+                    "LungParench"
+                ],
+                [
+                    "CardiacMixing",
+                    "HypDistrib"
+                ],
+                [
+                    "LungParench",
+                    "LungFlow"
+                ],
+                [
+                    "Grunting",
+                    "GruntingReport"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Sick"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Disease"
+                ],
+                [
+                    "LungParench",
+                    "ChestXray"
+                ],
+                [
+                    "LVH",
+                    "LungFlow"
+                ],
+                [
+                    "HypDistrib",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "CardiacMixing",
+                    "RUQO2"
+                ],
+                [
+                    "CO2",
+                    "Sick"
+                ],
+                [
+                    "LungParench",
+                    "CO2"
+                ],
+                [
+                    "LVH",
+                    "LVHreport"
+                ],
+                [
+                    "Disease",
+                    "LVH"
+                ],
+                [
+                    "RUQO2",
+                    "HypDistrib"
+                ],
+                [
+                    "LowerBodyO2",
+                    "HypDistrib"
+                ],
+                [
+                    "CO2",
+                    "CO2Report"
+                ],
+                [
+                    "CardiacMixing",
+                    "LungFlow"
+                ],
+                [
+                    "Disease",
+                    "Sick"
+                ],
+                [
+                    "Age",
+                    "DuctFlow"
+                ],
+                [
+                    "CardiacMixing",
+                    "Sick"
+                ],
+                [
+                    "LowerBodyO2",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Disease",
+                    "LungParench"
+                ],
+                [
+                    "RUQO2",
+                    "HypoxiaInO2"
+                ],
+                [
+                    "Disease",
+                    "LungFlow"
+                ],
+                [
+                    "LungParench",
+                    "Sick"
+                ],
+                [
+                    "DuctFlow",
+                    "LungFlow"
+                ],
+                [
+                    "ChestXray",
+                    "XrayReport"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Sick"
+                ]
+            ]
+        },
+        "forbidden_Precision":0.8947368421,
+        "required_Precision":0.4054054054,
         "run_id":4
     }
 ]

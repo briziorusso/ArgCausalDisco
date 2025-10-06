@@ -544,10 +544,9 @@ MAX_NODES = 20  # Skip graphs larger than this for performance reasons
 report_cols = [
     "time",
     "remove_n",
-    "cpdag_F1",
-    "cpdag_shd",
-    "cpdag_sid_low",
-    "cpdag_sid_high",
+    "dag_F1",
+    "dag_shd",
+    "dag_sid",
     "AP",
     "CIT_Precision",
     "CIT_F1",
@@ -695,12 +694,5 @@ synthetic_report = show_report(synthetic_res_df)
 
 synthetic_report.to_csv("synthetic-report.csv")
 
-
-child_res_df, _ = run_experiment(
-    prior_df=pd.read_json("child.json"), datasets=[Path("bnlearn/child/child.bifxml")]
-)
-child_res_df.to_csv("child-results.csv", index=False)
-child_report = show_report(child_res_df)
-child_report.to_csv("child-report.csv")
 
 print("Skipped files:", bn_skipped + syn_skipped)

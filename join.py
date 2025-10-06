@@ -37,10 +37,10 @@ def join_results(json_path, csv_path):
     return merged
 
 if __name__ == "__main__":
-    for type_ in ["bnlearn", "synthetic", "child"]:
+    for type_ in ["bnlearn", "synthetic"]:
         json_path = f"{type_}.json"
         csv_path = f"{type_}-results.csv"
         merged_df = join_results(json_path, csv_path)
-        output_path = f"merged_{type_}.csv"
+        output_path = f"results/merged_{type_}.csv"
         merged_df.to_csv(output_path, index=False)
         print(f"Joined results saved to {output_path}")

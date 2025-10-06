@@ -22,7 +22,7 @@
                     "A"
                 ],
                 [
-                    "T",
+                    "E",
                     "S"
                 ],
                 [
@@ -30,7 +30,7 @@
                     "A"
                 ],
                 [
-                    "E",
+                    "T",
                     "S"
                 ],
                 [
@@ -39,15 +39,15 @@
                 ],
                 [
                     "E",
-                    "A"
-                ],
-                [
-                    "R",
                     "A"
                 ],
                 [
                     "O",
                     "S"
+                ],
+                [
+                    "R",
+                    "A"
                 ]
             ],
             "required":[
@@ -77,41 +77,41 @@
         "priors":{
             "forbidden":[
                 [
-                    "Xray",
-                    "Cancer"
-                ],
-                [
                     "Dyspnoea",
-                    "Cancer"
-                ],
-                [
-                    "Dyspnoea",
-                    "Smoker"
+                    "Pollution"
                 ],
                 [
                     "Xray",
                     "Dyspnoea"
                 ],
                 [
-                    "Dyspnoea",
+                    "Cancer",
                     "Pollution"
+                ],
+                [
+                    "Dyspnoea",
+                    "Cancer"
                 ],
                 [
                     "Smoker",
                     "Pollution"
                 ],
                 [
-                    "Cancer",
+                    "Dyspnoea",
                     "Smoker"
                 ],
                 [
+                    "Xray",
+                    "Cancer"
+                ],
+                [
                     "Cancer",
-                    "Pollution"
+                    "Smoker"
                 ]
             ],
             "required":[
                 [
-                    "Pollution",
+                    "Smoker",
                     "Cancer"
                 ],
                 [
@@ -119,12 +119,12 @@
                     "Xray"
                 ],
                 [
-                    "Smoker",
-                    "Dyspnoea"
+                    "Pollution",
+                    "Cancer"
                 ],
                 [
                     "Smoker",
-                    "Cancer"
+                    "Dyspnoea"
                 ],
                 [
                     "Cancer",
@@ -161,42 +161,42 @@
         "priors":{
             "forbidden":[
                 [
-                    "Mek",
-                    "Raf"
-                ],
-                [
-                    "PIP3",
-                    "PIP2"
-                ],
-                [
-                    "Akt",
-                    "PIP3"
+                    "PKC",
+                    "Plcg"
                 ],
                 [
                     "Erk",
                     "Mek"
                 ],
                 [
-                    "PKC",
-                    "Plcg"
+                    "Akt",
+                    "PIP3"
+                ],
+                [
+                    "PIP3",
+                    "PIP2"
+                ],
+                [
+                    "Mek",
+                    "Raf"
                 ]
             ],
             "required":[
-                [
-                    "Mek",
-                    "Erk"
-                ],
-                [
-                    "Plcg",
-                    "PKC"
-                ],
                 [
                     "Raf",
                     "Mek"
                 ],
                 [
+                    "Mek",
+                    "Erk"
+                ],
+                [
                     "PIP3",
                     "Akt"
+                ],
+                [
+                    "Plcg",
+                    "PKC"
                 ]
             ]
         },
@@ -226,23 +226,35 @@
         "priors":{
             "forbidden":[
                 [
-                    "xray",
+                    "tub",
+                    "asia"
+                ],
+                [
+                    "either",
                     "lung"
+                ],
+                [
+                    "either",
+                    "tub"
+                ],
+                [
+                    "dysp",
+                    "lung"
+                ],
+                [
+                    "dysp",
+                    "tub"
                 ],
                 [
                     "bronc",
                     "smoke"
                 ],
                 [
-                    "dysp",
-                    "bronc"
-                ],
-                [
-                    "either",
+                    "xray",
                     "lung"
                 ],
                 [
-                    "dysp",
+                    "xray",
                     "tub"
                 ],
                 [
@@ -250,29 +262,17 @@
                     "smoke"
                 ],
                 [
-                    "either",
-                    "tub"
-                ],
-                [
                     "dysp",
-                    "lung"
-                ],
-                [
-                    "tub",
-                    "asia"
-                ],
-                [
-                    "xray",
-                    "tub"
+                    "bronc"
                 ]
             ],
             "required":[
                 [
-                    "lung",
+                    "tub",
                     "either"
                 ],
                 [
-                    "tub",
+                    "lung",
                     "either"
                 ]
             ]
@@ -300,36 +300,36 @@
         "priors":{
             "forbidden":[
                 [
+                    "Alarm",
+                    "Burglary"
+                ],
+                [
+                    "JohnCalls",
+                    "Earthquake"
+                ],
+                [
+                    "Alarm",
+                    "Earthquake"
+                ],
+                [
+                    "JohnCalls",
+                    "Alarm"
+                ],
+                [
+                    "MaryCalls",
+                    "Earthquake"
+                ],
+                [
+                    "MaryCalls",
+                    "Burglary"
+                ],
+                [
                     "MaryCalls",
                     "Alarm"
                 ],
                 [
                     "JohnCalls",
-                    "Earthquake"
-                ],
-                [
-                    "JohnCalls",
-                    "Alarm"
-                ],
-                [
-                    "MaryCalls",
                     "Burglary"
-                ],
-                [
-                    "Alarm",
-                    "Burglary"
-                ],
-                [
-                    "MaryCalls",
-                    "Earthquake"
-                ],
-                [
-                    "JohnCalls",
-                    "Burglary"
-                ],
-                [
-                    "Alarm",
-                    "Earthquake"
                 ]
             ],
             "required":[
@@ -344,5 +344,126 @@
         "required_Precision":0.0,
         "required_Recall":0.0,
         "required_F1":0.0
+    },
+    {
+        "filename":"child",
+        "num_nodes":20,
+        "num_edges":25,
+        "variable_descriptions":{
+            "XrayReport":"The formal radiological interpretation and conclusion derived from a chest X-ray examination.",
+            "LungParench":"The structural and functional state of the lung tissue, assessed for conditions like congestion or other abnormalities.",
+            "CO2":"The measured concentration of carbon dioxide in the infant's blood.",
+            "GruntingReport":"The medical record indicating the presence or absence of grunting respirations observed in the infant.",
+            "Sick":"A general clinical assessment reflecting the infant's overall state of health and well-being, indicating the presence of illness.",
+            "HypoxiaInO2":"The severity of systemic oxygen deprivation experienced by the infant, specifically when receiving supplemental oxygen.",
+            "Disease":"The primary medical condition affecting the infant, which may include specific congenital cardiac anomalies or pulmonary conditions.",
+            "CardiacMixing":"The degree to which oxygenated and deoxygenated blood streams intermingle within the heart's circulation.",
+            "LVHreport":"The documented diagnostic conclusion regarding the presence or absence of left ventricular hypertrophy.",
+            "CO2Report":"The formal laboratory report detailing the infant's blood carbon dioxide levels.",
+            "BirthAsphyxia":"Whether the infant experienced a lack of oxygen during or immediately after birth.",
+            "RUQO2":"The measured oxygen saturation level in the upper right quadrant of the infant's body, typically reflecting pre-ductal oxygenation.",
+            "LVH":"An indication of an enlarged or thickened left ventricle of the heart.",
+            "Age":"The chronological age of the infant at the time of clinical evaluation, categorized into early postnatal periods.",
+            "DuctFlow":"The direction and patency of blood flow through the ductus arteriosus, a transient fetal blood vessel.",
+            "ChestXray":"The visual findings observed in a radiographic image of the infant's chest.",
+            "LowerBodyO2":"The measured oxygen saturation level in the lower half of the infant's body, typically reflecting post-ductal oxygenation.",
+            "HypDistrib":"The pattern of oxygen saturation across different regions of the infant's body, indicating uniformity or disparity.",
+            "Grunting":"A distinct audible respiratory effort made by the infant, often associated with breathing difficulties.",
+            "LungFlow":"The rate and volume of blood circulation through the pulmonary vascular system."
+        },
+        "priors":{
+            "forbidden":[
+                [
+                    "XrayReport",
+                    "ChestXray"
+                ],
+                [
+                    "Sick",
+                    "Disease"
+                ],
+                [
+                    "ChestXray",
+                    "LungParench"
+                ],
+                [
+                    "GruntingReport",
+                    "Grunting"
+                ],
+                [
+                    "LVHreport",
+                    "LVH"
+                ],
+                [
+                    "HypDistrib",
+                    "RUQO2"
+                ],
+                [
+                    "HypDistrib",
+                    "LowerBodyO2"
+                ],
+                [
+                    "CO2Report",
+                    "CO2"
+                ],
+                [
+                    "CO2",
+                    "LungParench"
+                ]
+            ],
+            "required":[
+                [
+                    "DuctFlow",
+                    "LowerBodyO2"
+                ],
+                [
+                    "LungParench",
+                    "Grunting"
+                ],
+                [
+                    "Disease",
+                    "CardiacMixing"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Sick"
+                ],
+                [
+                    "LungParench",
+                    "CO2"
+                ],
+                [
+                    "HypoxiaInO2",
+                    "Sick"
+                ],
+                [
+                    "Disease",
+                    "Sick"
+                ],
+                [
+                    "Disease",
+                    "LVH"
+                ],
+                [
+                    "Disease",
+                    "LungParench"
+                ],
+                [
+                    "LungParench",
+                    "ChestXray"
+                ],
+                [
+                    "BirthAsphyxia",
+                    "Disease"
+                ]
+            ]
+        },
+        "forbidden_length":9,
+        "forbidden_Precision":0.8888888889,
+        "forbidden_Recall":0.0225352113,
+        "forbidden_F1":0.043956044,
+        "required_length":11,
+        "required_Precision":0.7272727273,
+        "required_Recall":0.32,
+        "required_F1":0.4444444444
     }
 ]
