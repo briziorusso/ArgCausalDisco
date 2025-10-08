@@ -657,20 +657,20 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
 
 # %%
 bnlearn_datasets = list(Path("bnlearn/").glob("*.bifxml"))
-bnlearn_prior_df = pd.read_json("bnlearn.json")
+bnlearn_prior_df = pd.read_json("results/llm_constraints/bnlearn-desc-consensus.json")
 
 # %%
 bnlearn_res_df, bn_skipped = run_experiment(
     prior_df=bnlearn_prior_df, datasets=bnlearn_datasets,
 )
 bnlearn_res_df.to_csv(
-    "bnlearn-results.csv", index=False
+    "results/ABAPC-LLM/bnlearn-desc-results.csv", index=False
 )
 
 # %%
 bnlearn_report = show_report(bnlearn_res_df)
 
-bnlearn_report.to_csv("bnlearn-report.csv")
+bnlearn_report.to_csv("results/ABAPC-LLM/bnlearn-desc-report.csv")
 
 
 # %% [markdown]
@@ -678,21 +678,72 @@ bnlearn_report.to_csv("bnlearn-report.csv")
 
 # %%
 synthetic_datasets = list(Path("synthetic/").glob("*.bifxml"))
-synthetic_prior_df = pd.read_json("synthetic.json")
+synthetic_prior_df = pd.read_json("results/llm_constraints/synthetic-consensus.json")
 
 # %%
 synthetic_res_df, syn_skipped = run_experiment(
     prior_df=synthetic_prior_df, datasets=synthetic_datasets
 )
 synthetic_res_df.to_csv(
-    "synthetic-results.csv", index=False
+    "results/ABAPC-LLM/synthetic-results.csv", index=False
 )
 
 
 # %%
 synthetic_report = show_report(synthetic_res_df)
 
-synthetic_report.to_csv("synthetic-report.csv")
+synthetic_report.to_csv("results/ABAPC-LLM/synthetic-report.csv")
 
 
 print("Skipped files:", bn_skipped + syn_skipped)
+
+# %%
+def join_results(json_path, csv_path):
+    """Join the prior JSON and ABAPC-LLM CSV results.
+
+    Args:
+        json_path (str): Path to the JSON file containing prior results.
+        csv_path (str): Path to the CSV file containing ABAPC-LLM results.
+
+    Returns:
+        pd.DataFrame: Merged DataFrame containing results from both sources.
+    """
+    json_df = pd.read_json(json_path)
+    prior_metrics = ["length", "Precision", "Recall", "F1"]
+    forbidden_metrics = [f"forbidden_{m}" for m in prior_metrics]
+    required_metrics = [f"required_{m}" for m in prior_metrics]
+    json_metrics = ['filename', *forbidden_metrics, *required_metrics]
+    json_df = json_df[json_metrics]
+    json_df = json_df.rename(columns={
+        k: f"prior_{k}" for k in json_df.columns
+    })
+
+    csv_df = pd.read_csv(csv_path)
+    merged = pd.merge(
+        csv_df,
+        json_df,
+        left_on=["dataset"],
+        right_on=["prior_filename"],
+        how="left"
+    )
+
+    prior_cols = [col for col in merged.columns if col.startswith("prior_") and col != "prior_filename"]
+    if "impl" in merged.columns:
+        merged.loc[merged["impl"] != "new", prior_cols] = float('nan')
+
+    return merged
+
+for type_ in [
+    "bnlearn-desc",
+    # "bnlearn",
+    "synthetic",
+    # "synthetic-desc",
+]:
+    # aggregated LLM constraints
+    json_path = f"results/llm_constraints/{type_}-consensus.json" 
+    # ABAPC-LLM experiment results
+    csv_path = f"results/ABAPC-LLM/{type_}-results.csv"
+    merged_df = join_results(json_path, csv_path)
+    output_path = f"results/ABAPC-LLM/merged_{type_}.csv"
+    merged_df.to_csv(output_path, index=False)
+    print(f"Joined results saved to {output_path}")
