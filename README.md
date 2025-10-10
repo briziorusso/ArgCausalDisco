@@ -29,9 +29,14 @@
     1. Generate/refresh priors in `priors_assessments.ipynb`.
     2. Run `experiment_llm.py` to create results, reports and produce `results/ABAPC-LLM/merged_*.csv`.
 2. **Causal-LLM-BFS**:
-    1. Run `causal-llm-bfs/run_heuristic_batch.py`.
-    2. Run `python export_bfs_result.py` to produce `results/causal-bfs-*.csv`.
+    1. `cd` to `causal-llm-bfs/`.
+    2. Run `run_heuristic_batch.py` with arguments. The script will check for already run results in the log and skip those. It will only stop until causal-bfs produce an DAG prediction. E.g.
+        ```bash
+        python run_heuristic_batch.py --heuristic_dir ../bnlearn --alg llm_bfs_with_statistics --n_samples 5000 --logdir logs
+        python run_heuristic_batch.py --heuristic_dir ../synthetic --alg llm_bfs_with_statistics --n_samples 5000 --logdir logs
+        ```
+    3. `cd` back to the project root and run `python export_bfs_result.py` to produce `results/causal-bfs-*.csv`.
 3. **Other Baselines**:
     Run `experiments.py` to produce `results/*.npy`. See [README_experiment.md](README_experiment.md) for details.
 4. **Analysis**:
-Run `notebooks/experiments_bnlearn.ipynb` and `notebooks/experiments_causenet.ipynb` for the final analysis and plots.
+    Run `notebooks/experiments_bnlearn.ipynb`, `notebooks/experiments_causenet.ipynb`, `notebooks/constraints_comparsion.ipynb` for the final analysis and plots.

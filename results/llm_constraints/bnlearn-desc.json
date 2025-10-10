@@ -71,8 +71,14 @@
 
             ]
         },
+        "forbidden_length":13,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.5416666667,
+        "forbidden_F1":0.7027027027,
+        "required_length":0,
         "required_Precision":0.0,
+        "required_Recall":0.0,
+        "required_F1":0.0,
         "run_id":0
     },
     {
@@ -169,8 +175,14 @@
                 ]
             ]
         },
+        "forbidden_length":11,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.6875,
+        "forbidden_F1":0.8148148148,
+        "required_length":8,
         "required_Precision":0.5,
+        "required_Recall":1.0,
+        "required_F1":0.6666666667,
         "run_id":0
     },
     {
@@ -317,8 +329,14 @@
                 ]
             ]
         },
+        "forbidden_length":24,
         "forbidden_Precision":0.9583333333,
+        "forbidden_Recall":0.247311828,
+        "forbidden_F1":0.3931623932,
+        "required_length":6,
         "required_Precision":0.5,
+        "required_Recall":0.1764705882,
+        "required_F1":0.2608695652,
         "run_id":0
     },
     {
@@ -530,8 +548,14 @@
                 ]
             ]
         },
+        "forbidden_length":33,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.6875,
+        "forbidden_F1":0.8148148148,
+        "required_length":14,
         "required_Precision":0.5714285714,
+        "required_Recall":1.0,
+        "required_F1":0.7272727273,
         "run_id":0
     },
     {
@@ -612,8 +636,14 @@
                 ]
             ]
         },
+        "forbidden_length":11,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.6875,
+        "forbidden_F1":0.8148148148,
+        "required_length":4,
         "required_Precision":0.5,
+        "required_Recall":0.5,
+        "required_F1":0.5,
         "run_id":0
     },
     {
@@ -1285,8 +1315,14 @@
                 ]
             ]
         },
+        "forbidden_length":128,
         "forbidden_Precision":0.9765625,
+        "forbidden_Recall":0.3521126761,
+        "forbidden_F1":0.5175983437,
+        "required_length":31,
         "required_Precision":0.4838709677,
+        "required_Recall":0.6,
+        "required_F1":0.5357142857,
         "run_id":0
     },
     {
@@ -1375,8 +1411,14 @@
                 ]
             ]
         },
+        "forbidden_length":9,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.5625,
+        "forbidden_F1":0.72,
+        "required_length":8,
         "required_Precision":0.5,
+        "required_Recall":1.0,
+        "required_F1":0.6666666667,
         "run_id":1
     },
     {
@@ -1458,8 +1500,14 @@
                 ]
             ]
         },
+        "forbidden_length":11,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.4583333333,
+        "forbidden_F1":0.6285714286,
+        "required_length":4,
         "required_Precision":0.75,
+        "required_Recall":0.5,
+        "required_F1":0.6,
         "run_id":1
     },
     {
@@ -1599,8 +1647,14 @@
                 ]
             ]
         },
+        "forbidden_length":24,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.5,
+        "forbidden_F1":0.6666666667,
+        "required_length":5,
         "required_Precision":1.0,
+        "required_Recall":0.625,
+        "required_F1":0.7692307692,
         "run_id":1
     },
     {
@@ -1677,8 +1731,14 @@
                 ]
             ]
         },
+        "forbidden_length":9,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.5625,
+        "forbidden_F1":0.72,
+        "required_length":5,
         "required_Precision":0.6,
+        "required_Recall":0.75,
+        "required_F1":0.6666666667,
         "run_id":1
     },
     {
@@ -2046,8 +2106,14 @@
                 ]
             ]
         },
+        "forbidden_length":50,
         "forbidden_Precision":0.94,
+        "forbidden_Recall":0.1323943662,
+        "forbidden_F1":0.2320987654,
+        "required_length":33,
         "required_Precision":0.3636363636,
+        "required_Recall":0.48,
+        "required_F1":0.4137931034,
         "run_id":1
     },
     {
@@ -2218,8 +2284,14 @@
                 ]
             ]
         },
+        "forbidden_length":32,
         "forbidden_Precision":0.9375,
+        "forbidden_Recall":0.3225806452,
+        "forbidden_F1":0.48,
+        "required_length":4,
         "required_Precision":0.5,
+        "required_Recall":0.1176470588,
+        "required_F1":0.1904761905,
         "run_id":1
     },
     {
@@ -2342,8 +2414,14 @@
                 ]
             ]
         },
+        "forbidden_length":18,
         "forbidden_Precision":0.8888888889,
+        "forbidden_Recall":0.1720430108,
+        "forbidden_F1":0.2882882883,
+        "required_length":6,
         "required_Precision":0.3333333333,
+        "required_Recall":0.1176470588,
+        "required_F1":0.1739130435,
         "run_id":2
     },
     {
@@ -2547,8 +2625,14 @@
                 ]
             ]
         },
+        "forbidden_length":33,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.6875,
+        "forbidden_F1":0.8148148148,
+        "required_length":12,
         "required_Precision":0.6666666667,
+        "required_Recall":1.0,
+        "required_F1":0.8,
         "run_id":2
     },
     {
@@ -2658,8 +2742,14 @@
                 ]
             ]
         },
+        "forbidden_length":16,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.6666666667,
+        "forbidden_F1":0.8,
+        "required_length":6,
         "required_Precision":0.6666666667,
+        "required_Recall":0.6666666667,
+        "required_F1":0.6666666667,
         "run_id":2
     },
     {
@@ -2748,8 +2838,14 @@
                 ]
             ]
         },
+        "forbidden_length":12,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.75,
+        "forbidden_F1":0.8571428571,
+        "required_length":5,
         "required_Precision":0.8,
+        "required_Recall":1.0,
+        "required_F1":0.8888888889,
         "run_id":2
     },
     {
@@ -3085,8 +3181,14 @@
                 ]
             ]
         },
+        "forbidden_length":36,
         "forbidden_Precision":0.9444444444,
+        "forbidden_Recall":0.0957746479,
+        "forbidden_F1":0.1739130435,
+        "required_length":39,
         "required_Precision":0.4358974359,
+        "required_Recall":0.68,
+        "required_F1":0.53125,
         "run_id":2
     },
     {
@@ -3183,8 +3285,14 @@
                 ]
             ]
         },
+        "forbidden_length":11,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.6875,
+        "forbidden_F1":0.8148148148,
+        "required_length":8,
         "required_Precision":0.5,
+        "required_Recall":1.0,
+        "required_F1":0.6666666667,
         "run_id":2
     },
     {
@@ -3282,8 +3390,14 @@
                 ]
             ]
         },
+        "forbidden_length":15,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.625,
+        "forbidden_F1":0.7692307692,
+        "required_length":4,
         "required_Precision":0.75,
+        "required_Recall":0.5,
+        "required_F1":0.6,
         "run_id":3
     },
     {
@@ -3384,8 +3498,14 @@
                 ]
             ]
         },
+        "forbidden_length":12,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.75,
+        "forbidden_F1":0.8571428571,
+        "required_length":8,
         "required_Precision":0.5,
+        "required_Recall":1.0,
+        "required_F1":0.6666666667,
         "run_id":3
     },
     {
@@ -3761,8 +3881,14 @@
                 ]
             ]
         },
+        "forbidden_length":47,
         "forbidden_Precision":0.9574468085,
+        "forbidden_Recall":0.1267605634,
+        "forbidden_F1":0.223880597,
+        "required_length":38,
         "required_Precision":0.4736842105,
+        "required_Recall":0.72,
+        "required_F1":0.5714285714,
         "run_id":3
     },
     {
@@ -4041,8 +4167,14 @@
                 ]
             ]
         },
+        "forbidden_length":57,
         "forbidden_Precision":0.8771929825,
+        "forbidden_Recall":0.5376344086,
+        "forbidden_F1":0.6666666667,
+        "required_length":6,
         "required_Precision":0.5,
+        "required_Recall":0.1764705882,
+        "required_F1":0.2608695652,
         "run_id":3
     },
     {
@@ -4114,8 +4246,14 @@
                 ]
             ]
         },
+        "forbidden_length":10,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.2083333333,
+        "forbidden_F1":0.3448275862,
+        "required_length":2,
         "required_Precision":1.0,
+        "required_Recall":0.25,
+        "required_F1":0.4,
         "run_id":3
     },
     {
@@ -4188,8 +4326,14 @@
                 ]
             ]
         },
+        "forbidden_length":9,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.5625,
+        "forbidden_F1":0.72,
+        "required_length":4,
         "required_Precision":1.0,
+        "required_Recall":1.0,
+        "required_F1":1.0,
         "run_id":3
     },
     {
@@ -4309,8 +4453,14 @@
                 ]
             ]
         },
+        "forbidden_length":13,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.2708333333,
+        "forbidden_F1":0.4262295082,
+        "required_length":11,
         "required_Precision":0.5454545455,
+        "required_Recall":0.75,
+        "required_F1":0.6315789474,
         "run_id":4
     },
     {
@@ -4469,8 +4619,14 @@
                 ]
             ]
         },
+        "forbidden_length":28,
         "forbidden_Precision":0.8928571429,
+        "forbidden_Recall":0.2688172043,
+        "forbidden_F1":0.4132231405,
+        "required_length":5,
         "required_Precision":0.4,
+        "required_Recall":0.1176470588,
+        "required_F1":0.1818181818,
         "run_id":4
     },
     {
@@ -4563,8 +4719,14 @@
                 ]
             ]
         },
+        "forbidden_length":12,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.75,
+        "forbidden_F1":0.8571428571,
+        "required_length":6,
         "required_Precision":0.6666666667,
+        "required_Recall":1.0,
+        "required_F1":0.8,
         "run_id":4
     },
     {
@@ -4654,8 +4816,14 @@
                 ]
             ]
         },
+        "forbidden_length":14,
         "forbidden_Precision":0.9285714286,
+        "forbidden_Recall":0.5416666667,
+        "forbidden_F1":0.6842105263,
+        "required_length":3,
         "required_Precision":1.0,
+        "required_Recall":0.5,
+        "required_F1":0.6666666667,
         "run_id":4
     },
     {
@@ -4720,8 +4888,14 @@
                 ]
             ]
         },
+        "forbidden_length":9,
         "forbidden_Precision":1.0,
+        "forbidden_Recall":0.5625,
+        "forbidden_F1":0.72,
+        "required_length":2,
         "required_Precision":1.0,
+        "required_Recall":0.5,
+        "required_F1":0.6666666667,
         "run_id":4
     },
     {
@@ -5133,8 +5307,14 @@
                 ]
             ]
         },
+        "forbidden_length":57,
         "forbidden_Precision":0.8947368421,
+        "forbidden_Recall":0.1436619718,
+        "forbidden_F1":0.2475728155,
+        "required_length":37,
         "required_Precision":0.4054054054,
+        "required_Recall":0.6,
+        "required_F1":0.4838709677,
         "run_id":4
     }
 ]

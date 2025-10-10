@@ -3,13 +3,7 @@
         "filename":"dag_5_nodes_5_edges_semantics_SF",
         "num_nodes":5,
         "num_edges":4,
-        "variable_descriptions":{
-            "tumors":"The presence of abnormal cellular growths, which can manifest in various forms and locations within an organism.",
-            "chronic_pain":"Persistent physical discomfort or agony that endures over a prolonged period, often affecting daily activities and quality of life.",
-            "sleep_apnea":"A diagnosed medical condition characterized by recurrent interruptions in breathing during sleep, impacting restorative rest.",
-            "dysfunction":"An impairment in the normal operation or activity of a specific organ, system, or biological process.",
-            "irritability":"A heightened state of emotional sensitivity, characterized by increased proneness to annoyance, frustration, or agitation."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -57,23 +51,7 @@
         "filename":"dag_15_nodes_15_edges_none_SF",
         "num_nodes":15,
         "num_edges":14,
-        "variable_descriptions":{
-            "chest_pain":"Any discomfort, aching, or sharp pain felt in the chest area, which can originate from various bodily systems.",
-            "pollution":"The introduction of harmful substances or products into the environment, such as air, water, or soil, that can cause adverse effects.",
-            "magnesium_deficiency":"An insufficient level of magnesium, an essential mineral, in the body, which can affect various physiological functions.",
-            "psoriasis":"A chronic autoimmune condition characterized by the rapid buildup of skin cells, leading to thick, red, scaly patches on the skin.",
-            "cardiovascular_disease":"A broad category of conditions that affect the heart and blood vessels, impacting their structure and function.",
-            "cell_damage":"Any alteration to the normal structure or function of cells, potentially impairing their ability to perform essential biological processes.",
-            "heart_attacks":"A serious medical event that occurs when the flow of blood to a part of the heart is blocked, often due to a buildup of fat, cholesterol, and other substances.",
-            "acid_reflux":"A condition where stomach acid frequently flows back into the tube connecting the mouth to the stomach (esophagus), causing irritation.",
-            "chain_reaction":"A sequential process where one event triggers the next, leading to a series of interconnected responses or transformations within a system.",
-            "indigestion":"A general term for discomfort or pain in the upper abdomen, often characterized by a feeling of fullness, bloating, or nausea after eating.",
-            "blood_vessels":"The intricate network of tubes, including arteries, veins, and capillaries, responsible for circulating blood throughout the body.",
-            "ulcers":"Open sores that can develop on the lining of the digestive tract, including the stomach, esophagus, or small intestine.",
-            "job_dissatisfaction":"A state of unhappiness or lack of fulfillment experienced in one's professional role or work environment.",
-            "inflammation_in_the_body":"A complex biological response of body tissues to harmful stimuli, such as pathogens, damaged cells, or irritants, characterized by protective processes.",
-            "nervous_tension":"A state of mental or emotional strain, often accompanied by a feeling of unease, restlessness, or physical tightness."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -105,13 +83,7 @@
         "filename":"dag_5_nodes_7_edges_none_random",
         "num_nodes":5,
         "num_edges":7,
-        "variable_descriptions":{
-            "coronary_artery_disease":"A specific condition involving the build-up of plaque in the arteries that supply blood to the heart, potentially restricting blood flow.",
-            "coronary_heart_disease":"A general term for heart conditions caused by narrowed or blocked arteries in the heart, reducing blood flow to the heart muscle.",
-            "high_blood_pressure":"A common medical condition where the long-term force of the blood against your artery walls is high enough that it may eventually cause health problems.",
-            "ventricular_fibrillation":"A severe type of irregular heart rhythm where the heart's lower chambers quiver uselessly instead of pumping blood, leading to circulatory collapse.",
-            "myocardial_infarction":"A serious medical event characterized by the death of heart muscle tissue due to a lack of blood supply, commonly known as a heart attack."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -183,18 +155,7 @@
         "filename":"dag_10_nodes_10_edges_semantics_SF",
         "num_nodes":10,
         "num_edges":9,
-        "variable_descriptions":{
-            "cardiovascular_disease":"A broad category encompassing conditions that affect the heart and blood vessels, impacting their structure and function.",
-            "blockages":"Obstructions or impediments that can occur within various bodily passages, such as blood vessels, airways, or other ducts, hindering normal flow or function.",
-            "brain_damage":"Any injury or destruction to brain cells that impairs its normal functioning, potentially affecting cognitive, physical, or emotional abilities.",
-            "heart_attacks":"An acute medical emergency that occurs when blood flow to a part of the heart muscle is severely reduced or blocked, causing damage to heart tissue.",
-            "premature_birth":"The event of an infant being born before the completion of the full gestational period, typically before 37 weeks of pregnancy.",
-            "radiotherapy":"A medical treatment method that utilizes high-energy radiation to target and damage specific types of cells within the body, often used in cancer treatment.",
-            "seizure":"A sudden, uncontrolled electrical disturbance in the brain, which can lead to temporary changes in behavior, movement, feelings, or states of consciousness.",
-            "reduced_blood_flow":"A physiological state characterized by a diminished volume of blood circulating through the body's vessels or specific organs.",
-            "surgery":"A medical procedure involving manual or instrumental intervention on the body to treat diseases, injuries, or deformities, requiring a controlled invasive technique.",
-            "alcoholism":"A chronic and progressive disease characterized by an impaired ability to control alcohol use despite adverse consequences to health, social life, or work."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -226,23 +187,7 @@
         "filename":"dag_15_nodes_22_edges_semantics_SF",
         "num_nodes":15,
         "num_edges":14,
-        "variable_descriptions":{
-            "hormonal_imbalances":"A state characterized by disrupted levels of hormones within the body, potentially affecting various physiological functions.",
-            "alcohol_abuse":"A pattern of excessive alcohol consumption leading to adverse health, social, or professional consequences.",
-            "mood_swings":"Noticeable and often rapid fluctuations in an individual's emotional state or disposition.",
-            "underlying_issues":"Deep-seated, often unresolved problems or conditions that contribute to an individual's current state or behavior.",
-            "chronic_pain":"Persistent pain lasting for an extended period, typically three months or longer.",
-            "dysfunction":"An impairment or abnormality in the normal operation of a bodily system, organ, or a person's behavior.",
-            "irritability":"A state of being easily annoyed, provoked, or angered.",
-            "ear_infections":"An inflammatory condition or infection affecting the structures of the ear.",
-            "tensions":"A state of mental, emotional, or interpersonal strain and unease.",
-            "phthalates":"A class of chemical compounds commonly found in various consumer products and the environment.",
-            "panic_attacks":"Discrete episodes of intense fear or discomfort accompanied by various physical and cognitive symptoms.",
-            "drug_abuse":"The detrimental use of psychoactive substances, encompassing both illicit drugs and the misuse of prescription medications.",
-            "situations":"Specific external circumstances, events, or environmental contexts that an individual encounters.",
-            "obsession":"A persistent, intrusive thought, urge, or image that is experienced as unwanted and causes significant distress or anxiety.",
-            "neck_pain":"Discomfort, ache, or stiffness experienced in the cervical region of the spine."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -314,18 +259,7 @@
         "filename":"dag_10_nodes_15_edges_semantics_random",
         "num_nodes":10,
         "num_edges":15,
-        "variable_descriptions":{
-            "blockage":"An impediment or obstruction to the normal flow of substances within a bodily conduit or passage.",
-            "adhesions":"Bands of scar-like tissue that can form between organs or between an organ and the abdominal wall.",
-            "deposits":"Aggregations of mineral or organic substances that settle in tissues or organs.",
-            "fibrosis":"The formation of excessive fibrous connective tissue in an organ or tissue.",
-            "kidney_stones":"Hard deposits of minerals and salts that form inside the kidneys.",
-            "demonstrators":"Accumulations of specific cellular or molecular entities within a biological system.",
-            "scar_tissue":"Dense, fibrous tissue that replaces normal tissue after injury or disease.",
-            "vitamin_d":"A fat-soluble vitamin crucial for several bodily functions, including mineral absorption and immune system regulation.",
-            "obstruction":"The state of being blocked or clogged, preventing passage or flow, often more severe than a simple blockage.",
-            "abdominal_pain":"Discomfort or a painful sensation originating in the abdominal region."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -378,23 +312,7 @@
         "filename":"dag_15_nodes_22_edges_none_SF",
         "num_nodes":15,
         "num_edges":14,
-        "variable_descriptions":{
-            "alkaloids":"Naturally occurring organic compounds, often found in plants, that can exert various physiological effects on the human body.",
-            "fractures":"A break or crack in a bone, typically resulting from trauma, stress, or certain medical conditions.",
-            "sleep_deprivation":"A state of not getting enough sleep, which can arise from various causes and have wide-ranging physiological and psychological consequences.",
-            "psychiatric_disorders":"Conditions characterized by a clinically significant disturbance in an individual's cognition, emotion regulation, or behavior.",
-            "breathing_problems":"Any condition that obstructs or impairs normal respiratory function, leading to difficulty in breathing.",
-            "sleep_problems":"Difficulties related to sleeping, including issues with falling asleep, staying asleep, or experiencing non-restorative sleep.",
-            "hypoglycemia":"A medical condition characterized by an abnormally low level of blood sugar (glucose), which is the body's primary energy source.",
-            "mood_swings":"Noticeable, sometimes rapid, shifts in a person's emotional state or mood, often observed as changes in affect or disposition.",
-            "kidney_failure":"A medical condition in which the kidneys are unable to adequately filter waste products from the blood, leading to their accumulation.",
-            "experiences":"Cumulative personal encounters, events, or situations that an individual has undergone throughout their life, shaping their perception and well-being.",
-            "environmental_factors":"External conditions, influences, or circumstances from a person's surroundings that can impact their health, development, or behavior.",
-            "hormones":"Chemical messengers produced by the body's endocrine glands, responsible for regulating many physiological processes and bodily functions.",
-            "surgery":"A medical treatment involving the use of instruments to repair, remove, or replace diseased or damaged tissues and organs.",
-            "ailments":"General term for a physical or mental illness, discomfort, or infirmity, which can range in severity.",
-            "ptsd":"Post-traumatic Stress Disorder; a psychiatric disorder that can occur in individuals who have experienced or witnessed a traumatic event."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -438,13 +356,7 @@
         "filename":"dag_5_nodes_7_edges_semantics_ER",
         "num_nodes":5,
         "num_edges":7,
-        "variable_descriptions":{
-            "high_blood_pressure":"A medical condition where the force of blood against the walls of the arteries is consistently elevated.",
-            "lack_of_exercise":"A state characterized by insufficient physical activity or a predominantly sedentary lifestyle.",
-            "plaque":"Accumulations of fatty substances, cholesterol, and other cellular waste products on the inner lining of arterial walls.",
-            "sudden_death":"An unexpected and abrupt fatality, often occurring without prior symptoms or within a very short time of symptom onset.",
-            "heart_problems":"A broad category encompassing various medical conditions that impair the normal structure and function of the heart."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -504,18 +416,7 @@
         "filename":"dag_10_nodes_15_edges_semantics_ER",
         "num_nodes":10,
         "num_edges":15,
-        "variable_descriptions":{
-            "old_age":"The advanced period of life, typically associated with a decline in physical and cognitive functions that occur naturally with increasing years.",
-            "blood_clots":"Gel-like masses of blood that form in a blood vessel or heart chamber, potentially impeding normal blood flow.",
-            "progressive_vision_loss":"A gradual and ongoing decline in an individual's visual acuity over time, often indicating an underlying ocular or neurological condition.",
-            "cardiac_arrest":"A sudden and complete cessation of the heart's pumping function, leading to a lack of blood flow to the brain and other organs.",
-            "genetics":"An individual's inherited biological characteristics and predispositions, passed down from their parents.",
-            "brain_damage":"Any form of injury or destruction to brain tissue that can result in temporary or permanent impairment of brain function.",
-            "heart_problems":"A broad category encompassing various medical conditions that affect the structure and function of the heart, ranging from mild to severe.",
-            "high_blood_pressure":"A medical condition where the force of blood against the walls of the arteries is consistently too high, requiring the heart to work harder.",
-            "anorexia":"A severe eating disorder characterized by an abnormally low body weight, an intense fear of gaining weight, and a distorted perception of body shape.",
-            "blindness":"The state of being unable to see due to severe vision impairment, ranging from partial sight to complete loss of vision."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -603,18 +504,7 @@
         "filename":"dag_10_nodes_15_edges_degrees_ER",
         "num_nodes":10,
         "num_edges":15,
-        "variable_descriptions":{
-            "hypothyroidism":"An endocrine disorder where the thyroid gland produces an insufficient amount of crucial hormones necessary for regulating metabolism.",
-            "sexual_dysfunction":"Persistent difficulties experienced by an individual in experiencing satisfaction from sexual activity due to problems with desire, arousal, orgasm, or pain.",
-            "prostate_gland_cancer_surgery":"A major surgical intervention involving the removal of all or part of the prostate gland, typically performed to treat prostate cancer.",
-            "high_blood_pressure":"A chronic medical condition characterized by persistently elevated arterial blood pressure, often requiring long-term management.",
-            "chronic_disease":"A long-lasting health condition, typically non-communicable, that progresses slowly and often requires ongoing medical attention.",
-            "nerve_damage":"Any injury or dysfunction affecting the nerves, which can impair their ability to transmit signals and lead to various sensory, motor, or autonomic deficits.",
-            "syndrome":"A specific collection of signs and symptoms that characteristically occur together, indicative of a particular disease or disorder.",
-            "sudden_death":"The unexpected and rapid cessation of all vital bodily functions, occurring shortly after the onset of symptoms or without any warning.",
-            "blood_pressure":"The physiological state related to the force exerted by circulating blood against the walls of the body's arteries, a key vital sign.",
-            "heart_problems":"A broad category encompassing various health conditions affecting the structure, function, and overall health of the heart."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -682,13 +572,7 @@
         "filename":"dag_5_nodes_5_edges_none_SF",
         "num_nodes":5,
         "num_edges":4,
-        "variable_descriptions":{
-            "vomiting":"The act of involuntarily expelling stomach contents through the mouth.",
-            "migraines":"The occurrence of severe headaches, frequently accompanied by pulsating pain, nausea, or sensitivity to light and sound.",
-            "anorexia":"A medical state characterized by a significant and often persistent aversion to food or severely restricted food intake, leading to nutritional deficiencies and potential health complications.",
-            "abdominal_pain":"The presence of discomfort or pain within the abdominal region, varying in intensity and location.",
-            "loss_of_appetite":"A subjective reduction in the desire or willingness to eat, leading to decreased food intake."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -725,13 +609,7 @@
         "filename":"dag_5_nodes_7_edges_semantics_random",
         "num_nodes":5,
         "num_edges":7,
-        "variable_descriptions":{
-            "obstacles":"Challenges or barriers encountered by individuals in their environment or in their pursuit of daily activities and personal goals.",
-            "brain_damage":"An injury or destruction of brain cells that can lead to a decline in various cognitive, physical, or emotional functions.",
-            "blindness":"A severe impairment of sight, which may range from partial vision loss to a complete absence of light perception.",
-            "strokes":"A sudden interruption of blood flow to a part of the brain, or bleeding into the brain tissue itself.",
-            "disabilities":"Enduring limitations in a person's physical, sensory, cognitive, or mental functions that can affect their ability to perform daily activities or participate fully in society."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -787,23 +665,7 @@
         "filename":"dag_15_nodes_15_edges_semantics_random",
         "num_nodes":15,
         "num_edges":15,
-        "variable_descriptions":{
-            "arguments":"Verbal disagreements or heated exchanges of views that may arise between individuals or groups.",
-            "hatred":"Intense dislike, hostility, or ill will directed towards someone or something.",
-            "chronic_pain":"Persistent or long-lasting physical discomfort that endures over an extended period.",
-            "terrorism":"The unlawful use of violence and intimidation, often against civilians, to achieve political or ideological aims.",
-            "irritability":"A state of being easily annoyed, provoked, or frustrated, often leading to a short temper.",
-            "discrimination":"Unfair or prejudicial treatment of different categories of people, often based on specific characteristics.",
-            "insecurity":"A state of feeling vulnerable, anxious, or lacking confidence, often concerning safety or personal stability.",
-            "tensions":"A state of strained relations, unease, or underlying hostility between individuals, groups, or within a community.",
-            "absence":"The state of being away or not present from expected activities or regular social settings.",
-            "despair":"A complete loss or absence of hope, leading to a profound sense of hopelessness.",
-            "bicycle_accidents":"Incidents involving bicycles that result in collisions, falls, or other mishaps leading to potential harm.",
-            "attacks":"Acts of aggression or violence, which can be physical assaults or targeted hostile actions.",
-            "withdrawal":"The act of receding or pulling back from social engagement, participation in activities, or a previous level of involvement.",
-            "serious_injuries":"Physical harm or damage to the body that is severe enough to require significant medical attention or rehabilitation.",
-            "fights":"Physical altercations or struggles that occur between individuals or groups."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -883,23 +745,7 @@
         "filename":"dag_15_nodes_22_edges_degrees_SF",
         "num_nodes":15,
         "num_edges":14,
-        "variable_descriptions":{
-            "insulin_resistance":"A physiological state in which the body's cells become less responsive to insulin, a hormone critical for regulating blood sugar.",
-            "high_salt_consumption":"A dietary habit characterized by the regular intake of excessive amounts of sodium, commonly found in processed foods and added to meals.",
-            "reflux":"The backward flow of fluids or contents from one body cavity into another, often referring to gastric contents moving up the esophagus.",
-            "coronary_heart_disease":"A significant medical condition involving damage or disease in the major blood vessels that supply blood to the heart muscle.",
-            "acid_reflux":"A specific type of reflux involving the backflow of stomach acid into the esophagus, potentially causing irritation and discomfort.",
-            "lack_of_sleep":"A state characterized by an insufficient quantity or poor quality of sleep, potentially affecting overall health and bodily functions.",
-            "elevated_cholesterol":"A medical state where the levels of cholesterol, a type of lipid, in the bloodstream are higher than healthy reference ranges.",
-            "ulcers":"Open sores or lesions that develop on the lining of various internal body surfaces, such as the digestive tract, causing pain and potential complications.",
-            "high_blood_pressure":"A medical condition, also known as hypertension, where the force of blood pushing against the artery walls is consistently elevated.",
-            "olanzapine":"A specific pharmaceutical compound categorized as an atypical antipsychotic medication, prescribed for certain mental health conditions.",
-            "hyperlipidemia":"A medical condition defined by abnormally high levels of lipids (fats), including cholesterol and triglycerides, circulating in the blood.",
-            "heartburn":"A common symptom described as a burning sensation in the chest, typically located behind the breastbone, often associated with digestive issues.",
-            "narrowing_of_the_blood_vessels":"A physiological condition characterized by a reduction in the internal diameter of blood vessels, often impacting blood flow to various organs.",
-            "colitis":"An inflammatory condition affecting the colon, which is the large intestine, leading to various gastrointestinal symptoms.",
-            "ulcerative_colitis":"A chronic inflammatory bowel disease specifically affecting the lining of the large intestine and rectum, leading to inflammation and sores."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -939,13 +785,7 @@
         "filename":"dag_5_nodes_5_edges_degrees_random",
         "num_nodes":5,
         "num_edges":5,
-        "variable_descriptions":{
-            "acute_watery_diarrhoea":"A medical condition characterized by the sudden onset of frequent, loose, and watery bowel movements.",
-            "etec":"Enterotoxigenic Escherichia coli (ETEC), a specific strain of bacteria known to affect the digestive system.",
-            "severe_dehydration":"A critical physiological state resulting from an extreme loss of body fluids, significantly impairing bodily functions.",
-            "vomiting":"The involuntary, forceful expulsion of the contents of the stomach through the mouth.",
-            "electrolyte_imbalance":"A physiological disturbance where the concentrations of essential mineral salts (electrolytes) in the body are outside healthy ranges."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -997,13 +837,7 @@
         "filename":"dag_5_nodes_5_edges_degrees_SF",
         "num_nodes":5,
         "num_edges":4,
-        "variable_descriptions":{
-            "various_diseases":"Represents the presence of a spectrum of medical conditions, illnesses, or infections that can affect an individual's physical health and bodily functions.",
-            "mood_swings":"Characterizes rapid and often unpredictable shifts in an individual's emotional state, ranging from periods of elevated mood to feelings of sadness or anger.",
-            "chronic_pain":"Refers to persistent physical discomfort or aches that last for an extended period, often months or years, impacting an individual's daily life.",
-            "unhygienic_environment":"Describes the general state of cleanliness and sanitation within a living or working area, encompassing factors like waste management, presence of pathogens, and overall upkeep.",
-            "irritability":"Indicates a heightened tendency to be easily frustrated, annoyed, or provoked by minor disturbances or events."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1043,23 +877,7 @@
         "filename":"dag_15_nodes_22_edges_none_ER",
         "num_nodes":15,
         "num_edges":22,
-        "variable_descriptions":{
-            "chest_pain":"Discomfort or pain experienced in the thoracic region of the body.",
-            "pneumonia":"An infection that inflames the air sacs in one or both lungs, which may fill with fluid or pus.",
-            "heart":"The muscular organ in the chest responsible for pumping blood throughout the circulatory system.",
-            "oxidative_stress":"An imbalance in the body between free radicals and antioxidants, potentially leading to cellular damage.",
-            "exposure_to_secondhand_smoke":"The involuntary inhalation of tobacco smoke by non-smokers.",
-            "coronary_heart_disease":"A specific type of heart disease characterized by plaque buildup in the arteries supplying blood to the heart muscle.",
-            "cardiovascular_diseases":"A broad category of conditions that affect the heart or blood vessels, often related to reduced blood flow.",
-            "cigarette_smoking":"The act of inhaling and exhaling the smoke of burning tobacco.",
-            "high_blood_pressure":"A common medical condition in which the long-term force of blood against artery walls is consistently elevated.",
-            "acute_pancreatitis":"A sudden inflammation of the pancreas, an organ located behind the stomach.",
-            "oxygen":"A vital gaseous element essential for cellular respiration and metabolic processes in the human body.",
-            "abdominal_fat":"Adipose tissue specifically located around the organs within the abdominal cavity, often measured as a health indicator.",
-            "hyperlipidemia":"A medical condition characterized by abnormally high levels of lipids (fats) in the blood.",
-            "death_in_the_united_states":"The occurrence of mortality events recorded within the geographical boundaries of the United States.",
-            "drug":"A pharmaceutical compound or substance administered for therapeutic, preventive, or diagnostic purposes."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1159,13 +977,7 @@
         "filename":"dag_5_nodes_7_edges_semantics_SF",
         "num_nodes":5,
         "num_edges":4,
-        "variable_descriptions":{
-            "insulin_resistance":"A metabolic state where the body's cells exhibit reduced responsiveness to the hormone insulin, affecting glucose uptake and utilization.",
-            "numbness":"A sensory alteration described as a partial or complete loss of feeling or sensation in a specific body part, often accompanied by tingling or a \"pins and needles\" sensation.",
-            "high_blood_pressure":"A clinical finding characterized by persistently elevated force exerted by circulating blood on the walls of the arteries.",
-            "head_and_neck_cancer":"A specific medical diagnosis indicating the presence of malignant cellular growth originating in the head or neck region.",
-            "neck_pain":"A common physical sensation involving discomfort, aching, or stiffness localized to the cervical spine or surrounding soft tissues."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1190,23 +1002,7 @@
         "filename":"dag_15_nodes_22_edges_semantics_ER",
         "num_nodes":15,
         "num_edges":22,
-        "variable_descriptions":{
-            "premature_death":"Mortality occurring at an age significantly earlier than the average life expectancy for a given population.",
-            "cardiac_arrest":"A sudden and complete cessation of the heart's pumping function, leading to a loss of circulation.",
-            "medical_conditions":"Pre-existing or developing health disorders, diseases, or chronic illnesses that can affect an individual.",
-            "fever":"An elevation of the body's core temperature above its normal physiological range.",
-            "vomiting":"The involuntary forceful expulsion of the contents of the stomach through the mouth.",
-            "high_cholesterol":"An elevated level of specific lipid substances in the blood, exceeding healthy thresholds.",
-            "gout":"A specific type of inflammatory condition often affecting joints, characterized by sudden onset of symptoms.",
-            "flushing_in_physiology":"A physiological response involving reddening of the skin, typically due to increased blood flow to the surface.",
-            "arrest":"A sudden, involuntary cessation of normal bodily function or activity.",
-            "intense_pain":"A strong, acute sensation of physical discomfort, often sudden or sharp in nature.",
-            "seizure":"A sudden, uncontrolled disturbance in brain function causing transient changes in consciousness, movement, or sensation.",
-            "abnormal_electrical_activity_in_the_brain":"Irregular or uncontrolled electrical impulses originating within brain tissue.",
-            "lifestyle":"An individual's habits, choices, and daily routines that collectively influence their health and well-being.",
-            "crystals":"Microscopic solid formations that can occur within body tissues or fluids.",
-            "severe_pain":"An experience of intense, debilitating physical discomfort, often described as highly distressing."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1278,23 +1074,7 @@
         "filename":"dag_15_nodes_15_edges_degrees_random",
         "num_nodes":15,
         "num_edges":15,
-        "variable_descriptions":{
-            "behavioral_problems":"Maladaptive or disruptive patterns of conduct and actions that deviate from expected social norms or cause distress.",
-            "social_problems":"Difficulties or challenges that individuals encounter in their interactions with others or in their integration into community structures and societal norms.",
-            "burnout":"A state of emotional, physical, and mental exhaustion caused by prolonged or excessive stress, often characterized by feelings of being overwhelmed, depleted, and lacking motivation.",
-            "alcohol_abuse":"The harmful consumption of alcoholic beverages, leading to negative health, social, or occupational outcomes.",
-            "poor_sleep":"A condition characterized by inadequate quality or restorative capacity of sleep, irrespective of the duration.",
-            "emotional_problems":"A broad category encompassing various difficulties with mood regulation, emotional stability, and psychological distress.",
-            "lack_of_appropriate_supervision":"The absence or inadequacy of oversight and guidance provided to an individual, particularly during formative or vulnerable periods.",
-            "lack_of_sleep":"A state of insufficient sleep duration, meaning an individual consistently does not obtain the recommended number of hours of sleep.",
-            "chronic_pain":"Persistent or recurrent pain that lasts for an extended period, typically beyond three to six months, despite treatment or normal healing processes.",
-            "infertility":"The biological inability to conceive or reproduce, affecting individuals or couples.",
-            "abandoned_child_syndrome":"A complex set of psychological and emotional difficulties stemming from perceived or actual emotional or physical abandonment during childhood.",
-            "despair":"A profound state of hopelessness, an extreme loss of hope or confidence in one's future or circumstances.",
-            "responsibilities":"The duties or obligations that an individual is expected or required to fulfill, often associated with work, family, or personal commitments.",
-            "drug_abuse":"The harmful or hazardous use of psychoactive substances for non-medical purposes, leading to adverse consequences.",
-            "substance_abuse":"A general term referring to the harmful or hazardous use of any psychoactive substance, encompassing both illicit drugs and alcohol."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
 
@@ -1331,22 +1111,7 @@
         "filename":"dag_15_nodes_15_edges_none_ER",
         "num_nodes":14,
         "num_edges":15,
-        "variable_descriptions":{
-            "social_problems":"Difficulties or challenges encountered by an individual in their interactions with others, within their community, or in adapting to broader societal structures.",
-            "alcohol_abuse":"A problematic pattern of excessive or harmful alcohol consumption that leads to significant impairment or distress.",
-            "emotional_problems":"Difficulties in managing, regulating, or healthily experiencing one's feelings, leading to distress or functional impairment.",
-            "misery":"A profound state of extreme unhappiness, suffering, or discomfort.",
-            "marital_problems":"Significant difficulties or unresolved conflicts experienced within a marital relationship.",
-            "chronic_pain":"Persistent physical discomfort that lasts for an extended period, often beyond typical healing time.",
-            "apathy":"A lack of interest, enthusiasm, or concern for things that would typically elicit an emotional or behavioral response.",
-            "irritability":"A pervasive tendency to be easily annoyed, frustrated, or provoked by minor issues.",
-            "discrimination":"Unfair or prejudicial treatment of an individual or group based on certain characteristics or categories.",
-            "separation":"The state where married individuals live apart, often marking a significant phase in the dissolution of a marriage.",
-            "great_depression":"A profound and pervasive state of severe low mood, sadness, and a significant loss of interest or pleasure in daily activities.",
-            "conviction":"The formal declaration by a judicial body that an individual is guilty of a criminal offense.",
-            "despair":"A complete and overwhelming loss of hope, often accompanied by feelings of hopelessness and futility regarding one's situation.",
-            "belief":"A strongly held personal principle, opinion, or conviction that an individual accepts as true or right."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
 
@@ -1383,13 +1148,7 @@
         "filename":"dag_5_nodes_5_edges_semantics_ER",
         "num_nodes":5,
         "num_edges":5,
-        "variable_descriptions":{
-            "low_self-esteem":"A persistent feeling of inadequacy, self-doubt, or a diminished sense of personal worth experienced by the individual, influencing their perception of themselves.",
-            "social_problems":"The range of difficulties and negative interactions the individual encounters within their community, personal relationships, or broader societal contexts, leading to adverse outcomes.",
-            "gambling":"The individual's participation in games of chance, often involving financial risk, as a regular activity or habit within their life.",
-            "chronic_pain":"The persistent and long-term physical discomfort or suffering experienced by the individual, significantly affecting their daily life and overall well-being.",
-            "bribes":"Instances where the individual is involved in offering, accepting, or facilitating illicit payments or favors to influence decisions or outcomes in their professional or personal dealings."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
 
@@ -1414,18 +1173,7 @@
         "filename":"dag_10_nodes_10_edges_semantics_ER",
         "num_nodes":10,
         "num_edges":10,
-        "variable_descriptions":{
-            "hatred":"The intensity and widespread nature of intense animosity or antagonism directed at particular groups or individuals within the community.",
-            "mood_swings":"The occurrence of noticeable and often rapid fluctuations in an individual's emotional state, ranging from highs to lows.",
-            "unrest":"The level of visible disturbance, agitation, or discontent within a community or a segment of its population.",
-            "instability":"The degree to which a system, community, or situation is susceptible to sudden, disruptive changes or is lacking firm foundations.",
-            "chronic_pain":"The self-reported or clinically assessed experience of persistent physical discomfort lasting for an extended duration among individuals in the population.",
-            "irritability":"The observed or self-reported tendency among individuals to become easily annoyed, agitated, or provoked.",
-            "homophobia":"The prevalence of negative attitudes and discriminatory behaviors directed towards individuals based on their sexual orientation within a specific population.",
-            "despair":"The profound feeling of hopelessness and extreme pessimism experienced by individuals within the community.",
-            "attacks":"The recorded frequency of incidents involving physical or verbal aggression, or acts of vandalism, against individuals or groups within the community.",
-            "loss_of_appetite":"The measured or reported decrease in an individual's desire or capacity to eat."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1477,23 +1225,7 @@
         "filename":"dag_15_nodes_22_edges_degrees_ER",
         "num_nodes":15,
         "num_edges":22,
-        "variable_descriptions":{
-            "respiratory_failure":"A severe medical condition where the lungs cannot adequately perform their function of gas exchange.",
-            "cardiac_arrest":"An abrupt and complete cessation of the heart's effective pumping action.",
-            "vision_loss":"Any degree of decreased visual acuity or reduction in the field of vision.",
-            "muscle":"Relates to the physiological state or functional capacity of the body's musculature.",
-            "fever":"An abnormal elevation of the body's core temperature above the normal range.",
-            "neck_stiffness":"Refers to a symptom involving reduced flexibility and discomfort in the cervical region of the spine.",
-            "high_blood_pressure":"A persistent medical condition characterized by an elevated force of blood against the artery walls.",
-            "coma":"A profound state of prolonged unconsciousness from which an individual cannot be aroused and is unresponsive to stimuli.",
-            "intracerebral_hemorrhage":"Describes bleeding that occurs directly within the brain tissue itself.",
-            "diagnosis":"The process of identifying the nature of a medical condition, disease, or illness through assessment.",
-            "multiple_sclerosis":"A chronic neurological disorder impacting the central nervous system, characterized by demyelination.",
-            "damage_to_the_eye":"Refers to any form of injury, trauma, or deterioration affecting the ocular structures.",
-            "convulsions":"Characterized by sudden, involuntary, and often violent contractions of muscle groups.",
-            "fatal_disease":"Pertains to an illness or medical condition characterized by an inherently high risk of mortality.",
-            "blindness":"The profound or complete absence of sight, resulting in an inability to perceive light or form."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1541,13 +1273,7 @@
         "filename":"dag_5_nodes_5_edges_degrees_ER",
         "num_nodes":5,
         "num_edges":5,
-        "variable_descriptions":{
-            "sleep_problems":"Any disturbance in the normal pattern or quality of sleep, potentially including difficulty initiating or maintaining sleep, or experiencing non-restorative sleep.",
-            "chronic_fatigue_syndrome":"A complex and severe medical condition characterized by persistent, debilitating exhaustion that does not improve with rest and may be worsened by physical or mental exertion.",
-            "chronic_pain":"A persistent and often debilitating physical sensation of discomfort or ache, lasting for an extended period.",
-            "degradation_of_neurons":"The progressive deterioration or damage to nerve cells within the central or peripheral nervous system.",
-            "psychological_stress":"A state of mental or emotional strain or tension resulting from adverse or demanding circumstances."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
 
@@ -1572,13 +1298,7 @@
         "filename":"dag_5_nodes_5_edges_none_ER",
         "num_nodes":5,
         "num_edges":5,
-        "variable_descriptions":{
-            "low_potassium_levels":"A medical condition indicating an abnormally reduced concentration of potassium, a vital electrolyte, in the bloodstream.",
-            "severe_dehydration":"A critical medical state where the body's fluid content is significantly reduced, impairing normal physiological functions.",
-            "kidney_failure":"A severe medical condition where the kidneys lose their ability to adequately filter waste products and regulate fluid balance in the body.",
-            "vomiting":"The involuntary forceful expulsion of stomach contents through the mouth, often accompanied by feelings of nausea.",
-            "diarrhoea":"A common gastrointestinal symptom characterized by frequent, loose, or watery bowel movements."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1622,23 +1342,7 @@
         "filename":"dag_15_nodes_15_edges_none_random",
         "num_nodes":15,
         "num_edges":15,
-        "variable_descriptions":{
-            "pneumonia":"An inflammatory condition of the lung affecting primarily the microscopic air sacs (alveoli), which may fill with fluid or pus.",
-            "hyperthermia":"An abnormally high body temperature that significantly exceeds the normal range, often due to a failure of thermoregulation.",
-            "alcohol_abuse":"A harmful pattern of alcohol consumption that leads to significant health, social, or occupational impairment or distress.",
-            "agitation":"A state of extreme restlessness, anxiety, and often increased psychomotor activity, sometimes accompanied by emotional distress.",
-            "underlying_issues":"Pre-existing or foundational conditions, vulnerabilities, or problems that may influence an individual's health status or behavioral patterns.",
-            "chronic_pain":"Persistent or long-lasting pain that continues for an extended period, often months or years, impacting daily life.",
-            "sepsis":"A life-threatening condition caused by the body's overwhelming and toxic response to an infection, potentially leading to organ damage.",
-            "irritability":"A state of heightened sensitivity and quickness to anger or annoyance, often manifested by a reduced tolerance for stress.",
-            "high_blood_pressure":"A common medical condition where the long-term force of the blood against your artery walls is consistently high, potentially leading to health problems.",
-            "ulcers":"Open sores that can develop on the lining of the digestive tract or other body surfaces, causing pain and discomfort.",
-            "despair":"A profound state of hopelessness, characterized by a complete loss or absence of optimism regarding future prospects.",
-            "heartburn":"A common digestive symptom characterized by a burning sensation, typically in the chest, often linked to gastric acid.",
-            "withdrawal":"A set of physical and psychological symptoms that occur when a person reduces or stops using a substance or engaging in an activity they have become dependent on.",
-            "wounds":"Injuries to bodily tissues, typically involving a break in the skin or other protective surfaces, that require healing.",
-            "kidney":"Refers to the functional health and status of the kidneys, vital organs responsible for filtering waste products from the blood and maintaining fluid balance."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1694,23 +1398,7 @@
         "filename":"dag_15_nodes_22_edges_none_random",
         "num_nodes":15,
         "num_edges":22,
-        "variable_descriptions":{
-            "insulin_resistance":"A physiological condition in which cells in the body fail to respond normally to the hormone insulin.",
-            "leukemia":"A malignant progressive disease involving the bone marrow and other blood-forming organs, characterized by an abnormal proliferation of leukocytes.",
-            "hyperglycemia":"A medical condition characterized by an excessively high amount of glucose circulating in the blood plasma.",
-            "blockage":"An obstruction within a bodily passage, vessel, or organ, impeding normal flow or function.",
-            "foods":"The types, composition, and patterns of dietary intake, encompassing various nutritional elements.",
-            "fever":"An abnormally high body temperature, typically accompanied by shivering, headache, and other systemic symptoms.",
-            "kidney_failure":"A medical condition in which the kidneys fail to adequately filter waste products and excess fluid from the blood.",
-            "complication":"An undesirable medical development that occurs during the course of a disease, procedure, or treatment, potentially worsening the prognosis or outcome.",
-            "chronic_exposure":"Prolonged or repeated contact with a specific environmental, chemical, or internal factor over an extended period.",
-            "lethargy":"A state of lacking energy and enthusiasm, characterized by sluggishness, drowsiness, and profound tiredness.",
-            "coma":"A profound state of unconsciousness from which a person cannot be roused, even by painful stimuli.",
-            "surgery":"A medical specialty that utilizes operative manual and instrumental techniques on a patient to investigate, diagnose, or treat a pathological condition, such as a disease or injury.",
-            "cirrhosis":"A late stage of scarring (fibrosis) in the liver, which can impair liver function and structure.",
-            "episode":"A distinct, sudden occurrence of a medical event or symptomatic manifestation.",
-            "rash":"An outbreak or eruption of spots or patches on the skin, often accompanied by irritation or inflammation."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1782,18 +1470,7 @@
         "filename":"dag_10_nodes_15_edges_semantics_SF",
         "num_nodes":10,
         "num_edges":17,
-        "variable_descriptions":{
-            "habitat_loss":"The destruction or severe degradation of natural environments, leading to a reduction in the space and resources available for plant and animal species to survive.",
-            "drought":"An extended period of unusually low precipitation, resulting in a shortage of water for ecological, agricultural, and human needs.",
-            "rising_temperatures":"A long-term trend of increasing average atmospheric and oceanic temperatures across a region or globally, often associated with climatic shifts.",
-            "urbanization":"The demographic shift from rural to urban areas, leading to an increase in population density and the expansion of human settlements and infrastructure.",
-            "erosion":"The process by which soil, rock, and other surficial material are removed and transported by natural agents such as wind, water, or ice.",
-            "lightning":"A sudden, powerful discharge of static electricity in the atmosphere, typically occurring during thunderstorms.",
-            "el_ni\u00f1o":"A recurring oceanic-atmospheric climate pattern characterized by unusual warming of surface waters in the equatorial Pacific Ocean, influencing global weather systems.",
-            "changes_in_land_use":"Modifications to the natural or managed environment by human activities, such as conversion of natural landscapes to agricultural fields, residential areas, or industrial zones.",
-            "forest_fires":"Uncontrolled and often destructive combustion that consumes wildland vegetation, including forests, grasslands, and bush areas.",
-            "rain":"Water droplets condensed from atmospheric water vapor that fall to the Earth's surface as precipitation."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1853,18 +1530,7 @@
         "filename":"dag_10_nodes_15_edges_degrees_SF",
         "num_nodes":10,
         "num_edges":17,
-        "variable_descriptions":{
-            "lack_of_oxygen":"A state where the body or a specific tissue is deprived of adequate oxygen supply.",
-            "coronary_artery_disease":"A medical condition caused by plaque buildup in the walls of the arteries that supply blood to the heart.",
-            "hyperthyroidism":"A condition where the thyroid gland produces an excessive amount of thyroid hormones.",
-            "excess_fluid":"The presence of an abnormal accumulation of fluid within the body's tissues or cavities.",
-            "high_blood_pressure":"A medical state characterized by abnormally elevated pressure in the arteries.",
-            "shortness_of_breath":"A subjective sensation of difficulty or discomfort in breathing, also known as dyspnea.",
-            "atrial_fibrillation":"An irregular and often rapid heart rhythm originating in the upper chambers of the heart.",
-            "reduced_blood_flow":"A condition characterized by insufficient circulation of blood to an organ or region of the body.",
-            "hypertensive_heart_disease":"A medical condition referring to structural or functional heart changes resulting from chronic elevated arterial pressure.",
-            "pericarditis":"Inflammation of the pericardium, the sac-like membrane surrounding the heart."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1928,23 +1594,7 @@
         "filename":"dag_15_nodes_15_edges_semantics_SF",
         "num_nodes":15,
         "num_edges":14,
-        "variable_descriptions":{
-            "disasters":"Severe, often sudden, events that cause widespread damage, disruption, or loss to infrastructure, communities, or natural environments.",
-            "foreclosure":"The legal process by which a lender repossesses a property when the borrower fails to meet mortgage payment obligations.",
-            "health_risks":"Factors or exposures that increase the probability of an individual developing adverse health outcomes, diseases, or injuries.",
-            "vomiting":"The involuntary forceful expulsion of stomach contents through the mouth, often a symptom associated with illness, motion sickness, or other distress.",
-            "migraines":"Severe headaches often characterized by throbbing pain, sensitivity to light and sound, and sometimes accompanied by nausea or visual disturbances.",
-            "ulcers":"Open sores that can develop on the lining of the digestive tract, skin, or other body parts, causing pain and requiring medical attention.",
-            "high_blood_pressure":"A common medical condition where the long-term force of blood against artery walls is consistently elevated, posing risks to cardiovascular health.",
-            "infringement":"The act of violating a legal right, privilege, or agreement, often related to intellectual property or contractual terms.",
-            "hormonal_changes":"Fluctuations or imbalances in the body's chemical messengers (hormones) that regulate various physiological processes and bodily functions.",
-            "health_conditions":"The general state of an individual's physical or mental well-being, often encompassing specific ailments, diseases, or disorders.",
-            "lawsuits":"Legal proceedings initiated by one party against another in a court of law to enforce a right or seek a remedy for a perceived wrong.",
-            "attacks":"Episodes of sudden onset characterized by intense physical symptoms, acute distress, or a rapid deterioration in an individual's condition.",
-            "situations":"Specific sets of circumstances, events, or conditions that an individual encounters in their daily life, which can vary greatly in nature.",
-            "financial_losses":"Reductions in monetary value, income, or assets, leading to a decrease in overall wealth or economic resources for an individual or entity.",
-            "substance_abuse":"The harmful or hazardous use of psychoactive substances, including alcohol and illicit drugs, leading to detrimental effects on health and well-being."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -1984,18 +1634,7 @@
         "filename":"dag_10_nodes_10_edges_semantics_random",
         "num_nodes":10,
         "num_edges":10,
-        "variable_descriptions":{
-            "chronic_fatigue":"A persistent and profound state of tiredness or lack of energy, not relieved by rest.",
-            "lack_of_sleep":"A state of insufficient rest, characterized by inadequate duration or poor quality of sleep.",
-            "chronic_pain":"Sustained physical discomfort or a persistent ache in the body.",
-            "embarrassment":"A feeling of awkwardness, shame, or self-consciousness arising from social situations or personal experiences.",
-            "irritability":"An emotional state characterized by an increased tendency to become annoyed, frustrated, or easily provoked.",
-            "isolation":"The state of being physically or emotionally separated from others, leading to a lack of social contact.",
-            "sweating":"The natural physiological process of secreting liquid from the skin's glands.",
-            "despair":"A deep and profound feeling of hopelessness, typically accompanied by a loss of spirit or courage.",
-            "hormones":"Specific chemical messengers within the body that regulate various physiological functions.",
-            "tight_clothing":"The physical restriction or pressure exerted by garments on the body."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2055,13 +1694,7 @@
         "filename":"dag_5_nodes_7_edges_none_SF",
         "num_nodes":5,
         "num_edges":4,
-        "variable_descriptions":{
-            "memory_problems":"A range of cognitive difficulties specifically related to the encoding, retention, or recall of information or experiences.",
-            "hypothyroidism":"A medical disorder resulting from an underactive thyroid gland, leading to insufficient production of essential thyroid hormones.",
-            "brain_damage":"Any form of injury or impairment to brain tissue, which can arise from various causes and potentially affect neurological function.",
-            "ulcers":"A medical condition characterized by the presence of open sores on internal or external body surfaces, often associated with various discomforts or health complications.",
-            "high_blood_pressure":"A chronic health state defined by persistently elevated blood pressure levels in the arteries, a significant physiological measurement."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2109,22 +1742,7 @@
         "filename":"dag_15_nodes_15_edges_degrees_ER",
         "num_nodes":14,
         "num_edges":15,
-        "variable_descriptions":{
-            "chest_pain":"Discomfort or a sensation of pressure experienced in the chest area, which can manifest in various forms.",
-            "low_self-esteem":"A diminished sense of one's own worth or capabilities; a negative overall self-perception.",
-            "chronic_inflammation":"A prolonged inflammatory response within the body, which can be an underlying factor in various health issues.",
-            "tiredness":"A state of physical or mental fatigue and lack of energy, often affecting daily functioning.",
-            "difficulties":"Obstacles, hardships, or problems encountered in various aspects of daily life, tasks, or relationships.",
-            "psychological_problems":"A range of mental health conditions, disorders, or significant distress that affect mood, thinking, and behavior.",
-            "heart_attacks":"A severe medical event where blood supply to a part of the heart is interrupted, leading to damage to the heart muscle.",
-            "social_stigma":"The negative societal perception or disapproval associated with certain personal circumstances or characteristics.",
-            "chronic_pain":"Persistent physical discomfort or agony lasting for an extended duration, beyond typical recovery time.",
-            "embarrassment":"A feeling of self-consciousness, shame, or awkwardness in social situations or regarding personal matters.",
-            "irritability":"A heightened tendency to become easily annoyed, frustrated, or agitated by minor issues.",
-            "chronic_stress":"Persistent and prolonged mental or emotional pressure and tension experienced over an extended period.",
-            "sexual_abuse":"Any sexual act without consent, often involving power imbalances, which can have profound and lasting impacts on an individual.",
-            "alcoholism":"A chronic disease characterized by an impaired ability to stop or control alcohol use despite adverse consequences."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2232,13 +1850,7 @@
         "filename":"dag_5_nodes_5_edges_semantics_random",
         "num_nodes":5,
         "num_edges":5,
-        "variable_descriptions":{
-            "hallucinations":"The occurrence of sensory perceptions (e.g., visual, auditory, tactile) experienced as real by an individual in the absence of corresponding external stimuli.",
-            "paranoia":"A psychological state marked by persistent distrust and suspicion of others, often accompanied by delusions of persecution, conspiracy, or an exaggerated sense of threat.",
-            "brain_damage":"An observable neurological condition characterized by structural or functional impairment of brain tissue, potentially impacting various cognitive and behavioral processes.",
-            "violent_video_games":"A quantitative measure reflecting an individual's habitual exposure to or engagement with interactive digital entertainment content featuring overtly aggressive or combative themes.",
-            "violent_behavior":"The frequency, intensity, or likelihood of actions intended to cause physical harm, injury, or destruction to individuals, animals, or property."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2298,18 +1910,7 @@
         "filename":"dag_10_nodes_10_edges_none_SF",
         "num_nodes":10,
         "num_edges":9,
-        "variable_descriptions":{
-            "low_self-esteem":"A psychological state reflecting a diminished sense of personal worth or capability.",
-            "health_risks":"The overall susceptibility or exposure to potential adverse health conditions and diseases.",
-            "lack_of_sleep":"A state of insufficient rest, characterized by inadequate duration or poor quality of sleep.",
-            "ulcers":"A medical condition characterized by open sores that develop on the lining of internal organs or skin.",
-            "high_blood_pressure":"A chronic medical condition where the force of blood against artery walls is consistently elevated.",
-            "toxins":"Harmful chemical compounds or biological agents found in the environment or within the body.",
-            "drug_use":"The intake or application of various medicinal or recreational substances.",
-            "mildew":"The presence of common mold or fungi, often found in damp indoor environments.",
-            "waste":"Undesired materials or byproducts, ranging from environmental pollutants to biological detritus.",
-            "substance_abuse":"A pattern of harmful use of psychoactive substances, leading to negative consequences for an individual."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
 
@@ -2346,13 +1947,7 @@
         "filename":"dag_5_nodes_7_edges_degrees_random",
         "num_nodes":5,
         "num_edges":7,
-        "variable_descriptions":{
-            "indigestion":"A condition characterized by impaired digestion, often accompanied by symptoms such as discomfort, bloating, or nausea in the upper abdomen.",
-            "stomach_infection":"The presence of pathogenic microorganisms within the gastric system, potentially leading to various physiological responses.",
-            "ulcers":"Eroded lesions that form on the inner lining of the stomach or the initial part of the small intestine.",
-            "stomach_cancer":"The uncontrolled proliferation of abnormal cells within the tissues of the stomach, representing a malignant disease state.",
-            "abdominal_pain":"A general experience of discomfort, aching, or soreness originating within the abdominal region."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2404,18 +1999,7 @@
         "filename":"dag_10_nodes_15_edges_none_SF",
         "num_nodes":10,
         "num_edges":17,
-        "variable_descriptions":{
-            "overweight":"A classification of body weight indicating an excess accumulation of body fat that may impair health, often determined by a Body Mass Index (BMI) in a specific range.",
-            "premature_death":"The occurrence of death at an age significantly younger than the average life expectancy within a given population.",
-            "hormonal_imbalances":"A condition where there is an atypical concentration of certain hormones in the body, potentially affecting various physiological processes.",
-            "oxidative_stress":"An physiological state resulting from an imbalance between the production of reactive oxygen species and the body's antioxidant defenses, potentially impacting cellular function.",
-            "chd":"A specific type of heart condition characterized by the narrowing or blockage of the coronary arteries, which supply blood to the heart muscle.",
-            "cardiovascular_diseases":"A broad category of diseases affecting the heart and blood vessels, encompassing various conditions such as coronary artery disease, heart failure, and stroke.",
-            "metabolic_syndrome":"A medical condition characterized by a combination of risk factors, including elevated blood pressure, high blood sugar, and abnormal cholesterol levels, affecting an individual's metabolic health.",
-            "high_blood_pressure":"A chronic medical condition where the force of blood against the artery walls is consistently too high, requiring the heart to work harder to pump blood.",
-            "lifestyle":"The general way of living of an individual, including daily habits, dietary choices, physical activity levels, and social behaviors.",
-            "alcoholism":"A chronic medical condition characterized by an impaired ability to control alcohol intake, leading to various health and social issues."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2511,18 +2095,7 @@
         "filename":"dag_10_nodes_10_edges_none_random",
         "num_nodes":10,
         "num_edges":10,
-        "variable_descriptions":{
-            "low_self-esteem":"A psychological state characterized by a diminished sense of personal worth, value, or capability.",
-            "psychological_problems":"A broad category encompassing various mental, emotional, or behavioral challenges and disorders.",
-            "asbestos_exposure":"The extent to which individuals have encountered or inhaled microscopic asbestos fibers from their surroundings.",
-            "chronic_pain":"Persistent or recurrent physical discomfort that lasts for an extended duration, often defined as three months or more.",
-            "ulcers":"The occurrence of open sores or lesions on the skin or mucous membranes, typically inside the body.",
-            "high_blood_pressure":"A medical state characterized by persistently elevated arterial blood pressure.",
-            "natural_disasters":"Significant adverse events arising from natural processes of the Earth, such as severe storms, floods, or earthquakes.",
-            "alcoholism":"A chronic disease marked by an impaired ability to control alcohol consumption, despite negative consequences.",
-            "toxic_mold":"The presence and concentration of harmful fungal growths in residential or occupational environments.",
-            "serious_health_conditions":"Life-threatening, severely debilitating, or chronic medical ailments requiring significant medical intervention or care."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2662,13 +2235,7 @@
         "filename":"dag_5_nodes_7_edges_degrees_ER",
         "num_nodes":5,
         "num_edges":7,
-        "variable_descriptions":{
-            "subarachnoid_hemorrhage":"A medical diagnosis describing bleeding into the subarachnoid space, the area between the brain and the membranes surrounding it.",
-            "hemorrhagic_stroke":"A medical diagnosis referring to a type of stroke caused by bleeding in the brain, rather than a clot.",
-            "high_blood_pressure":"A chronic medical condition characterized by persistently elevated pressure within the arterial blood vessels.",
-            "intracerebral_hemorrhage":"A medical diagnosis indicating bleeding that occurs directly within the brain tissue.",
-            "decreased_level_of_consciousness":"A clinical observation indicating a reduction in an individual's alertness and awareness of their surroundings."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2716,18 +2283,7 @@
         "filename":"dag_10_nodes_15_edges_degrees_random",
         "num_nodes":10,
         "num_edges":15,
-        "variable_descriptions":{
-            "blockage":"An impediment or stricture within a duct, vessel, or pathway in the body, restricting normal passage.",
-            "atherosclerosis":"A pathological process involving the thickening and hardening of arterial walls due to plaque accumulation, impacting vascular health.",
-            "high_cholesterol":"A physiological state characterized by an elevated concentration of lipid compounds, particularly cholesterol, in the bloodstream.",
-            "oxidized_cholesterol":"A specific form of cholesterol that has undergone chemical modification, often analyzed in metabolic health assessments.",
-            "retrograde_ejaculation":"A condition where semen, during ejaculation, enters the bladder instead of being expelled through the urethra.",
-            "infertility":"A medical diagnosis indicating the inability of an individual or couple to achieve pregnancy after a specified duration of regular, unprotected sexual intercourse.",
-            "obstruction":"A physical impediment or blockage within a bodily passage or system, preventing normal flow or function.",
-            "health_conditions":"A broad category encompassing various medical states or diagnoses affecting an individual's overall physical well-being.",
-            "gallstones":"Concretions that form within the gallbladder or bile ducts, composed of hardened digestive fluid.",
-            "surgery":"A medical intervention involving invasive procedures performed to treat diseases, injuries, or deformities."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2779,18 +2335,7 @@
         "filename":"dag_10_nodes_10_edges_degrees_ER",
         "num_nodes":10,
         "num_edges":10,
-        "variable_descriptions":{
-            "premature_death":"An outcome signifying mortality occurring at an age significantly younger than the average life expectancy within a given population.",
-            "renal_diseases":"A group of medical conditions characterized by impaired kidney function or damage to the kidneys.",
-            "social_isolation":"A state characterized by a lack of social contact, engagement, or interaction with others.",
-            "chronic_pain":"A persistent or recurrent unpleasant sensory and emotional experience associated with actual or potential tissue damage, lasting for an extended period.",
-            "irritability":"An emotional disposition characterized by an increased tendency to become easily annoyed, frustrated, or agitated by minor disturbances.",
-            "high_blood_pressure":"A physiological state where the arterial blood pressure is consistently elevated above normal levels.",
-            "lymphoma":"A type of cancer originating in the lymphocytes, a component of the body's immune system.",
-            "despair":"A profound psychological state encompassing a complete loss or absence of hope, often accompanied by feelings of hopelessness and futility.",
-            "anorexia":"A severe medical condition marked by an unhealthy and substantial reduction in food intake, often leading to significant weight loss and malnourishment.",
-            "loss_of_appetite":"A diminished desire or interest in consuming food."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2851,18 +2396,7 @@
         "filename":"dag_10_nodes_10_edges_degrees_random",
         "num_nodes":10,
         "num_edges":10,
-        "variable_descriptions":{
-            "poor_health":"A general state of diminished physical or mental well-being, indicating a departure from optimal functioning and vitality.",
-            "social_problems":"Difficulties or challenges encountered in interpersonal relationships, community integration, or adherence to societal norms, often leading to isolation or conflict.",
-            "low_self-esteem":"A psychological state characterized by a lack of confidence and a negative perception of one's own worth and abilities.",
-            "fermentation":"A metabolic process involving microorganisms, which can occur in various biological contexts, including within the body or during the processing of organic matter.",
-            "lack_of_concentration":"A cognitive difficulty characterized by an inability to focus attention, sustain mental effort, or maintain clarity of thought on a specific task or idea.",
-            "chronic_pain":"Persistent physical discomfort or distress that lasts for an extended period, significantly impacting an individual's daily life.",
-            "toxins":"Harmful substances that can be present in the body or environment, potentially interfering with normal biological processes and health.",
-            "lovesickness":"A state of intense emotional preoccupation and longing, often related to romantic feelings, which can lead to significant emotional distress.",
-            "alcoholism":"A severe and progressive disorder characterized by a compulsive need to consume alcohol, leading to significant personal, social, and health consequences.",
-            "hepatitis_x":"A specific medical condition affecting the liver, characterized by inflammation and potential impairment of liver function."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
 
@@ -2915,18 +2449,7 @@
         "filename":"dag_10_nodes_15_edges_none_ER",
         "num_nodes":10,
         "num_edges":15,
-        "variable_descriptions":{
-            "spinal_stenosis":"A medical condition involving the narrowing of the spaces within the spine, which can put pressure on the spinal cord and nerves.",
-            "degeneration":"The progressive deterioration of tissues, organs, or functions over time, often associated with aging, disease processes, or wear and tear.",
-            "numbness":"A sensory alteration characterized by a partial or complete loss of feeling or sensation in a particular area of the body.",
-            "eye_problems":"A broad category encompassing various conditions or disorders affecting the eyes, potentially leading to visual impairment, discomfort, or structural changes.",
-            "brain_damage":"Any injury or damage to the brain, which may result in impaired cognitive, sensory, or physical functions.",
-            "osteoporosis":"A skeletal disorder characterized by reduced bone mineral density and deterioration of bone tissue, leading to increased bone fragility.",
-            "high_blood_pressure":"A common physiological condition where arterial blood pressure is persistently elevated above normal levels.",
-            "neck_pain":"Discomfort, aching, or stiffness sensations localized to the cervical region of the spine, varying in intensity and duration.",
-            "birth_defect":"A congenital abnormality or impairment present from birth, affecting bodily structure or function.",
-            "blindness":"The complete or significant loss of vision, rendering an individual unable to perceive light, forms, or movements."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -2998,23 +2521,7 @@
         "filename":"dag_15_nodes_22_edges_degrees_random",
         "num_nodes":15,
         "num_edges":22,
-        "variable_descriptions":{
-            "fractures":"Structural breaks or cracks in bone tissue, typically resulting from trauma or underlying conditions that weaken bones.",
-            "immobility":"The state of being unable to move freely or normally, often leading to prolonged periods of inactivity or bed rest.",
-            "pad":"A specialized material or device used in medical settings for cushioning, support, or absorption.",
-            "excess_weight":"A condition where an individual's body mass significantly exceeds a healthy range, typically due to an accumulation of adipose tissue.",
-            "skin_breakdown":"A broad term referring to any damage or disruption to the integrity of the skin, ranging from irritation to open wounds.",
-            "tumors":"Abnormal growths of tissue that can be benign or malignant, arising from uncontrolled cell division.",
-            "toxins":"Substances produced by living organisms or artificial processes that are harmful to biological tissues and functions.",
-            "cachexia":"A complex syndrome characterized by severe systemic inflammation, significant involuntary weight loss, and muscle wasting.",
-            "medical_problems":"A broad category encompassing various health-related issues, illnesses, or dysfunctions that require clinical attention or management.",
-            "chronic_disease":"A long-term health condition that persists over an extended period, often requiring ongoing medical care and management.",
-            "nerve_damage":"Any injury, degeneration, or dysfunction affecting the peripheral or central nervous system, impairing nerve signal transmission.",
-            "shear":"Mechanical stress occurring when opposing forces act in parallel, often affecting skin integrity during movement or repositioning.",
-            "gangrene":"A severe medical condition involving the death of body tissue due to a lack of blood supply or a serious bacterial infection.",
-            "severe_pain":"An intense, debilitating, and highly unpleasant sensory and emotional experience, often indicative of significant injury or disease.",
-            "incontinence":"The involuntary or accidental leakage of urine or feces, indicating a loss of control over bladder or bowel functions."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -3106,16 +2613,7 @@
         "filename":"dag_10_nodes_10_edges_none_ER",
         "num_nodes":8,
         "num_edges":10,
-        "variable_descriptions":{
-            "numbness":"Characterizes a loss of sensation, or a feeling of tingling or 'pins and needles,' in a specific part of the body.",
-            "panic_attack":"Describes an abrupt surge of intense fear or discomfort, often accompanied by physical symptoms like heart palpitations, shortness of breath, or dizziness.",
-            "serious_health_problems":"Represents significant and potentially life-altering health conditions that require considerable medical attention or management.",
-            "high_blood_pressure":"Refers to a physiological state where the force of blood against artery walls is consistently elevated.",
-            "infertility":"Describes the inability to conceive or produce offspring despite regular unprotected sexual intercourse over a defined period.",
-            "medical_problems":"Denotes a general classification for various health issues, ailments, or disorders that an individual might experience.",
-            "chronic_disease":"Identifies a long-lasting health condition that typically cannot be cured but can be controlled over an extended period.",
-            "nerve_damage":"Pertains to an injury or impairment affecting the nerves, which are responsible for transmitting signals throughout the body."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -3167,23 +2665,7 @@
         "filename":"dag_15_nodes_22_edges_semantics_random",
         "num_nodes":15,
         "num_edges":22,
-        "variable_descriptions":{
-            "scarring":"The formation of fibrous tissue that replaces normal tissue after injury or disease, often leading to a permanent mark.",
-            "rupture":"A sudden break or bursting of an organ, tissue, or vessel.",
-            "blood_vessels":"The intricate network of tubes that transport blood throughout the body, essential for nutrient and oxygen delivery.",
-            "brain_damage":"Any injury or degeneration that results in the destruction or deterioration of brain cells.",
-            "lack_of_sleep":"A state of insufficient or poor-quality sleep, impacting cognitive and physiological functions.",
-            "migraines":"A type of severe headache characterized by throbbing pain, often accompanied by other symptoms like sensitivity to light or sound.",
-            "anaerobic_bacteria":"Microorganisms that thrive in environments lacking oxygen, often found in various bodily niches.",
-            "sleep_apnea":"A common sleep disorder characterized by pauses in breathing or shallow breaths during sleep.",
-            "strokes":"A medical emergency that occurs when the blood supply to part of the brain is interrupted or reduced, leading to cell damage.",
-            "ectopic_pregnancy":"A pregnancy in which the fertilized egg implants outside the uterus, most commonly in the fallopian tube.",
-            "surgery":"A medical procedure involving an incision with instruments to repair, remove, or replace diseased or damaged tissue, or to investigate a condition.",
-            "gum_disease":"An inflammatory condition affecting the tissues surrounding and supporting the teeth.",
-            "water_retention":"The accumulation of excess fluid in the body's tissues or cavities.",
-            "congestive_heart_failure":"A chronic condition where the heart muscle doesn't pump blood as effectively as it should, leading to various systemic effects.",
-            "blindness":"The state of being unable to see due to injury, disease, or a congenital condition."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -3251,23 +2733,7 @@
         "filename":"dag_15_nodes_15_edges_degrees_SF",
         "num_nodes":15,
         "num_edges":14,
-        "variable_descriptions":{
-            "damage_to_the_hippocampus":"Structural or functional alterations observed in the brain's hippocampus region.",
-            "mood_swings":"Significant and rapid fluctuations in an individual's emotional state or disposition.",
-            "brain_damage":"Any injury or insult to the brain that results in the impairment of its normal function.",
-            "heart_attacks":"An acute medical event resulting from a sudden blockage of blood flow to the heart muscle.",
-            "chronic_pain":"Persistent physical discomfort or distress lasting for an extended period.",
-            "memory_loss":"A noticeable decline in the ability to recall information, experiences, or events.",
-            "cells":"The viability and functional state of an individual's cellular components, particularly those in the nervous system.",
-            "irritability":"A state of increased sensitivity and propensity to be easily annoyed or angered.",
-            "dysfunction":"Impaired or abnormal functioning of a biological system, organ, or cognitive process.",
-            "nerve_injuries":"Physical trauma or damage affecting the nervous system.",
-            "anorexia":"An eating disorder characterized by an abnormally low body weight, an intense fear of gaining weight, and a distorted perception of body weight or shape.",
-            "withdrawal":"The collection of physiological and psychological symptoms experienced upon cessation or reduction of a regularly used substance.",
-            "alcoholism":"A chronic disease characterized by an impaired ability to control alcohol intake, preoccupation with alcohol, and continued use despite adverse consequences.",
-            "substance_abuse":"A pattern of harmful use of any mood-altering substance.",
-            "heart_problems":"A general classification for various medical conditions affecting the normal function of the heart."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -3323,23 +2789,7 @@
         "filename":"dag_15_nodes_15_edges_semantics_ER",
         "num_nodes":15,
         "num_edges":15,
-        "variable_descriptions":{
-            "panic_attacks":"Sudden, intense episodes of fear that trigger severe physical reactions even without real danger or apparent cause.",
-            "difficulties":"Significant challenges or obstacles encountered in an individual's life or daily functioning.",
-            "excess_weight":"A condition characterized by having a body weight greater than what is considered healthy for a given height, often classified as overweight or obesity.",
-            "mood_swings":"Rapid and often intense shifts in an individual's emotional state, moving between varying feelings such as happiness, sadness, or anger.",
-            "chronic_pain":"Pain that is persistent, lasting for a prolonged period, typically more than three to six months, and which can be continuous or intermittent.",
-            "substance_abuse":"The harmful or hazardous use of psychoactive substances, including alcohol or illicit drugs.",
-            "irritability":"A state of feeling easily annoyed, frustrated, or provoked.",
-            "high_blood_pressure":"A common medical condition in which the long-term force of the blood against artery walls is consistently high.",
-            "medical_problems":"A broad category encompassing various health conditions, illnesses, or diseases that may require professional medical diagnosis or treatment.",
-            "despair":"A profound state of hopelessness, characterized by a complete loss or absence of hope and extreme sadness.",
-            "candida":"An overgrowth of *Candida* yeast in the body, which can manifest with a variety of physical symptoms.",
-            "weight_problems":"Challenges or concerns related to an individual's body weight, encompassing difficulties in maintaining a healthy range.",
-            "pms":"A combination of physical and emotional symptoms that many women experience in the week or two before their menstrual period.",
-            "overeating":"The act of consuming food in quantities beyond typical hunger, often leading to feelings of fullness or discomfort.",
-            "loss_of_appetite":"A reduced desire to eat, resulting in a decreased intake of food."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
 
@@ -3368,13 +2818,7 @@
         "filename":"dag_5_nodes_5_edges_none_random",
         "num_nodes":5,
         "num_edges":5,
-        "variable_descriptions":{
-            "prejudice":"The formation of preconceived negative opinions, judgments, or attitudes towards individuals or groups, often lacking a rational basis or sufficient direct experience.",
-            "misconduct":"Actions or behaviors that violate established rules, policies, ethical standards, or expected professional conduct within an organizational setting.",
-            "discrimination":"The unfair or differential treatment of individuals or groups based on perceived characteristics or unfounded beliefs, leading to disadvantages or unequal opportunities.",
-            "impairment":"A significant reduction in an individual's physical, cognitive, or emotional capacity, affecting their ability to perform tasks or function effectively.",
-            "substance_abuse":"The habitual or excessive use of psychoactive substances, such as alcohol or drugs, which can affect an individual's daily life and responsibilities."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -3406,13 +2850,7 @@
         "filename":"dag_5_nodes_7_edges_none_ER",
         "num_nodes":5,
         "num_edges":7,
-        "variable_descriptions":{
-            "numbness":"A physical sensation characterized by a partial or complete loss of feeling in a particular body part, sometimes accompanied by a tingling sensation.",
-            "coronary_heart_disease":"A chronic medical condition affecting the blood vessels that supply the heart muscle, potentially impacting its ability to function optimally over time.",
-            "high_cholesterol":"A medical condition characterized by elevated levels of cholesterol in an individual's bloodstream, often measured through routine blood tests.",
-            "high_blood_pressure":"A physiological state where the force of blood against the artery walls is consistently too high, a key indicator during routine health check-ups.",
-            "angina":"A symptom characterized by discomfort or pain in the chest, often described as pressure, squeezing, or fullness, which may occur in various health contexts."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -3476,18 +2914,7 @@
         "filename":"dag_10_nodes_10_edges_degrees_SF",
         "num_nodes":10,
         "num_edges":9,
-        "variable_descriptions":{
-            "hypotension":"A medical state defined by abnormally low systemic blood pressure readings.",
-            "vomiting":"The forceful expulsion of the contents of the stomach through the mouth.",
-            "migraines":"A type of recurrent headache characterized by severe throbbing pain or a pulsing sensation, often accompanied by other symptoms.",
-            "severe_vertigo":"An intense and debilitating sensation of spinning or dizziness, often accompanied by loss of balance.",
-            "hypoxia":"A condition in which the body or a region of the body is deprived of adequate oxygen supply at the tissue level.",
-            "cardiac_tamponade":"A critical medical condition characterized by the accumulation of fluid around the heart, impeding its function.",
-            "hormonal_changes":"Alterations or imbalances in the body's endocrine system, affecting the concentration of various hormones.",
-            "low_blood_pressure":"A physiological state where the force of blood against artery walls is consistently lower than optimal.",
-            "lightheadedness":"A sensation of faintness, dizziness, or giddiness, often indicating a reduction in blood flow to the brain.",
-            "low_levels":"A measured decrease below the normal physiological range for a crucial bodily substance or parameter."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -3539,13 +2966,7 @@
         "filename":"dag_5_nodes_7_edges_degrees_SF",
         "num_nodes":5,
         "num_edges":4,
-        "variable_descriptions":{
-            "eye_problems":"This variable represents the occurrence of various medical conditions or symptoms affecting the ocular system, which can range from minor irritations to significant visual impairments.",
-            "ulcers":"This variable indicates the presence and severity of localized breaks or open sores that develop on the surface of internal or external bodily tissues.",
-            "high_blood_pressure":"This variable measures the systemic arterial pressure, specifically noting instances where it consistently exceeds healthy limits.",
-            "rosacea":"This variable characterizes the manifestation of a chronic inflammatory skin disorder, primarily recognized by facial redness, visible blood vessels, and sometimes papules or pustules.",
-            "damage_to_the_intestinal_lining":"This variable quantifies the extent of compromised structural integrity or injury observed in the protective lining of the gastrointestinal tract."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
@@ -3570,18 +2991,7 @@
         "filename":"dag_10_nodes_15_edges_none_random",
         "num_nodes":10,
         "num_edges":15,
-        "variable_descriptions":{
-            "medicines":"Pharmaceutical agents administered for therapeutic purposes.",
-            "cardiac_arrest":"An abrupt and complete loss of heart function, breathing, and consciousness.",
-            "complication":"An additional, often negative, health issue identified during a patient's care journey.",
-            "vomiting":"The involuntary forceful expulsion of the contents of the stomach through the mouth.",
-            "high_blood_pressure":"A chronic medical condition where blood pressure is persistently elevated above normal levels.",
-            "surgery":"A medical procedure involving an incision into the body, typically to repair, remove, or replace diseased or damaged tissues or organs.",
-            "gum_disease":"An inflammatory condition affecting the tissues surrounding the teeth.",
-            "sudden_death":"The unexpected and abrupt cessation of all vital functions, leading to death.",
-            "blood_pressure":"The measured pressure exerted by circulating blood on the walls of blood vessels.",
-            "heart_problems":"A general term referring to various conditions affecting the structure and function of the heart."
-        },
+        "variable_descriptions":null,
         "priors":{
             "forbidden":[
                 [
