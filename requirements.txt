@@ -17,7 +17,10 @@ pyagrum
 pyparsing
 torch
 causal-learn
+litellm
+instructor
 gcastle 
+cdt
 git+https://github.com/xunzheng/notears
 ### the below has to be run in the terminal
 #>>> pip install git+https://github.com/bd2kccd/py-causal --no-deps --no-dependencies

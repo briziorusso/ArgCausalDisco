@@ -25,6 +25,32 @@
 
 ## Reproduce
 
+### Setup
+
+1. Clone the repo and `cd` into it.
+2. Create and activate a Python virtual environment (optional but recommended):
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+3. Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+4. Install `clingo` (ASP solver):
+    - Follow instructions at https://potassco.org/clingo/ to install `clingo`.
+    - Ensure `clingo` is in your system PATH (you can check by running `clingo --version` in your terminal).
+
+### LLM configuration
+
+Set environment variables for Gemini API key and activate LiteLLM proxy:
+```bash
+export GEMINI_API_KEY="your_api_key"
+litellm --config priors/litellm.yaml --detailed_debug
+```
+
+### Run experiments
+
 1. **ABAPC-LLM**:
     1. Generate/refresh priors in `priors_assessments.ipynb`.
     2. Run `experiment_llm.py` to create results, reports and produce `results/ABAPC-LLM/merged_*.csv`.
