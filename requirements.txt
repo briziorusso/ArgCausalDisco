@@ -21,6 +21,8 @@ litellm
 instructor
 gcastle 
 cdt
+bnlearn
+dagma
 git+https://github.com/xunzheng/notears
 ### the below has to be run in the terminal
 #>>> pip install git+https://github.com/bd2kccd/py-causal --no-deps --no-dependencies

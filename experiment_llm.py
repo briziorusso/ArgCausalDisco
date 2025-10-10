@@ -653,49 +653,69 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
     return pd.DataFrame(all_runs), skipped
 
 # %% [markdown]
-# ### Bnlearn small datasets
+# ### Run experiments for different dataset types
 
 # %%
-bnlearn_datasets = list(Path("bnlearn/").glob("*.bifxml"))
-bnlearn_prior_df = pd.read_json("results/llm_constraints/bnlearn-desc-consensus.json")
+
+def run_dataset_experiment(type_):
+    """Run experiment for a specific dataset type.
+    
+    Args:
+        type_ (str): Dataset type identifier (e.g., 'bnlearn-desc', 'synthetic')
+    
+    Returns:
+        tuple: (results_df, skipped_files)
+    """
+    # Parse dataset type to get base name
+    base_name = type_.split('-')[0]  # 'bnlearn' or 'synthetic'
+    
+    # Set up paths based on dataset type
+    dataset_path = Path(f"{base_name}/")
+    datasets = list(dataset_path.glob("*.bifxml"))
+    
+    # Load appropriate prior constraints
+    prior_json = f"results/llm_constraints/{type_}-consensus.json"
+    prior_df = pd.read_json(prior_json)
+    
+    # Run experiment
+    res_df, skipped = run_experiment(
+        prior_df=prior_df, 
+        datasets=datasets
+    )
+    
+    # Save results
+    results_path = f"results/ABAPC-LLM/{type_}-results.csv"
+    res_df.to_csv(results_path, index=False)
+    
+    # Generate and save report
+    report = show_report(res_df)
+    report_path = f"results/ABAPC-LLM/{type_}-report.csv"
+    report.to_csv(report_path)
+    
+    print(f"Results saved to {results_path}")
+    print(f"Report saved to {report_path}")
+    
+    return res_df, skipped
 
 # %%
-bnlearn_res_df, bn_skipped = run_experiment(
-    prior_df=bnlearn_prior_df, datasets=bnlearn_datasets,
-)
-bnlearn_res_df.to_csv(
-    "results/ABAPC-LLM/bnlearn-desc-results.csv", index=False
-)
 
-# %%
-bnlearn_report = show_report(bnlearn_res_df)
+# Run experiments for different dataset types
+all_skipped = []
 
-bnlearn_report.to_csv("results/ABAPC-LLM/bnlearn-desc-report.csv")
+for type_ in [
+    "bnlearn-desc",
+    # "bnlearn",
+    "synthetic",
+    # "synthetic-desc",
+]:
+    print(f"\n{'='*60}")
+    print(f"Running experiment for: {type_}")
+    print(f"{'='*60}\n")
+    
+    res_df, skipped = run_dataset_experiment(type_)
+    all_skipped.extend(skipped)
 
-
-# %% [markdown]
-# ### Synthetic datasets
-
-# %%
-synthetic_datasets = list(Path("synthetic/").glob("*.bifxml"))
-synthetic_prior_df = pd.read_json("results/llm_constraints/synthetic-consensus.json")
-
-# %%
-synthetic_res_df, syn_skipped = run_experiment(
-    prior_df=synthetic_prior_df, datasets=synthetic_datasets
-)
-synthetic_res_df.to_csv(
-    "results/ABAPC-LLM/synthetic-results.csv", index=False
-)
-
-
-# %%
-synthetic_report = show_report(synthetic_res_df)
-
-synthetic_report.to_csv("results/ABAPC-LLM/synthetic-report.csv")
-
-
-print("Skipped files:", bn_skipped + syn_skipped)
+print(f"\nTotal skipped files: {all_skipped}")
 
 # %%
 def join_results(json_path, csv_path):
