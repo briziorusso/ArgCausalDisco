@@ -2,7 +2,7 @@
 
 This script unifies the functionality of the CausaNet and BNLearn experiment drivers into a single CLI with resume/progress tracking.
 
-File: `ArgCausalDisco/experiments.py`
+File: `experiments.py`
 
 - Sources: `--source {causenet|bnlearn}`
 - Saves per-run progress CSVs and aggregated summaries (`.npy`)
@@ -12,11 +12,11 @@ File: `ArgCausalDisco/experiments.py`
 ## Quick Start
 
 - CausaNet graphs (default):
-  - `python ArgCausalDisco/experiments.py --source causenet --models mpc fgs nt --n_runs 5`
+  - `python experiments.py --source causenet --models mpc fgs nt --n_runs 5`
 - BNLearn datasets:
-  - `python ArgCausalDisco/experiments.py --source bnlearn --names child asia --models mpc fgs --n_runs 5`
+  - `python experiments.py --source bnlearn --names child asia --models mpc fgs --n_runs 5`
 - Show options:
-  - `python ArgCausalDisco/experiments.py --help`
+  - `python experiments.py --help`
 
 ## Outputs
 
@@ -37,7 +37,7 @@ Use `--resume` to continue runs using progress CSVs. Use `--load_res` to start f
 
 Examples:
 - Run 50 reps on all graphs for two models:
-  - `python ArgCausalDisco/experiments.py --models mpc fgs --n_runs 50`
+  - `python experiments.py --models mpc fgs --n_runs 50`
 - Filter by filename metadata (parsed from names like `dag_<N>_nodes_<E>_edges_<heur>_<type>.bifxml`):
   - `--nodes {5|10|15}`
   - `--edges_class {d|1.5d}`
@@ -56,9 +56,9 @@ Examples:
 
 Examples:
 - Run on a subset:
-  - `python ArgCausalDisco/experiments.py --source bnlearn --names child asia --models mpc fgs nt --n_runs 20`
+  - `python experiments.py --source bnlearn --names child asia --models mpc fgs nt --n_runs 20`
 - Select by substring:
-  - `python ArgCausalDisco/experiments.py --source bnlearn --include chi --models mpc`
+  - `python experiments.py --source bnlearn --include chi --models mpc`
 
 Directory structure expected (example for `child`):
 - `<bn_data_path>/bayesian/<size>/child.bif/child.bif`
@@ -72,7 +72,7 @@ Pass one or more with `--models`:
 - `random_edge`: random DAG matching the true |E|
 
 Notes:
-- Some models require optional deps (e.g., CDT for `cam`, castle/notears for `nt`/`mcsl`, R setup for CAM). See `ArgCausalDisco/cd_algorithms/models.py`.
+- Some models require optional deps (e.g., CDT for `cam`, castle/notears for `nt`/`mcsl`, R setup for CAM). See `cd_algorithms/models.py`.
 
 ## Reproducibility
 
@@ -92,9 +92,9 @@ Notes:
 ## Example Workflows
 
 - CausaNet, resume a large job with progress and summaries:
-  - `python ArgCausalDisco/experiments.py --version causenet_bifxml_50rep --models mpc fgs nt --resume`
+  - `python experiments.py --version causenet_bifxml_50rep --models mpc fgs nt --resume`
 - BNLearn, small smoke test:
-  - `python ArgCausalDisco/experiments.py --source bnlearn --names child --models mpc --n_runs 2 --sample_size 1000`
+  - `python experiments.py --source bnlearn --names child --models mpc --n_runs 2 --sample_size 1000`
 
 ## Troubleshooting
 

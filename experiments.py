@@ -1,9 +1,3 @@
-"""Unified experiment script supporting both CausaNet BIFXML graphs and BNLearn datasets.
-
-This combines the CLI, resume, and progress tracking features of experiment_causenet.py
-and extends them to run on BNLearn datasets using load_bnlearn_data_dag.
-"""
-
 import os
 import logging
 import re
