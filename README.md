@@ -56,7 +56,7 @@ litellm --config priors/litellm.yaml --detailed_debug
     2. Run `experiment_llm.py` to create results, reports and produce `results/ABAPC-LLM/merged_*.csv`.
 2. **Causal-LLM-BFS**:
     1. `cd` to `causal-llm-bfs/`.
-    2. Run `run_heuristic_batch.py` with arguments. The script will check for already run results in the log and skip those. It will only stop until causal-bfs produce an DAG prediction. To exclude variable descriptions from the prompts, add the `--exclude_desc` flag. E.g.
+    2. Run `run_heuristic_batch.py` with arguments. Specify the dataset containing llm constraints (generated from `priors_assessments.ipynb`) using `--heuristic_dir`. The script will check for already run results in the log and skip those. It will only stop until causal-bfs produce an DAG prediction. To exclude variable descriptions from the prompts, add the `--exclude_desc` flag. E.g.
         ```bash
         python run_heuristic_batch.py --heuristic_dir ../bnlearn --alg llm_bfs_with_statistics --n_samples 5000 --logdir logs
         python run_heuristic_batch.py --heuristic_dir ../synthetic --alg llm_bfs_with_statistics --n_samples 5000 --logdir logs --exclude_desc
