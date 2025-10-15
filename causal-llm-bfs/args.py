@@ -9,5 +9,6 @@ def get_args():
     parser.add_argument('--w_threshold', type=float, default=0.3, help='w_threshold for NOTEARS')
     parser.add_argument('--logdir', type=str, default='./logs', help='log directory')
     parser.add_argument('--heuristic_dir', type=str, default='./heuristic_by_degree', help='Directory containing heuristic .bifxml datasets')
+    parser.add_argument('--exclude_desc', action='store_true', help='Exclude variable descriptions when prompting LLMs.')
     args = parser.parse_args()
     return args

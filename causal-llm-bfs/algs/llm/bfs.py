@@ -40,7 +40,7 @@ def llm_bfs(var_names_and_desc, dataset, df, include_statistics=False):
     nodes = [var for var in var_names_and_desc]
     for var in var_names_and_desc:
         causal_var = var_names_and_desc[var]
-        message_history[1]['content'] += f'''{var}: {causal_var.description}\n'''
+        message_history[1]['content'] += f'''{var}: {causal_var.description}\n''' if causal_var.description else f"{var}\n"
 
     message_history[1]['content'] += prompt_init
     print(message_history[1]['content'])

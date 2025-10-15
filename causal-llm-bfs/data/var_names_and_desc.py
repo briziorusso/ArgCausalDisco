@@ -176,7 +176,7 @@ import os
 import pyagrum as gum
 
 
-def _parse_bifxml_variables(bifxml_path):
+def _parse_bifxml_variables(bifxml_path, exclude_desc=False):
     """
     Use pyAgrum to parse a BIFXML file and extract variables with descriptions.
 
@@ -186,24 +186,36 @@ def _parse_bifxml_variables(bifxml_path):
     vars_map = {}
     for name in bn.names():
         desc = bn.variable(name).description()
-        if desc is None or len(str(desc).strip()) == 0:
-            desc = name
-        vars_map[name] = CausalVariable(name, name, str(desc))
+        if exclude_desc or desc is None or len(str(desc).strip()) == 0:
+            desc = ""
+        else:
+            desc = str(desc)
+        vars_map[name] = CausalVariable(name, name, desc)
     return vars_map
 
 
-def load_heuristic_dataset_varmap(dataset_key, base_dir="./heuristic_by_degree"):
+def load_heuristic_dataset_varmap(dataset_key, base_dir="./heuristic_by_degree", exclude_desc=False):
     """
     Given a dataset key (filename without extension) located in heuristic_by_degree,
     return a mapping compatible with VAR_NAMES_AND_DESC[dataset].
     """
     candidate = os.path.join(base_dir, f"{dataset_key}.bifxml")
     if os.path.exists(candidate):
-        return _parse_bifxml_variables(candidate)
+        return _parse_bifxml_variables(candidate, exclude_desc=exclude_desc)
     # Try to match by title-cased and underscores tolerant search
     for fname in os.listdir(base_dir):
         if not fname.lower().endswith('.bifxml'):
             continue
         if os.path.splitext(fname)[0] == dataset_key:
-            return _parse_bifxml_variables(os.path.join(base_dir, fname))
+            return _parse_bifxml_variables(os.path.join(base_dir, fname), exclude_desc=exclude_desc)
     raise FileNotFoundError(f"No BIFXML found for dataset '{dataset_key}' in {base_dir}")
+
+
+def clear_descriptions(var_map):
+    """
+    Create a new var_map with empty descriptions.
+    """
+    new_map = {}
+    for k, v in var_map.items():
+        new_map[k] = CausalVariable(v.symbol, v.name, "")
+    return new_map

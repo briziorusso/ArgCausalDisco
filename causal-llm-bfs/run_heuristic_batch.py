@@ -13,7 +13,7 @@ def find_datasets(heuristic_dir: Path):
   return [p.stem for p in bifxml_paths]
 
 
-def run_single(dataset: str, n_samples: int, alg: str, project_root: Path, heuristic_dir: Path, logdir: str):
+def run_single(dataset: str, n_samples: int, alg: str, project_root: Path, heuristic_dir: Path, logdir: str, exclude_desc: bool):
   cmd = [
     sys.executable,
     str(project_root / 'run.py'),
@@ -23,6 +23,8 @@ def run_single(dataset: str, n_samples: int, alg: str, project_root: Path, heuri
     '--n_samples', str(n_samples),
     '--logdir', logdir,
   ]
+  if exclude_desc:
+    cmd.append('--exclude_desc')
   result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
   print(f"\n===== {dataset} | stdout =====\n{result.stdout}")
   if result.returncode != 0:
@@ -71,6 +73,7 @@ def main():
   parser.add_argument('--project_root', type=str, default='.', help='Project root where run.py resides')
   parser.add_argument('--logdir', type=str, default='logs', help='Logs directory used by run.py')
   parser.add_argument('--save_csv', type=str, default=None, help='Optional path to save the aggregated CSV')
+  parser.add_argument('--exclude_desc', action='store_true', help='Exclude descriptions when prompting LLMs.')
   args = parser.parse_args()
 
   heuristic_dir = Path(args.heuristic_dir).resolve()
@@ -93,7 +96,7 @@ def main():
     if datasets_to_run:
       print(f"Found {len(datasets_to_run)} datasets to run out of {len(datasets)} total.")
       for ds in tqdm(datasets_to_run, desc="Running datasets"):
-        run_single(ds, args.n_samples, args.alg, project_root, heuristic_dir, logdir)
+        run_single(ds, args.n_samples, args.alg, project_root, heuristic_dir, logdir, args.exclude_desc)
     else:
       print("All datasets have already been run.")
       break

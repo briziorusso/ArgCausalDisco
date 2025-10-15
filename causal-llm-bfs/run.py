@@ -67,22 +67,30 @@ gaussian_noise = np.random.normal(loc=0.0, scale=0.00001, size=data.shape)
 if args.alg == 'llm_pairwise':
   var_map = VAR_NAMES_AND_DESC.get(args.dataset)
   if var_map is None:
-    var_map = load_heuristic_dataset_varmap(args.dataset, base_dir=args.heuristic_dir)
+    var_map = load_heuristic_dataset_varmap(args.dataset, base_dir=args.heuristic_dir, exclude_desc=args.exclude_desc)
+  elif args.exclude_desc:
+    var_map = clear_descriptions(var_map)
   predicted_adj_mat = llm_pairwise(var_map, prompts.get(args.dataset, prompts['asia']), df, include_statistics=False)
 elif args.alg == 'llm_pairwise_with_statistics':
   var_map = VAR_NAMES_AND_DESC.get(args.dataset)
   if var_map is None:
-    var_map = load_heuristic_dataset_varmap(args.dataset, base_dir=args.heuristic_dir)
+    var_map = load_heuristic_dataset_varmap(args.dataset, base_dir=args.heuristic_dir, exclude_desc=args.exclude_desc)
+  elif args.exclude_desc:
+    var_map = clear_descriptions(var_map)
   predicted_adj_mat = llm_pairwise(var_map, prompts.get(args.dataset, prompts['asia']), df, include_statistics=True)
 elif args.alg == 'llm_bfs':
   var_map = VAR_NAMES_AND_DESC.get(args.dataset)
   if var_map is None:
-    var_map = load_heuristic_dataset_varmap(args.dataset, base_dir=args.heuristic_dir)
+    var_map = load_heuristic_dataset_varmap(args.dataset, base_dir=args.heuristic_dir, exclude_desc=args.exclude_desc)
+  elif args.exclude_desc:
+    var_map = clear_descriptions(var_map)
   predicted_adj_mat = llm_bfs(var_map, args.dataset, df, include_statistics=False)
 elif args.alg == 'llm_bfs_with_statistics':
   var_map = VAR_NAMES_AND_DESC.get(args.dataset)
   if var_map is None:
-    var_map = load_heuristic_dataset_varmap(args.dataset, base_dir=args.heuristic_dir)
+    var_map = load_heuristic_dataset_varmap(args.dataset, base_dir=args.heuristic_dir, exclude_desc=args.exclude_desc)
+  elif args.exclude_desc:
+    var_map = clear_descriptions(var_map)
   predicted_adj_mat = llm_bfs(var_map, args.dataset, df, include_statistics=True)
 else:
   raise ValueError(f"Unknown algorithm {args.alg}")
