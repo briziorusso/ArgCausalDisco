@@ -1370,7 +1370,7 @@ TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
 TestCausalABA().randomG(10, 1, "ER", 2024) ## 4 models
 TestCausalABA().randomG(11, 1, "ER", 2024) ## 48 models
 TestCausalABA().randomG(12, 1, "ER", 2024) ## 12 models
-TestCausalABA().randomG(15, 1, "ER", 2024) ## 13:10 minutes, 80 models
+# TestCausalABA().randomG(15, 1, "ER", 2024) ## 13:10 minutes, 80 models
 
 TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().five_node_sprinkler_PC_facts()

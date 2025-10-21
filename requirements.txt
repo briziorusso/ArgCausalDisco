@@ -14,6 +14,7 @@ pmlb
 pgmpy
 python-javabridge
 pyparsing
+pydantic
 torch
 causal-learn
 gcastle 
