@@ -28,16 +28,18 @@ from datetime import datetime
 from pathlib import Path
 # sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 from utils.graph_utils import powerset, extract_test_elements_from_symbol
+from utils.prior_knowledge import PriorKnowledge
 
 def compile_and_ground(n_nodes:int, facts_location:str="",
                 skeleton_rules_reduction:bool=False,
                 weak_constraints:bool=False,
-                indep_facts:dict[tuple, set[tuple]]=dict(),
-                dep_facts:dict[tuple, set[tuple]]=dict(),
+                indep_facts:dict[tuple[int, int], set[tuple]]=dict(),
+                dep_facts:dict[tuple[int, int], set[tuple]]=dict(),
                 opt_mode:str='optN',
                 show:list=['arrow'],
                 pre_grounding:bool=False,
                 ext_flag: bool = False,
+                prior_knowledge: PriorKnowledge | None = None,
                 )->Control:
 
     logging.info("Compiling the program")
@@ -45,7 +47,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     cpu_count = min(os.cpu_count() or 1, 64)
     ctl = Control(['-t %d' % cpu_count])
     ctl.configuration.solve.parallel_mode = cpu_count
-    ctl.configuration.solve.models="0"
+    ctl.configuration.solve.models=0
     ctl.configuration.solver.seed="2024"
     ctl.configuration.solve.opt_mode = opt_mode
 
@@ -76,11 +78,20 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     ### Active paths rules
     n_p = 0
     G = rx.generators.complete_graph(n_nodes)
-    ### remove paths that contain an indep fact
     if skeleton_rules_reduction:
-        G.remove_edges_from(indep_facts)
-        for (X, Y) in indep_facts:
+        forbidden_edges = indep_facts.keys()
+        G.remove_edges_from(set(G.edge_list()) & forbidden_edges)
+        for (X, Y) in forbidden_edges:
             ctl.add("specific", [], f":- edge({X},{Y}).")
+    if prior_knowledge is not None:
+        for (X, Y) in prior_knowledge.forbidden:
+            if not skeleton_rules_reduction or ((X, Y) not in forbidden_edges and (Y, X) not in forbidden_edges):
+                ctl.add("specific", [], f":- arrow({X},{Y}).")
+        for (X, Y) in prior_knowledge.required:
+            if not skeleton_rules_reduction or ((X, Y) not in forbidden_edges and (Y, X) not in forbidden_edges):
+                ctl.add("specific", [], f"arrow({X},{Y}).")
+            else:
+                logging.warning(f"Required edge ({X},{Y}) is in the forbidden edges set.")
 
     node_pairs = tuple(dep_facts | indep_facts if skeleton_rules_reduction else combinations(range(n_nodes),2))
     logging.info(f"{len(node_pairs) / (n_nodes*(n_nodes-1)/2):.2%} of all node pairs will be considered for active paths.")
@@ -159,6 +170,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
 
     return ctl
 
+
 def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 skeleton_rules_reduction:bool=False,
                 weak_constraints:bool=False,
@@ -168,16 +180,16 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 search_for_models:str='No', 
                 show:list=['arrow'],
                 pre_grounding: bool=False,
-                )->list:     
+                disable_reground: bool=False,
+                prior_knowledge: PriorKnowledge | None = None,
+                return_statistics: bool = False,
+                )->list:
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
     
     """
     logging.info(f"Running CausalABA")
-
-    facts_location_wc = facts_location.replace(".lp","_wc.lp")
-    facts_location_I = facts_location.replace(".lp","_I.lp")
-
+    
     # (X, Y) -> their condition sets S
     indep_facts: dict[tuple, set[tuple]] = {}
     dep_facts: dict[tuple, set[tuple]] = {}
@@ -211,10 +223,10 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 assert condition_set not in facts_group[(X,Y)], f"Redundant external fact: {line_clean}"
                 facts_group[(X,Y)].add(condition_set)
 
-    ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding, ext_flag)
-
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
+    ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
+                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding, ext_flag, prior_knowledge)
+
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
             if fact[3] == "ext_indep" and set_indep_facts:
@@ -245,10 +257,11 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         models = []
         logging.info("   Solving...")
         with ctl.solve(yield_=True) as handle:
-            for model in handle:
-                models.append(model.symbols(shown=True))
+            for i, model in enumerate(handle):
+                if model.optimality_proven:
+                    models.append(model.symbols(shown=True))
                 if print_models:
-                    logging.info(f"Answer {len(models)}: {model}")
+                    logging.info(f"Answer {i}: {model}")
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         logging.info(f"Number of models: {n_models}")
         times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
@@ -270,7 +283,12 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             facts_group[(X, Y)].remove(tuple(S))
             if not facts_group[(X, Y)]:
                 del facts_group[(X, Y)]
-                reground = skeleton_rules_reduction and (ext_flag is False or dep_type == "ext_indep")
+                ## regrground only if disable_reground is False, skeleton_rules_reduction is True, and either ext_flag is False or dep_type is "ext_indep"
+                reground = (
+                    disable_reground is False
+                    and skeleton_rules_reduction
+                    and (ext_flag is False or dep_type == "ext_indep")
+                )
             else:
                 logging.debug(f"   Not removing fact {fact_str} because there are multiple facts with the same X and Y")
             ctl.assign_external(Function(dep_type, [Number(X), Number(Y), Function(fact_str.replace(').','').split(",")[-1])]), None)
@@ -279,7 +297,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 ### Save external statements
                 logging.info("Recompiling and regrounding...")
                 ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding, ext_flag=ext_flag)
+                                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding, ext_flag=ext_flag, prior_knowledge=prior_knowledge)
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
@@ -289,10 +307,11 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             models = []
             logging.info("   Solving...")
             with ctl.solve(yield_=True) as handle:
-                for model in handle:
-                    models.append(model.symbols(shown=True))
+                for i, model in enumerate(handle):
+                    if model.optimality_proven:
+                        models.append(model.symbols(shown=True))
                     if print_models:
-                        logging.info(f"Answer {len(models)}: {model}")
+                        logging.info(f"Answer {i}: {model}")
             n_models = int(ctl.statistics['summary']['models']['enumerated'])
             logging.info(f"Number of models: {n_models}")
             times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
@@ -323,13 +342,16 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             
             if n_models > 0:
                 if search_for_models == "first_subsets":
-                    return models, False
+                    return [models, False]
                 else:
                     set_of_models.append(models)
 
         if len(set_of_models) > 0:
-            return set_of_models, True
+            return [set_of_models, True]
 
-    return models, False
+    if return_statistics:
+        return [models, False, ctl.statistics, remove_n if 'remove_n' in locals() else 0]
+    else:
+        return [models, False]
 
 # CausalABA(3, "outputs/test_facts.lp", False)

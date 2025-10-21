@@ -1,0 +1,14 @@
+ext_indep(0,1,s2). I=0.2649787894105012, False
+ext_indep(0,1,s3). I=0.25762851557703825, False
+ext_indep(0,1,s2y3). I=0.0, False
+ext_dep(0,2,empty). I=0.9999246630485028, True
+ext_dep(0,2,s1). I=0.499955556582103, True
+ext_dep(0,2,s3). I=0.4999436769453953, True
+ext_dep(0,3,empty). I=0.9999999987200816, True
+ext_dep(0,3,s2). I=0.4999999990503474, True
+ext_dep(1,2,empty). I=0.6908520654478614, True
+ext_dep(1,2,s0). I=0.31421452528363547, True
+ext_indep(1,3,empty). I=0.7225438874490485, False
+ext_indep(2,3,s0). I=0.29653509101717745, True
+ext_indep(2,3,s1). I=0.27145177304732365, False
+ext_indep(2,3,s0y1). I=0.0, True
