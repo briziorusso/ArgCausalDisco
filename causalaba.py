@@ -36,6 +36,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 indep_facts:dict[tuple[int, int], set[tuple]]=dict(),
                 dep_facts:dict[tuple[int, int], set[tuple]]=dict(),
                 opt_mode:str='optN',
+                out_n:int=0,
                 show:list=['arrow'],
                 pre_grounding:bool=False,
                 ext_flag: bool = False,
@@ -47,9 +48,10 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     cpu_count = min(os.cpu_count() or 1, 64)
     ctl = Control(['-t %d' % cpu_count])
     ctl.configuration.solve.parallel_mode = cpu_count
-    ctl.configuration.solve.models=0
+    ctl.configuration.solve.models=out_n
     ctl.configuration.solver.seed="2024"
     ctl.configuration.solve.opt_mode = opt_mode
+    # ctl.configuration.solve.time_limit = 3600.0  # 1 hour time limit
 
     ### Add set definition
     condition_sets = (
@@ -177,6 +179,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 fact_pct:float=1.0,
                 set_indep_facts:bool=False,
                 opt_mode:str='optN',
+                out_n:int=5,
                 search_for_models:str='No', 
                 show:list=['arrow'],
                 pre_grounding: bool=False,
@@ -225,7 +228,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
 
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
     ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding, ext_flag, prior_knowledge)
+                weak_constraints, indep_facts, dep_facts, opt_mode, out_n, show, pre_grounding, ext_flag, prior_knowledge)
 
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
@@ -240,7 +243,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
         models = []
         logging.info("   Solving...")
-        with ctl.solve(yield_=True) as handle:
+        with ctl.solve(yield_=True, async_=True) as handle:
+            handle.wait(3600)
+            handle.cancel()
             for model in handle:
                 models.append(model.symbols(shown=True))
                 if print_models:
@@ -297,7 +302,8 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 ### Save external statements
                 logging.info("Recompiling and regrounding...")
                 ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                                weak_constraints, indep_facts, dep_facts, opt_mode, show, pre_grounding, ext_flag=ext_flag, prior_knowledge=prior_knowledge)
+                                weak_constraints, indep_facts, dep_facts, opt_mode, 
+                                 out_n, show, pre_grounding, ext_flag, prior_knowledge)
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")

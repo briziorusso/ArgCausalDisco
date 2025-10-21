@@ -36,7 +36,7 @@ except:
     logging.info('Castle not installed')
     sys.path.append('../trustworthyAI/gcastle/')
     from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
-
+os.environ['CASTLE_BACKEND'] = 'pytorch'
 notears_from = 'notears' ## 'castle' or 'notears'
 try:
     from notears.nonlinear import NotearsMLP, notears_nonlinear
@@ -69,6 +69,12 @@ def run_method(X,
                scenario:str='',
                test_alpha:float=0.01,
                extra_tests:bool=False,
+               disable_reground:bool=False,
+               return_statistics:bool=False,
+               S_weight:bool=True,
+               out_n:int=0,
+               skeleton_rules_reduction:bool=True,
+               pre_grounding:bool=False,
                device:str=''
                ):
     """
@@ -218,7 +224,11 @@ def run_method(X,
         random_stability(seed)
         start = time.time()
         W_est = ABAPC(data=X, alpha=test_alpha, indep_test=test_name,
-                      scenario=scenario, S_weight=True, pre_grounding=True)
+                      scenario=scenario, S_weight=S_weight, pre_grounding=pre_grounding,
+                      skeleton_rules_reduction=skeleton_rules_reduction,
+                      disable_reground=disable_reground,
+                      return_statistics=return_statistics, out_n=out_n
+                      )
         elapsed = time.time() - start
         logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')
 
