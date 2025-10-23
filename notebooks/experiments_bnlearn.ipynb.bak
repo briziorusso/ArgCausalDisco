@@ -1,0 +1,4904 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# BNLearn Results"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "id": "c9260929",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import warnings\n",
+    "warnings.filterwarnings('ignore')\n",
+    "\n",
+    "from pathlib import Path\n",
+    "import sys\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "from IPython.display import display\n",
+    "\n",
+    "pd.set_option('display.max_rows', 2000)\n",
+    "\n",
+    "REPO_ROOT = Path.cwd().resolve().parent\n",
+    "sys.path.insert(0, str(REPO_ROOT))\n",
+    "sys.path.insert(0, str(REPO_ROOT / 'utils'))\n",
+    "\n",
+    "from plotting import *\n",
+    "\n",
+    "save_figs = False\n",
+    "debug = False\n",
+    "\n",
+    "RESULTS_DIR = REPO_ROOT / 'results'\n",
+    "\n",
+    "# Two running versions (FGS/NT and Random/MPC)\n",
+    "VERSIONS = ['bnlearn_big_fgs_nt', 'bnlearn_big_rnd_mpc','bnlearn_child_base', 'bnlearn_child_base2']\n",
+    "# CSV with ABAPC and ABAPC-LLM single-run results to aggregate\n",
+    "CSV_ABAPC = RESULTS_DIR / 'ABAPC-LLM/merged_bnlearn-desc.csv'\n",
+    "CSV_BFS = RESULTS_DIR / 'causal-bfs-bnlearn-results.csv'\n",
+    "\n",
+    "# Display labels and styles (aligned with causenet notebook)\n",
+    "names_dict = {\n",
+    "    'random': 'Random',\n",
+    "    'pc': 'PC',\n",
+    "    'pc_max': 'Max-PC',\n",
+    "    'fgs': 'FGS',\n",
+    "    'spc': 'Shapley-PC',\n",
+    "    'mpc': 'MPC',\n",
+    "    'cpc': 'CPC',\n",
+    "    'abapc': 'ABAPC (Ours)',\n",
+    "    'abapc_llm': 'ABAPC-LLM',\n",
+    "    'abapc_llm_d': 'ABAPC-LLM-d',\n",
+    "    'cam': 'CAM',\n",
+    "    'nt': 'NOTEARS-MLP',\n",
+    "    'mcsl': 'MCSL-MLP',\n",
+    "    'ges': 'GES',\n",
+    "    'aspcr': 'ASPCR',\n",
+    "    'llm_bfs': 'LLM-BFS',\n",
+    "}\n",
+    "\n",
+    "symbols_dict = {\n",
+    "    'random': 'x',\n",
+    "    'pc': 'circle',\n",
+    "    'pc_max': 'circle-open',\n",
+    "    'fgs': 'triangle-up-dot',\n",
+    "    'spc': 'hexagon2-dot',\n",
+    "    'mpc': 'diamond-dot',\n",
+    "    'cpc': 'square-dot',\n",
+    "    'abapc': 'triangle-down-dot',\n",
+    "    'abapc_llm': 'triangle-down-open',\n",
+    "    'abapc_llm_d': 'triangle-left-open',\n",
+    "    'cam': 'star',\n",
+    "    'nt': 'pentagon-dot',\n",
+    "    'mcsl': 'cross-thin',\n",
+    "    'ges': 'circle-cross',\n",
+    "    'aspcr': 'diamond-open',\n",
+    "    'llm_bfs': 'star-diamond-dot',\n",
+    "}\n",
+    "\n",
+    "colors_dict = {\n",
+    "    'random': '#7f7f7f',\n",
+    "    'pc': main_blue,\n",
+    "    'pc_max': sec_blue,\n",
+    "    'fgs': sec_orange,\n",
+    "    'spc': sec_green,\n",
+    "    'mpc': main_green,\n",
+    "    'cpc': '#c678dd',\n",
+    "    'abapc': '#bcbd22',\n",
+    "    'abapc_llm': sec_purple,\n",
+    "    'abapc_llm_d': main_purple,\n",
+    "    'cam': main_orange,\n",
+    "    'nt': sec_blue,\n",
+    "    'mcsl': '#bcbd22',\n",
+    "    'ges': '#17becf',\n",
+    "    'aspcr': sec_purple,\n",
+    "    'llm_bfs': \"#e377c2\", \n",
+    "}\n",
+    "\n",
+    "\n",
+    "# For labeling datasets (|V|, |E|). Use constants as in original bnlearn notebook.\n",
+    "dags_nodes_map = {'asia':8, 'cancer':5, 'earthquake':5, 'sachs':11, 'survey':6, 'alarm':37, 'child':20, 'insurance':27, 'hailfinder':56, 'hepar2':70}\n",
+    "dags_arcs_map = {'asia':8, 'cancer':4, 'earthquake':4, 'sachs':17, 'survey':6, 'alarm':46, 'child':25, 'insurance':52, 'hailfinder':66, 'hepar2':123}\n",
+    "\n",
+    "default_methods = ['Random', 'FGS', 'NOTEARS-MLP', 'MPC', 'ABAPC (Ours)', 'LLM-BFS', 'ABAPC-LLM', 'ABAPC-LLM-d']\n",
+    "inverse_names = {v: k for k, v in names_dict.items()}\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "b1a7e9ad",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Optional: per-run configuration with method selection (mirrors causenet notebook)\n",
+    "MODEL_ALIASES = {}\n",
+    "EXTRA_MODELS = {}\n",
+    "\n",
+    "# Metrics schema used when loading CSV aggregates\n",
+    "COLUMNS_MAP = {\n",
+    "    'dag': [\n",
+    "        'dataset', 'model',\n",
+    "        'elapsed_mean', 'elapsed_std',\n",
+    "        'nnz_mean', 'nnz_std',\n",
+    "        'fdr_mean', 'fdr_std',\n",
+    "        'tpr_mean', 'tpr_std',\n",
+    "        'fpr_mean', 'fpr_std',\n",
+    "        'precision_mean', 'precision_std',\n",
+    "        'recall_mean', 'recall_std',\n",
+    "        'F1_mean', 'F1_std',\n",
+    "        'shd_mean', 'shd_std',\n",
+    "        'sid_mean', 'sid_std',\n",
+    "    ],\n",
+    "}\n",
+    "\n",
+    "# Mapping from desired metric names to CSV column names\n",
+    "CSV_METRIC_MAP = {\n",
+    "    'dag': {\n",
+    "        'elapsed': 'time',\n",
+    "        'nnz': 'dag_nnz',\n",
+    "        'fdr': 'dag_fdr',\n",
+    "        'tpr': 'dag_tpr',\n",
+    "        'fpr': 'dag_fpr',\n",
+    "        'precision': 'dag_precision',\n",
+    "        'recall': 'dag_recall',\n",
+    "        'F1': 'dag_F1',\n",
+    "        'shd': 'dag_shd',\n",
+    "        'sid': 'dag_sid',\n",
+    "    }\n",
+    "}\n",
+    "\n",
+    "def load_npy(version: str, kind: str):\n",
+    "    path = RESULTS_DIR / f'stored_results_{version}.npy'\n",
+    "    cols = ['dataset', 'model', 'elapsed_mean', 'elapsed_std', 'nnz_mean', 'nnz_std',\n",
+    "            'fdr_mean', 'fdr_std', 'tpr_mean', 'tpr_std', 'fpr_mean', 'fpr_std',\n",
+    "            'precision_mean', 'precision_std', 'recall_mean', 'recall_std',\n",
+    "            'F1_mean', 'F1_std', 'shd_mean', 'shd_std', 'SID_mean', 'SID_std']\n",
+    "    if not path.exists():\n",
+    "        return pd.DataFrame(columns=cols)\n",
+    "    arr = np.load(path, allow_pickle=True)\n",
+    "    df = pd.DataFrame(arr, columns=cols)\n",
+    "    df['dataset'] = df['dataset'].astype(str)\n",
+    "    df['model'] = df['model'].astype(str)\n",
+    "    return df\n",
+    "\n",
+    "def resolve_csv_path(spec, base_dir):\n",
+    "    csv_entry = spec.get('csv_path')\n",
+    "    if csv_entry is None:\n",
+    "        csv_entry = spec.get('csv_name', 'agg.csv')\n",
+    "    csv_path = Path(csv_entry)\n",
+    "    if not csv_path.is_absolute():\n",
+    "        csv_path = base_dir / csv_path\n",
+    "    return csv_path\n",
+    "\n",
+    "def load_csv_results(kind, spec, columns, base_dir, csv_path=None):\n",
+    "    csv_path = csv_path or resolve_csv_path(spec, base_dir)\n",
+    "    if not csv_path.exists():\n",
+    "        raise FileNotFoundError(f'Missing CSV results file: {csv_path}')\n",
+    "    df = pd.read_csv(csv_path)\n",
+    "    dataset_col = spec.get('csv_dataset_column', 'dataset')\n",
+    "    model_constant = spec.get('csv_model_constant')\n",
+    "    model_col = spec.get('csv_model_column', 'model')\n",
+    "    # Normalise dataset/model columns\n",
+    "    df = df.rename(columns={dataset_col: 'dataset'})\n",
+    "    if model_constant is not None:\n",
+    "        df['model'] = str(model_constant)\n",
+    "    elif model_col in df.columns:\n",
+    "        df = df.rename(columns={model_col: 'model'})\n",
+    "    else:\n",
+    "        # If no model column and no constant provided, try to infer a single model\n",
+    "        if 'impl' in df.columns:\n",
+    "            df = df.rename(columns={'impl': 'model'})\n",
+    "        else:\n",
+    "            raise ValueError(f'CSV lacks a model column and no csv_model_constant provided: {csv_path}')\n",
+    "    model_mapping = spec.get('csv_model_mapping')\n",
+    "    if model_mapping:\n",
+    "        df['model'] = df['model'].replace(model_mapping)\n",
+    "    df['dataset'] = df['dataset'].astype(str)\n",
+    "    df['model'] = df['model'].astype(str)\n",
+    "    # Metric columns mapping and aggregation\n",
+    "    metrics_map = CSV_METRIC_MAP[kind].copy()\n",
+    "    overrides = spec.get('csv_metric_map')\n",
+    "    if overrides:\n",
+    "        metrics_map.update(overrides)\n",
+    "    missing = [src for src in metrics_map.values() if src not in df.columns]\n",
+    "    if missing:\n",
+    "        raise ValueError(f'Missing columns in CSV results ({csv_path}): {missing}')\n",
+    "    rename_map = {src: name for name, src in metrics_map.items()}\n",
+    "    value_cols = list(rename_map.keys())\n",
+    "    df = df[['dataset', 'model'] + value_cols].rename(columns=rename_map)\n",
+    "    grouped = (\n",
+    "        df.groupby(['dataset', 'model'], as_index=False)\n",
+    "          .agg({col: ['mean', 'std'] for col in rename_map.values()})\n",
+    "    )\n",
+    "    # Flatten multi-index columns\n",
+    "    flat_columns = []\n",
+    "    for col in grouped.columns:\n",
+    "        if isinstance(col, tuple):\n",
+    "            metric, agg = col\n",
+    "            flat_columns.append(f'{metric}_{agg}' if agg != '' else metric)\n",
+    "        else:\n",
+    "            flat_columns.append(col)\n",
+    "    grouped.columns = flat_columns\n",
+    "    # Ensure presence of expected columns\n",
+    "    for metric in rename_map.values():\n",
+    "        for agg in ('mean','std'):\n",
+    "            col = f'{metric}_{agg}'\n",
+    "            if col not in grouped.columns:\n",
+    "                grouped[col] = np.nan\n",
+    "    for col in columns:\n",
+    "        if col not in grouped.columns:\n",
+    "            grouped[col] = np.nan\n",
+    "    return grouped[columns]\n",
+    "\n",
+    "def load_results(kind, run_specs=None):\n",
+    "    columns = COLUMNS_MAP[kind]\n",
+    "    specs = run_specs or RUN_CONFIGS\n",
+    "    frames = []\n",
+    "    for spec in specs:\n",
+    "        base_dir = Path(spec.get('results_dir', RESULTS_DIR))\n",
+    "        include_methods = spec.get('include_methods')\n",
+    "        label = spec.get('label', spec.get('version', 'run'))\n",
+    "        fmt = str(spec.get('format', 'npy')).lower()\n",
+    "        if fmt == 'csv':\n",
+    "            csv_path = resolve_csv_path(spec, base_dir)\n",
+    "            if not csv_path.exists():\n",
+    "                print(f\"[WARN] Missing results file: {csv_path}\")\n",
+    "                continue\n",
+    "            df = load_csv_results(kind, spec, columns, base_dir, csv_path=csv_path)\n",
+    "        else:\n",
+    "            version = spec.get('version')\n",
+    "            if not version:\n",
+    "                print('[WARN] Missing version in run spec; skipping')\n",
+    "                continue\n",
+    "            try:\n",
+    "                df = load_npy(version, kind)\n",
+    "            except FileNotFoundError:\n",
+    "                print(f\"[WARN] Missing results file for version: {version}\")\n",
+    "                continue\n",
+    "        # Harmonise column names and models\n",
+    "        df = df.rename(columns=lambda col: col.replace('sid', 'SID'))\n",
+    "        if 'model' in df:\n",
+    "            df['model'] = df['model'].replace(MODEL_ALIASES)\n",
+    "        if include_methods:\n",
+    "            df = df[df['model'].isin(include_methods)].reset_index(drop=True)\n",
+    "        df['run_label'] = label\n",
+    "        frames.append(df)\n",
+    "    if not frames:\n",
+    "        cols_with_label = columns + ['run_label']\n",
+    "        return pd.DataFrame(columns=cols_with_label)\n",
+    "    return pd.concat(frames, ignore_index=True)\n",
+    "\n",
+    "# Example RUN_CONFIGS; adjust to your runs\n",
+    "RUN_CONFIGS = [\n",
+    "    {\n",
+    "        'results_dir': RESULTS_DIR,\n",
+    "        'version': 'bnlearn_big_rnd_mpc',\n",
+    "        'include_methods': ['Random'],\n",
+    "        'label': 'rnd_mpc',\n",
+    "    },\n",
+    "    {\n",
+    "        'results_dir': RESULTS_DIR,\n",
+    "        'version': 'bnlearn_big_fgs_nt',\n",
+    "        'include_methods': ['FGS', 'NOTEARS-MLP'],\n",
+    "        'label': 'fgs_nt',\n",
+    "    },\n",
+    "    {\n",
+    "        'results_dir': RESULTS_DIR,\n",
+    "        'version': 'bnlearn_child_base',\n",
+    "        'include_methods': ['Random', 'FGS', 'NOTEARS-MLP'],\n",
+    "        'label': 'rnd_mpc',\n",
+    "    },\n",
+    "    {\n",
+    "        'results_dir': RESULTS_DIR,\n",
+    "        'version': 'bnlearn_child_base2',\n",
+    "        'include_methods': ['Random', 'FGS', 'NOTEARS-MLP'],\n",
+    "        'label': 'rnd_mpc',\n",
+    "    },\n",
+    "    {\n",
+    "        'results_dir': RESULTS_DIR,\n",
+    "        'version': 'bnlearn_50rep_abapc',\n",
+    "        'include_methods': ['ABAPC (Ours)'],\n",
+    "        'label': 'abapc',\n",
+    "    }\n",
+    "]\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "80e1e57f",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "DAG models: ['ABAPC (Ours)', 'FGS', 'NOTEARS-MLP', 'Random']\n"
+     ]
+    }
+   ],
+   "source": [
+    "datasets_to_plot = {'cancer', 'earthquake', 'asia', 'survey', 'sachs', 'child'}\n",
+    "\n",
+    "# Merge aggregates using RUN_CONFIGS (method-selectable)\n",
+    "dag_all = load_results('dag')\n",
+    "\n",
+    "## filter to datasets of interest\n",
+    "dag_all = dag_all[dag_all['dataset'].str.lower().isin(datasets_to_plot)].copy()\n",
+    "\n",
+    "# Add node/edge counts for label/normalisation\n",
+    "if 'num_edges' not in dag_all.columns: dag_all['num_edges'] = np.nan\n",
+    "if 'num_nodes' not in dag_all.columns: dag_all['num_nodes'] = np.nan\n",
+    "# Fill from known maps where missing\n",
+    "base_names = dag_all['dataset'].astype(str).str.replace('<br>.*','', regex=True).str.lower()\n",
+    "dag_all['n_edges'] = base_names.map(dags_arcs_map).fillna(dag_all['num_edges']).astype(float)\n",
+    "dag_all['n_nodes'] = base_names.map(dags_nodes_map).fillna(dag_all['num_nodes']).astype(float)\n",
+    "# Nice dataset label\n",
+    "ds_upper = base_names.str.upper()\n",
+    "dag_all['dataset'] = ds_upper + '<br> |V|=' + dag_all['n_nodes'].fillna(0).astype(int).astype(str) + ', |E|=' + dag_all['n_edges'].fillna(0).astype(int).astype(str)\n",
+    "\n",
+    "# Compute normalised metrics\n",
+    "def add_normals(df, sid_cols):\n",
+    "    if 'shd_mean' in df and 'n_edges' in df:\n",
+    "        df['p_shd_mean'] = df['shd_mean'].astype(float) / df['n_edges'].astype(float)\n",
+    "        df['p_shd_std'] = df['shd_std'].astype(float) / df['n_edges'].astype(float)\n",
+    "    for c in sid_cols:\n",
+    "        mean_c, std_c = f'{c}_mean', f'{c}_std'\n",
+    "        if mean_c in df and 'n_edges' in df:\n",
+    "            df[f'p_{c}_mean'] = df[mean_c].astype(float) / df['n_edges'].astype(float)\n",
+    "            df[f'p_{c}_std'] = df[std_c].astype(float) / df['n_edges'].astype(float)\n",
+    "    return df\n",
+    "\n",
+    "dag_all = add_normals(dag_all, sid_cols=['SID'])\n",
+    "\n",
+    "available_models_dag = sorted(dag_all['model'].unique()) if len(dag_all)>0 else []\n",
+    "print('DAG models:', available_models_dag)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "075dc51b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Version: bnlearn_big_fgs_nt\n",
+      "Version: bnlearn_big_rnd_mpc\n",
+      "Version: bnlearn_child_base\n",
+      "Version: bnlearn_child_base2\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Count runs across VERSIONS using progress CSVs if present, else parse logs.\n",
+    "# Also count ABAPC/LLM-BFS runs from CSVs, splitting ABAPC by impl.\n",
+    "\n",
+    "from pathlib import Path\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import re\n",
+    "\n",
+    "# Uses existing: RESULTS_DIR (Path), VERSIONS (list[str]), names_dict, CSV_ABAPC, CSV_BFS\n",
+    "expected_n_runs = None  # set to int to flag incomplete, e.g., 50\n",
+    "\n",
+    "def count_progress_dir(progress_dir: Path):\n",
+    "    rx = re.compile(r'^(?P<dataset>.+?)__+(?P<method>.+?)_(?P<kind>dag|cpdag)\\.csv$')\n",
+    "    dag_counts, cpdag_counts = {}, {}\n",
+    "    if not progress_dir.exists():\n",
+    "        return pd.DataFrame(columns=['dataset','method_key','model','dag_runs','cpdag_runs','runs'])\n",
+    "    for p in progress_dir.glob('*.csv'):\n",
+    "        m = rx.match(p.name)\n",
+    "        if not m:\n",
+    "            continue\n",
+    "        key = (m.group('dataset'), m.group('method'))\n",
+    "        try:\n",
+    "            n = sum(1 for _ in open(p, 'r', encoding='utf-8', errors='ignore')) - 1\n",
+    "            n = max(0, n)\n",
+    "        except Exception:\n",
+    "            n = 0\n",
+    "        if m.group('kind') == 'dag':\n",
+    "            dag_counts[key] = n\n",
+    "        else:\n",
+    "            cpdag_counts[key] = n\n",
+    "    keys = sorted(set(dag_counts.keys()) | set(cpdag_counts.keys()))\n",
+    "    rows = []\n",
+    "    for dataset, method in keys:\n",
+    "        dag_n = dag_counts.get((dataset, method), 0)\n",
+    "        cpdag_n = cpdag_counts.get((dataset, method), 0)\n",
+    "        runs = min(dag_n, cpdag_n) if (dag_n and cpdag_n) else max(dag_n, cpdag_n)\n",
+    "        rows.append({'dataset':dataset,'method_key':method,'model':names_dict.get(method,method),\n",
+    "                     'dag_runs':dag_n,'cpdag_runs':cpdag_n,'runs':runs})\n",
+    "    return pd.DataFrame(rows).sort_values(['dataset','model']).reset_index(drop=True)\n",
+    "\n",
+    "def count_from_log(log_path: Path):\n",
+    "    # Count lines like: {'dataset': 'child', 'model': 'FGS', 'elapsed': ... , ...}\n",
+    "    # Two lines per run (DAG and CPDAG) => runs = floor(count/2)\n",
+    "    if not log_path.exists():\n",
+    "        return pd.DataFrame(columns=['dataset','method_key','model','runs'])\n",
+    "    pat = re.compile(r\"\"\"\\{[^}]*'dataset'\\s*:\\s*'(?P<dataset>[^']+)'.*?'model'\\s*:\\s*'(?P<model>[^']+)'.*?'elapsed'\"\"\")\n",
+    "    counts = {}\n",
+    "    with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:\n",
+    "        for line in f:\n",
+    "            m = pat.search(line)\n",
+    "            if not m:\n",
+    "                continue\n",
+    "            key = (m.group('dataset'), m.group('model'))\n",
+    "            counts[key] = counts.get(key, 0) + 1\n",
+    "    rows = []\n",
+    "    inverse_names = {v: k for k, v in names_dict.items()}\n",
+    "    for (dataset, model_pretty), line_count in counts.items():\n",
+    "        runs = line_count // 2  # two metric logs per run\n",
+    "        method_key = inverse_names.get(model_pretty, model_pretty)\n",
+    "        rows.append({'dataset':dataset,'method_key':method_key,'model':model_pretty,'runs':runs})\n",
+    "    return pd.DataFrame(rows)\n",
+    "\n",
+    "def count_csv_abapc_split(csv_path: Path):\n",
+    "    # Split ABAPC by impl column if present: org -> abapc, new -> abapc_llm\n",
+    "    if not csv_path.exists():\n",
+    "        return pd.DataFrame(columns=['dataset','method_key','model','runs'])\n",
+    "    df = pd.read_csv(csv_path)\n",
+    "    # Guess dataset column\n",
+    "    dcol = None\n",
+    "    for c in ['dataset','Dataset','data','graph','name']:\n",
+    "        if c in df.columns:\n",
+    "            dcol = c; break\n",
+    "    if dcol is None:\n",
+    "        return pd.DataFrame(columns=['dataset','method_key','model','runs'])\n",
+    "    impl_col = 'impl' if 'impl' in df.columns else None\n",
+    "    if impl_col:\n",
+    "        impl_map = {'org':'abapc','new':'abapc_llm'}\n",
+    "        df['_method_key'] = df[impl_col].map(impl_map).fillna('abapc')\n",
+    "        df['_model'] = df['_method_key'].map(lambda k: names_dict.get(k, k))\n",
+    "        g = df.groupby([df[dcol].astype(str),'_method_key','_model']).size().rename('runs').reset_index()\n",
+    "        g.columns = ['dataset','method_key','model','runs']\n",
+    "        return g\n",
+    "    # fallback: count all as abapc\n",
+    "    g = df.groupby(df[dcol].astype(str)).size().rename('runs').reset_index()\n",
+    "    g.columns = ['dataset','runs']\n",
+    "    g['method_key'] = 'abapc'\n",
+    "    g['model'] = names_dict.get('abapc','abapc')\n",
+    "    return g[['dataset','method_key','model','runs']]\n",
+    "\n",
+    "def count_csv_llm_bfs(csv_path: Path):\n",
+    "    if not csv_path.exists():\n",
+    "        return pd.DataFrame(columns=['dataset','method_key','model','runs'])\n",
+    "    df = pd.read_csv(csv_path)\n",
+    "    dcol = None\n",
+    "    for c in ['dataset','Dataset','data','graph','name']:\n",
+    "        if c in df.columns:\n",
+    "            dcol = c; break\n",
+    "    if dcol is None:\n",
+    "        return pd.DataFrame(columns=['dataset','method_key','model','runs'])\n",
+    "    g = df.groupby(df[dcol].astype(str)).size().rename('runs').reset_index()\n",
+    "    g.columns = ['dataset','runs']\n",
+    "    g['method_key'] = 'llm_bfs'\n",
+    "    g['model'] = names_dict.get('llm_bfs','llm_bfs')\n",
+    "    return g[['dataset','method_key','model','runs']]\n",
+    "\n",
+    "# Per-version counting\n",
+    "counts_per_version = {}\n",
+    "for v in VERSIONS:\n",
+    "    pdir = RESULTS_DIR / 'progress' / v\n",
+    "    dfp = count_progress_dir(pdir)\n",
+    "    if dfp.empty:\n",
+    "        # fallback to log parsing\n",
+    "        dfl = count_from_log(RESULTS_DIR / f'log_{v}.log')\n",
+    "        counts_per_version[v] = dfl\n",
+    "    else:\n",
+    "        counts_per_version[v] = dfp[['dataset','method_key','model','runs']]\n",
+    "\n",
+    "# Show per-version pivots\n",
+    "for v, dfv in counts_per_version.items():\n",
+    "    print(f'Version: {v}')\n",
+    "    if dfv.empty:\n",
+    "        # display(pd.DataFrame({'note':[f'No progress CSVs or log entries found in {RESULTS_DIR} for {v}']}))\n",
+    "        continue\n",
+    "    piv = dfv.pivot(index='dataset', columns='model', values='runs').fillna(0).astype(int)\n",
+    "    # display(piv)\n",
+    "\n",
+    "# Combine across versions (take max per dataset/method)\n",
+    "combined = (pd.concat(list(counts_per_version.values()), ignore_index=True)\n",
+    "            if counts_per_version else\n",
+    "            pd.DataFrame(columns=['dataset','method_key','model','runs']))\n",
+    "if not combined.empty:\n",
+    "    combined = (combined.groupby(['dataset','method_key','model'], as_index=False)['runs']\n",
+    "                .max())\n",
+    "\n",
+    "# Add CSVs with split ABAPC implementations + LLM-BFS\n",
+    "csv_counts = []\n",
+    "csv_counts.append(count_csv_abapc_split(CSV_ABAPC))\n",
+    "csv_counts.append(count_csv_llm_bfs(CSV_BFS))\n",
+    "csv_counts = pd.concat(csv_counts, ignore_index=True) if csv_counts else pd.DataFrame(columns=['dataset','method_key','model','runs'])\n",
+    "\n",
+    "all_counts = combined\n",
+    "if not csv_counts.empty:\n",
+    "    all_counts = pd.concat([all_counts, csv_counts], ignore_index=True)\n",
+    "\n",
+    "all_counts = all_counts.sort_values(['dataset','model']).reset_index(drop=True)\n",
+    "# display(all_counts)\n",
+    "\n",
+    "# Pivot view\n",
+    "pivot_all = all_counts.pivot(index='dataset', columns='model', values='runs').fillna(0).astype(int)\n",
+    "# display(pivot_all)\n",
+    "\n",
+    "# Optional incomplete flagging\n",
+    "if expected_n_runs is not None and not all_counts.empty:\n",
+    "    incomplete = all_counts[all_counts['runs'] < int(expected_n_runs)].copy()\n",
+    "    if not incomplete.empty:\n",
+    "        print(f'Incomplete (runs < {expected_n_runs}):')\n",
+    "        # display(incomplete.sort_values(['runs','dataset','model']))\n",
+    "    else:\n",
+    "        print('All dataset/model pairs reached expected_n_runs.')\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1c7fa4ee",
+   "metadata": {},
+   "source": [
+    "## Structure Reconstruction Evaluation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "6b5159c9",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "DAG plotting methods: ['Random', 'FGS', 'NOTEARS-MLP', 'ABAPC (Ours)']\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.plotly.v1+json": {
+       "config": {
+        "plotlyServerURL": "https://plot.ly"
+       },
+       "data": [
+        {
+         "error_y": {
+          "array": {
+           "bdata": "ZmZmZmZm2j+4HoXrUbjWP+F6FK5H4dI/9ihcj8L1zD/A8iVZjL/CP6rx0k1iELg/",
+           "dtype": "f8"
+          },
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#7f7f7f"
+         },
+         "name": "Random",
+         "offsetgroup": "0",
+         "opacity": 0.6,
+         "showlegend": true,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "ZmZmZmZm9j/NzMzMzMz2P0jhehSuR/U/UrgehetR+T99sOMWSn34P7raiv1l9/w/",
+          "dtype": "f8"
+         },
+         "yaxis": "y"
+        },
+        {
+         "error_y": {
+          "array": {
+           "bdata": "FK5H4XoUvj97FK5H4XrEP1VVVVVVVcU/pHA9CtejuD+yGH/lS7K4P+0vuycPC8U/",
+           "dtype": "f8"
+          },
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#b85c00"
+         },
+         "name": "FGS",
+         "offsetgroup": "1",
+         "opacity": 0.6,
+         "showlegend": true,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "j8L1KFyP4j/2KFyPwvXkP9BpA5020PE/exSuR+F69j9rntEEOGv2Pz0K16NwPQJA",
+          "dtype": "f8"
+         },
+         "yaxis": "y"
+        },
+        {
+         "error_y": {
+          "array": {
+           "bdata": "7FG4HoXroT+4HoXrUbjSPwAAAAAAAAAAKVyPwvUoxD8SEhISEhKyP/p+arx0k7g/",
+           "dtype": "f8"
+          },
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#0085CA"
+         },
+         "name": "NOTEARS-MLP",
+         "offsetgroup": "2",
+         "opacity": 0.6,
+         "showlegend": true,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "16NwPQrX7z/2KFyPwvXgPwAAAAAAAPA/uB6F61G47D+QKcNc9o/pP8RCrWneceo/",
+          "dtype": "f8"
+         },
+         "yaxis": "y"
+        },
+        {
+         "error_y": {
+          "array": {
+           "bdata": "hetRuB6F0z9xPQrXo3C9P1G4HoXrUcg/16NwPQrXwz99sOMWSn3AP5zEILByaLE/",
+           "dtype": "f8"
+          },
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#bcbd22"
+         },
+         "name": "ABAPC (Ours)",
+         "offsetgroup": "3",
+         "opacity": 0.6,
+         "showlegend": true,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "9ihcj8L14D8pXI/C9SisPzfQaQOdNuA/7FG4HoXr4z+9VvCJI73WP8IXJlMFo8I/",
+          "dtype": "f8"
+         },
+         "yaxis": "y"
+        },
+        {
+         "marker": {
+          "color": "white"
+         },
+         "name": "",
+         "offsetgroup": "4",
+         "opacity": 1,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "dtype": "f8"
+         }
+        },
+        {
+         "error_y": {
+          "array": [
+           0.16,
+           0.1,
+           0.14,
+           0.08,
+           0.08,
+           0.04
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#7f7f7f"
+         },
+         "name": "Random",
+         "offsetgroup": "5",
+         "opacity": 0.6,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.36,
+          0.29,
+          0.28,
+          0.19,
+          0.17,
+          0.08
+         ],
+         "yaxis": "y2"
+        },
+        {
+         "error_y": {
+          "array": [
+           0.1,
+           0.03,
+           0.1,
+           0.04,
+           0.03,
+           0.05
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#b85c00"
+         },
+         "name": "FGS",
+         "offsetgroup": "6",
+         "opacity": 0.6,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.43,
+          0.47,
+          0.27,
+          0.25,
+          0.14,
+          0.14
+         ],
+         "yaxis": "y2"
+        },
+        {
+         "error_y": {
+          "array": [
+           null,
+           0.27,
+           null,
+           0.15,
+           0.1,
+           0.08
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#0085CA"
+         },
+         "name": "NOTEARS-MLP",
+         "offsetgroup": "7",
+         "opacity": 0.6,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.4,
+          0.5,
+          null,
+          0.3,
+          0.3,
+          0.4
+         ],
+         "yaxis": "y2"
+        },
+        {
+         "error_y": {
+          "array": [
+           0.21,
+           0.05,
+           0.18,
+           0.15,
+           0.13,
+           0.06
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#bcbd22"
+         },
+         "name": "ABAPC (Ours)",
+         "offsetgroup": "8",
+         "opacity": 0.6,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.61,
+          0.98,
+          0.55,
+          0.49,
+          0.66,
+          0.86
+         ],
+         "yaxis": "y2"
+        }
+       ],
+       "layout": {
+        "annotations": [
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "         NSHD         ",
+          "x": 0.043750000000000004,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "           F1           ",
+          "x": 0.12291666666666667,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "         NSHD         ",
+          "x": 0.21041666666666664,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "           F1           ",
+          "x": 0.2895833333333333,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "         NSHD         ",
+          "x": 0.3770833333333333,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "           F1           ",
+          "x": 0.45625,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "         NSHD         ",
+          "x": 0.54375,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "           F1           ",
+          "x": 0.6229166666666667,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "         NSHD         ",
+          "x": 0.7104166666666666,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "           F1           ",
+          "x": 0.7895833333333332,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "         NSHD         ",
+          "x": 0.8770833333333332,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "           F1           ",
+          "x": 0.9562499999999999,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         }
+        ],
+        "bargap": 0.08,
+        "bargroupgap": 0.05,
+        "barmode": "group",
+        "font": {
+         "color": "black",
+         "family": "Serif",
+         "size": 23
+        },
+        "height": 700,
+        "hovermode": "x unified",
+        "legend": {
+         "orientation": "h",
+         "x": 0.5,
+         "xanchor": "center",
+         "y": 1.23,
+         "yanchor": "top"
+        },
+        "margin": {
+         "b": 70,
+         "l": 40,
+         "r": 40,
+         "t": 80
+        },
+        "shapes": [
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.0075000000000000015,
+          "x1": 0.08,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.08666666666666667,
+          "x1": 0.15916666666666668,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.17416666666666664,
+          "x1": 0.24666666666666665,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.2533333333333333,
+          "x1": 0.3258333333333333,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.3408333333333333,
+          "x1": 0.41333333333333333,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.42,
+          "x1": 0.4925,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.5075,
+          "x1": 0.58,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.5866666666666667,
+          "x1": 0.6591666666666667,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.6741666666666666,
+          "x1": 0.7466666666666666,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.7533333333333332,
+          "x1": 0.8258333333333332,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.8408333333333332,
+          "x1": 0.9133333333333332,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.9199999999999999,
+          "x1": 0.9924999999999999,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         }
+        ],
+        "template": {
+         "data": {
+          "bar": [
+           {
+            "error_x": {
+             "color": "#2a3f5f"
+            },
+            "error_y": {
+             "color": "#2a3f5f"
+            },
+            "marker": {
+             "line": {
+              "color": "white",
+              "width": 0.5
+             },
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "bar"
+           }
+          ],
+          "barpolar": [
+           {
+            "marker": {
+             "line": {
+              "color": "white",
+              "width": 0.5
+             },
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "barpolar"
+           }
+          ],
+          "carpet": [
+           {
+            "aaxis": {
+             "endlinecolor": "#2a3f5f",
+             "gridcolor": "#C8D4E3",
+             "linecolor": "#C8D4E3",
+             "minorgridcolor": "#C8D4E3",
+             "startlinecolor": "#2a3f5f"
+            },
+            "baxis": {
+             "endlinecolor": "#2a3f5f",
+             "gridcolor": "#C8D4E3",
+             "linecolor": "#C8D4E3",
+             "minorgridcolor": "#C8D4E3",
+             "startlinecolor": "#2a3f5f"
+            },
+            "type": "carpet"
+           }
+          ],
+          "choropleth": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "choropleth"
+           }
+          ],
+          "contour": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "contour"
+           }
+          ],
+          "contourcarpet": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "contourcarpet"
+           }
+          ],
+          "heatmap": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "heatmap"
+           }
+          ],
+          "histogram": [
+           {
+            "marker": {
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "histogram"
+           }
+          ],
+          "histogram2d": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "histogram2d"
+           }
+          ],
+          "histogram2dcontour": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "histogram2dcontour"
+           }
+          ],
+          "mesh3d": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "mesh3d"
+           }
+          ],
+          "parcoords": [
+           {
+            "line": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "parcoords"
+           }
+          ],
+          "pie": [
+           {
+            "automargin": true,
+            "type": "pie"
+           }
+          ],
+          "scatter": [
+           {
+            "fillpattern": {
+             "fillmode": "overlay",
+             "size": 10,
+             "solidity": 0.2
+            },
+            "type": "scatter"
+           }
+          ],
+          "scatter3d": [
+           {
+            "line": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatter3d"
+           }
+          ],
+          "scattercarpet": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattercarpet"
+           }
+          ],
+          "scattergeo": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattergeo"
+           }
+          ],
+          "scattergl": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattergl"
+           }
+          ],
+          "scattermap": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattermap"
+           }
+          ],
+          "scattermapbox": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattermapbox"
+           }
+          ],
+          "scatterpolar": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterpolar"
+           }
+          ],
+          "scatterpolargl": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterpolargl"
+           }
+          ],
+          "scatterternary": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterternary"
+           }
+          ],
+          "surface": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "surface"
+           }
+          ],
+          "table": [
+           {
+            "cells": {
+             "fill": {
+              "color": "#EBF0F8"
+             },
+             "line": {
+              "color": "white"
+             }
+            },
+            "header": {
+             "fill": {
+              "color": "#C8D4E3"
+             },
+             "line": {
+              "color": "white"
+             }
+            },
+            "type": "table"
+           }
+          ]
+         },
+         "layout": {
+          "annotationdefaults": {
+           "arrowcolor": "#2a3f5f",
+           "arrowhead": 0,
+           "arrowwidth": 1
+          },
+          "autotypenumbers": "strict",
+          "coloraxis": {
+           "colorbar": {
+            "outlinewidth": 0,
+            "ticks": ""
+           }
+          },
+          "colorscale": {
+           "diverging": [
+            [
+             0,
+             "#8e0152"
+            ],
+            [
+             0.1,
+             "#c51b7d"
+            ],
+            [
+             0.2,
+             "#de77ae"
+            ],
+            [
+             0.3,
+             "#f1b6da"
+            ],
+            [
+             0.4,
+             "#fde0ef"
+            ],
+            [
+             0.5,
+             "#f7f7f7"
+            ],
+            [
+             0.6,
+             "#e6f5d0"
+            ],
+            [
+             0.7,
+             "#b8e186"
+            ],
+            [
+             0.8,
+             "#7fbc41"
+            ],
+            [
+             0.9,
+             "#4d9221"
+            ],
+            [
+             1,
+             "#276419"
+            ]
+           ],
+           "sequential": [
+            [
+             0,
+             "#0d0887"
+            ],
+            [
+             0.1111111111111111,
+             "#46039f"
+            ],
+            [
+             0.2222222222222222,
+             "#7201a8"
+            ],
+            [
+             0.3333333333333333,
+             "#9c179e"
+            ],
+            [
+             0.4444444444444444,
+             "#bd3786"
+            ],
+            [
+             0.5555555555555556,
+             "#d8576b"
+            ],
+            [
+             0.6666666666666666,
+             "#ed7953"
+            ],
+            [
+             0.7777777777777778,
+             "#fb9f3a"
+            ],
+            [
+             0.8888888888888888,
+             "#fdca26"
+            ],
+            [
+             1,
+             "#f0f921"
+            ]
+           ],
+           "sequentialminus": [
+            [
+             0,
+             "#0d0887"
+            ],
+            [
+             0.1111111111111111,
+             "#46039f"
+            ],
+            [
+             0.2222222222222222,
+             "#7201a8"
+            ],
+            [
+             0.3333333333333333,
+             "#9c179e"
+            ],
+            [
+             0.4444444444444444,
+             "#bd3786"
+            ],
+            [
+             0.5555555555555556,
+             "#d8576b"
+            ],
+            [
+             0.6666666666666666,
+             "#ed7953"
+            ],
+            [
+             0.7777777777777778,
+             "#fb9f3a"
+            ],
+            [
+             0.8888888888888888,
+             "#fdca26"
+            ],
+            [
+             1,
+             "#f0f921"
+            ]
+           ]
+          },
+          "colorway": [
+           "#636efa",
+           "#EF553B",
+           "#00cc96",
+           "#ab63fa",
+           "#FFA15A",
+           "#19d3f3",
+           "#FF6692",
+           "#B6E880",
+           "#FF97FF",
+           "#FECB52"
+          ],
+          "font": {
+           "color": "#2a3f5f"
+          },
+          "geo": {
+           "bgcolor": "white",
+           "lakecolor": "white",
+           "landcolor": "white",
+           "showlakes": true,
+           "showland": true,
+           "subunitcolor": "#C8D4E3"
+          },
+          "hoverlabel": {
+           "align": "left"
+          },
+          "hovermode": "closest",
+          "mapbox": {
+           "style": "light"
+          },
+          "paper_bgcolor": "white",
+          "plot_bgcolor": "white",
+          "polar": {
+           "angularaxis": {
+            "gridcolor": "#EBF0F8",
+            "linecolor": "#EBF0F8",
+            "ticks": ""
+           },
+           "bgcolor": "white",
+           "radialaxis": {
+            "gridcolor": "#EBF0F8",
+            "linecolor": "#EBF0F8",
+            "ticks": ""
+           }
+          },
+          "scene": {
+           "xaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           },
+           "yaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           },
+           "zaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           }
+          },
+          "shapedefaults": {
+           "line": {
+            "color": "#2a3f5f"
+           }
+          },
+          "ternary": {
+           "aaxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           },
+           "baxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           },
+           "bgcolor": "white",
+           "caxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           }
+          },
+          "title": {
+           "x": 0.05
+          },
+          "xaxis": {
+           "automargin": true,
+           "gridcolor": "#EBF0F8",
+           "linecolor": "#EBF0F8",
+           "ticks": "",
+           "title": {
+            "standoff": 15
+           },
+           "zerolinecolor": "#EBF0F8",
+           "zerolinewidth": 2
+          },
+          "yaxis": {
+           "automargin": true,
+           "gridcolor": "#EBF0F8",
+           "linecolor": "#EBF0F8",
+           "ticks": "",
+           "title": {
+            "standoff": 15
+           },
+           "zerolinecolor": "#EBF0F8",
+           "zerolinewidth": 2
+          }
+         }
+        },
+        "width": 1600,
+        "xaxis": {
+         "anchor": "y",
+         "domain": [
+          0,
+          0.94
+         ]
+        },
+        "yaxis": {
+         "anchor": "x",
+         "domain": [
+          0,
+          1
+         ],
+         "range": [
+          0,
+          2.6
+         ],
+         "title": {
+          "font": {
+           "size": 23
+          },
+          "text": "Normalised SHD"
+         }
+        },
+        "yaxis2": {
+         "anchor": "x",
+         "overlaying": "y",
+         "scaleanchor": 0,
+         "showgrid": false,
+         "showline": false,
+         "showticklabels": true,
+         "side": "right",
+         "title": {
+          "font": {
+           "size": 23
+          },
+          "text": "F1"
+         },
+         "zeroline": true
+        }
+       }
+      }
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.plotly.v1+json": {
+       "config": {
+        "plotlyServerURL": "https://plot.ly"
+       },
+       "data": [
+        {
+         "error_y": {
+          "array": {
+           "bdata": "mpmZmZmZ8T9mZmZmZmbsPylcj8L1KPA/w/UoXI/C7z8Z5rJ/TBnWPzJ3LSEf9Ow/",
+           "dtype": "f8"
+          },
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#7f7f7f"
+         },
+         "name": "Random",
+         "opacity": 0.6,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "hetRuB6FBkAfhetRuB4FQGPJL5b8YgdAXI/C9ShcDkC4t7e3t7cHQLaEfNCzWShA",
+          "dtype": "f8"
+         }
+        },
+        {
+         "error_y": {
+          "array": {
+           "bdata": "FK5H4XoU3j+4HoXrUbiuP6HTBjptoOM/PQrXo3A91j/9/Pz8/PzMP2iR7Xw/NfI/",
+           "dtype": "f8"
+          },
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#b85c00"
+         },
+         "name": "FGS",
+         "opacity": 0.6,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "j8L1KFyPBkDhehSuR+EDQAOdNtBpAwNAFK5H4XoUE0Dr6urq6uoGQCPb+X5qvCVA",
+          "dtype": "f8"
+         }
+        },
+        {
+         "error_y": {
+          "array": {
+           "bdata": "16NwPQrXwz+F61G4HoX1PwAAAAAAAAAAAAAAAAAA8D/jSK8VfOLYP33Qs1n1ufI/",
+           "dtype": "f8"
+          },
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#0085CA"
+         },
+         "name": "NOTEARS-MLP",
+         "opacity": 0.6,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "9ihcj8L1A0CF61G4HoUDQKuqqqqqqgZAAAAAAAAAEECkcD0K16MIQKpgVFInoCFA",
+          "dtype": "f8"
+         }
+        },
+        {
+         "error_y": {
+          "array": {
+           "bdata": "cT0K16Nw9D8AAAAAAAAAAFG4HoXrUeg/FK5H4XoU7D/YcQulPtjhP5XUCWgibPA/",
+           "dtype": "f8"
+          },
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#bcbd22"
+         },
+         "name": "ABAPC (Ours)",
+         "opacity": 0.6,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "PQrXo3A9AUAAAAAAAAAAAFnyiyW/WAJAuB6F61E4CkByC6U+2HH7P3STGARWDgVA",
+          "dtype": "f8"
+         }
+        }
+       ],
+       "layout": {
+        "bargap": 0.15,
+        "bargroupgap": 0.1,
+        "barmode": "group",
+        "font": {
+         "color": "black",
+         "family": "Serif",
+         "size": 23
+        },
+        "height": 700,
+        "hovermode": "x unified",
+        "legend": {
+         "orientation": "h",
+         "x": 0.5,
+         "xanchor": "center",
+         "y": 1,
+         "yanchor": "top"
+        },
+        "margin": {
+         "b": 80,
+         "l": 40,
+         "r": 40,
+         "t": 20
+        },
+        "template": {
+         "data": {
+          "bar": [
+           {
+            "error_x": {
+             "color": "#2a3f5f"
+            },
+            "error_y": {
+             "color": "#2a3f5f"
+            },
+            "marker": {
+             "line": {
+              "color": "white",
+              "width": 0.5
+             },
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "bar"
+           }
+          ],
+          "barpolar": [
+           {
+            "marker": {
+             "line": {
+              "color": "white",
+              "width": 0.5
+             },
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "barpolar"
+           }
+          ],
+          "carpet": [
+           {
+            "aaxis": {
+             "endlinecolor": "#2a3f5f",
+             "gridcolor": "#C8D4E3",
+             "linecolor": "#C8D4E3",
+             "minorgridcolor": "#C8D4E3",
+             "startlinecolor": "#2a3f5f"
+            },
+            "baxis": {
+             "endlinecolor": "#2a3f5f",
+             "gridcolor": "#C8D4E3",
+             "linecolor": "#C8D4E3",
+             "minorgridcolor": "#C8D4E3",
+             "startlinecolor": "#2a3f5f"
+            },
+            "type": "carpet"
+           }
+          ],
+          "choropleth": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "choropleth"
+           }
+          ],
+          "contour": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "contour"
+           }
+          ],
+          "contourcarpet": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "contourcarpet"
+           }
+          ],
+          "heatmap": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "heatmap"
+           }
+          ],
+          "histogram": [
+           {
+            "marker": {
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "histogram"
+           }
+          ],
+          "histogram2d": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "histogram2d"
+           }
+          ],
+          "histogram2dcontour": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "histogram2dcontour"
+           }
+          ],
+          "mesh3d": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "mesh3d"
+           }
+          ],
+          "parcoords": [
+           {
+            "line": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "parcoords"
+           }
+          ],
+          "pie": [
+           {
+            "automargin": true,
+            "type": "pie"
+           }
+          ],
+          "scatter": [
+           {
+            "fillpattern": {
+             "fillmode": "overlay",
+             "size": 10,
+             "solidity": 0.2
+            },
+            "type": "scatter"
+           }
+          ],
+          "scatter3d": [
+           {
+            "line": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatter3d"
+           }
+          ],
+          "scattercarpet": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattercarpet"
+           }
+          ],
+          "scattergeo": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattergeo"
+           }
+          ],
+          "scattergl": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattergl"
+           }
+          ],
+          "scattermap": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattermap"
+           }
+          ],
+          "scattermapbox": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattermapbox"
+           }
+          ],
+          "scatterpolar": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterpolar"
+           }
+          ],
+          "scatterpolargl": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterpolargl"
+           }
+          ],
+          "scatterternary": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterternary"
+           }
+          ],
+          "surface": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "surface"
+           }
+          ],
+          "table": [
+           {
+            "cells": {
+             "fill": {
+              "color": "#EBF0F8"
+             },
+             "line": {
+              "color": "white"
+             }
+            },
+            "header": {
+             "fill": {
+              "color": "#C8D4E3"
+             },
+             "line": {
+              "color": "white"
+             }
+            },
+            "type": "table"
+           }
+          ]
+         },
+         "layout": {
+          "annotationdefaults": {
+           "arrowcolor": "#2a3f5f",
+           "arrowhead": 0,
+           "arrowwidth": 1
+          },
+          "autotypenumbers": "strict",
+          "coloraxis": {
+           "colorbar": {
+            "outlinewidth": 0,
+            "ticks": ""
+           }
+          },
+          "colorscale": {
+           "diverging": [
+            [
+             0,
+             "#8e0152"
+            ],
+            [
+             0.1,
+             "#c51b7d"
+            ],
+            [
+             0.2,
+             "#de77ae"
+            ],
+            [
+             0.3,
+             "#f1b6da"
+            ],
+            [
+             0.4,
+             "#fde0ef"
+            ],
+            [
+             0.5,
+             "#f7f7f7"
+            ],
+            [
+             0.6,
+             "#e6f5d0"
+            ],
+            [
+             0.7,
+             "#b8e186"
+            ],
+            [
+             0.8,
+             "#7fbc41"
+            ],
+            [
+             0.9,
+             "#4d9221"
+            ],
+            [
+             1,
+             "#276419"
+            ]
+           ],
+           "sequential": [
+            [
+             0,
+             "#0d0887"
+            ],
+            [
+             0.1111111111111111,
+             "#46039f"
+            ],
+            [
+             0.2222222222222222,
+             "#7201a8"
+            ],
+            [
+             0.3333333333333333,
+             "#9c179e"
+            ],
+            [
+             0.4444444444444444,
+             "#bd3786"
+            ],
+            [
+             0.5555555555555556,
+             "#d8576b"
+            ],
+            [
+             0.6666666666666666,
+             "#ed7953"
+            ],
+            [
+             0.7777777777777778,
+             "#fb9f3a"
+            ],
+            [
+             0.8888888888888888,
+             "#fdca26"
+            ],
+            [
+             1,
+             "#f0f921"
+            ]
+           ],
+           "sequentialminus": [
+            [
+             0,
+             "#0d0887"
+            ],
+            [
+             0.1111111111111111,
+             "#46039f"
+            ],
+            [
+             0.2222222222222222,
+             "#7201a8"
+            ],
+            [
+             0.3333333333333333,
+             "#9c179e"
+            ],
+            [
+             0.4444444444444444,
+             "#bd3786"
+            ],
+            [
+             0.5555555555555556,
+             "#d8576b"
+            ],
+            [
+             0.6666666666666666,
+             "#ed7953"
+            ],
+            [
+             0.7777777777777778,
+             "#fb9f3a"
+            ],
+            [
+             0.8888888888888888,
+             "#fdca26"
+            ],
+            [
+             1,
+             "#f0f921"
+            ]
+           ]
+          },
+          "colorway": [
+           "#636efa",
+           "#EF553B",
+           "#00cc96",
+           "#ab63fa",
+           "#FFA15A",
+           "#19d3f3",
+           "#FF6692",
+           "#B6E880",
+           "#FF97FF",
+           "#FECB52"
+          ],
+          "font": {
+           "color": "#2a3f5f"
+          },
+          "geo": {
+           "bgcolor": "white",
+           "lakecolor": "white",
+           "landcolor": "white",
+           "showlakes": true,
+           "showland": true,
+           "subunitcolor": "#C8D4E3"
+          },
+          "hoverlabel": {
+           "align": "left"
+          },
+          "hovermode": "closest",
+          "mapbox": {
+           "style": "light"
+          },
+          "paper_bgcolor": "white",
+          "plot_bgcolor": "white",
+          "polar": {
+           "angularaxis": {
+            "gridcolor": "#EBF0F8",
+            "linecolor": "#EBF0F8",
+            "ticks": ""
+           },
+           "bgcolor": "white",
+           "radialaxis": {
+            "gridcolor": "#EBF0F8",
+            "linecolor": "#EBF0F8",
+            "ticks": ""
+           }
+          },
+          "scene": {
+           "xaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           },
+           "yaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           },
+           "zaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           }
+          },
+          "shapedefaults": {
+           "line": {
+            "color": "#2a3f5f"
+           }
+          },
+          "ternary": {
+           "aaxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           },
+           "baxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           },
+           "bgcolor": "white",
+           "caxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           }
+          },
+          "title": {
+           "x": 0.05
+          },
+          "xaxis": {
+           "automargin": true,
+           "gridcolor": "#EBF0F8",
+           "linecolor": "#EBF0F8",
+           "ticks": "",
+           "title": {
+            "standoff": 15
+           },
+           "zerolinecolor": "#EBF0F8",
+           "zerolinewidth": 2
+          },
+          "yaxis": {
+           "automargin": true,
+           "gridcolor": "#EBF0F8",
+           "linecolor": "#EBF0F8",
+           "ticks": "",
+           "title": {
+            "standoff": 15
+           },
+           "zerolinecolor": "#EBF0F8",
+           "zerolinewidth": 2
+          }
+         }
+        },
+        "width": 1600,
+        "yaxis": {
+         "title": {
+          "font": {
+           "size": 23
+          },
+          "text": "Normalised SID = SID / Number of Edges in DAG"
+         }
+        }
+       }
+      }
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.plotly.v1+json": {
+       "config": {
+        "plotlyServerURL": "https://plot.ly"
+       },
+       "data": [
+        {
+         "error_y": {
+          "array": [
+           0.22,
+           0.16,
+           0.16,
+           0.11,
+           0.08,
+           0.04
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#7f7f7f"
+         },
+         "name": "Random",
+         "offsetgroup": "0",
+         "opacity": 0.6,
+         "showlegend": true,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.2,
+          0.17,
+          0.24,
+          0.14,
+          0.16,
+          0.07
+         ],
+         "yaxis": "y"
+        },
+        {
+         "error_y": {
+          "array": [
+           0.08,
+           0.06,
+           0.16,
+           0.05,
+           0.04,
+           0.04
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#b85c00"
+         },
+         "name": "FGS",
+         "offsetgroup": "1",
+         "opacity": 0.6,
+         "showlegend": true,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.45,
+          0.44,
+          0.4,
+          0.25,
+          0.14,
+          0.11
+         ],
+         "yaxis": "y"
+        },
+        {
+         "error_y": {
+          "array": [
+           0.5,
+           0.27,
+           null,
+           0.2,
+           0.19,
+           0.1
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#0085CA"
+         },
+         "name": "NOTEARS-MLP",
+         "offsetgroup": "2",
+         "opacity": 0.6,
+         "showlegend": true,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.25,
+          0.5,
+          null,
+          0.31,
+          0.6,
+          0.45
+         ],
+         "yaxis": "y"
+        },
+        {
+         "error_y": {
+          "array": [
+           0.3,
+           0.09,
+           0.19,
+           0.21,
+           0.13,
+           0.06
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#bcbd22"
+         },
+         "name": "ABAPC (Ours)",
+         "offsetgroup": "3",
+         "opacity": 0.6,
+         "showlegend": true,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.52,
+          0.96,
+          0.61,
+          0.64,
+          0.67,
+          0.86
+         ],
+         "yaxis": "y"
+        },
+        {
+         "marker": {
+          "color": "white"
+         },
+         "name": "",
+         "offsetgroup": "4",
+         "opacity": 1,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": {
+          "bdata": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "dtype": "f8"
+         }
+        },
+        {
+         "error_y": {
+          "array": [
+           0.22,
+           0.16,
+           0.16,
+           0.11,
+           0.08,
+           0.04
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#7f7f7f"
+         },
+         "name": "Random",
+         "offsetgroup": "5",
+         "opacity": 0.6,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.2,
+          0.17,
+          0.24,
+          0.14,
+          0.16,
+          0.07
+         ],
+         "yaxis": "y2"
+        },
+        {
+         "error_y": {
+          "array": [
+           0.12,
+           0,
+           0.08,
+           0.03,
+           0.04,
+           0.07
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#b85c00"
+         },
+         "name": "FGS",
+         "offsetgroup": "6",
+         "opacity": 0.6,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.42,
+          0.5,
+          0.21,
+          0.24,
+          0.13,
+          0.19
+         ],
+         "yaxis": "y2"
+        },
+        {
+         "error_y": {
+          "array": [
+           0.04,
+           0.28,
+           0,
+           0.16,
+           0.07,
+           0.08
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#0085CA"
+         },
+         "name": "NOTEARS-MLP",
+         "offsetgroup": "7",
+         "opacity": 0.6,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0,
+          0.5,
+          0,
+          0.23,
+          0.2,
+          0.37
+         ],
+         "yaxis": "y2"
+        },
+        {
+         "error_y": {
+          "array": [
+           0.3,
+           0,
+           0.18,
+           0.14,
+           0.13,
+           0.07
+          ],
+          "type": "data",
+          "visible": true
+         },
+         "marker": {
+          "color": "#bcbd22"
+         },
+         "name": "ABAPC (Ours)",
+         "offsetgroup": "8",
+         "opacity": 0.6,
+         "showlegend": false,
+         "type": "bar",
+         "x": [
+          "CANCER<br> |V|=5, |E|=4",
+          "EARTHQUAKE<br> |V|=5, |E|=4",
+          "SURVEY<br> |V|=6, |E|=6",
+          "ASIA<br> |V|=8, |E|=8",
+          "SACHS<br> |V|=11, |E|=17",
+          "CHILD<br> |V|=20, |E|=25"
+         ],
+         "y": [
+          0.5,
+          1,
+          0.51,
+          0.39,
+          0.65,
+          0.86
+         ],
+         "yaxis": "y2"
+        }
+       ],
+       "layout": {
+        "annotations": [
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "      Precision      ",
+          "x": 0.04375,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "        Recall        ",
+          "x": 0.12291666666666666,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "      Precision      ",
+          "x": 0.21041666666666664,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "        Recall        ",
+          "x": 0.2895833333333333,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "      Precision      ",
+          "x": 0.3770833333333333,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "        Recall        ",
+          "x": 0.45624999999999993,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "      Precision      ",
+          "x": 0.54375,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "        Recall        ",
+          "x": 0.6229166666666666,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "      Precision      ",
+          "x": 0.7104166666666667,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "        Recall        ",
+          "x": 0.7895833333333333,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "      Precision      ",
+          "x": 0.8770833333333332,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         },
+         {
+          "font": {
+           "color": "black",
+           "size": 23
+          },
+          "showarrow": false,
+          "text": "        Recall        ",
+          "x": 0.9562499999999998,
+          "xanchor": "center",
+          "xref": "x domain",
+          "y": 1.07,
+          "yanchor": "middle",
+          "yref": "y domain"
+         }
+        ],
+        "bargap": 0.08,
+        "bargroupgap": 0.05,
+        "barmode": "group",
+        "font": {
+         "color": "black",
+         "family": "Serif",
+         "size": 23
+        },
+        "height": 700,
+        "hovermode": "x unified",
+        "legend": {
+         "orientation": "h",
+         "x": 0.5,
+         "xanchor": "center",
+         "y": 1.23,
+         "yanchor": "top"
+        },
+        "margin": {
+         "b": 70,
+         "l": 40,
+         "r": 40,
+         "t": 80
+        },
+        "shapes": [
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0,
+          "x1": 0.09083333333333334,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.07583333333333332,
+          "x1": 0.16999999999999998,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.16333333333333333,
+          "x1": 0.2575,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.24249999999999997,
+          "x1": 0.33666666666666667,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.32999999999999996,
+          "x1": 0.4241666666666667,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.4091666666666666,
+          "x1": 0.5033333333333333,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.4966666666666666,
+          "x1": 0.5908333333333333,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.5758333333333332,
+          "x1": 0.6699999999999999,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.6633333333333333,
+          "x1": 0.7575000000000001,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.7424999999999999,
+          "x1": 0.8366666666666667,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.8299999999999998,
+          "x1": 0.9241666666666666,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         },
+         {
+          "fillcolor": "#E5ECF6",
+          "layer": "below",
+          "line": {
+           "color": "#E5ECF6",
+           "width": 2
+          },
+          "type": "rect",
+          "x0": 0.9091666666666665,
+          "x1": 1,
+          "xref": "x domain",
+          "y0": 1.04,
+          "y1": 1.1,
+          "yref": "y domain"
+         }
+        ],
+        "template": {
+         "data": {
+          "bar": [
+           {
+            "error_x": {
+             "color": "#2a3f5f"
+            },
+            "error_y": {
+             "color": "#2a3f5f"
+            },
+            "marker": {
+             "line": {
+              "color": "white",
+              "width": 0.5
+             },
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "bar"
+           }
+          ],
+          "barpolar": [
+           {
+            "marker": {
+             "line": {
+              "color": "white",
+              "width": 0.5
+             },
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "barpolar"
+           }
+          ],
+          "carpet": [
+           {
+            "aaxis": {
+             "endlinecolor": "#2a3f5f",
+             "gridcolor": "#C8D4E3",
+             "linecolor": "#C8D4E3",
+             "minorgridcolor": "#C8D4E3",
+             "startlinecolor": "#2a3f5f"
+            },
+            "baxis": {
+             "endlinecolor": "#2a3f5f",
+             "gridcolor": "#C8D4E3",
+             "linecolor": "#C8D4E3",
+             "minorgridcolor": "#C8D4E3",
+             "startlinecolor": "#2a3f5f"
+            },
+            "type": "carpet"
+           }
+          ],
+          "choropleth": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "choropleth"
+           }
+          ],
+          "contour": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "contour"
+           }
+          ],
+          "contourcarpet": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "contourcarpet"
+           }
+          ],
+          "heatmap": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "heatmap"
+           }
+          ],
+          "histogram": [
+           {
+            "marker": {
+             "pattern": {
+              "fillmode": "overlay",
+              "size": 10,
+              "solidity": 0.2
+             }
+            },
+            "type": "histogram"
+           }
+          ],
+          "histogram2d": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "histogram2d"
+           }
+          ],
+          "histogram2dcontour": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "histogram2dcontour"
+           }
+          ],
+          "mesh3d": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "type": "mesh3d"
+           }
+          ],
+          "parcoords": [
+           {
+            "line": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "parcoords"
+           }
+          ],
+          "pie": [
+           {
+            "automargin": true,
+            "type": "pie"
+           }
+          ],
+          "scatter": [
+           {
+            "fillpattern": {
+             "fillmode": "overlay",
+             "size": 10,
+             "solidity": 0.2
+            },
+            "type": "scatter"
+           }
+          ],
+          "scatter3d": [
+           {
+            "line": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatter3d"
+           }
+          ],
+          "scattercarpet": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattercarpet"
+           }
+          ],
+          "scattergeo": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattergeo"
+           }
+          ],
+          "scattergl": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattergl"
+           }
+          ],
+          "scattermap": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattermap"
+           }
+          ],
+          "scattermapbox": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scattermapbox"
+           }
+          ],
+          "scatterpolar": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterpolar"
+           }
+          ],
+          "scatterpolargl": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterpolargl"
+           }
+          ],
+          "scatterternary": [
+           {
+            "marker": {
+             "colorbar": {
+              "outlinewidth": 0,
+              "ticks": ""
+             }
+            },
+            "type": "scatterternary"
+           }
+          ],
+          "surface": [
+           {
+            "colorbar": {
+             "outlinewidth": 0,
+             "ticks": ""
+            },
+            "colorscale": [
+             [
+              0,
+              "#0d0887"
+             ],
+             [
+              0.1111111111111111,
+              "#46039f"
+             ],
+             [
+              0.2222222222222222,
+              "#7201a8"
+             ],
+             [
+              0.3333333333333333,
+              "#9c179e"
+             ],
+             [
+              0.4444444444444444,
+              "#bd3786"
+             ],
+             [
+              0.5555555555555556,
+              "#d8576b"
+             ],
+             [
+              0.6666666666666666,
+              "#ed7953"
+             ],
+             [
+              0.7777777777777778,
+              "#fb9f3a"
+             ],
+             [
+              0.8888888888888888,
+              "#fdca26"
+             ],
+             [
+              1,
+              "#f0f921"
+             ]
+            ],
+            "type": "surface"
+           }
+          ],
+          "table": [
+           {
+            "cells": {
+             "fill": {
+              "color": "#EBF0F8"
+             },
+             "line": {
+              "color": "white"
+             }
+            },
+            "header": {
+             "fill": {
+              "color": "#C8D4E3"
+             },
+             "line": {
+              "color": "white"
+             }
+            },
+            "type": "table"
+           }
+          ]
+         },
+         "layout": {
+          "annotationdefaults": {
+           "arrowcolor": "#2a3f5f",
+           "arrowhead": 0,
+           "arrowwidth": 1
+          },
+          "autotypenumbers": "strict",
+          "coloraxis": {
+           "colorbar": {
+            "outlinewidth": 0,
+            "ticks": ""
+           }
+          },
+          "colorscale": {
+           "diverging": [
+            [
+             0,
+             "#8e0152"
+            ],
+            [
+             0.1,
+             "#c51b7d"
+            ],
+            [
+             0.2,
+             "#de77ae"
+            ],
+            [
+             0.3,
+             "#f1b6da"
+            ],
+            [
+             0.4,
+             "#fde0ef"
+            ],
+            [
+             0.5,
+             "#f7f7f7"
+            ],
+            [
+             0.6,
+             "#e6f5d0"
+            ],
+            [
+             0.7,
+             "#b8e186"
+            ],
+            [
+             0.8,
+             "#7fbc41"
+            ],
+            [
+             0.9,
+             "#4d9221"
+            ],
+            [
+             1,
+             "#276419"
+            ]
+           ],
+           "sequential": [
+            [
+             0,
+             "#0d0887"
+            ],
+            [
+             0.1111111111111111,
+             "#46039f"
+            ],
+            [
+             0.2222222222222222,
+             "#7201a8"
+            ],
+            [
+             0.3333333333333333,
+             "#9c179e"
+            ],
+            [
+             0.4444444444444444,
+             "#bd3786"
+            ],
+            [
+             0.5555555555555556,
+             "#d8576b"
+            ],
+            [
+             0.6666666666666666,
+             "#ed7953"
+            ],
+            [
+             0.7777777777777778,
+             "#fb9f3a"
+            ],
+            [
+             0.8888888888888888,
+             "#fdca26"
+            ],
+            [
+             1,
+             "#f0f921"
+            ]
+           ],
+           "sequentialminus": [
+            [
+             0,
+             "#0d0887"
+            ],
+            [
+             0.1111111111111111,
+             "#46039f"
+            ],
+            [
+             0.2222222222222222,
+             "#7201a8"
+            ],
+            [
+             0.3333333333333333,
+             "#9c179e"
+            ],
+            [
+             0.4444444444444444,
+             "#bd3786"
+            ],
+            [
+             0.5555555555555556,
+             "#d8576b"
+            ],
+            [
+             0.6666666666666666,
+             "#ed7953"
+            ],
+            [
+             0.7777777777777778,
+             "#fb9f3a"
+            ],
+            [
+             0.8888888888888888,
+             "#fdca26"
+            ],
+            [
+             1,
+             "#f0f921"
+            ]
+           ]
+          },
+          "colorway": [
+           "#636efa",
+           "#EF553B",
+           "#00cc96",
+           "#ab63fa",
+           "#FFA15A",
+           "#19d3f3",
+           "#FF6692",
+           "#B6E880",
+           "#FF97FF",
+           "#FECB52"
+          ],
+          "font": {
+           "color": "#2a3f5f"
+          },
+          "geo": {
+           "bgcolor": "white",
+           "lakecolor": "white",
+           "landcolor": "white",
+           "showlakes": true,
+           "showland": true,
+           "subunitcolor": "#C8D4E3"
+          },
+          "hoverlabel": {
+           "align": "left"
+          },
+          "hovermode": "closest",
+          "mapbox": {
+           "style": "light"
+          },
+          "paper_bgcolor": "white",
+          "plot_bgcolor": "white",
+          "polar": {
+           "angularaxis": {
+            "gridcolor": "#EBF0F8",
+            "linecolor": "#EBF0F8",
+            "ticks": ""
+           },
+           "bgcolor": "white",
+           "radialaxis": {
+            "gridcolor": "#EBF0F8",
+            "linecolor": "#EBF0F8",
+            "ticks": ""
+           }
+          },
+          "scene": {
+           "xaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           },
+           "yaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           },
+           "zaxis": {
+            "backgroundcolor": "white",
+            "gridcolor": "#DFE8F3",
+            "gridwidth": 2,
+            "linecolor": "#EBF0F8",
+            "showbackground": true,
+            "ticks": "",
+            "zerolinecolor": "#EBF0F8"
+           }
+          },
+          "shapedefaults": {
+           "line": {
+            "color": "#2a3f5f"
+           }
+          },
+          "ternary": {
+           "aaxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           },
+           "baxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           },
+           "bgcolor": "white",
+           "caxis": {
+            "gridcolor": "#DFE8F3",
+            "linecolor": "#A2B1C6",
+            "ticks": ""
+           }
+          },
+          "title": {
+           "x": 0.05
+          },
+          "xaxis": {
+           "automargin": true,
+           "gridcolor": "#EBF0F8",
+           "linecolor": "#EBF0F8",
+           "ticks": "",
+           "title": {
+            "standoff": 15
+           },
+           "zerolinecolor": "#EBF0F8",
+           "zerolinewidth": 2
+          },
+          "yaxis": {
+           "automargin": true,
+           "gridcolor": "#EBF0F8",
+           "linecolor": "#EBF0F8",
+           "ticks": "",
+           "title": {
+            "standoff": 15
+           },
+           "zerolinecolor": "#EBF0F8",
+           "zerolinewidth": 2
+          }
+         }
+        },
+        "width": 1600,
+        "xaxis": {
+         "anchor": "y",
+         "domain": [
+          0,
+          0.94
+         ]
+        },
+        "yaxis": {
+         "anchor": "x",
+         "domain": [
+          0,
+          1
+         ],
+         "range": [
+          0,
+          1.3
+         ],
+         "title": {
+          "font": {
+           "size": 23
+          },
+          "text": "Precision"
+         }
+        },
+        "yaxis2": {
+         "anchor": "x",
+         "overlaying": "y",
+         "range": [
+          0,
+          1.3
+         ],
+         "scaleanchor": 0,
+         "showgrid": false,
+         "showline": false,
+         "showticklabels": true,
+         "side": "right",
+         "title": {
+          "font": {
+           "size": 23
+          },
+          "text": "Recall"
+         },
+         "zeroline": true
+        }
+       }
+      }
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Plots by dataset (DAG)\n",
+    "if len(dag_all):\n",
+    "    methods = [m for m in default_methods if m in dag_all['model'].unique()]\n",
+    "    print('DAG plotting methods:', methods)\n",
+    "    double_bar_chart_plotly(\n",
+    "        dag_all, ['p_shd','F1'], names_dict, colors_dict, methods,\n",
+    "        save_figs=save_figs, font_size=23, output_name=str(REPO_ROOT / 'results/figs/Fig.bn_dag_SHD_SID.html'),\n",
+    "        debug=False, range_y1=[0,2.6], range_y2=[0,5.6], rect_exp=0.01\n",
+    "    )\n",
+    "    bar_chart_plotly(\n",
+    "        dag_all, 'p_SID', names_dict, colors_dict, methods,\n",
+    "        save_figs=save_figs, font_size=23, output_name=str(REPO_ROOT / 'results/figs/Fig.bn_dag_F1.html'),\n",
+    "        debug=False\n",
+    "    )\n",
+    "    double_bar_chart_plotly(\n",
+    "        dag_all, ['precision','recall'], names_dict, colors_dict, methods,\n",
+    "        save_figs=save_figs, font_size=23, output_name=str(REPO_ROOT / 'results/figs/Fig.bn_dag_prec_rec.html'),\n",
+    "        debug=False\n",
+    "    )\n",
+    "else:\n",
+    "    print('No DAG results found.')\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d6641fb4",
+   "metadata": {},
+   "source": [
+    "## Constraints Evaluation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "51f56479",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# # Re-execute (kernel was reset).\n",
+    "\n",
+    "# import pandas as pd\n",
+    "# import numpy as np\n",
+    "# import matplotlib.pyplot as plt\n",
+    "# import math\n",
+    "# from matplotlib.colors import TwoSlopeNorm, LinearSegmentedColormap\n",
+    "\n",
+    "# INPATH = \"../results/ABAPC-LLM/merged_bnlearn-desc.csv\"\n",
+    "\n",
+    "# def cmap_blue_good_orange_bad():\n",
+    "#     return LinearSegmentedColormap.from_list(\n",
+    "#         \"good_blue_bad_orange\",\n",
+    "#         [(255/255,140/255,0/255), (1,1,1), (0/255,90/255,181/255)],\n",
+    "#         N=256\n",
+    "#     )\n",
+    "\n",
+    "# def row_ci_quality(row):\n",
+    "#     if \"CIT_F1\" in row and pd.notna(row[\"CIT_F1\"]):\n",
+    "#         return row[\"CIT_F1\"]\n",
+    "#     p = row.get(\"CIT_Precision\"); r = row.get(\"CIT_Recall\")\n",
+    "#     if pd.notna(p) and pd.notna(r) and (p+r)>0:\n",
+    "#         return 2*p*r/(p+r)\n",
+    "#     if pd.notna(r): return r\n",
+    "#     if pd.notna(p): return p\n",
+    "#     return np.nan\n",
+    "\n",
+    "# def tie_safe_qbins(series, q=3, right=True):\n",
+    "#     s = pd.to_numeric(series, errors=\"coerce\")\n",
+    "#     ranks = s.rank(method=\"first\")\n",
+    "#     norm = ranks / (ranks.max() if ranks.max() else 1)\n",
+    "#     edges = np.quantile(norm, np.linspace(0,1,q+1))\n",
+    "#     if right:\n",
+    "#         edges[-1] = 1.0\n",
+    "#     labels = [\"Low\",\"Mid\",\"High\"][:q]\n",
+    "#     bins = pd.cut(norm, bins=edges, labels=labels, include_lowest=True, right=right, duplicates=\"drop\")\n",
+    "#     return bins, edges, labels\n",
+    "\n",
+    "# def grid_counts_and_means(df_in, row_labcol, col_labcol, val_col):\n",
+    "#     rows = [\"High\",\"Mid\",\"Low\"]; cols = [\"Low\",\"Mid\",\"High\"]\n",
+    "#     means = np.full((3,3), np.nan); counts = np.zeros((3,3), dtype=int)\n",
+    "#     for i, rlab in enumerate(rows):\n",
+    "#         for j, clab in enumerate(cols):\n",
+    "#             vals = df_in.loc[(df_in[row_labcol]==rlab) & (df_in[col_labcol]==clab), val_col].astype(float)\n",
+    "#             if len(vals)>0:\n",
+    "#                 means[i,j] = float(vals.mean()); counts[i,j] = int(len(vals))\n",
+    "#     return means, counts, rows, cols\n",
+    "\n",
+    "# def plot_agg(means, counts, title_suffix):\n",
+    "#     vmax = np.nanmax(np.abs(means)) if np.any(~np.isnan(means)) else 1.0\n",
+    "#     fig = plt.figure(figsize=(6.8,5.4))\n",
+    "#     ax = fig.add_axes([0.12,0.16,0.66,0.74])\n",
+    "#     im = ax.imshow(means, cmap=cmap_blue_good_orange_bad(), norm=TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax), aspect=\"equal\")\n",
+    "#     ax.set_xticks(range(3)); ax.set_xticklabels([\"Low CI\",\"Mid CI\",\"High CI\"], fontsize=14)\n",
+    "#     ax.set_yticks(range(3)); ax.set_yticklabels([\"High LLM\",\"Mid LLM\",\"Low LLM\"], fontsize=14)\n",
+    "#     ax.set_xlabel(\"Data constraint F1\", fontsize=14)\n",
+    "#     ax.set_ylabel(\"LLM constraint F1\", fontsize=14)\n",
+    "#     for i in range(3):\n",
+    "#         for j in range(3):\n",
+    "#             if not np.isnan(means[i,j]):\n",
+    "#                 ax.text(j,i,f\"{means[i,j]:.3f}\\n(n={counts[i,j]})\", ha=\"center\", va=\"center\", fontsize=14)\n",
+    "#     cax = fig.add_axes([0.82,0.16,0.02,0.74]); cb = fig.colorbar(im, cax=cax); cb.set_label(\"Mean Δ DAG F1\", fontsize=14)\n",
+    "#     # ax.set_title(f\"dag_F1 — {title_suffix}\", fontsize=14)\n",
+    "#     plt.show()\n",
+    "\n",
+    "# def plot_panels(panels, title_suffix):\n",
+    "#     n = len(panels); ncols=3; nrows=math.ceil(n/ncols)\n",
+    "#     fig = plt.figure(figsize=(5.0*ncols+2.2, 4.4*nrows))\n",
+    "#     left, right, top, bottom = 0.05, 0.11, 0.08, 0.10\n",
+    "#     wspace, hspace = 0.06, 0.09\n",
+    "#     grid_w = 1 - left - right; grid_h = 1 - top - bottom\n",
+    "#     cell_w = (grid_w - (ncols-1)*wspace)/ncols; cell_h = (grid_h - (nrows-1)*hspace)/nrows\n",
+    "\n",
+    "#     vmax=0.0\n",
+    "#     for _, means, _ in panels:\n",
+    "#         if np.any(~np.isnan(means)):\n",
+    "#             vmax = max(vmax, np.nanmax(np.abs(means)))\n",
+    "#     if vmax==0: vmax=1.0\n",
+    "#     norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)\n",
+    "\n",
+    "#     for idx, (d, means, counts) in enumerate(panels):\n",
+    "#         r = idx//ncols; c = idx % ncols\n",
+    "#         ax = fig.add_axes([left + c*(cell_w+wspace), 1 - top - (r+1)*cell_h - r*hspace, cell_w, cell_h])\n",
+    "#         im = ax.imshow(means, cmap=cmap_blue_good_orange_bad(), norm=norm, aspect=\"equal\")\n",
+    "#         ax.set_xticks(range(3)); ax.set_xticklabels([\"Low CI\",\"Mid CI\",\"High CI\"], fontsize=14)\n",
+    "#         ax.set_yticks(range(3)); ax.set_yticklabels([\"High LLM\",\"Mid LLM\",\"Low LLM\"], fontsize=14)\n",
+    "#         ax.set_title(d, fontsize=12)\n",
+    "#         for i in range(3):\n",
+    "#             for j in range(3):\n",
+    "#                 if not np.isnan(means[i,j]):\n",
+    "#                     ax.text(j,i,f\"{means[i,j]:.2f}\\n(n={counts[i,j]})\", ha=\"center\", va=\"center\", fontsize=14)\n",
+    "#     cax = fig.add_axes([1-right+0.01, bottom, 0.02, grid_h]); cb = fig.colorbar(im, cax=cax); cb.set_label(\"Mean Δ DAG F1\", fontsize=14)\n",
+    "#     # fig.suptitle(f\"dag_F1 — {title_suffix}\", fontsize=15, y=0.995)\n",
+    "#     plt.show()\n",
+    "\n",
+    "# def run_heatmaps(GLOBAL_BINS=True):\n",
+    "#     df = pd.read_csv(INPATH)\n",
+    "\n",
+    "#     if \"prior_forbidden_F1\" in df.columns and \"prior_required_F1\" in df.columns:\n",
+    "#         df[\"prior_overall_F1\"] = df[[\"prior_forbidden_F1\",\"prior_required_F1\"]].mean(axis=1)\n",
+    "#     LLM_COL = next((c for c in [\"prior_overall_F1\",\"AP_F1\",\"prior_required_F1\",\"prior_forbidden_F1\",\"prior_forbidden_Precision\",\"AP\"] if c in df.columns), None)\n",
+    "\n",
+    "#     df[\"CIQ\"] = df.apply(row_ci_quality, axis=1).clip(0,1)\n",
+    "\n",
+    "#     avg = df[[\"dataset\",\"seed\",\"impl\",\"num_nodes\",\"CIQ\",LLM_COL,\"dag_F1\"]]\\\n",
+    "#             .groupby([\"dataset\",\"seed\",\"impl\"], as_index=False).mean(numeric_only=True)\n",
+    "\n",
+    "#     org = avg[avg[\"impl\"]==\"org\"].drop(columns=[\"impl\"]).rename(columns={\"CIQ\":\"ci_quality\"})\n",
+    "#     new = avg[avg[\"impl\"]==\"new\"].drop(columns=[\"impl\"]).rename(columns={\"CIQ\":\"ci_quality_new\", LLM_COL:\"llm_quality\"})\n",
+    "#     merged = pd.merge(new, org, on=[\"dataset\",\"seed\"], how=\"inner\", suffixes=(\"_new\",\"_org\"))\n",
+    "#     merged[\"n_nodes\"] = merged[\"num_nodes_new\"].fillna(merged[\"num_nodes_org\"])\n",
+    "\n",
+    "#     m = merged[[\"dataset\",\"seed\",\"n_nodes\",\"ci_quality\",\"llm_quality\",\"dag_F1_new\",\"dag_F1_org\"]].copy()\n",
+    "#     m = m.rename(columns={\"dag_F1_new\":\"comb\",\"dag_F1_org\":\"ci\"})\n",
+    "#     m[\"delta\"] = m[\"comb\"] - m[\"ci\"]\n",
+    "#     m = m.dropna(subset=[\"ci_quality\",\"llm_quality\",\"delta\"])\n",
+    "\n",
+    "#     if GLOBAL_BINS:\n",
+    "#         m[\"ci_bin\"], ci_edges, _  = tie_safe_qbins(m[\"ci_quality\"], q=3, right=True)\n",
+    "#         m[\"llm_bin\"], llm_edges, _ = tie_safe_qbins(m[\"llm_quality\"], q=3, right=True)\n",
+    "\n",
+    "#         agg_means, agg_counts, _, _ = grid_counts_and_means(m, \"llm_bin\", \"ci_bin\", \"delta\")\n",
+    "\n",
+    "#         ds = sorted(m[\"dataset\"].unique())\n",
+    "#         panels = []; sum_counts = np.zeros_like(agg_counts)\n",
+    "#         for d in ds:\n",
+    "#             sub = m[m[\"dataset\"]==d]\n",
+    "#             gmean, gcount, _, _ = grid_counts_and_means(sub, \"llm_bin\", \"ci_bin\", \"delta\")\n",
+    "#             panels.append((d, gmean, gcount))\n",
+    "#             sum_counts += gcount\n",
+    "\n",
+    "#         plot_agg(agg_means, agg_counts, \"GLOBAL cuts\")\n",
+    "#         plot_panels(panels, \"per dataset (GLOBAL cuts)\")\n",
+    "\n",
+    "#         print(\"GLOBAL_BINS=True ➜ per-dataset counts sum to aggregate?\",\n",
+    "#               np.array_equal(agg_counts, sum_counts))\n",
+    "#         print(\"CI edges (rank space):\", [float(x) for x in ci_edges])\n",
+    "#         print(\"LLM edges (rank space):\", [float(x) for x in llm_edges])\n",
+    "\n",
+    "#     else:\n",
+    "#         ds = sorted(m[\"dataset\"].unique())\n",
+    "#         panels = []; checks=[]\n",
+    "#         for d in ds:\n",
+    "#             sub = m[m[\"dataset\"]==d].copy()\n",
+    "#             sub[\"ci_bin\"], _, _  = tie_safe_qbins(sub[\"ci_quality\"], q=3, right=True)\n",
+    "#             sub[\"llm_bin\"], _, _ = tie_safe_qbins(sub[\"llm_quality\"], q=3, right=True)\n",
+    "#             gmean, gcount, _, _ = grid_counts_and_means(sub, \"llm_bin\", \"ci_bin\", \"delta\")\n",
+    "#             panels.append((d, gmean, gcount))\n",
+    "#             checks.append({\"dataset\": d, \"rows_used\": len(sub), \"sum_grid_counts\": int(gcount.sum()), \"counts_match\": bool(gcount.sum()==len(sub))})\n",
+    "\n",
+    "#         m[\"ci_bin_agg\"], _, _  = tie_safe_qbins(m[\"ci_quality\"], q=3, right=True)\n",
+    "#         m[\"llm_bin_agg\"], _, _ = tie_safe_qbins(m[\"llm_quality\"], q=3, right=True)\n",
+    "#         agg_means, agg_counts, _, _ = grid_counts_and_means(m, \"llm_bin_agg\", \"ci_bin_agg\", \"delta\")\n",
+    "\n",
+    "#         plot_agg(agg_means, agg_counts, \"PER-DATASET cuts (aggregate separately binned)\")\n",
+    "#         plot_panels(panels, \"per dataset (PER-DATASET cuts)\")\n",
+    "\n",
+    "#         display(pd.DataFrame(checks).sort_values(\"dataset\"))\n",
+    "\n",
+    "# print(\"=== GLOBAL_BINS = True ===\")\n",
+    "# run_heatmaps(GLOBAL_BINS=True)\n",
+    "\n",
+    "# print(\"\\n=== GLOBAL_BINS = False ===\")\n",
+    "# run_heatmaps(GLOBAL_BINS=False)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cpdag-eval-title",
+   "metadata": {},
+   "source": [
+    "## CPDAG Evaluation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cpdag-eval-code",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Load and plot CPDAG metrics (SID best/worst) to mirror experiments.ipynb\n",
+    "\n",
+    "# Extend schemas to support CPDAG files\n",
+    "COLUMNS_MAP.update({\n",
+    "    'cpdag': [\n",
+    "        'dataset','model',\n",
+    "        'elapsed_mean','elapsed_std',\n",
+    "        'nnz_mean','nnz_std',\n",
+    "        'fdr_mean','fdr_std',\n",
+    "        'tpr_mean','tpr_std',\n",
+    "        'fpr_mean','fpr_std',\n",
+    "        'precision_mean','precision_std',\n",
+    "        'recall_mean','recall_std',\n",
+    "        'F1_mean','F1_std',\n",
+    "        'shd_mean','shd_std',\n",
+    "        'SID_low_mean','SID_low_std','SID_high_mean','SID_high_std'\n",
+    "    ]\n",
+    "})\n",
+    "\n",
+    "# Optional CSV metric mapping for CPDAG if ever needed (not used here)\n",
+    "CSV_METRIC_MAP.update({\n",
+    "    'cpdag': {\n",
+    "        'elapsed': 'time',\n",
+    "        'nnz': 'cpdag_nnz',\n",
+    "        'fdr': 'cpdag_fdr',\n",
+    "        'tpr': 'cpdag_tpr',\n",
+    "        'fpr': 'cpdag_fpr',\n",
+    "        'precision': 'cpdag_precision',\n",
+    "        'recall': 'cpdag_recall',\n",
+    "        'F1': 'cpdag_F1',\n",
+    "        'shd': 'cpdag_shd',\n",
+    "        # best/worst SID if present in CSV aggregates\n",
+    "        'SID_low': 'cpdag_sid_low',\n+    "        'SID_high': 'cpdag_sid_high',\n+    "    }\n",
+    "})\n",
+    "\n",
+    "# Redefine loader to read cpdag npy files when requested\n",
+    "def load_npy(version: str, kind: str):\n",
+    "    if kind == 'cpdag':\n",
+    "        path = RESULTS_DIR / f'stored_results_{version}_cpdag.npy'\n",
+    "        cols = ['dataset','model',\n",
+    "                'elapsed_mean','elapsed_std',\n",
+    "                'nnz_mean','nnz_std',\n",
+    "                'fdr_mean','fdr_std',\n",
+    "                'tpr_mean','tpr_std',\n",
+    "                'fpr_mean','fpr_std',\n",
+    "                'precision_mean','precision_std',\n",
+    "                'recall_mean','recall_std',\n",
+    "                'F1_mean','F1_std',\n",
+    "                'shd_mean','shd_std',\n",
+    "                'SID_low_mean','SID_low_std','SID_high_mean','SID_high_std']\n",
+    "    else:\n",
+    "        path = RESULTS_DIR / f'stored_results_{version}.npy'\n",
+    "        cols = ['dataset', 'model', 'elapsed_mean', 'elapsed_std', 'nnz_mean', 'nnz_std',\n",
+    "                'fdr_mean', 'fdr_std', 'tpr_mean', 'tpr_std', 'fpr_mean', 'fpr_std',\n",
+    "                'precision_mean', 'precision_std', 'recall_mean', 'recall_std',\n",
+    "                'F1_mean', 'F1_std', 'shd_mean', 'shd_std', 'SID_mean', 'SID_std']\n",
+    "    if not path.exists():\n",
+    "        raise FileNotFoundError(f'Missing results file: {path}')\n",
+    "    arr = np.load(path, allow_pickle=True)\n",
+    "    df = pd.DataFrame(arr, columns=cols)\n",
+    "    df['dataset'] = df['dataset'].astype(str)\n",
+    "    df['model'] = df['model'].astype(str)\n",
+    "    return df\n",
+    "\n",
+    "# Load combined CPDAG aggregates across RUN_CONFIGS\n",
+    "cpdag_all = load_results('cpdag')\n",
+    "\n",
+    "# Restrict to the same datasets as DAG plots\n",
+    "if 'dataset' in cpdag_all.columns and len(cpdag_all):\n",
+    "    base_names = cpdag_all['dataset'].astype(str).str.replace('<br>.*','', regex=True).str.lower()\n",
+    "    cpdag_all = cpdag_all[base_names.isin(datasets_to_plot)].copy()\n",
+    "\n",
+    "# Add node/edge counts and pretty labels\n",
+    "if len(cpdag_all):\n",
+    "    base_names = cpdag_all['dataset'].astype(str).str.replace('<br>.*','', regex=True).str.lower()\n",
+    "    cpdag_all['n_edges'] = base_names.map(dags_arcs_map).fillna(cpdag_all.get('num_edges', np.nan)).astype(float)\n",
+    "    cpdag_all['n_nodes'] = base_names.map(dags_nodes_map).fillna(cpdag_all.get('num_nodes', np.nan)).astype(float)\n",
+    "    ds_upper = base_names.str.upper()\n",
+    "    cpdag_all['dataset'] = ds_upper + '<br> |V|=' + cpdag_all['n_nodes'].fillna(0).astype(int).astype(str) + ', |E|=' + cpdag_all['n_edges'].fillna(0).astype(int).astype(str)\n",
+    "\n",
+    "    # Normalise SHD and SID best/worst by number of edges\n",
+    "    if 'shd_mean' in cpdag_all and 'n_edges' in cpdag_all:\n",
+    "        cpdag_all['p_shd_mean'] = cpdag_all['shd_mean'].astype(float) / cpdag_all['n_edges'].astype(float)\n",
+    "        cpdag_all['p_shd_std'] = cpdag_all['shd_std'].astype(float) / cpdag_all['n_edges'].astype(float)\n",
+    "    for c in ['SID_low','SID_high']:\n",
+    "        mean_c, std_c = f'{c}_mean', f'{c}_std'\n",
+    "        if mean_c in cpdag_all and 'n_edges' in cpdag_all:\n",
+    "            cpdag_all[f'p_{c}_mean'] = cpdag_all[mean_c].astype(float) / cpdag_all['n_edges'].astype(float)\n",
+    "            cpdag_all[f'p_{c}_std'] = cpdag_all[std_c].astype(float) / cpdag_all['n_edges'].astype(float)\n",
+    "    # Ensure non-zero tiny values for visibility\n",
+    "    if 'p_SID_low_mean' in cpdag_all: cpdag_all['p_SID_low_mean'] = cpdag_all['p_SID_low_mean'].replace(0, 0.03)\n",
+    "    if 'p_SID_high_mean' in cpdag_all: cpdag_all['p_SID_high_mean'] = cpdag_all['p_SID_high_mean'].replace(0, 0.03)\n",
+    "\n",
+    "# Plot CPDAG NSID best vs worst\n",
+    "if len(cpdag_all):\n",
+    "    # Preferred ordering; include only those present\n",
+    "    preferred = ['Random','FGS','NOTEARS-MLP','Shapley-PC','ASPCR','ABAPC (Ours)','ABAPC-LLM','ABAPC-LLM-d','LLM-BFS','MPC']\n",
+    "    methods = [m for m in preferred if m in cpdag_all['model'].unique()]\n",
+    "    print('CPDAG plotting methods:', methods)\n",
+    "    double_bar_chart_plotly(\n",
+    "        cpdag_all, ['p_SID_low','p_SID_high'], names_dict, colors_dict, methods,\n",
+    "        save_figs=save_figs, font_size=23, output_name=str(REPO_ROOT / 'results/figs/Fig.bn_cpdag_SID_best_worst.html'),\n",
+    "        debug=False, range_y1=[0,6], range_y2=[0,6], rect_exp=0.01\n",
+    "    )\n",
+    "else:\n",
+    "    print('No CPDAG results found.')\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "aba-env",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
