@@ -41,12 +41,24 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 pre_grounding:bool=False,
                 ext_flag: bool = False,
                 prior_knowledge: PriorKnowledge | None = None,
+                # Bounds for rule generation (Definition 4.5)
+                max_path_length: int | None = None,
+                max_conditioning_size: int | None = None,
+                # Additional bounds encoded in ASP
+                collider_tree_depth: int | None = None,
+                cycle_length: int | None = None,
                 )->Control:
 
     logging.info("Compiling the program")
     ### Create Control
     cpu_count = min(os.cpu_count() or 1, 64)
-    ctl = Control(['-t %d' % cpu_count])
+    control_args = ['-t %d' % cpu_count]
+    # Provide constants for bounded acyclicity and collider-tree depth
+    if cycle_length is not None:
+        control_args += [f"-c l_cyc={int(cycle_length)}"]
+    if collider_tree_depth is not None:
+        control_args += [f"-c l_b={int(collider_tree_depth)}"]
+    ctl = Control(control_args)
     ctl.configuration.solve.parallel_mode = cpu_count
     ctl.configuration.solve.models=out_n
     ctl.configuration.solver.seed="2024"
@@ -54,10 +66,15 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     # ctl.configuration.solve.time_limit = 3600.0  # 1 hour time limit
 
     ### Add set definition
-    condition_sets = (
+    # Enumerate admissible conditioning sets S. If a bound is provided,
+    # we restrict to |S| <= max_conditioning_size.
+    base_condition_sets = (
         set().union(*indep_facts.values(), *dep_facts.values())
         if skeleton_rules_reduction
         else powerset(range(n_nodes))
+    )
+    condition_sets = (
+        (S for S in base_condition_sets if max_conditioning_size is None or len(S) <= max_conditioning_size)
     )
     for S in tqdm(condition_sets):
         for s in S:
@@ -66,7 +83,12 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             logging.debug(f"   {set_str}")
 
     ### Load main program and facts
-    ctl.load(str(Path(__file__).resolve().parent / 'encodings' / 'causalaba.lp'))
+    # Decide which encoding to load: base or bounded
+    bounded_encoding_active = (cycle_length is not None and cycle_length > 0) or (
+        collider_tree_depth is not None and collider_tree_depth > 0
+    )
+    encoding_file = 'causalaba_bounded.lp' if bounded_encoding_active else 'causalaba.lp'
+    ctl.load(str(Path(__file__).resolve().parent / 'encodings' / encoding_file))
     if facts_location != "":
         ctl.load(facts_location)
         if weak_constraints:
@@ -86,6 +108,27 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
         for (X, Y) in forbidden_edges:
             ctl.add("specific", [], f":- edge({X},{Y}).")
     if prior_knowledge is not None:
+        # Prune the path-enumeration skeleton using prior knowledge.
+        # Keep an undirected edge (u,v) if either orientation is required.
+        # Remove it only if BOTH orientations are forbidden and neither is required.
+        req_dir = set(prior_knowledge.required)
+        req_undirected = {tuple(sorted((a, b))) for (a, b) in req_dir}
+        forb_dir = set(prior_knowledge.forbidden)
+        # Build a map to count how many orientations are forbidden for a pair
+        forb_counts = {}
+        for a, b in forb_dir:
+            key = tuple(sorted((a, b)))
+            forb_counts[key] = forb_counts.get(key, 0) + 1
+        to_remove = set()
+        for (u, v) in G.edge_list():
+            key = tuple(sorted((u, v)))
+            if key in req_undirected:
+                continue  # keep edges that are required in at least one orientation
+            # Remove only if both orientations are forbidden
+            if forb_counts.get(key, 0) >= 2:
+                to_remove.add((u, v))
+        if to_remove:
+            G.remove_edges_from(to_remove)
         for (X, Y) in prior_knowledge.forbidden:
             if not skeleton_rules_reduction or ((X, Y) not in forbidden_edges and (Y, X) not in forbidden_edges):
                 ctl.add("specific", [], f":- arrow({X},{Y}).")
@@ -100,8 +143,27 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
 
     if skeleton_rules_reduction is False:
         pre_grounding = False
+    # Helper to iterate paths with an optional cutoff, falling back if needed
+    def _iter_paths_with_cutoff(graph, src, dst, cutoff):
+        try:
+            # rustworkx exposes an optional cutoff argument on all_simple_paths
+            return rx.all_simple_paths(graph, src, dst, cutoff=cutoff) if cutoff is not None else rx.all_simple_paths(graph, src, dst)
+        except TypeError:
+            # Fallback for older versions without cutoff: filter manually
+            paths = rx.all_simple_paths(graph, src, dst)
+            if cutoff is None:
+                return paths
+            # Wrap generator to filter by number of edges (|p|)
+            def _gen():
+                for p in paths:
+                    if len(p) - 1 <= cutoff:
+                        yield p
+            return _gen()
+
+    use_bounded_nb = bounded_encoding_active and collider_tree_depth is not None and collider_tree_depth > 0
+
     for (X, Y) in tqdm(node_pairs):
-        for path in rx.all_simple_paths(G, X, Y):
+        for path in _iter_paths_with_cutoff(G, X, Y, max_path_length):
             n_p += 1
             ### add path rule
             path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
@@ -116,8 +178,11 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 if (X,Y) in indep_facts:
                     condition_sets.update(indep_facts[(X,Y)])
                 for S in condition_sets:
+                    if max_conditioning_size is not None and len(S) > max_conditioning_size:
+                        continue
                     s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
-                    nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})" for idx in range(1,len(path)-1)]
+                    nb_pred = 'nb_b' if use_bounded_nb else 'nb'
+                    nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})" for idx in range(1,len(path)-1)]
                     nbs_str = ", " + ','.join(nbs) if len(nbs) > 0 else ""
                     ctl.add("specific", [], f"ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
                     logging.debug(f"   ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
@@ -126,7 +191,8 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                         ext_premise = f"ext_indep({X},{Y},{s_str}), " if ext_flag else ""
                         ctl.add("specific", [], f"dep({X},{Y},{s_str}) :- {ext_premise}ap({X},{Y},p{n_p},{s_str}).")
             else:
-                nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
+                nb_pred = 'nb_b' if use_bounded_nb else 'nb'
+                nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
                 nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
                 ctl.add("specific", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
                 logging.debug(f"   ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
@@ -134,6 +200,8 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
         if (X, Y) in dep_facts:
             if pre_grounding:
                 for S in dep_facts[(X, Y)]:
+                    if max_conditioning_size is not None and len(S) > max_conditioning_size:
+                        continue
                     s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
                     ext_premise = f"ext_dep({X},{Y},{s_str}), " if ext_flag else ""
                     ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- {ext_premise}not ap({X},{Y},_,{s_str}).")
@@ -179,13 +247,19 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 fact_pct:float=1.0,
                 set_indep_facts:bool=False,
                 opt_mode:str='optN',
-                out_n:int=5,
+                out_n:int=0,
                 search_for_models:str='No', 
                 show:list=['arrow'],
                 pre_grounding: bool=False,
                 disable_reground: bool=False,
                 prior_knowledge: PriorKnowledge | None = None,
                 return_statistics: bool = False,
+                # Bounds for rule generation (Definition 4.5)
+                max_path_length: int | None = None,
+                max_conditioning_size: int | None = None,
+                # Additional bounds encoded in ASP
+                collider_tree_depth: int | None = None,
+                cycle_length: int | None = None,
                 )->list:
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
@@ -227,8 +301,24 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 facts_group[(X,Y)].add(condition_set)
 
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
-    ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                weak_constraints, indep_facts, dep_facts, opt_mode, out_n, show, pre_grounding, ext_flag, prior_knowledge)
+    ctl = compile_and_ground(
+        n_nodes,
+        facts_location,
+        skeleton_rules_reduction,
+        weak_constraints,
+        indep_facts,
+        dep_facts,
+        opt_mode,
+        out_n,
+        show,
+        pre_grounding,
+        ext_flag,
+        prior_knowledge,
+        max_path_length=max_path_length,
+        max_conditioning_size=max_conditioning_size,
+        collider_tree_depth=collider_tree_depth,
+        cycle_length=cycle_length,
+    )
 
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
@@ -299,9 +389,24 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             if reground:
                 ### Save external statements
                 logging.info("Recompiling and regrounding...")
-                ctl = compile_and_ground(n_nodes, facts_location, skeleton_rules_reduction,
-                                weak_constraints, indep_facts, dep_facts, opt_mode, 
-                                 out_n, show, pre_grounding, ext_flag, prior_knowledge)
+                ctl = compile_and_ground(
+                    n_nodes,
+                    facts_location,
+                    skeleton_rules_reduction,
+                    weak_constraints,
+                    indep_facts,
+                    dep_facts,
+                    opt_mode,
+                    out_n,
+                    show,
+                    pre_grounding,
+                    ext_flag,
+                    prior_knowledge,
+                    max_path_length=max_path_length,
+                    max_conditioning_size=max_conditioning_size,
+                    collider_tree_depth=collider_tree_depth,
+                    cycle_length=cycle_length,
+                )
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")

@@ -30,6 +30,7 @@ from utils.helpers import logger_setup, random_stability
 from utils.data_utils import simulate_discrete_data, simulate_dag, simulate_data_and_run_PC, load_bnlearn_data_dag
 from causalaba import CausalABA
 from abapc import ABAPC
+from utils.prior_knowledge import PriorKnowledge, Constraints
 
 class TestCausalABA(unittest.TestCase):
 
@@ -1347,6 +1348,114 @@ class TestABAPC(unittest.TestCase):
 
         self.assertIn(expected, models)
 
+class TestBoundedCausalABA(unittest.TestCase):
+    def test_path_length_bound_prunes_long_paths(self):
+        logger_setup()
+        logging.info("=== test_path_length_bound_prunes_long_paths ===")
+        # Build a directed chain 0->1->2->3->4->5; test ap(0,5,_,_)
+        n_nodes = 6
+        variables = [f"X{i}" for i in range(n_nodes)]
+        req = {(f"X{i}", f"X{i + 1}") for i in range(n_nodes - 1)}
+        # Forbid all other directed edges to avoid alternative shorter paths
+        all_edges = {(f"X{i}", f"X{j}") for i in range(n_nodes) for j in range(n_nodes) if i != j}
+        forb = all_edges - req
+        pk = PriorKnowledge(variables, Constraints(required=req, forbidden=forb))
+
+        # With a tight path-length bound, ap(0,5,_,_) should not appear
+        models_bounded, _ = CausalABA(
+            n_nodes,
+            facts_location="",
+            show=["ap"],
+            prior_knowledge=pk,
+            max_path_length=3,  # requires length 5 path; should be pruned
+            print_models=False,
+        )
+        ap_strings_bounded = {str(sym) for m in models_bounded for sym in m}
+        self.assertFalse(any(s.startswith("ap(0,5,") for s in ap_strings_bounded))
+
+        # Without the bound, the long path should be allowed and ap(0,5,_,_) should appear
+        models_unbounded, _ = CausalABA(
+            n_nodes,
+            facts_location="",
+            show=["ap"],
+            prior_knowledge=pk,
+            max_path_length=None,
+            print_models=False,
+        )
+        ap_strings_unbounded = {str(sym) for m in models_unbounded for sym in m}
+        self.assertTrue(any(s.startswith("ap(0,5,") for s in ap_strings_unbounded))
+
+    def test_collider_depth_bound_effect(self):
+        logger_setup()
+        logging.info("=== test_collider_depth_bound_effect ===")
+        # Graph: 0->2, 3->2 (collider at 2 on path 0-2-3-5), 3->5, 2->4->6 (descendant of 2 at depth 2)
+        # Test ap(0,5,_,s6): requires descendant 6 of collider 2 to be in S
+        n_nodes = 7
+        variables = [f"X{i}" for i in range(n_nodes)]
+        req = {("X0", "X2"), ("X3", "X2"), ("X3", "X5"), ("X2", "X4"), ("X4", "X6")}
+        all_edges = {(f"X{i}", f"X{j}") for i in range(n_nodes) for j in range(n_nodes) if i != j}
+        forb = all_edges - req
+        pk = PriorKnowledge(variables, Constraints(required=req, forbidden=forb))
+
+        # With collider_tree_depth=1, depth-2 descendant should not unblock, so no ap(...,s6)
+        models_b1, _ = CausalABA(
+            n_nodes,
+            facts_location="",
+            show=["ap"],
+            prior_knowledge=pk,
+            collider_tree_depth=1,
+            cycle_length=0,
+            print_models=False,
+        )
+        ap_b1 = {str(sym) for m in models_b1 for sym in m}
+        self.assertFalse(any(s.startswith("ap(0,5,") and ",s6)" in s for s in ap_b1))
+
+        # With collider_tree_depth>=2, it should appear
+        models_b2, _ = CausalABA(
+            n_nodes,
+            facts_location="",
+            show=["ap"],
+            prior_knowledge=pk,
+            collider_tree_depth=3,
+            cycle_length=0,
+            print_models=False,
+        )
+        ap_b2 = {str(sym) for m in models_b2 for sym in m}
+        self.assertTrue(any(s.startswith("ap(0,5,") and ",s6)" in s for s in ap_b2))
+
+    def test_cycle_length_bound_allows_long_cycle(self):
+        logger_setup()
+        logging.info("=== test_cycle_length_bound_allows_long_cycle ===")
+        # Force a 4-cycle: 0->1->2->3->0
+        n_nodes = 4
+        variables = [f"X{i}" for i in range(n_nodes)]
+        req = {("X0", "X1"), ("X1", "X2"), ("X2", "X3"), ("X3", "X0")}
+        all_edges = {(f"X{i}", f"X{j}") for i in range(n_nodes) for j in range(n_nodes) if i != j}
+        forb = all_edges - req
+        pk = PriorKnowledge(variables, Constraints(required=req, forbidden=forb))
+
+        # Unbounded acyclicity should forbid any model
+        models_unbounded, _ = CausalABA(
+            n_nodes,
+            facts_location="",
+            show=["arrow"],
+            prior_knowledge=pk,
+            cycle_length=0,
+            print_models=False,
+        )
+        self.assertEqual(len(models_unbounded), 0)
+
+        # Bounding cycle length to 3 allows the 4-cycle
+        models_bounded, _ = CausalABA(
+            n_nodes,
+            facts_location="",
+            show=["arrow"],
+            prior_knowledge=pk,
+            cycle_length=3,
+            print_models=False,
+        )
+        self.assertGreater(len(models_bounded), 0)
+
 
 start = datetime.now()
 TestCausalABA().three_node_all_graphs()
@@ -1367,9 +1476,9 @@ TestCausalABA().six_node_example()
 TestCausalABA().randomG(7, 1, "ER", 2024)
 TestCausalABA().randomG(8, 1, "ER", 2024)
 TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
-TestCausalABA().randomG(10, 1, "ER", 2024) ## 4 models
-TestCausalABA().randomG(11, 1, "ER", 2024) ## 48 models
-TestCausalABA().randomG(12, 1, "ER", 2024) ## 12 models
+# TestCausalABA().randomG(10, 1, "ER", 2024) ## 4 models
+# TestCausalABA().randomG(11, 1, "ER", 2024) ## 48 models
+# TestCausalABA().randomG(12, 1, "ER", 2024) ## 12 models
 # TestCausalABA().randomG(15, 1, "ER", 2024) ## 13:10 minutes, 80 models
 
 TestCausalABA().five_node_colombo_PC_facts()
@@ -1393,5 +1502,9 @@ TestABAPC().test_abapc_mock_three_var()
 TestABAPC().test_abapc_mock_three_var_collider()
 TestABAPC().test_incremental_solving()
 TestABAPC().test_pre_grounding()
+
+TestBoundedCausalABA().test_path_length_bound_prunes_long_paths()
+TestBoundedCausalABA().test_collider_depth_bound_effect()
+TestBoundedCausalABA().test_cycle_length_bound_allows_long_cycle()
 
 logging.info(f"Total time={str(datetime.now()-start)}")

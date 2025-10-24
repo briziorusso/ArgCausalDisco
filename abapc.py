@@ -149,10 +149,16 @@ def ABAPC(data,
         models, MECs = set_of_models_to_set_of_graphs(model_sets, n_nodes, False)
 
     if len(models) == 1:
+        # Single-model shortcut: keep return shape consistent with out_mode
+        single_model = next(iter(models))
         B_est = np.zeros((n_nodes, n_nodes))
-        for edge in models.pop():
+        for edge in single_model:
             B_est[edge[0], edge[1]] = 1
-        return B_est
+        if out_mode == "optN":
+            # Return the model set and its adjacency matrix
+            return models, B_est
+        else:
+            return B_est
 
     if len(set_of_model_sets) > 0:
         logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
