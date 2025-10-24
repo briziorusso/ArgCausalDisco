@@ -243,9 +243,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
         models = []
         logging.info("   Solving...")
-        with ctl.solve(yield_=True, async_=True) as handle:
-            handle.wait(3600)
-            handle.cancel()
+        with ctl.solve(yield_=True) as handle:
             for model in handle:
                 models.append(model.symbols(shown=True))
                 if print_models:
