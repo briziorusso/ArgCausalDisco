@@ -12,7 +12,13 @@ from datetime import datetime
 from cd_algorithms.models import run_method
 from utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
 from utils.helpers import random_stability, logger_setup
-from utils.data_utils import load_bnlearn_data_dag, simulate_dag, BIF_FOLDER_MAP
+from utils.data_utils import (
+    load_bnlearn_data_dag,
+    simulate_dag,
+    simulate_discrete_data,
+    simulate_linear_continuous_data,
+    BIF_FOLDER_MAP,
+)
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -160,6 +166,14 @@ parser.add_argument('--simulate_with', choices=['internal', 'pyagrum'], default=
 
 # BNLearn specific
 parser.add_argument('--bn_data_path', default='datasets', help='Root data path for BNLearn .bif files')
+
+# Random synthetic generation
+parser.add_argument('--graph_type', choices=['ER', 'SF', 'BP'], default='ER', help='Random graph type (source=random)')
+parser.add_argument('--size', action='append', help='Random: comma pair n,e (e=edges); can repeat, e.g., --size 10,15 --size 20,30')
+parser.add_argument('--n_nodes_list', dest='n_nodes_list', nargs='*', type=int, help='Random: list of node counts, e.g., --n_nodes_list 5 10 20')
+parser.add_argument('--density_list', dest='density_list', nargs='*', type=float, help='Random: list of edge densities (edges ≈ density*n), e.g., --density_list 1 2 4')
+parser.add_argument('--sim_type', choices=['discrete', 'continuous'], default='discrete', help='Random: type of data simulation')
+parser.add_argument('--noise_type', choices=['gaussian', 'exponential'], default='gaussian', help='Random (continuous): exogenous noise distribution')
 
 # Common
 parser.add_argument('--sample_size', type=int, default=5000)
@@ -337,7 +351,7 @@ if args.source == 'causenet':
     for graph_path in bifxml_files:
         dataset_name = os.path.splitext(os.path.basename(graph_path))[0]
         datasets.append((dataset_name, 'causenet', {'graph_path': graph_path}))
-else:
+elif args.source == 'bnlearn':
     # BNLearn
     # Determine dataset names: default to all known if none provided; allow include filters
     all_bn = sorted(BIF_FOLDER_MAP.keys())
@@ -351,6 +365,27 @@ else:
         raise SystemExit('No BNLearn datasets selected. Use --names or --include to pick datasets.')
     for name in selected:
         datasets.append((name, 'bnlearn', {'dataset_name': name}))
+else:
+    # Random synthetic graphs
+    sizes = []
+    if args.size:
+        for pair in args.size:
+            try:
+                n_str, e_str = pair.split(',')
+                n = int(n_str.strip()); e = int(e_str.strip())
+                sizes.append((n, e))
+            except Exception:
+                raise SystemExit(f'Invalid --size entry "{pair}". Use format n,e')
+    if args.n_nodes_list and args.density_list:
+        for n in args.n_nodes_list:
+            for dens in args.density_list:
+                e = max(n - 1, int(round(dens * n)))  # ensure at least a tree edge count
+                sizes.append((n, e))
+    if not sizes:
+        raise SystemExit('For --source random, provide either --size n,e (can repeat) or both --n_nodes_list and --density_list.')
+    for n, e in sizes:
+        ds_name = f'random_n{n}_e{e}_{args.graph_type}'
+        datasets.append((ds_name, 'random', {'n': n, 'e': e, 'graph_type': args.graph_type}))
 
 
 # Main loop
@@ -401,12 +436,41 @@ for dataset_name, src, info in datasets:
             seed = seeds_list[idx]
             # Load data + true DAG
             std = True if standardise is None else standardise
-            X_s, B_true = load_bnlearn_data_dag(
-                info['dataset_name'], args.bn_data_path, sample_size,
-                seed=seed,
-                print_info=True if idx == 0 and completed_runs == 0 else False,
-                standardise=std,
-            )
+            if src == 'bnlearn':
+                X_s, B_true = load_bnlearn_data_dag(
+                    info['dataset_name'], args.bn_data_path, sample_size,
+                    seed=seed,
+                    print_info=True if idx == 0 and completed_runs == 0 else False,
+                    standardise=std,
+                )
+            elif src == 'random':
+                # Generate a random ground-truth DAG and discrete data
+                B_true = simulate_dag(d=info['n'], s0=info['e'], graph_type=info['graph_type'])
+                edges = list(zip(*np.where(B_true == 1)))
+                truth_edges = set((i, j) for i, j in edges)
+                if args.sim_type == 'discrete':
+                    X_s = simulate_discrete_data(
+                        num_of_nodes=info['n'],
+                        sample_size=sample_size,
+                        truth_DAG_directed_edges=truth_edges,
+                        random_seed=seed,
+                    )
+                else:
+                    X_s = simulate_linear_continuous_data(
+                        num_of_nodes=info['n'],
+                        sample_size=sample_size,
+                        truth_DAG_directed_edges=truth_edges,
+                        noise_type=args.noise_type,
+                        random_seed=seed,
+                    )
+            else:
+                # For CausaNet (if present), fall back to BNLearn loader or extend here later
+                X_s, B_true = load_bnlearn_data_dag(
+                    info.get('dataset_name', 'asia'), args.bn_data_path, sample_size,
+                    seed=seed,
+                    print_info=True if idx == 0 and completed_runs == 0 else False,
+                    standardise=std,
+                )
 
             if 'random' in method.lower():
                 random_stability(seed)
