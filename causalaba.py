@@ -47,19 +47,22 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 # Additional bounds encoded in ASP
                 collider_tree_depth: int | None = None,
                 cycle_length: int | None = None,
+                threads: int | None = None,
                 )->Control:
 
     logging.info("Compiling the program")
     ### Create Control
     cpu_count = min(os.cpu_count() or 1, 64)
-    control_args = ['-t %d' % cpu_count]
+    if threads is None:
+        threads = cpu_count
+    control_args = ['-t %d' % threads]
     # Provide constants for bounded acyclicity and collider-tree depth
     if cycle_length is not None:
         control_args += [f"-c l_cyc={int(cycle_length)}"]
     if collider_tree_depth is not None:
         control_args += [f"-c l_b={int(collider_tree_depth)}"]
     ctl = Control(control_args)
-    ctl.configuration.solve.parallel_mode = cpu_count
+    ctl.configuration.solve.parallel_mode = threads
     ctl.configuration.solve.models=out_n
     ctl.configuration.solver.seed="2024"
     ctl.configuration.solve.opt_mode = opt_mode
@@ -260,6 +263,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 # Additional bounds encoded in ASP
                 collider_tree_depth: int | None = None,
                 cycle_length: int | None = None,
+                threads: int | None = None,
                 )->list:
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
@@ -318,6 +322,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         max_conditioning_size=max_conditioning_size,
         collider_tree_depth=collider_tree_depth,
         cycle_length=cycle_length,
+        threads=threads,
     )
 
     if search_for_models == 'No':
@@ -406,6 +411,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     max_conditioning_size=max_conditioning_size,
                     collider_tree_depth=collider_tree_depth,
                     cycle_length=cycle_length,
+                    threads=threads,
                 )
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)

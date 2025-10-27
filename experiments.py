@@ -193,6 +193,7 @@ parser.add_argument('--skeleton_rules_reduction', type=str_to_bool, default=True
 parser.add_argument('--disable_reground', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC: disable regrounding')
 parser.add_argument('--return_statistics', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC: return statistics')
 parser.add_argument('--out_n', type=int, default=5, help='ABAPC: number of output models to request')   
+parser.add_argument('--threads', type=int, default=None, help='ABAPC/CausalABA: clingo solver threads (-t); smaller uses less memory')
 
 # Bounded Causal ABA parameters
 parser.add_argument('--max_path_length', type=int, default=None, help='Bound: maximum simple path length |p| (lp)')
@@ -239,6 +240,7 @@ skeleton_rules_reduction = args.skeleton_rules_reduction
 disable_reground = args.disable_reground
 return_statistics = args.return_statistics
 out_n = args.out_n
+threads = args.threads
 max_path_length = args.max_path_length
 max_conditioning_size = args.max_conditioning_size
 collider_tree_depth = args.collider_tree_depth
@@ -503,6 +505,7 @@ for dataset_name, src, info in datasets:
                     sz_ratio=sz_ratio,
                     lb_ratio=lb_ratio,
                     lcyc_ratio=lcyc_ratio,
+                    threads=threads,
                 )
                 if 'Tensor' in str(type(W_est)):
                     W_est = np.asarray([list(i) for i in W_est])

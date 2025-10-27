@@ -87,6 +87,7 @@ def run_method(X,
                sz_ratio:float|None=None,
                lb_ratio:float|None=None,
                lcyc_ratio:float|None=None,
+               threads:int|None=None,
                ):
     """
     Runs the causal discovery method specified by method on the data X
@@ -262,6 +263,8 @@ def run_method(X,
                       max_conditioning_size=max_conditioning_size,
                       collider_tree_depth=collider_tree_depth,
                       cycle_length=cycle_length,
+                      # Solver threads
+                      threads=threads,
                       )
         elapsed = time.time() - start
         logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')

@@ -44,6 +44,7 @@ def ABAPC(data,
           max_conditioning_size: int | None = None,
           collider_tree_depth: int | None = None,
           cycle_length: int | None = None,
+          threads: int | None = None,
           ):
     """
     Args:
@@ -150,6 +151,7 @@ def ABAPC(data,
         max_conditioning_size=max_conditioning_size,
         collider_tree_depth=collider_tree_depth,
         cycle_length=cycle_length,
+        threads=threads,
     )
 
     if multiple_solutions:
