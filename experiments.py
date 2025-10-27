@@ -146,7 +146,7 @@ def save_summary_tables(base_path: Path, version: str, dag_df: pd.DataFrame, cpd
 
 # CLI
 parser = argparse.ArgumentParser(
-    description='Run causal discovery experiments on CausaNet or BNLearn datasets',
+    description='Run causal discovery experiments on CauseNet or BNLearn datasets',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument('--source', choices=['causenet', 'bnlearn'], required=True, help='Source of datasets to use')
@@ -154,7 +154,7 @@ parser.add_argument('--version', required=True, help='Version name for this expe
 parser.add_argument('--models', nargs='*', default=['random'], help='List of models to run')
 parser.add_argument('--results_dir', default='results')
 
-# CausaNet specific
+# CauseNet specific
 parser.add_argument('--bifxml_dir', default=os.path.join('datasets', 'causenet_generator', 'bifxmls'), help='Folder with .bifxml graphs (for source=causenet)')
 parser.add_argument('--simulate_with', choices=['internal', 'pyagrum'], default='internal', help='How to simulate data from DAG (causenet only)')
 
@@ -168,9 +168,7 @@ parser.add_argument('--device', type=int, default=0)
 parser.add_argument('--load_res', action='store_true')
 parser.add_argument('--save_res', action='store_true', default=True)
 parser.add_argument('--resume', action='store_true', help='Resume from saved progress and summaries')
-parser.add_argument('--standardise', dest='standardise', action='store_true', help='Standardise data (z-score) after label encoding')
-parser.add_argument('--no-standardise', dest='standardise', action='store_false', help='Do not standardise data')
-parser.set_defaults(standardise=None)
+parser.add_argument('--standardise', type=str_to_bool, default=True, metavar='{true,false}', help='Standardise data (z-score) after label encoding')
 parser.add_argument('--test_alpha', type=float, default=0.05, help='Significance level for conditional independence tests')
 parser.add_argument('--test_name', choices=['fisherz', 'chisq', 'gsq', 'kci', 'fastkci', 'rcit'], default='fisherz', help='Independence test to use')
 
@@ -182,15 +180,25 @@ parser.add_argument('--disable_reground', type=str_to_bool, default=True, metava
 parser.add_argument('--return_statistics', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC: return statistics')
 parser.add_argument('--out_n', type=int, default=5, help='ABAPC: number of output models to request')   
 
+# Bounded Causal ABA parameters
+parser.add_argument('--max_path_length', type=int, default=None, help='Bound: maximum simple path length |p| (lp)')
+parser.add_argument('--max_conditioning_size', type=int, default=None, help='Bound: maximum conditioning set size |Z| (sz)')
+parser.add_argument('--collider_tree_depth', type=int, default=None, help='Bound: collider-tree depth (lb)')
+parser.add_argument('--cycle_length', type=int, default=None, help='Bound: acyclicity checks only cycles up to length (lcyc)')
+parser.add_argument('--lp_ratio', type=float, default=None, help='Fraction of (n-1) for max_path_length')
+parser.add_argument('--sz_ratio', type=float, default=None, help='Fraction of (n-2) for max_conditioning_size')
+parser.add_argument('--lb_ratio', type=float, default=None, help='Fraction of (n-1) for collider_tree_depth')
+parser.add_argument('--lcyc_ratio', type=float, default=None, help='Fraction of n for cycle_length')
+
 # Subset filters (interpreted based on source)
 parser.add_argument('--include', action='append', help='Substring to include; for causenet: file base name filters, for bnlearn: dataset name filters')
 parser.add_argument('--glob', action='append', help='Glob pattern to include (causenet only for filenames)')
 parser.add_argument('--regex', action='append', help='Regex to include (causenet only for filenames)')
 parser.add_argument('--names', nargs='*', help='Exact names to include (causenet: file base names without path; bnlearn: dataset names)')
-parser.add_argument('--nodes', type=int, choices=[5, 10, 15], help='CausaNet filter: only graphs with this number of nodes')
-parser.add_argument('--edges_class', choices=['d', '1.5d'], help='CausaNet filter: only graphs with edges equal to d or ~1.5d')
-parser.add_argument('--heur', choices=['none', 'degrees', 'semantics'], help='CausaNet filter: only graphs with this heuristic')
-parser.add_argument('--type', dest='gtype', choices=['random', 'er', 'sf'], help='CausaNet filter: only graphs with this type')
+parser.add_argument('--nodes', type=int, choices=[5, 10, 15], help='CauseNet filter: only graphs with this number of nodes')
+parser.add_argument('--edges_class', choices=['d', '1.5d'], help='CauseNet filter: only graphs with edges equal to d or ~1.5d')
+parser.add_argument('--heur', choices=['none', 'degrees', 'semantics'], help='CauseNet filter: only graphs with this heuristic')
+parser.add_argument('--type', dest='gtype', choices=['random', 'er', 'sf'], help='CauseNet filter: only graphs with this type')
 
 args = parser.parse_args()
 
@@ -217,6 +225,14 @@ skeleton_rules_reduction = args.skeleton_rules_reduction
 disable_reground = args.disable_reground
 return_statistics = args.return_statistics
 out_n = args.out_n
+max_path_length = args.max_path_length
+max_conditioning_size = args.max_conditioning_size
+collider_tree_depth = args.collider_tree_depth
+cycle_length = args.cycle_length
+lp_ratio = args.lp_ratio
+sz_ratio = args.sz_ratio
+lb_ratio = args.lb_ratio
+lcyc_ratio = args.lcyc_ratio
 
 model_list = args.models
 names_dict = {
@@ -260,7 +276,7 @@ if load_existing and save_res:
     np.save(results_path / f'stored_results_{version}_cpdag_bkp.npy', mt_res_cpdag.reindex(columns=CPDAG_SUMMARY_COLUMNS).to_numpy())
 
 
-# Helpers for CausaNet filtering
+# Helpers for CauseNet filtering
 def edge_class(d, e):
     if e == d:
         return 'd'
@@ -414,7 +430,15 @@ for dataset_name, src, info in datasets:
                     S_weight=S_weight, pre_grounding=pre_grounding,
                     skeleton_rules_reduction=skeleton_rules_reduction,
                     disable_reground=disable_reground,
-                    return_statistics=return_statistics, out_n=out_n
+                    return_statistics=return_statistics, out_n=out_n,
+                    max_path_length=max_path_length,
+                    max_conditioning_size=max_conditioning_size,
+                    collider_tree_depth=collider_tree_depth,
+                    cycle_length=cycle_length,
+                    lp_ratio=lp_ratio,
+                    sz_ratio=sz_ratio,
+                    lb_ratio=lb_ratio,
+                    lcyc_ratio=lcyc_ratio,
                 )
                 if 'Tensor' in str(type(W_est)):
                     W_est = np.asarray([list(i) for i in W_est])

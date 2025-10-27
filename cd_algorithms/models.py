@@ -29,6 +29,7 @@ gc.set_threshold(0,0,0)
 from abapc import ABAPC
 from cd_algorithms.PC import pc
 from utils.helpers import random_stability, get_freer_gpu
+from math import floor
 
 try:
     from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
@@ -75,7 +76,17 @@ def run_method(X,
                out_n:int=0,
                skeleton_rules_reduction:bool=True,
                pre_grounding:bool=False,
-               device:str=''
+               device:str='',
+               # Bounded Causal ABA parameters
+               max_path_length:int|None=None,
+               max_conditioning_size:int|None=None,
+               collider_tree_depth:int|None=None,
+               cycle_length:int|None=None,
+               # Ratios to derive bounds from n (if provided)
+               lp_ratio:float|None=None,
+               sz_ratio:float|None=None,
+               lb_ratio:float|None=None,
+               lcyc_ratio:float|None=None,
                ):
     """
     Runs the causal discovery method specified by method on the data X
@@ -223,11 +234,34 @@ def run_method(X,
     elif method == 'abapc':
         random_stability(seed)
         start = time.time()
+        # Derive proportional bounds if ratios are provided
+        n = X.shape[1]
+        # max_path_length: 1..n-1 edges
+        if max_path_length is None and lp_ratio is not None and n >= 2:
+            lp_max = max(1, n - 1)
+            max_path_length = max(1, min(lp_max, int(floor(lp_ratio * lp_max))))
+        # max_conditioning_size: 0..n-2
+        if max_conditioning_size is None and sz_ratio is not None and n >= 2:
+            sz_max = max(0, n - 2)
+            max_conditioning_size = max(0, min(sz_max, int(floor(sz_ratio * sz_max))))
+        # collider_tree_depth: 0..n-1
+        if collider_tree_depth is None and lb_ratio is not None and n >= 2:
+            lb_max = max(0, n - 1)
+            collider_tree_depth = max(0, min(lb_max, int(floor(lb_ratio * lb_max))))
+        # cycle_length: 3..n
+        if cycle_length is None and lcyc_ratio is not None and n >= 3:
+            lcyc_max = n
+            cycle_length = max(3, min(lcyc_max, int(floor(lcyc_ratio * lcyc_max))))
         W_est = ABAPC(data=X, alpha=test_alpha, indep_test=test_name,
                       scenario=scenario, S_weight=S_weight, pre_grounding=pre_grounding,
                       skeleton_rules_reduction=skeleton_rules_reduction,
                       disable_reground=disable_reground,
-                      return_statistics=return_statistics, out_n=out_n
+                      return_statistics=return_statistics, out_n=out_n,
+                      # Bounds
+                      max_path_length=max_path_length,
+                      max_conditioning_size=max_conditioning_size,
+                      collider_tree_depth=collider_tree_depth,
+                      cycle_length=cycle_length,
                       )
         elapsed = time.time() - start
         logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')

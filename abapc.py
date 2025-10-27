@@ -38,7 +38,13 @@ def ABAPC(data,
           sepsets = None, smoothing_k=0, S_weight=True,
           skeleton_rules_reduction=True, pre_grounding=False, 
           disable_reground=False, prior_knowledge=None, 
-          return_statistics=False, out_n=0):
+          return_statistics=False, out_n=0,
+          # Bounds for Causal ABA
+          max_path_length: int | None = None,
+          max_conditioning_size: int | None = None,
+          collider_tree_depth: int | None = None,
+          cycle_length: int | None = None,
+          ):
     """
     Args:
     data: np.array
@@ -139,6 +145,11 @@ def ABAPC(data,
         prior_knowledge=prior_knowledge,
         return_statistics=return_statistics,
         out_n=out_n,
+        # Bounds
+        max_path_length=max_path_length,
+        max_conditioning_size=max_conditioning_size,
+        collider_tree_depth=collider_tree_depth,
+        cycle_length=cycle_length,
     )
 
     if multiple_solutions:
