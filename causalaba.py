@@ -139,10 +139,10 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             if not skeleton_rules_reduction or ((X, Y) not in forbidden_edges and (Y, X) not in forbidden_edges):
                 ctl.add("specific", [], f"arrow({X},{Y}).")
             else:
-                logging.warning(f"Required edge ({X},{Y}) is in the forbidden edges set.")
+                logging.warning(f"   Required edge ({X},{Y}) is in the forbidden edges set.")
 
     node_pairs = tuple(dep_facts | indep_facts if skeleton_rules_reduction else combinations(range(n_nodes),2))
-    logging.info(f"{len(node_pairs) / (n_nodes*(n_nodes-1)/2):.2%} of all node pairs will be considered for active paths.")
+    logging.info(f"   {len(node_pairs) / (n_nodes*(n_nodes-1)/2):.2%} of all node pairs will be considered for active paths.")
 
     if skeleton_rules_reduction is False:
         pre_grounding = False
@@ -365,12 +365,12 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
         logging.info(f"Times: {times}")
         remove_n = 0
-        logging.info(f"Number of facts removed: {remove_n}")
+        logging.info(f"Number of facts removed: {remove_n}/{len(facts)}")
 
         ## start removing facts if no models are found
         while n_models == 0 and remove_n < len(facts):
             remove_n += 1
-            logging.info(f"Number of facts removed: {remove_n}")
+            logging.info(f"Number of facts removed: {remove_n}/{len(facts)}")
 
             reground = False
             fact_to_remove = facts[-remove_n]
