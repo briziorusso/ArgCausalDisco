@@ -29,6 +29,8 @@ gc.set_threshold(0,0,0)
 from abapc import ABAPC
 from cd_algorithms.PC import pc
 from utils.helpers import random_stability, get_freer_gpu
+from causallearn.search.PermutationBased.GRaSP import grasp
+from causallearn.search.PermutationBased.BOSS import boss
 
 try:
     from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
@@ -281,5 +283,25 @@ def run_method(X,
             W_est = None
         elapsed = time.time() - start
         logging.info(f'Time taken for CAM: {round(elapsed,2)}s')
+
+    elif method == 'grasp':
+        random_stability(seed)
+        start = time.time()
+
+        G = grasp(X, score_func="local_score_BDeu")
+        W_est = G.graph.T
+        
+        elapsed = time.time() - start
+        logging.info(f'Time taken for GRaSP: {round(elapsed,2)}s')
+    
+    elif method == 'boss':
+        random_stability(seed)
+        start = time.time()
+
+        G = boss(X, score_func="local_score_BDeu")
+        W_est = G.graph.T
+        
+        elapsed = time.time() - start
+        logging.info(f'Time taken for BOSS: {round(elapsed,2)}s')
 
     return W_est, elapsed

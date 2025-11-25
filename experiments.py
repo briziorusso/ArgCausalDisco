@@ -203,6 +203,8 @@ names_dict = {
     'nt': 'NOTEARS-MLP',
     'mcsl': 'MCSL-MLP',
     'ges': 'GES',
+    'grasp': 'GRaSP',
+    'boss': 'BOSS',
     'random': 'Random',
     'random_edge': 'Random (match |E|)'
 }
