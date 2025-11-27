@@ -146,7 +146,7 @@ parser.add_argument('--models', nargs='*', default=['random'], help='List of mod
 parser.add_argument('--results_dir', default='results')
 
 # CausaNet specific
-parser.add_argument('--bifxml_dir', default=os.path.join('datasets', 'causenet_generator', 'bifxmls'), help='Folder with .bifxml graphs (for source=causenet)')
+parser.add_argument('--bifxml_dir', default='synthetic', help='Folder with .bifxml graphs (for source=causenet)')
 parser.add_argument('--simulate_with', choices=['internal', 'pyagrum'], default='internal', help='How to simulate data from DAG (causenet only)')
 
 # BNLearn specific

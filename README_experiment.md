@@ -31,7 +31,7 @@ Use `--resume` to continue runs using progress CSVs. Use `--load_res` to start f
 ## CausaNet Mode
 
 - Source: `--source causenet` (or omit; it is the default)
-- Graphs folder: `--bifxml_dir datasets/causenet_generator/bifxmls`
+- Graphs folder: `--bifxml_dir synthetic`
 - Data simulation: `--simulate_with {internal|pyagrum}` (default: internal)
 - Standardisation: default False for CausaNet; override with `--standardise/--no-standardise`
 
