@@ -1,2 +1,10 @@
+ext_indep(0,2,empty). I=0.6128286404328308, NA
+ext_indep(2,4,empty). I=0.5455991315679418, NA
+ext_dep(2,3,empty). I=0.999414095938528, NA
+ext_indep(0,4,empty). I=0.8695853722843788, NA
 ext_indep(1,2,empty). I=0.9038995848100522, NA
 ext_indep(0,3,empty). I=0.8225743442148599, NA
+ext_indep(1,4,empty). I=0.5912969509638057, NA
+ext_indep(3,4,empty). I=0.8474312912586831, NA
+ext_dep(0,1,empty). I=0.812135537313269, NA
+ext_indep(1,3,empty). I=0.5580940427149431, NA

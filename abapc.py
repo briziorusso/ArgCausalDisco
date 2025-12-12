@@ -24,7 +24,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 from itertools import combinations
 from cd_algorithms.PC import pc
-from causalaba import CausalABA
+from causalaba_increm import CausalABA
 # sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 from utils.helpers import logger_setup, random_stability
 from utils.graph_utils import initial_strength, set_of_models_to_set_of_graphs
