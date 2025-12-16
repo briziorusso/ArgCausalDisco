@@ -524,17 +524,16 @@ def CausalABA(
                         continue
                     s_str = 'empty' if not S else 's' + 'y'.join([str(i) for i in S])
                     ext_premise = f"active_pair({X},{Y}), " + (f"ext_dep({X},{Y},{s_str}), " if ext_flag else "")
-                    ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- {ext_premise}not ap_exists({X},{Y},{s_str}).")
-                    ctl.add("specific", [], f":- {ext_premise}not ap_exists({X},{Y},{s_str}).")
+                    ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- {ext_premise}not ap({X},{Y},_,{s_str}).")
+                    ctl.add("specific", [], f":- {ext_premise}not ap({X},{Y},_,{s_str}).")
                     ctl.add("specific", [], f":- active_pair({X},{Y}), ext_dep({X},{Y},{s_str}), not edge({X},{Y}), not edge({Y},{X}).")
             else:
                 ext_premise = f"active_pair({X},{Y}), " + (f"ext_dep({X},{Y},S), " if ext_flag else "")
-                ctl.add("specific", [], f"indep({X},{Y},S) :- {ext_premise}not ap_exists({X},{Y},S), set(S).")
+                ctl.add("specific", [], f"indep({X},{Y},S) :- {ext_premise}not ap({X},{Y},_,S), set(S).")
         if (X, Y) in indep_facts:
             ext_premise = f"active_pair({X},{Y}), " + (f"ext_indep({X},{Y},S), " if ext_flag else "")
-            ctl.add("specific", [], f"dep({X},{Y},S) :- {ext_premise}ap_exists({X},{Y},S), set(S).")
+            ctl.add("specific", [], f"dep({X},{Y},S) :- {ext_premise}ap({X},{Y},_,S), set(S).")
 
-    ctl.add("specific", [], "ap_exists(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), set(S).")
 
     # Show directives
     if 'arrow' in show:
