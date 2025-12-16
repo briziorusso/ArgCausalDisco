@@ -8,8 +8,32 @@ from collections import defaultdict
 from itertools import combinations, chain
 from copy import deepcopy
 import warnings
+from pathlib import Path
+
 warnings.filterwarnings("ignore")
-os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_R_HOME = REPO_ROOT / "R" / "R-4.1.2"
+R_HOME_ENV = os.environ.get("R_HOME")
+if R_HOME_ENV:
+    R_HOME_PATH = Path(R_HOME_ENV).expanduser()
+else:
+    R_HOME_PATH = DEFAULT_R_HOME
+
+if not R_HOME_PATH.exists():
+    R_HOME_PATH = DEFAULT_R_HOME
+
+os.environ["R_HOME"] = str(R_HOME_PATH)
+R_BIN_PATH = R_HOME_PATH / "bin"
+os.environ["PATH"] = os.pathsep.join([str(R_BIN_PATH), os.environ.get("PATH", "")])
+
+PYTHON_LIB_PATH = Path(sys.prefix) / "lib"
+LD_LIBRARY_PATHS = [R_HOME_PATH / "lib", PYTHON_LIB_PATH]
+existing_ld = os.environ.get("LD_LIBRARY_PATH")
+if existing_ld:
+    LD_LIBRARY_PATHS.extend(existing_ld.split(os.pathsep))
+os.environ["LD_LIBRARY_PATH"] = os.pathsep.join(str(p) for p in LD_LIBRARY_PATHS)
+
 ### To not have the WARNING: ignoring environment value of R_HOME 
 ### set the verbose to False in the launch_R_script function in:
 ### CausalDiscoveryToolbox/cdt/utils/R.py#L155
@@ -20,7 +44,7 @@ except:
     sys.path.append('../CausalDiscoveryToolbox/')
     import cdt
 from cdt.metrics import SHD, SID, SID_CPDAG
-cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
+cdt.SETTINGS.rpath = str(R_BIN_PATH / "Rscript")
 
 def model_to_adjacency_matrix(model:list, num_of_nodes:int)->np.ndarray:
     adj_mat = np.zeros((num_of_nodes,num_of_nodes))
