@@ -225,7 +225,6 @@ def _add_pair_rules_incremental(
         nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1, len(path)-1)]
         nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
         rules.append(f"ap({X},{Y},{qsym},S) :- {qsym}, active_pair({X},{Y}), {nbs_str} not in({X},S), not in({Y},S), set(S).")
-        rules.append(f"ap_exists({X},{Y},S) :- ap({X},{Y},{qsym},S).")
         new_paths.append(tuple(path))
     if rules and part_id is not None:
         part_name = f"incr_{part_id}"
@@ -509,7 +508,6 @@ def CausalABA(
             nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
             nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
             ctl.add("specific", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, active_pair({X},{Y}), {nbs_str} not in({X},S), not in({Y},S), set(S).")
-            ctl.add("specific", [], f"ap_exists({X},{Y},S) :- ap({X},{Y},p{n_p},S).")
             _PAIR_PATHS_ADDED.setdefault((X, Y), set()).add(tuple(path))
 
         # Enforce dep/indep facts exactly as in the non-incremental solver:
@@ -533,6 +531,8 @@ def CausalABA(
         if (X, Y) in indep_facts:
             ext_premise = f"active_pair({X},{Y}), " + (f"ext_indep({X},{Y},S), " if ext_flag else "")
             ctl.add("specific", [], f"dep({X},{Y},S) :- {ext_premise}ap_exists({X},{Y},S), set(S).")
+
+    ctl.add("specific", [], "ap_exists(X,Y,S) :- ap(X,Y,_,S), var(X), var(Y), set(S).")
 
     # Show directives
     if 'arrow' in show:
