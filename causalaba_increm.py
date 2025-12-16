@@ -337,7 +337,8 @@ def CausalABA(
     ext_flag = False
     debug_dump_path = debug_dump_path or os.environ.get("CAUSALABA_DUMP")
     ext_values: dict[Function, bool | None] = {}
-    observer = _DebugObserver()
+    enable_observer = debug_traces or bool(debug_dump_path)
+    observer = _DebugObserver() if enable_observer else None
     if facts_location:
         facts_loc = facts_location.replace(".lp","_I.lp") if weak_constraints else facts_location
         with open(facts_loc, 'r') as file:
@@ -402,11 +403,12 @@ def CausalABA(
     if collider_tree_depth is not None:
         control_args += [f"-c l_b={int(collider_tree_depth)}"]
     ctl = Control(control_args)
-    try:
-        ctl.register_observer(observer)
-        observer.set_ctl(ctl)
-    except Exception:
-        logger.exception("Failed to register debug observer")
+    if observer is not None:
+        try:
+            ctl.register_observer(observer)
+            observer.set_ctl(ctl)
+        except Exception:
+            logger.exception("Failed to register debug observer")
     ctl.configuration.solve.parallel_mode = 1
     ctl.configuration.solve.models = out_n
     ctl.configuration.solver.seed = "2024"
@@ -783,7 +785,7 @@ def CausalABA(
                 logger.debug("[post-solve] satisfiable=%s", result.satisfiable)
         except Exception:
             pass
-        if n_models == 0 and debug_dump_path and remove_n == 1:
+        if observer is not None and n_models == 0 and debug_dump_path and remove_n == 1:
             logger.info("[debug] dumping grounded program to %s", debug_dump_path)
             try:
                 observer.dump_to(debug_dump_path, ext_values, note=f"unsat after removal {remove_n}")
