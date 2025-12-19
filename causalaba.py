@@ -47,6 +47,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 # Additional bounds encoded in ASP
                 collider_tree_depth: int | None = None,
                 cycle_length: int | None = None,
+                dump_specific: str | None = None,
                 )->Control:
 
     logging.info("Compiling the program")
@@ -65,6 +66,14 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     ctl.configuration.solve.opt_mode = opt_mode
     # ctl.configuration.solve.time_limit = 3600.0  # 1 hour time limit
 
+    # Collect specific rules if dumping is requested
+    specific_rules = [] if dump_specific else None
+    def add_specific(rule_str):
+        """Helper to add rule and optionally track it"""
+        ctl.add("specific", [], rule_str)
+        if specific_rules is not None:
+            specific_rules.append(rule_str)
+
     ### Add set definition
     # Enumerate admissible conditioning sets S. If a bound is provided,
     # we restrict to |S| <= max_conditioning_size.
@@ -79,7 +88,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     for S in tqdm(condition_sets):
         for s in S:
             set_str = f"in({s},{'s' + 'y'.join([str(i) for i in S])})."
-            ctl.add("specific", [], set_str)
+            add_specific(set_str)
             logging.debug(f"   {set_str}")
 
     ### Load main program and facts
@@ -94,8 +103,8 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
         if weak_constraints:
             ctl.load(facts_location.replace(".lp","_wc.lp"))
 
-    ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
-    ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+    add_specific("indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+    add_specific("dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
     ### add nonblocker rules
     logging.info("   Adding Specific Rules...")
 
@@ -106,7 +115,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
         forbidden_edges = indep_facts.keys()
         G.remove_edges_from(set(G.edge_list()) & forbidden_edges)
         for (X, Y) in forbidden_edges:
-            ctl.add("specific", [], f":- edge({X},{Y}).")
+            add_specific(f":- edge({X},{Y}).")
     if prior_knowledge is not None:
         # Prune the path-enumeration skeleton using prior knowledge.
         # Keep an undirected edge (u,v) if either orientation is required.
@@ -131,10 +140,10 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             G.remove_edges_from(to_remove)
         for (X, Y) in prior_knowledge.forbidden:
             if not skeleton_rules_reduction or ((X, Y) not in forbidden_edges and (Y, X) not in forbidden_edges):
-                ctl.add("specific", [], f":- arrow({X},{Y}).")
+                add_specific(f":- arrow({X},{Y}).")
         for (X, Y) in prior_knowledge.required:
             if not skeleton_rules_reduction or ((X, Y) not in forbidden_edges and (Y, X) not in forbidden_edges):
-                ctl.add("specific", [], f"arrow({X},{Y}).")
+                add_specific(f"arrow({X},{Y}).")
             else:
                 logging.warning(f"Required edge ({X},{Y}) is in the forbidden edges set.")
 
@@ -167,7 +176,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             n_p += 1
             ### add path rule
             path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
-            ctl.add("specific", [], f"p{n_p} :- {','.join(path_edges)}.")
+            add_specific(f"p{n_p} :- {','.join(path_edges)}.")
             logging.debug(f"   p{n_p} :- {','.join(path_edges)}.")
 
             ### add active path rule
@@ -184,17 +193,17 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                     nb_pred = 'nb_b' if use_bounded_nb else 'nb'
                     nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})" for idx in range(1,len(path)-1)]
                     nbs_str = ", " + ','.join(nbs) if len(nbs) > 0 else ""
-                    ctl.add("specific", [], f"ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
+                    add_specific(f"ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
                     logging.debug(f"   ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
 
                     if S in indep_facts.get((X,Y), set()):
                         ext_premise = f"ext_indep({X},{Y},{s_str}), " if ext_flag else ""
-                        ctl.add("specific", [], f"dep({X},{Y},{s_str}) :- {ext_premise}ap({X},{Y},p{n_p},{s_str}).")
+                        add_specific(f"dep({X},{Y},{s_str}) :- {ext_premise}ap({X},{Y},p{n_p},{s_str}).")
             else:
                 nb_pred = 'nb_b' if use_bounded_nb else 'nb'
                 nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
                 nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
-                ctl.add("specific", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+                add_specific(f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
                 logging.debug(f"   ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
 
         if (X, Y) in dep_facts:
@@ -204,13 +213,13 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                         continue
                     s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
                     ext_premise = f"ext_dep({X},{Y},{s_str}), " if ext_flag else ""
-                    ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- {ext_premise}not ap({X},{Y},_,{s_str}).")
+                    add_specific(f"indep({X},{Y},{s_str}) :- {ext_premise}not ap({X},{Y},_,{s_str}).")
             else:
                 ext_premise = f"ext_dep({X},{Y},S), " if ext_flag else ""
-                ctl.add("specific", [], f"indep({X},{Y},S) :- {ext_premise}not ap({X},{Y},_,S), set(S).")
+                add_specific(f"indep({X},{Y},S) :- {ext_premise}not ap({X},{Y},_,S), set(S).")
         if (X, Y) in indep_facts and pre_grounding is False:
             ext_premise = f"ext_indep({X},{Y},S), " if ext_flag else ""
-            ctl.add("specific", [], f"dep({X},{Y},S) :- {ext_premise}ap({X},{Y},_,S), set(S).")
+            add_specific(f"dep({X},{Y},S) :- {ext_premise}ap({X},{Y},_,S), set(S).")
 
     logging.info(f"{n_p} active paths added.")
 
@@ -231,6 +240,14 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
         ctl.add("base", [], "#show ap/4.")
     if 'dpath' in show:
         ctl.add("base", [], "#show dpath/2.")
+
+    ### Dump specific rules to file if requested
+    if dump_specific is not None:
+        logging.info(f"Dumping specific rules to {dump_specific}")
+        with open(dump_specific, 'w') as f:
+            for rule in specific_rules:
+                f.write(rule + '\n')
+        logging.info(f"Dumped {len(specific_rules)} specific rules")
 
     ### Ground
     logging.info("   Grounding...")
