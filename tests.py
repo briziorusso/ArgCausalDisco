@@ -1178,8 +1178,9 @@ class TestABAPC(unittest.TestCase):
         sepset = defaultdict(list)
 
         sepset.update({
-            (1, 2): [((0,), 1), ((), 0)],
-            (0, 1): [((), 0.02)],
+            (1, 2): [((0,), 1), ### For indep(1,2,s1) -> Expected I approx 1.0
+                     ((), 0)],  ### For dep(1,2,empty) -> Expected I approx 1.0
+            (0, 1): [((), 0.02)],   ### For indep(0,1,empty) -> Expected I approx 0.75 and to be rejected
         })
         ## run ABAPC
         B_est = ABAPC(data=data, alpha=0.01, indep_test='fisherz', scenario=scenario, 
@@ -1509,9 +1510,9 @@ TestCausalABA().five_node_colombo_example()
 TestCausalABA().five_node_sprinkler_example()
 # TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
 TestCausalABA().six_node_example()
-# TestCausalABA().randomG(7, 1, "ER", 2024)
-# TestCausalABA().randomG(8, 1, "ER", 2024)
-# TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
+TestCausalABA().randomG(7, 1, "ER", 2024)
+TestCausalABA().randomG(8, 1, "ER", 2024)
+TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
 # # TestCausalABA().randomG(10, 1, "ER", 2024) ## 4 models
 # # TestCausalABA().randomG(11, 1, "ER", 2024) ## 48 models
 # # TestCausalABA().randomG(12, 1, "ER", 2024) ## 12 models
@@ -1519,7 +1520,7 @@ TestCausalABA().six_node_example()
 
 TestCausalABA().five_node_colombo_PC_facts()
 # TestCausalABA().five_node_sprinkler_PC_facts() ### this does not pass currently
-# TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)  ## This test takes a little longer
+TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)  ## This test takes a little longer
 
 TestMetricsDAG().test_metrics_perfect()
 TestMetricsDAG().test_metrics_errors()
@@ -1534,7 +1535,7 @@ TestABAPC().test_abapc_four_node_example()
 TestCausalABA().four_node_example_arbitrary()
 TestCausalABA().four_node_example_indeps()
 
-TestABAPC().test_abapc_mock_three_var() ### TO FIX: 
+TestABAPC().test_abapc_mock_three_var()
 TestABAPC().test_abapc_mock_three_var_collider()
 TestABAPC().test_pre_grounding() ## not applicable to incremental
 TestABAPC().test_incremental_solving() ## not applicable to fully incremental
