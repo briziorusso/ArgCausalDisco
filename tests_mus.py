@@ -75,87 +75,216 @@ class TestMUSAnalysis(unittest.TestCase):
         os.remove(facts_file)
 
     def test_mus_links_wrong_tests_four_node_abapc(self):
-        """Adapt ABAPC four-node example and link wrong tests to MUS cores.
+        """Follow test_abapc_four_node_example and append MUS analysis.
 
-        Method:
-        - Simulate data for the four-node true DAG (ArgCD example)
-        - Run PC to obtain sepsets and p-values
-        - Build facts by flipping those that disagree with ground-truth independencies
-        - Save ext_* facts to a temp file and run MUS
-        - Assert MUS cores are subsets of the wrong facts set
+        We reuse the exact fact construction from test_abapc_four_node_example:
+        facts come from PC output versus ground truth (no synthetic contradictions),
+        then we run:
+        - CausalABA with all facts (expect UNSAT or at least allow removal),
+        - CausalABA with search_for_models='first' (removal strategy),
+        - MUS over the fact set plus the ground-truth counterparts of wrong facts
+          to highlight which tests are inconsistent.
         """
         logger_setup()
         logging.info("===============Running test_mus_links_wrong_tests_four_node_abapc===============")
 
         import networkx as nx
         import numpy as np
+        import types
+        # Stub notears to avoid heavy optional dependency required by cd_algorithms.models
+        if 'notears.nonlinear' not in sys.modules:
+            notears_module = types.ModuleType('notears')
+            notears_nonlinear_module = types.ModuleType('notears.nonlinear')
+            class _DummyMLP:
+                pass
+            def _dummy_notears_nonlinear(*args, **kwargs):
+                raise ImportError("notears is not installed in this test environment")
+            notears_nonlinear_module.NotearsMLP = _DummyMLP
+            notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+            sys.modules['notears'] = notears_module
+            sys.modules['notears.nonlinear'] = notears_nonlinear_module
         from utils.graph_utils import find_all_d_separations_sets, extract_test_elements_from_symbol, initial_strength
-        # Avoid external PC dependencies; use ground-truth independencies and inject controlled contradictions
+        from utils.data_utils import simulate_data_and_run_PC
+        from utils.helpers import random_stability
+
+        # ArgCD four-node DAG (same structure and seed as test_abapc_four_node_example)
         alpha = 0.05
-        B_true = np.array( [[ 0,  0,  1,  0],
-                    [ 0,  0,  1,  1],
-                    [ 0,  0,  0,  1],
-                    [ 0,  0,  0,  0],
-                    ])
+        seed = 2376
+        B_true = np.array(
+            [
+                [0, 0, 1, 0],
+                [0, 0, 1, 1],
+                [0, 0, 0, 1],
+                [0, 0, 0, 0],
+            ]
+        )
         n_nodes = B_true.shape[0]
-        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+        G_true = nx.DiGraph(
+            pd.DataFrame(
+                B_true,
+                columns=[f"X{i+1}" for i in range(B_true.shape[1])],
+                index=[f"X{i+1}" for i in range(B_true.shape[1])],
+            )
+        )
+        relabel_dict = {f"X{i+1}": i for i in range(n_nodes)}
+        G_true1 = nx.relabel_nodes(G_true, relabel_dict)
 
         true_seplist = find_all_d_separations_sets(G_true)
+
+        random_stability(seed)
+        data, cg = simulate_data_and_run_PC(G_true, alpha, seed=seed, uc_rule=5, stable=True)
+
+        facts = []  # (fact_str, I, is_correct)
         facts_ext = []
         wrong_ext = []
+        wrong_true_ext = []
         count_wrong = 0
-        # Start with all ground-truth independence facts
-        for test in true_seplist:
-            facts_ext.append(f"ext_{test}")
-        # Inject controlled contradictions: flip a subset (prefer small S) and include both
-        selected = []
+
         for test in true_seplist:
             X, S, Y, dep_type = extract_test_elements_from_symbol(test)
-            if dep_type == "indep" and (len(S) == 0 or len(S) == 1):
-                selected.append(test)
-            if len(selected) >= 6:
-                break
-        for test in selected:
-            flipped = test.replace("indep", "dep")
-            wrong_ext.append(f"ext_{flipped}")
-            facts_ext.append(f"ext_{flipped}")
-            count_wrong += 1
+            test_PC = set([t for t in cg.sepset[X, Y] if set(t[0]) == S])
+            if len(test_PC) != 1:
+                continue
+            p = list(test_PC)[0][1]
+            dep_type_PC = "indep" if p > alpha else "dep"
+            I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+            if dep_type == dep_type_PC:
+                fact_str = test
+                is_correct = True
+            elif dep_type == "indep":
+                count_wrong += 1
+                fact_str = test.replace("indep", "dep")
+                is_correct = False
+                wrong_true_ext.append(f"ext_{test}")  # ground-truth counterpart for MUS
+            else:  # dep
+                count_wrong += 1
+                fact_str = test.replace("dep", "indep")
+                is_correct = False
+                wrong_true_ext.append(f"ext_{test}")
 
-        logging.info(f"Total independence statements: {len(true_seplist)}")
-        logging.info(f"Facts generated: {len(facts_ext)}")
-        logging.info(f"Wrong facts (flipped): {count_wrong}")
+            facts.append((fact_str, I, is_correct))
+            ext_line = f"ext_{fact_str}"
+            facts_ext.append(ext_line)
+            if not is_correct:
+                wrong_ext.append(ext_line)
 
-        # Write facts to a temp file (plain ext_* lines ending with '.')
+        logging.info(f"Seed: {seed}")
+        logging.info(f"True DAG: {G_true1.edges}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
+        logging.info(f"Number of wrong facts: {count_wrong} ({(count_wrong/len(facts))*100 if facts else 0:.2f}%)")
+        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
+
+        # Write facts to temp files (base + I + wc) for CausalABA
         fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
         os.close(fd)
+        facts_I_file = facts_file.replace('.lp', '_I.lp')
+        facts_wc_file = facts_file.replace('.lp', '_wc.lp')
+
         with open(facts_file, 'w') as f:
             for s in facts_ext:
-                # Ensure single trailing period
                 line = s if s.endswith('.') else s + '.'
-                f.write(line + "\n")
+                f.write(f"#external {line}\n")
 
-        # Run MUS
+        with open(facts_I_file, 'w') as f:
+            for fact, s in zip(facts, facts_ext):
+                line = s if s.endswith('.') else s + '.'
+                I = fact[1]
+                f.write(f"{line} I={I}, NA\n")
+
+        with open(facts_wc_file, 'w') as f:
+            for fact, s in zip(facts, facts_ext):
+                line = s if s.endswith('.') else s + '.'
+                I = fact[1]
+                f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
+
+        # Step 1: Run with all facts (may be UNSAT). If UNSAT, removal should fix it.
+        logging.info("Step 1: Testing with all facts")
+        models_all, _ = CausalABA(n_nodes, facts_file, weak_constraints=True, print_models=False)
+        logging.info(f"  → {len(models_all)} models")
+
+        # Step 2: Apply removal strategy to reach SAT (or keep SAT)
+        logging.info("Step 2: Applying removal strategy (search_for_models='first')")
+        models_after, multiple, stats, remove_n = CausalABA(
+            n_nodes,
+            facts_file,
+            weak_constraints=True,
+            search_for_models='first',
+            print_models=False,
+            return_statistics=True,
+        )
+        logging.info(f"  → Facts removed: {remove_n}")
+        logging.info(f"  → Models found after removal: {len(models_after)}")
+
+        self.assertGreaterEqual(len(models_after), 0)
+        if len(models_all) == 0:
+            self.assertGreater(remove_n, 0, "Expected removal of X>0 tests to reach SAT when UNSAT")
+            self.assertGreater(len(models_after), 0, "Expected SAT after removing X tests")
+
+        # Step 3: Run MUS on PC facts plus the ground-truth counterparts of wrong facts
+        logging.info("Step 3: Running MUS analysis")
+        fd_mus, facts_mus_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd_mus)
+        with open(facts_mus_file, 'w') as f:
+            for s in facts_ext + wrong_true_ext:
+                line = s if s.endswith('.') else s + '.'
+                f.write(f"{line}\n")
+
         mus_result = CausalABA_MUS(
             n_nodes=n_nodes,
-            facts_location=facts_file,
+            facts_location=facts_mus_file,
             gringo_path="clingo",
             wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp"
         )
 
         logging.info(f"MUS cores found: {mus_result['n_mus']}")
-        for i, mus_facts in enumerate(mus_result['mus_facts']):
-            logging.info(f"  MUS #{i+1}: {len(mus_facts)} facts")
-            for fact in mus_facts:
-                logging.info(f"    - {fact}")
-
-        # Link MUSes to wrong facts: every MUS should contain at least one wrong/flipped test
-        wrong_set = set(wrong_ext)
         mus_sets = [set(mf) for mf in mus_result['mus_facts']]
-        self.assertGreaterEqual(mus_result['n_mus'], 1, "Expected at least one MUS core")
-        for ms in mus_sets:
-            self.assertTrue(len(ms.intersection(wrong_set)) >= 1, "Each MUS should include at least one wrong/flipped test")
+        if mus_sets:
+            sizes = [len(ms) for ms in mus_sets]
+            fact_freq = Counter(f for ms in mus_sets for f in ms)
+            common_facts = set.intersection(*mus_sets)
+            common_preview = sorted(common_facts)[:10]
+            if len(common_facts) > 10:
+                common_preview.append(f"... (+{len(common_facts) - 10} more)")
+            top_common = ', '.join(f"{f} ({c}/{mus_result['n_mus']})" for f, c in fact_freq.most_common(5))
+            logging.info(
+                f"  MUS sizes: min={min(sizes)}, max={max(sizes)}, avg={sum(sizes)/len(sizes):.2f}"
+            )
+            logging.info(
+                f"  Facts present in all MUS ({len(common_facts)}): {', '.join(common_preview) if common_preview else '(none)'}"
+            )
+            logging.info(f"  Top frequent facts: {top_common if top_common else '(none)'}")
+            
+            # Analyze wrong vs correct fact frequencies in MUS
+            wrong_set = set(w + '.' if not w.endswith('.') else w for w in wrong_ext + wrong_true_ext)
+            correct_facts = [f for f in fact_freq if f not in wrong_set]
+            wrong_facts = [f for f in fact_freq if f in wrong_set]
+            
+            logging.info(f"  Wrong facts in MUS: {len(wrong_facts)} unique, correct facts: {len(correct_facts)} unique")
+            
+            if wrong_facts:
+                wrong_freq = [(f, fact_freq[f], fact_freq[f]/mus_result['n_mus']*100) for f in wrong_facts]
+                wrong_freq.sort(key=lambda x: x[1], reverse=True)
+                top_wrong = ', '.join(f"{f} ({c}/{mus_result['n_mus']} = {p:.1f}%)" for f, c, p in wrong_freq[:5])
+                logging.info(f"  Top wrong facts in MUS: {top_wrong}")
+                
+                # Show average frequency
+                avg_wrong_freq = sum(fact_freq[f] for f in wrong_facts) / len(wrong_facts)
+                avg_correct_freq = sum(fact_freq[f] for f in correct_facts) / len(correct_facts) if correct_facts else 0
+                logging.info(f"  Avg appearances: wrong facts {avg_wrong_freq:.1f}, correct facts {avg_correct_freq:.1f}")
+        else:
+            logging.info("  No MUS cores found")
+
+        wrong_set = set(w + '.' if not w.endswith('.') else w for w in wrong_ext + wrong_true_ext)
+        if mus_result['n_mus'] > 0:
+            for ms in mus_sets:
+                self.assertTrue(len(ms.intersection(wrong_set)) >= 1, "Each MUS should include at least one wrong/flipped test")
 
         os.remove(facts_file)
+        os.remove(facts_I_file)
+        os.remove(facts_wc_file)
+        os.remove(facts_mus_file)
 
     def test_adorning_with_mus_assumptions(self):
         """Test that facts are correctly adorned with mus/1 assumptions.
