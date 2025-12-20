@@ -454,6 +454,7 @@ def CausalABA(
                     block_pairs.add(_pair_key(X, Y))
 
     # Match the baseline solver ordering: remove lowest-I facts first.
+    # Match baseline ordering: sort by strength only.
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
     block_pairs |= {_pair_key(x, y) for (x, y) in indep_facts}
     if debug_enabled:

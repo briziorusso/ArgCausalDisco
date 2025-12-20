@@ -1519,15 +1519,15 @@ TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
 # # TestCausalABA().randomG(15, 1, "ER", 2024) ## 13:10 minutes, 80 models
 
 TestCausalABA().five_node_colombo_PC_facts()
-# TestCausalABA().five_node_sprinkler_PC_facts() ### this does not pass currently
+# TestCausalABA().five_node_sprinkler_PC_facts() ### this does not pass because of ordering of facts
 TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)  ## This test takes a little longer
 
 TestMetricsDAG().test_metrics_perfect()
 TestMetricsDAG().test_metrics_errors()
 
-# TestABAPC().test_abapc() ### 1 model instead of 4
-# TestABAPC().test_abapc_indeps() ### 5 errors instead of 7
-# TestABAPC().test_abapc_bnlearn() ### 4 errors instead of 0
+TestABAPC().test_abapc() 
+TestABAPC().test_abapc_indeps() 
+TestABAPC().test_abapc_bnlearn()
 
 ## Paper Examples
 TestCausalABA().four_node_PC_facts() 
