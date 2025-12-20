@@ -151,9 +151,10 @@ def run_mus_solver(program_str: str, gringo_path: str = "clingo",
                         mus_predicates = re.findall(r'mus\((\d+)\)', mus_content)
                         mus = [int(n) for n in mus_predicates]
                         mus_list.append(mus)
-                        logging.info(f"Found MUS: {mus}")
+                        # Per-MUS logs are noisy; keep at debug level.
+                        logging.debug(f"Found MUS: {mus}")
                     else:
-                        logging.info("Found empty MUS (program is satisfiable)")
+                        logging.debug("Found empty MUS (program is satisfiable)")
         
         logging.info(f"Total MUS found: {len(mus_list)}")
         
@@ -358,8 +359,12 @@ def CausalABA_MUS(n_nodes: int, facts_location: str = "",
         return {'mus_list': [], 'mus_facts': [], 'n_mus': 0, 'fact_mapping': {}}
     
     logging.info(f"Found {len(facts)} facts to analyze for MUS")
-    for idx, fact in fact_mapping.items():
-        logging.info(f"  Fact {idx}: {fact}")
+    if len(fact_mapping) <= 20:
+        for idx, fact in fact_mapping.items():
+            logging.debug(f"  Fact {idx}: {fact}")
+    else:
+        preview = [fact_mapping[i] for i in sorted(fact_mapping.keys())[:5]]
+        logging.debug(f"  Preview facts: {preview} (showing 5 of {len(fact_mapping)})")
     
     # Step 2: Build MUS program with assumption layer on top of CausalABA encoding
     program = build_mus_program(n_nodes, facts, facts_location)
@@ -374,7 +379,11 @@ def CausalABA_MUS(n_nodes: int, facts_location: str = "",
         mus_facts.append(mus_fact_list)
     
     if mus_list:
-        logging.info(f"MUS facts (resolved): {mus_facts}")
+        sizes = [len(m) for m in mus_list]
+        logging.info(
+            f"MUS facts resolved: {len(mus_list)} cores (min={min(sizes)}, max={max(sizes)}, avg={sum(sizes)/len(sizes):.2f})"
+        )
+        logging.debug(f"MUS facts (resolved): {mus_facts}")
     else:
         logging.info("MUS facts (resolved): []")
     

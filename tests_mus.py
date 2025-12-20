@@ -16,12 +16,13 @@ import logging
 import tempfile
 import unittest
 from datetime import datetime
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+from collections import Counter
 import pandas as pd
-if not hasattr(pd, '__version__'):
-    pd.__version__ = '2.2.3'
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, PROJECT_ROOT)
+sys.path.insert(0, os.path.dirname(PROJECT_ROOT))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, 'src'))
 
 from causalaba import CausalABA
 from causalaba_mus import CausalABA_MUS
