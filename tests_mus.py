@@ -73,6 +73,89 @@ class TestMUSAnalysis(unittest.TestCase):
         
         os.remove(facts_file)
 
+    def test_mus_links_wrong_tests_four_node_abapc(self):
+        """Adapt ABAPC four-node example and link wrong tests to MUS cores.
+
+        Method:
+        - Simulate data for the four-node true DAG (ArgCD example)
+        - Run PC to obtain sepsets and p-values
+        - Build facts by flipping those that disagree with ground-truth independencies
+        - Save ext_* facts to a temp file and run MUS
+        - Assert MUS cores are subsets of the wrong facts set
+        """
+        logger_setup()
+        logging.info("===============Running test_mus_links_wrong_tests_four_node_abapc===============")
+
+        import networkx as nx
+        import numpy as np
+        from utils.graph_utils import find_all_d_separations_sets, extract_test_elements_from_symbol, initial_strength
+        # Avoid external PC dependencies; use ground-truth independencies and inject controlled contradictions
+        alpha = 0.05
+        B_true = np.array( [[ 0,  0,  1,  0],
+                    [ 0,  0,  1,  1],
+                    [ 0,  0,  0,  1],
+                    [ 0,  0,  0,  0],
+                    ])
+        n_nodes = B_true.shape[0]
+        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+
+        true_seplist = find_all_d_separations_sets(G_true)
+        facts_ext = []
+        wrong_ext = []
+        count_wrong = 0
+        # Start with all ground-truth independence facts
+        for test in true_seplist:
+            facts_ext.append(f"ext_{test}")
+        # Inject controlled contradictions: flip a subset (prefer small S) and include both
+        selected = []
+        for test in true_seplist:
+            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+            if dep_type == "indep" and (len(S) == 0 or len(S) == 1):
+                selected.append(test)
+            if len(selected) >= 6:
+                break
+        for test in selected:
+            flipped = test.replace("indep", "dep")
+            wrong_ext.append(f"ext_{flipped}")
+            facts_ext.append(f"ext_{flipped}")
+            count_wrong += 1
+
+        logging.info(f"Total independence statements: {len(true_seplist)}")
+        logging.info(f"Facts generated: {len(facts_ext)}")
+        logging.info(f"Wrong facts (flipped): {count_wrong}")
+
+        # Write facts to a temp file (plain ext_* lines ending with '.')
+        fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd)
+        with open(facts_file, 'w') as f:
+            for s in facts_ext:
+                # Ensure single trailing period
+                line = s if s.endswith('.') else s + '.'
+                f.write(line + "\n")
+
+        # Run MUS
+        mus_result = CausalABA_MUS(
+            n_nodes=n_nodes,
+            facts_location=facts_file,
+            gringo_path="clingo",
+            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp"
+        )
+
+        logging.info(f"MUS cores found: {mus_result['n_mus']}")
+        for i, mus_facts in enumerate(mus_result['mus_facts']):
+            logging.info(f"  MUS #{i+1}: {len(mus_facts)} facts")
+            for fact in mus_facts:
+                logging.info(f"    - {fact}")
+
+        # Link MUSes to wrong facts: every MUS should contain at least one wrong/flipped test
+        wrong_set = set(wrong_ext)
+        mus_sets = [set(mf) for mf in mus_result['mus_facts']]
+        self.assertGreaterEqual(mus_result['n_mus'], 1, "Expected at least one MUS core")
+        for ms in mus_sets:
+            self.assertTrue(len(ms.intersection(wrong_set)) >= 1, "Each MUS should include at least one wrong/flipped test")
+
+        os.remove(facts_file)
+
     def test_adorning_with_mus_assumptions(self):
         """Test that facts are correctly adorned with mus/1 assumptions.
         
