@@ -23,9 +23,26 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from pathlib import Path
-# import sys
-# sys.path.append("utils")
-# sys.path.append("cd_algorithms")
+import sys
+import types
+
+# Stub notears to avoid heavy optional dependency required by cd_algorithms.models.
+# This keeps the test suite runnable in minimal environments.
+if 'notears.nonlinear' not in sys.modules:
+    notears_module = types.ModuleType('notears')
+    notears_nonlinear_module = types.ModuleType('notears.nonlinear')
+
+    class _DummyMLP:
+        pass
+
+    def _dummy_notears_nonlinear(*args, **kwargs):
+        raise ImportError("notears is not installed in this test environment")
+
+    notears_nonlinear_module.NotearsMLP = _DummyMLP
+    notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+    notears_module.nonlinear = notears_nonlinear_module
+    sys.modules['notears'] = notears_module
+    sys.modules['notears.nonlinear'] = notears_nonlinear_module
 from utils.graph_utils import find_all_d_separations_sets, model_to_set_of_arrows, set_of_models_to_set_of_graphs, dag2cpdag, extract_test_elements_from_symbol, initial_strength, DAGMetrics
 from utils.helpers import logger_setup, random_stability
 from utils.data_utils import simulate_discrete_data, simulate_dag, simulate_data_and_run_PC, load_bnlearn_data_dag
@@ -1494,57 +1511,58 @@ class TestIncrementalABA(unittest.TestCase):
         # Should become SAT after removing one fact
         self.assertGreater(len(models), 0)
 
-start = datetime.now()
-TestCausalABA().three_node_all_graphs()
-TestCausalABA().three_node_graph_empty()
-TestCausalABA().collider()
-TestCausalABA().chains_confounder()
-TestCausalABA().one_edge()
-TestCausalABA().incompatible_Is()
-TestCausalABA().four_node_all_graphs()
-TestCausalABA().four_node_shapPC_example()
-TestCausalABA().four_node_shapPC_example_noI0()
-TestCausalABA().incompatible_chain()
-TestCausalABA().five_node_all_graphs()
-TestCausalABA().five_node_colombo_example()
-TestCausalABA().five_node_sprinkler_example()
-# TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
-TestCausalABA().six_node_example()
-TestCausalABA().randomG(7, 1, "ER", 2024)
-TestCausalABA().randomG(8, 1, "ER", 2024)
-TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
-# # TestCausalABA().randomG(10, 1, "ER", 2024) ## 4 models
-# # TestCausalABA().randomG(11, 1, "ER", 2024) ## 48 models
-# # TestCausalABA().randomG(12, 1, "ER", 2024) ## 12 models
-# # TestCausalABA().randomG(15, 1, "ER", 2024) ## 13:10 minutes, 80 models
+if __name__ == '__main__':
+    start = datetime.now()
+    TestCausalABA().three_node_all_graphs()
+    TestCausalABA().three_node_graph_empty()
+    TestCausalABA().collider()
+    TestCausalABA().chains_confounder()
+    TestCausalABA().one_edge()
+    TestCausalABA().incompatible_Is()
+    TestCausalABA().four_node_all_graphs()
+    TestCausalABA().four_node_shapPC_example()
+    TestCausalABA().four_node_shapPC_example_noI0()
+    TestCausalABA().incompatible_chain()
+    TestCausalABA().five_node_all_graphs()
+    TestCausalABA().five_node_colombo_example()
+    TestCausalABA().five_node_sprinkler_example()
+    # TestCausalABA().six_node_all_graphs() ## This test takes 8 minutes to run, 3.7M models
+    TestCausalABA().six_node_example()
+    TestCausalABA().randomG(7, 1, "ER", 2024)
+    TestCausalABA().randomG(8, 1, "ER", 2024)
+    TestCausalABA().randomG(9, 1, "ER", 2024) ## 13 seconds, 4 models
+    # # TestCausalABA().randomG(10, 1, "ER", 2024) ## 4 models
+    # # TestCausalABA().randomG(11, 1, "ER", 2024) ## 48 models
+    # # TestCausalABA().randomG(12, 1, "ER", 2024) ## 12 models
+    # # TestCausalABA().randomG(15, 1, "ER", 2024) ## 13:10 minutes, 80 models
 
-TestCausalABA().five_node_colombo_PC_facts()
-# TestCausalABA().five_node_sprinkler_PC_facts() ### this does not pass because of ordering of facts
-TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)  ## This test takes a little longer
+    TestCausalABA().five_node_colombo_PC_facts()
+    # TestCausalABA().five_node_sprinkler_PC_facts() ### this does not pass because of ordering of facts
+    TestCausalABA().randomG_PC_facts(4, 1, "ER", 2024)  ## This test takes a little longer
 
-TestMetricsDAG().test_metrics_perfect()
-TestMetricsDAG().test_metrics_errors()
+    TestMetricsDAG().test_metrics_perfect()
+    TestMetricsDAG().test_metrics_errors()
 
-TestABAPC().test_abapc() 
-TestABAPC().test_abapc_indeps() 
-TestABAPC().test_abapc_bnlearn()
+    TestABAPC().test_abapc()
+    TestABAPC().test_abapc_indeps()
+    TestABAPC().test_abapc_bnlearn()
 
-## Paper Examples
-TestCausalABA().four_node_PC_facts() 
-TestABAPC().test_abapc_four_node_example()
-TestCausalABA().four_node_example_arbitrary()
-TestCausalABA().four_node_example_indeps()
+    ## Paper Examples
+    TestCausalABA().four_node_PC_facts()
+    TestABAPC().test_abapc_four_node_example()
+    TestCausalABA().four_node_example_arbitrary()
+    TestCausalABA().four_node_example_indeps()
 
-TestABAPC().test_abapc_mock_three_var()
-TestABAPC().test_abapc_mock_three_var_collider()
-TestABAPC().test_pre_grounding() ## not applicable to incremental
-TestABAPC().test_incremental_solving() ## not applicable to fully incremental
+    TestABAPC().test_abapc_mock_three_var()
+    TestABAPC().test_abapc_mock_three_var_collider()
+    TestABAPC().test_pre_grounding() ## not applicable to incremental
+    TestABAPC().test_incremental_solving() ## not applicable to fully incremental
 
-### bounded causal ABA tests
-TestBoundedCausalABA().test_path_length_bound_prunes_long_paths()
-TestBoundedCausalABA().test_collider_depth_bound_effect()
-TestBoundedCausalABA().test_cycle_length_bound_allows_long_cycle()
+    ### bounded causal ABA tests
+    TestBoundedCausalABA().test_path_length_bound_prunes_long_paths()
+    TestBoundedCausalABA().test_collider_depth_bound_effect()
+    TestBoundedCausalABA().test_cycle_length_bound_allows_long_cycle()
 
-TestIncrementalABA().unsat_to_sat_three_nodes()
+    TestIncrementalABA().unsat_to_sat_three_nodes()
 
-logging.info(f"Total time={str(datetime.now()-start)}")
+    logging.info(f"Total time={str(datetime.now()-start)}")
