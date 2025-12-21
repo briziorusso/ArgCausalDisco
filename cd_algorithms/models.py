@@ -88,6 +88,7 @@ def run_method(X,
                lb_ratio:float|None=None,
                lcyc_ratio:float|None=None,
                threads:int|None=None,
+               abapc_solver:str='incremental',
                ):
     """
     Runs the causal discovery method specified by method on the data X
@@ -258,6 +259,7 @@ def run_method(X,
                       skeleton_rules_reduction=skeleton_rules_reduction,
                       disable_reground=disable_reground,
                       return_statistics=return_statistics, out_n=out_n,
+                      use_incremental=(abapc_solver == 'incremental'),
                       # Bounds
                       max_path_length=max_path_length,
                       max_conditioning_size=max_conditioning_size,

@@ -24,7 +24,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 from itertools import combinations
 from cd_algorithms.PC import pc
-from causalaba_increm import CausalABA
+from causalaba_increm import CausalABA as CausalABA_increm
 # sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 from utils.helpers import logger_setup, random_stability
 from utils.graph_utils import initial_strength, set_of_models_to_set_of_graphs
@@ -45,6 +45,7 @@ def ABAPC(data,
           collider_tree_depth: int | None = None,
           cycle_length: int | None = None,
           threads: int | None = None,
+          use_incremental: bool = True,
           ):
     """
     Args:
@@ -131,7 +132,13 @@ def ABAPC(data,
         return facts_location_I, sepsets
 
     set_of_model_sets = []
-    model_sets, multiple_solutions = CausalABA(
+    # Choose solver variant lazily to avoid unnecessary imports.
+    if use_incremental:
+        CausalSolver = CausalABA_increm
+    else:
+        from causalaba import CausalABA as CausalSolver
+
+    model_sets, multiple_solutions = CausalSolver(
         n_nodes,
         facts_location,
         weak_constraints=True,

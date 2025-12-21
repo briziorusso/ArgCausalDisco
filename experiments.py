@@ -194,6 +194,7 @@ parser.add_argument('--disable_reground', type=str_to_bool, default=True, metava
 parser.add_argument('--return_statistics', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC: return statistics')
 parser.add_argument('--out_n', type=int, default=5, help='ABAPC: number of output models to request')   
 parser.add_argument('--threads', type=int, default=None, help='ABAPC/CausalABA: clingo solver threads (-t); smaller uses less memory')
+parser.add_argument('--abapc_solver', choices=['incremental', 'baseline'], default='incremental', help='Use incremental or baseline CausalABA inside ABAPC')
 
 # Bounded Causal ABA parameters
 parser.add_argument('--max_path_length', type=int, default=None, help='Bound: maximum simple path length |p| (lp)')
@@ -249,6 +250,7 @@ lp_ratio = args.lp_ratio
 sz_ratio = args.sz_ratio
 lb_ratio = args.lb_ratio
 lcyc_ratio = args.lcyc_ratio
+abapc_solver = args.abapc_solver
 
 model_list = args.models
 names_dict = {
@@ -506,6 +508,7 @@ for dataset_name, src, info in datasets:
                     lb_ratio=lb_ratio,
                     lcyc_ratio=lcyc_ratio,
                     threads=threads,
+                    abapc_solver=abapc_solver,
                 )
                 if 'Tensor' in str(type(W_est)):
                     W_est = np.asarray([list(i) for i in W_est])
