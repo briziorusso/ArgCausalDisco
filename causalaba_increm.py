@@ -189,137 +189,9 @@ def _add_pair_rules_incremental(
     ext_values: dict[Function, bool | None] | None = None,
     debug_traces: bool = False,
 ):
-    global _INCR_COUNTER, _PAIR_PATHS_ADDED
-    debug_enabled = _should_debug(debug_traces)
-    G = rx.generators.complete_graph(n_nodes)
-    # Prune skeleton as compile_and_ground would: remove undirected edges for
-    # any pair that has (at least one) independence statement.
-    forbidden_edges = set(indep_facts)
-    if debug_enabled:
-        logger.debug("[increm] Pruning skeleton for pairs: %s", forbidden_edges)
-    if forbidden_edges:
-        # rustworkx raises if asked to remove a non-existent edge; intersect first.
-        existing_edges = set(G.edge_list())
-        G.remove_edges_from(existing_edges & forbidden_edges)
-    if prior_knowledge is not None:
-        req_dir = set(prior_knowledge.required)
-        req_undirected = {tuple(sorted((a, b))) for (a, b) in req_dir}
-        forb_dir = set(prior_knowledge.forbidden)
-        forb_counts = {}
-        for a, b in forb_dir:
-            key = tuple(sorted((a, b)))
-            forb_counts[key] = forb_counts.get(key, 0) + 1
-        to_remove = set()
-        for (u, v) in G.edge_list():
-            key = tuple(sorted((u, v)))
-            if key in req_undirected:
-                continue
-            if forb_counts.get(key, 0) >= 2:
-                to_remove.add((u, v))
-        if to_remove:
-            G.remove_edges_from(to_remove)
-
-    use_bounded_nb = collider_tree_depth is not None and collider_tree_depth > 0
-    nb_pred = 'nb_b' if use_bounded_nb else 'nb'
-
-    # In incremental mode with skeleton pruning, we typically only care about the
-    # conditioning sets that appear in the provided facts. Grounding rules with a
-    # free set variable can trigger clingo grounding-time auxiliary atom clashes
-    # in incremental parts (seen as "redefinition of atom <'_'>").
-    #
-    # Therefore, for non-pre-grounding mode we generate ap/4 rules for concrete
-    # set symbols rather than using a variable S.
-    allowed_cond_sets: list[tuple[int, ...]] = []
-    if not pre_grounding:
-        allowed: set[tuple[int, ...]] = {()}
-        for v in indep_facts.values():
-            allowed.update(v)
-        for v in dep_facts.values():
-            allowed.update(v)
-        if max_conditioning_size is not None:
-            allowed = {s for s in allowed if len(s) <= max_conditioning_size}
-        allowed_cond_sets = sorted(allowed)
-
-    rules: list[str] = []
-    new_paths: list[tuple[int, ...]] = []
-    part_id = None
-    qid = 0
-    already = _PAIR_PATHS_ADDED.setdefault((X, Y), set())
-    for path in _iter_paths_with_cutoff(G, X, Y, max_path_length):
-        tpath = tuple(path)
-        if tpath in already:
-            continue
-        if debug_enabled:
-            logger.debug("[increm] Adding path rule for pair (%s,%s): %s", X, Y, path)
-        if part_id is None:
-            _INCR_COUNTER += 1
-            part_id = _INCR_COUNTER
-        qid += 1
-        path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
-        if pre_grounding:
-            condition_sets = set()
-            if (X, Y) in dep_facts:
-                condition_sets.update(dep_facts[(X, Y)])
-            if (X, Y) in indep_facts:
-                condition_sets.update(indep_facts[(X, Y)])
-            for S in condition_sets:
-                if max_conditioning_size is not None and len(S) > max_conditioning_size:
-                    continue
-                s_str = 'empty' if not S else 's' + 'y'.join([str(i) for i in S])
-                nbs = [
-                    f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})"
-                    for idx in range(1, len(path) - 1)
-                ]
-                body_parts = list(path_edges)
-                body_parts.extend(nbs)
-                rules.append(f"ap3({X},{Y},{s_str}) :- {', '.join(body_parts)}, not in({X},{s_str}), not in({Y},{s_str}), set({s_str}).")
-        else:
-            # Ground ap/4 and dep/3 rules for concrete conditioning sets.
-            for cond in allowed_cond_sets:
-                s_str = 'empty' if not cond else 's' + 'y'.join([str(i) for i in cond])
-                nbs = [
-                    f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})"
-                    for idx in range(1, len(path) - 1)
-                ]
-                body_parts = list(path_edges)
-                body_parts.extend(nbs)
-                body_parts.append(f"not in({X},{s_str})")
-                body_parts.append(f"not in({Y},{s_str})")
-                body_parts.append(f"set({s_str})")
-                rules.append(f"ap3({X},{Y},{s_str}) :- {', '.join(body_parts)}.")
-        new_paths.append(tpath)
-
-    # Note: ext_dep/ext_indep consistency rules are added once in the base program.
-    # Incremental parts only need to introduce new ap/4 (and ap3/3) instances.
-
-    if rules and part_id is not None:
-        # Avoid underscores in program part names; in some clingo versions this
-        # can interact badly with incremental grounding (seen as atom '_' clashes).
-        part_name = f"incrp{part_id}"
-        payload = "\n".join(rules)
-        try:
-            ctl.add(part_name, [], payload)
-            ctl.ground([(part_name, [])])
-            logger.info("[increm] Grounding incremental part for pair (%s,%s) with %s rules.", X, Y, len(rules))
-        except Exception:
-            try:
-                sym_summary = {}
-                for atom in ctl.symbolic_atoms:
-                    name = str(atom.symbol)
-                    sym_summary[name] = sym_summary.get(name, 0) + 1
-                logger.error(
-                    "[increm] symbolic atom names before failure (count=%s): %s",
-                    len(sym_summary),
-                    list(sym_summary.keys()),
-                )
-            except Exception:
-                pass
-            logger.exception("[increm] failed to ground part %s with rules:\n%s", part_name, payload)
-            raise
-        _PAIR_PATHS_ADDED[(X, Y)].update(new_paths)
-        logger.info("[increm] Added %s rules for pair (%s,%s) in part %s", len(rules), X, Y, part_name)
-        if debug_enabled:
-            logger.debug("[increm] Rules:\n%s", "\n".join(rules))
+    # Option A uses a Bayes-ball ASP encoding to derive ap3/3 for all required
+    # (X,Y,S) triples in one shot. Incremental path grounding is no longer used.
+    return None
 
 
 def _count_atoms(ctl, name: str, arity: int | None = None) -> int:
@@ -556,35 +428,107 @@ def CausalABA(
     for i in range(n_nodes):
         ctl.add("guards_use", [], f"var({i}).")
 
-    # Always include the trivial active-path case: if X and Y are adjacent (edge/2),
-    # then there is an active path of length 1 between them (unless conditioning on
-    # the endpoints). This is part of the baseline semantics (path [X,Y]) and also
-    # prevents clingo from simplifying rules that depend on ap/4 when no longer paths
-    # were grounded initially under skeleton pruning.
-    ctl.add(
-        "specific",
-        [],
-        "ap(X,Y,dir,S) :- edge(X,Y), not in(X,S), not in(Y,S), set(S), var(X), var(Y), X!=Y.",
-    )
+    # Compute d-connection (active trails) using a Bayes-ball style encoding.
+    #
+    # This replaces explicit enumeration of all simple paths (which is exponential
+    # and dominated initial grounding time/memory). Bayes-ball explores a finite
+    # state space per (start node, conditioning set), which is polynomial.
+    #
+    # We only compute ap3/3 for (X,Y,S) triples that occur in the observational
+    # facts (dep/3 or indep/3), which keeps grounding compact under
+    # skeleton_rules_reduction.
+    #
+    # Compatibility notes:
+    # - Some legacy tests and call-sites expect `ap/4` atoms to exist. We expose
+    #   `ap/4` as an alias of `ap3/3` (with a dummy third argument) so callers can
+    #   continue using `show=["ap"]`.
+    # - `max_path_length` is implemented as a bound on the number of Bayes-ball
+    #   edge traversals (steps).
+    # - `collider_tree_depth` bounds how far a collider-descendant in S can be to
+    #   open colliders; when > 0 we use the bounded encoding's `dpath_k/3`.
 
-    # Collapsing active-path existence to ap3/3 (exists some ap/4).
-    # This avoids relying on `not ap(X,Y,_,S)` which is *not* reactive to
-    # newly introduced path-id symbols in incremental grounding.
-    ctl.add(
-        "specific",
-        [],
-        "ap3(X,Y,S) :- ap(X,Y,P,S), var(X), var(Y), set(S), X!=Y.",
-    )
-    ctl.add(
-        "specific",
-        [],
-        "ap3(X,Y,S) :- ap3(Y,X,S), var(X), var(Y), set(S), X!=Y.",
-    )
+    bb_lines: list[str] = []
+    bb_lines.append("% Query triples to evaluate (restrict to one orientation to match constraints).")
+    bb_lines.append("qpair(X,Y,S) :- dep(X,Y,S), set(S), var(X), var(Y), X<Y, X!=Y.")
+    bb_lines.append("qpair(X,Y,S) :- indep(X,Y,S), set(S), var(X), var(Y), X<Y, X!=Y.")
+    if 'ap' in show:
+        # Legacy/debug mode: allow users/tests to ask for active-path atoms even
+        # without providing dep/indep facts.
+        bb_lines.append("want_ap.")
+        bb_lines.append("qpair(X,Y,S) :- want_ap, set(S), var(X), var(Y), X<Y, X!=Y.")
+    bb_lines.append("")
+    bb_lines.append("bb_start(X,S) :- qpair(X,_,S), set(S), var(X).")
+    bb_lines.append("")
 
-    # NOTE: ap_guard_set/1 externals were previously used to prevent irreversible
-    # grounding-time simplification of rules using `not ap(...)`. The current solver
-    # enforces facts via ap3/3 constraints (positive dependency on ap/4), so we do not
-    # rely on `not ap(...)` and do not need these guards.
+    # Ancestor-of-observed (incl. observed itself): used to open colliders.
+    bb_lines.append("% Ancestor-of-observed (incl. observed itself): used to open colliders.")
+    bb_lines.append("anc_obs(N,S) :- in(N,S), set(S), var(N).")
+    if collider_tree_depth is not None and collider_tree_depth > 0:
+        # Depth-bounded collider activation: only observed descendants within l_b
+        # directed steps can open a collider.
+        #
+        # This matches the legacy bounded semantics (see causalaba_bounded.lp's
+        # collider_desc_b/4).
+        bb_lines.append("anc_obs(N,S) :- in(Z,S), dpath_k(N,Z,K), set(S), var(N), var(Z), N!=Z, K=1..l_b.")
+    else:
+        bb_lines.append("anc_obs(N,S) :- in(Z,S), dpath(N,Z), set(S), var(N), var(Z), N!=Z.")
+    bb_lines.append("")
+
+    # Collider detection: a node with at least two distinct parents.
+    bb_lines.append("is_collider(N) :- arrow(P,N), arrow(Q,N), P<Q, P!=Q, var(P), var(Q), var(N).")
+    bb_lines.append("")
+
+    if max_path_length is not None:
+        l_ap = int(max_path_length)
+        bb_lines.append(f"#const l_ap={l_ap}.")
+        bb_lines.append("")
+        bb_lines.append("% Bayes-ball states with step counter T (0..l_ap).")
+        bb_lines.append("bb_u(X,X,S,0) :- bb_start(X,S).")
+        bb_lines.append("bb_d(X,X,S,0) :- bb_start(X,S).")
+        bb_lines.append("")
+        bb_lines.append("% Move to parents (consume one step).")
+        bb_lines.append("% - From bb_u (arrive from child): propagate to parents if current node is not observed.")
+        bb_lines.append("bb_u(X,P,S,T1) :- bb_u(X,N,S,T), T < l_ap, T1 = T+1, not in(N,S), arrow(P,N), var(P), var(N), set(S).")
+        bb_lines.append("% - From bb_d (arrive from parent): propagate to parents only through opened colliders.")
+        bb_lines.append("bb_u(X,P,S,T1) :- bb_d(X,N,S,T), T < l_ap, T1 = T+1, is_collider(N), anc_obs(N,S), arrow(P,N), var(P), var(N), set(S).")
+        bb_lines.append("")
+        bb_lines.append("% Move to children (consume one step; only if current node is not observed).")
+        bb_lines.append("bb_d(X,C,S,T1) :- bb_u(X,N,S,T), T < l_ap, T1 = T+1, not in(N,S), arrow(N,C), var(N), var(C), set(S).")
+        bb_lines.append("bb_d(X,C,S,T1) :- bb_d(X,N,S,T), T < l_ap, T1 = T+1, not in(N,S), arrow(N,C), var(N), var(C), set(S).")
+        bb_lines.append("")
+        bb_lines.append("% Active connection exists between X and Y given S iff Bayes-ball can reach Y.")
+        bb_lines.append("ap3(X,Y,S) :- qpair(X,Y,S), not in(X,S), not in(Y,S), bb_u(X,Y,S,_).")
+        bb_lines.append("ap3(X,Y,S) :- qpair(X,Y,S), not in(X,S), not in(Y,S), bb_d(X,Y,S,_).")
+    else:
+        bb_lines.append("% Bayes-ball states: bb_u(start,node,set) = reached node with ball arriving from a child.")
+        bb_lines.append("%                  bb_d(start,node,set) = reached node with ball arriving from a parent.")
+        bb_lines.append("bb_u(X,X,S) :- bb_start(X,S).")
+        bb_lines.append("bb_d(X,X,S) :- bb_start(X,S).")
+        bb_lines.append("")
+        bb_lines.append("% Move to parents.")
+        bb_lines.append("% - If the ball arrives from a child (bb_u), only propagate further if the")
+        bb_lines.append("%   current node is NOT observed.")
+        bb_lines.append("% - If the ball arrives from a parent (bb_d), propagate to parents iff the")
+        bb_lines.append("%   current node is an ancestor of an observed node (incl. observed itself).")
+        bb_lines.append("bb_u(X,P,S) :- bb_u(X,N,S), not in(N,S), arrow(P,N), var(P), var(N), set(S).")
+        bb_lines.append("bb_u(X,P,S) :- bb_d(X,N,S), is_collider(N), anc_obs(N,S), arrow(P,N), var(P), var(N), set(S).")
+        bb_lines.append("")
+        bb_lines.append("% Move to children (only if current node is not observed).")
+        bb_lines.append("bb_d(X,C,S) :- bb_u(X,N,S), not in(N,S), arrow(N,C), var(N), var(C), set(S).")
+        bb_lines.append("bb_d(X,C,S) :- bb_d(X,N,S), not in(N,S), arrow(N,C), var(N), var(C), set(S).")
+        bb_lines.append("")
+        bb_lines.append("% Active connection exists between X and Y given S iff Bayes-ball can reach Y.")
+        bb_lines.append("ap3(X,Y,S) :- qpair(X,Y,S), not in(X,S), not in(Y,S), bb_u(X,Y,S).")
+        bb_lines.append("ap3(X,Y,S) :- qpair(X,Y,S), not in(X,S), not in(Y,S), bb_d(X,Y,S).")
+
+    bb_lines.append("")
+    bb_lines.append("% Backwards-compatible alias for callers/tests that expect ap/4 atoms.")
+    bb_lines.append("ap(X,Y,bb,S) :- ap3(X,Y,S), qpair(X,Y,S).")
+
+    ctl.add("specific", [], "\n".join(bb_lines))
+
+    # NOTE: We no longer rely on explicit ap/4 path atoms nor on `not ap(...)`, so
+    # the earlier ap_guard_set/1 machinery is not needed.
     # Dynamic skeleton blocking is only needed/valid when using externals.
     if skeleton_rules_reduction and ext_flag and block_pairs:
         ctl.add("specific", [], ":- block_edge(X,Y), edge(X,Y), X<Y, var(X), var(Y).")
@@ -661,86 +605,15 @@ def CausalABA(
                 assumptions.append((sym, bool(val)))
         return assumptions
 
-    # Build skeleton and add path rules without adding ":- edge(X,Y)." constraints
+    # No explicit path enumeration: Bayes-ball encoding above derives ap3/3.
     logger.info("   Adding Specific Rules...")
-    n_p = 0
-    G = rx.generators.complete_graph(n_nodes)
-    forbidden_edges = set()
-    if skeleton_rules_reduction:
-        forbidden_edges = set(indep_facts)
-        if debug_enabled:
-            logger.debug("[skeleton] Forbidden edges: %s", forbidden_edges)
-        if forbidden_edges and not ext_flag:
-            # Non-external runs do not have a removal loop; keep the original
-            # pruning behavior to match the baseline solver.
-            existing_edges = set(G.edge_list())
-            G.remove_edges_from(existing_edges & forbidden_edges)
-        # For ext_flag runs, we keep the full skeleton and rely on dynamic
-        # block_edge/2 externals to disable/enable adjacency.
-    if prior_knowledge is not None:
-        # prune undirected skeleton using prior knowledge (symmetric with causalaba)
-        req_dir = set(prior_knowledge.required)
-        req_undirected = {tuple(sorted((a, b))) for (a, b) in req_dir}
-        forb_dir = set(prior_knowledge.forbidden)
-        forb_counts = {}
-        for a, b in forb_dir:
-            key = tuple(sorted((a, b)))
-            forb_counts[key] = forb_counts.get(key, 0) + 1
-        to_remove = set()
-        for (u, v) in G.edge_list():
-            key = tuple(sorted((u, v)))
-            if key in req_undirected:
-                continue
-            if forb_counts.get(key, 0) >= 2:
-                to_remove.add((u, v))
-        if to_remove:
-            G.remove_edges_from(to_remove)
 
+    if prior_knowledge is not None:
         # Enforce prior knowledge on arrows as in original compile_and_ground
         for (Xf, Yf) in prior_knowledge.forbidden:
             ctl.add("specific", [], f":- arrow({Xf},{Yf}).")
         for (Xr, Yr) in prior_knowledge.required:
             ctl.add("specific", [], f"arrow({Xr},{Yr}).")
-
-    node_pairs = tuple(dep_facts | indep_facts) if skeleton_rules_reduction else tuple(combinations(range(n_nodes),2))
-    use_bounded_nb = bounded_encoding_active and collider_tree_depth is not None and collider_tree_depth > 0
-    for (X, Y) in node_pairs:
-        if debug_enabled:
-            logger.debug("[skeleton] Adding path rules for pair (%s,%s)", X, Y)
-        for path in _iter_paths_with_cutoff(G, X, Y, max_path_length):
-            if debug_enabled:
-                logger.debug("[skeleton] Found path for pair (%s,%s): %s", X, Y, path)
-            n_p += 1
-            path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
-            ctl.add("specific", [], f"p{n_p} :- {','.join(path_edges)}.")
-            if debug_enabled:
-                logger.debug("[rules] added specific p%s :- %s.", n_p, ",".join(path_edges))
-            nb_pred = 'nb_b' if use_bounded_nb else 'nb'
-            if pre_grounding:
-                condition_sets = set()
-                if (X, Y) in dep_facts:
-                    condition_sets.update(dep_facts[(X, Y)])
-                if (X, Y) in indep_facts:
-                    condition_sets.update(indep_facts[(X, Y)])
-                for S in condition_sets:
-                    if max_conditioning_size is not None and len(S) > max_conditioning_size:
-                        continue
-                    s_str = 'empty' if not S else 's' + 'y'.join([str(i) for i in S])
-                    nbs = [
-                        f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})"
-                        for idx in range(1, len(path) - 1)
-                    ]
-                    nbs_str = ", " + ','.join(nbs) if len(nbs) > 0 else ""
-                    ctl.add("specific", [], f"ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
-            else:
-                nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
-                nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
-                ctl.add(
-                    "specific",
-                    [],
-                    f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).",
-                )
-            _PAIR_PATHS_ADDED.setdefault((X, Y), set()).add(tuple(path))
 
 
 
