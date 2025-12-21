@@ -256,10 +256,6 @@ def _add_pair_rules_incremental(
             part_id = _INCR_COUNTER
         qid += 1
         path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
-        # Use a unique term (not a predicate) as the path identifier in ap/4.
-        # We inline the edge literals directly in ap rules to avoid clingo
-        # incremental grounding crashes seen with auxiliary 0-arity predicates.
-        pid = f"p{part_id}x{qid}"
         if pre_grounding:
             condition_sets = set()
             if (X, Y) in dep_facts:
@@ -276,9 +272,7 @@ def _add_pair_rules_incremental(
                 ]
                 body_parts = list(path_edges)
                 body_parts.extend(nbs)
-                rules.append(f"ap({X},{Y},{pid},{s_str}) :- {', '.join(body_parts)}.")
-                # Make ap3/3 reactive: assert it alongside new ap/4 atoms.
-                rules.append(f"ap3({X},{Y},{s_str}) :- ap({X},{Y},{pid},{s_str}).")
+                rules.append(f"ap3({X},{Y},{s_str}) :- {', '.join(body_parts)}, not in({X},{s_str}), not in({Y},{s_str}), set({s_str}).")
         else:
             # Ground ap/4 and dep/3 rules for concrete conditioning sets.
             for cond in allowed_cond_sets:
@@ -292,9 +286,7 @@ def _add_pair_rules_incremental(
                 body_parts.append(f"not in({X},{s_str})")
                 body_parts.append(f"not in({Y},{s_str})")
                 body_parts.append(f"set({s_str})")
-                rules.append(f"ap({X},{Y},{pid},{s_str}) :- {', '.join(body_parts)}.")
-                # Make ap3/3 reactive: assert it alongside new ap/4 atoms.
-                rules.append(f"ap3({X},{Y},{s_str}) :- ap({X},{Y},{pid},{s_str}), set({s_str}).")
+                rules.append(f"ap3({X},{Y},{s_str}) :- {', '.join(body_parts)}.")
         new_paths.append(tpath)
 
     # Note: ext_dep/ext_indep consistency rules are added once in the base program.
@@ -306,13 +298,6 @@ def _add_pair_rules_incremental(
         part_name = f"incrp{part_id}"
         payload = "\n".join(rules)
         try:
-            # clingo 5.8 can hit sporadic incremental grounding errors
-            # ("redefinition of atom <'_'>") when grounding after a solve.
-            # cleanup() reduces internal baggage before adding a new part.
-            try:
-                ctl.cleanup()
-            except Exception:
-                pass
             ctl.add(part_name, [], payload)
             ctl.ground([(part_name, [])])
             logger.info("[increm] Grounding incremental part for pair (%s,%s) with %s rules.", X, Y, len(rules))
@@ -596,38 +581,10 @@ def CausalABA(
         "ap3(X,Y,S) :- ap3(Y,X,S), var(X), var(Y), set(S), X!=Y.",
     )
 
-    # Guard against clingo simplifications when skeleton_rules_reduction prunes all paths
-    # for a fact-pair at initial grounding time.
-    #
-    # Without this, rules like:
-    #   indep(X,Y,S) :- ext_dep(X,Y,S), not ap(X,Y,_,S).
-    # can get simplified into an unconditional indep/3 if ap/4 has no supporting rules,
-    # and later incremental grounding of ap/4 will not undo that simplification.
-    #
-    # We introduce a set-level external ap_guard_set/1 and a dummy ap/4 head that keeps
-    # ap/4 "alive" for *all* pairs and conditioning sets during grounding. This prevents
-    # irreversible simplification of rules depending on `not ap(...)` when skeleton
-    # pruning initially yields no paths for some pairs.
-    if skeleton_rules_reduction:
-        # IMPORTANT: clingo may simplify rules depending on `ap/4` at grounding time
-        # if `ap/4` has no support yet (e.g., due to skeleton pruning).
-        #
-        # To prevent irreversible simplification, we:
-        #  1) ground a part that only DECLARES the externals (so we can assign them)
-        #  2) assign them to None (undefined) BEFORE grounding the rules that use them
-        #  3) ground the rules that introduce dummy `ap/4` atoms guarded by these externals
-        #  4) later, during solving, force these externals to False.
-        for S in base_condition_sets:
-            if max_conditioning_size is not None and len(S) > max_conditioning_size:
-                continue
-            s_sym = _cond_to_symbol(S)
-            ctl.add("guards_decl", [], f"#external ap_guard_set({s_sym}).")
-            ctl.add(
-                "guards_use",
-                [],
-                f"ap(X,Y,guard,{s_sym}) :- ap_guard_set({s_sym}), var(X), var(Y), X!=Y.",
-            )
-            ap_guard_syms.append(Function("ap_guard_set", [s_sym]))
+    # NOTE: ap_guard_set/1 externals were previously used to prevent irreversible
+    # grounding-time simplification of rules using `not ap(...)`. The current solver
+    # enforces facts via ap3/3 constraints (positive dependency on ap/4), so we do not
+    # rely on `not ap(...)` and do not need these guards.
     # Dynamic skeleton blocking is only needed/valid when using externals.
     if skeleton_rules_reduction and ext_flag and block_pairs:
         ctl.add("specific", [], ":- block_edge(X,Y), edge(X,Y), X<Y, var(X), var(Y).")
@@ -688,13 +645,7 @@ def CausalABA(
                 # as hard constraints; assign_external is a no-op in that case.
                 continue
 
-        # Ensure ap_guard externals are always forced false.
-        for sym in ap_guard_syms:
-            try:
-                ctl.assign_external(sym, False)
-                ext_values[sym] = False
-            except Exception:
-                continue
+
 
     def _assumptions_from_exts() -> list[tuple[int, bool]]:
         """
@@ -810,21 +761,6 @@ def CausalABA(
 
     # Ground the full base
     logger.info("   Grounding full base program...")
-    # Ground guard externals in two phases:
-    # - First declare them so assign_external works
-    # - Then temporarily set them TRUE while grounding guard rules, so `ap/4` atoms
-    #   exist in the grounding domain and rules depending on ap/4 are not dropped.
-    # - Later (before solving) we force these externals to FALSE.
-    if skeleton_rules_reduction and ap_guard_syms:
-        ctl.ground([("guards_decl", [])])
-        for sym in ap_guard_syms:
-            try:
-                ctl.assign_external(sym, True)
-                ext_values[sym] = True
-            except Exception:
-                pass
-        ctl.ground([("guards_use", [])])
-
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     if debug_enabled:
         try:
@@ -840,18 +776,6 @@ def CausalABA(
     # Activate all pair guards by default
     models = []
     n_models = 0
-
-    # Always disable ap_guard_set/1 before solving. During grounding we may
-    # temporarily set these externals to True to prevent clingo simplification,
-    # but leaving them enabled changes semantics (e.g., makes ap3/3 true for all
-    # pairs) and can cause UNSAT on valid instances.
-    if ap_guard_syms:
-        for sym in ap_guard_syms:
-            try:
-                ctl.assign_external(sym, False)
-                ext_values[sym] = False
-            except Exception:
-                pass
 
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
@@ -878,14 +802,6 @@ def CausalABA(
             ext_values[ext_sym] = True
             if debug_enabled:
                 logger.debug("[assign] %s = %s", ext_sym, True)
-        # Force ap_guard/3 false (guards were kept undefined during grounding).
-        if ap_guard_syms:
-            for sym in ap_guard_syms:
-                try:
-                    ctl.assign_external(sym, False)
-                    ext_values[sym] = False
-                except Exception:
-                    pass
         _assign_block_edges()
         last_syms = None
         logger.info("   Solving...")
@@ -944,24 +860,10 @@ def CausalABA(
     if (search_for_models != 'first') or n_models > 0:
         return [models, False]
 
-    # We are about to enter the incremental removal/grounding loop.
-    # Calling cleanup() here resets the solver state between solve() calls.
-    # This avoids rare clingo issues when grounding new program parts after
-    # an UNSAT solve (seen as "redefinition of atom <'_'>" during ground()).
-    try:
-        ctl.cleanup()
-    except Exception:
-        pass
-
     remove_n = 0
 
     # (no dep_guard refresh: ext_dep semantics stay reactive via ap_guard_set + not ap)
     while n_models == 0 and remove_n < len(facts):
-        # Ensure the solver state is clean before any new incremental grounding.
-        try:
-            ctl.cleanup()
-        except Exception:
-            pass
         remove_n += 1
         fact_to_remove = facts[-remove_n]
         rem_X, rem_S, rem_Y, dep_type, fact_str = fact_to_remove[:5]
