@@ -23,8 +23,7 @@ def _iter_paths_with_cutoff(graph, src, dst, cutoff):
     try:
         return (
             rx.all_simple_paths(graph, src, dst, cutoff=cutoff)
-            if cutoff is not None
-            else rx.all_simple_paths(graph, src, dst)
+            if cutoff is not None else rx.all_simple_paths(graph, src, dst)
         )
     except TypeError:
         paths = rx.all_simple_paths(graph, src, dst)
@@ -71,7 +70,13 @@ def _block_sym(x: int, y: int) -> Function:
 _INCR_COUNTER = 0
 # For each ordered pair, keep track of which concrete node paths have already been grounded.
 _PAIR_PATHS_ADDED: dict[tuple[int, int], set[tuple[int, ...]]] = {}
-_ACTIVE_PAIR_STATE: dict[tuple[int, int], bool] = {}
+
+
+def _reset_incremental_state() -> None:
+    """Reset module-level incremental caches between solver runs."""
+    global _INCR_COUNTER, _PAIR_PATHS_ADDED
+    _INCR_COUNTER = 0
+    _PAIR_PATHS_ADDED = {}
 
 
 class _DebugObserver:
@@ -217,13 +222,32 @@ def _add_pair_rules_incremental(
     use_bounded_nb = collider_tree_depth is not None and collider_tree_depth > 0
     nb_pred = 'nb_b' if use_bounded_nb else 'nb'
 
+    # In incremental mode with skeleton pruning, we typically only care about the
+    # conditioning sets that appear in the provided facts. Grounding rules with a
+    # free set variable can trigger clingo grounding-time auxiliary atom clashes
+    # in incremental parts (seen as "redefinition of atom <'_'>").
+    #
+    # Therefore, for non-pre-grounding mode we generate ap/4 rules for concrete
+    # set symbols rather than using a variable S.
+    allowed_cond_sets: list[tuple[int, ...]] = []
+    if not pre_grounding:
+        allowed: set[tuple[int, ...]] = {()}
+        for v in indep_facts.values():
+            allowed.update(v)
+        for v in dep_facts.values():
+            allowed.update(v)
+        if max_conditioning_size is not None:
+            allowed = {s for s in allowed if len(s) <= max_conditioning_size}
+        allowed_cond_sets = sorted(allowed)
+
     rules: list[str] = []
     new_paths: list[tuple[int, ...]] = []
     part_id = None
     qid = 0
     already = _PAIR_PATHS_ADDED.setdefault((X, Y), set())
     for path in _iter_paths_with_cutoff(G, X, Y, max_path_length):
-        if tuple(path) in already:
+        tpath = tuple(path)
+        if tpath in already:
             continue
         if debug_enabled:
             logger.debug("[increm] Adding path rule for pair (%s,%s): %s", X, Y, path)
@@ -232,56 +256,66 @@ def _add_pair_rules_incremental(
             part_id = _INCR_COUNTER
         qid += 1
         path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
-        qsym = f"q{part_id}_{qid}"
-        rules.append(f"{qsym} :- active_pair({X},{Y}), {','.join(path_edges)}.")
+        # Use a unique term (not a predicate) as the path identifier in ap/4.
+        # We inline the edge literals directly in ap rules to avoid clingo
+        # incremental grounding crashes seen with auxiliary 0-arity predicates.
+        pid = f"p{part_id}x{qid}"
         if pre_grounding:
             condition_sets = set()
             if (X, Y) in dep_facts:
                 condition_sets.update(dep_facts[(X, Y)])
             if (X, Y) in indep_facts:
                 condition_sets.update(indep_facts[(X, Y)])
-                for S in condition_sets:
-                    if max_conditioning_size is not None and len(S) > max_conditioning_size:
-                        continue
-                    s_str = 'empty' if not S else 's' + 'y'.join([str(i) for i in S])
-                    nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})" for idx in range(1, len(path)-1)]
-                    nbs_str = ", " + ','.join(nbs) if len(nbs) > 0 else ""
-                    rules.append(f"ap({X},{Y},{qsym},{s_str}) :- {qsym}, active_pair({X},{Y}){nbs_str}.")
-                    # Restore the consistency check for this concrete conditioning set so it
-                    # is not simplified away when new dep/indep atoms appear incrementally.
-                    rules.append(
-                        f":- dep({X},{Y},{s_str}), indep({X},{Y},{s_str}), not in({X},{s_str}), not in({Y},{s_str})."
-                    )
-                    if S in indep_facts.get((X, Y), set()):
-                        ext_premise = f"ext_indep({X},{Y},{s_str}), " if ext_flag else ""
-                        rules.append(f"dep({X},{Y},{s_str}) :- {ext_premise}ap({X},{Y},{qsym},{s_str}).")
+            for S in condition_sets:
+                if max_conditioning_size is not None and len(S) > max_conditioning_size:
+                    continue
+                s_str = 'empty' if not S else 's' + 'y'.join([str(i) for i in S])
+                nbs = [
+                    f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})"
+                    for idx in range(1, len(path) - 1)
+                ]
+                body_parts = list(path_edges)
+                body_parts.extend(nbs)
+                rules.append(f"ap({X},{Y},{pid},{s_str}) :- {', '.join(body_parts)}.")
+                # Make ap3/3 reactive: assert it alongside new ap/4 atoms.
+                rules.append(f"ap3({X},{Y},{s_str}) :- ap({X},{Y},{pid},{s_str}).")
         else:
-            nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1, len(path)-1)]
-            nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
-            rules.append(f"ap({X},{Y},{qsym},S) :- {qsym}, active_pair({X},{Y}), {nbs_str} not in({X},S), not in({Y},S), set(S).")
-        new_paths.append(tuple(path))
-    if pre_grounding and (X, Y) in dep_facts:
-        for S in dep_facts[(X, Y)]:
-            if max_conditioning_size is not None and len(S) > max_conditioning_size:
-                continue
-            s_str = 'empty' if not S else 's' + 'y'.join([str(i) for i in S])
-            ext_premise = f"ext_dep({X},{Y},{s_str}), " if ext_flag else ""
-            rules.append(f"indep({X},{Y},{s_str}) :- {ext_premise}not ap({X},{Y},_,{s_str}).")
+            # Ground ap/4 and dep/3 rules for concrete conditioning sets.
+            for cond in allowed_cond_sets:
+                s_str = 'empty' if not cond else 's' + 'y'.join([str(i) for i in cond])
+                nbs = [
+                    f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})"
+                    for idx in range(1, len(path) - 1)
+                ]
+                body_parts = list(path_edges)
+                body_parts.extend(nbs)
+                body_parts.append(f"not in({X},{s_str})")
+                body_parts.append(f"not in({Y},{s_str})")
+                body_parts.append(f"set({s_str})")
+                rules.append(f"ap({X},{Y},{pid},{s_str}) :- {', '.join(body_parts)}.")
+                # Make ap3/3 reactive: assert it alongside new ap/4 atoms.
+                rules.append(f"ap3({X},{Y},{s_str}) :- ap({X},{Y},{pid},{s_str}), set({s_str}).")
+        new_paths.append(tpath)
+
+    # Note: ext_dep/ext_indep consistency rules are added once in the base program.
+    # Incremental parts only need to introduce new ap/4 (and ap3/3) instances.
+
     if rules and part_id is not None:
-        part_name = f"incr_{part_id}"
-        logger.info("Grounding incremental part for pair (%s,%s) with %s rules.", X, Y, len(rules))
-        active_pair_sym = Function("active_pair", [Number(X), Number(Y)])
-        decls: list[str] = []
-        if (X, Y) not in _ACTIVE_PAIR_STATE:
-            decls.append(f"#external active_pair({X},{Y}).")
-        payload = "\n".join(decls + rules)
+        # Avoid underscores in program part names; in some clingo versions this
+        # can interact badly with incremental grounding (seen as atom '_' clashes).
+        part_name = f"incrp{part_id}"
+        payload = "\n".join(rules)
         try:
+            # clingo 5.8 can hit sporadic incremental grounding errors
+            # ("redefinition of atom <'_'>") when grounding after a solve.
+            # cleanup() reduces internal baggage before adding a new part.
+            try:
+                ctl.cleanup()
+            except Exception:
+                pass
             ctl.add(part_name, [], payload)
             ctl.ground([(part_name, [])])
-            ctl.assign_external(active_pair_sym, True)
-            _ACTIVE_PAIR_STATE[(X, Y)] = True
-            if ext_values is not None:
-                ext_values[active_pair_sym] = True
+            logger.info("[increm] Grounding incremental part for pair (%s,%s) with %s rules.", X, Y, len(rules))
         except Exception:
             try:
                 sym_summary = {}
@@ -399,18 +433,14 @@ def CausalABA(
     debug_enabled = _should_debug(debug_traces)
     logger.info("Running CausalABA")
     # Reset per-run incremental bookkeeping to avoid cross-run contamination
-    global _INCR_COUNTER
-    _INCR_COUNTER = 0
-    global _ACTIVE_PAIR_STATE
-    _ACTIVE_PAIR_STATE = {}
-    global _PAIR_PATHS_ADDED
-    _PAIR_PATHS_ADDED = {}
+    _reset_incremental_state()
 
     indep_facts: dict[tuple, set[tuple]] = {}
     dep_facts: dict[tuple, set[tuple]] = {}
     facts = []
     ext_flag = False
     block_pairs: set[tuple[int, int]] = set()
+    ap_guard_syms: list[Function] = []
     debug_dump_path = debug_dump_path or os.environ.get("CAUSALABA_DUMP")
     ext_values: dict[Function, bool | None] = {}
     enable_observer = debug_traces or bool(debug_dump_path)
@@ -514,26 +544,123 @@ def CausalABA(
         if weak_constraints:
             ctl.load(facts_location.replace('.lp','_wc.lp'))
 
-    ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
-    ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
-    if skeleton_rules_reduction and block_pairs:
+    if ext_flag:
+        ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+        ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+
+    # Enforce observational facts against active-path existence.
+    # This works for both:
+    # - plain facts loaded as dep/3, indep/3, and
+    # - externalized facts mapped into dep/3, indep/3.
+    #
+    # Use ap3/3 (existential over ap/4) for reactivity and to avoid wildcard issues.
+    ctl.add(
+        "specific",
+        [],
+        ":- dep(X,Y,S), not ap3(X,Y,S), set(S), var(X), var(Y), X<Y, not in(X,S), not in(Y,S).",
+    )
+    ctl.add(
+        "specific",
+        [],
+        ":- indep(X,Y,S), ap3(X,Y,S), set(S), var(X), var(Y), X<Y, not in(X,S), not in(Y,S).",
+    )
+
+    # Provide explicit var/1 facts up-front (redundant with the encoding) so that
+    # guard rules that quantify over all variable pairs can be grounded safely.
+    # We keep these in a dedicated program part that we can ground early.
+    for i in range(n_nodes):
+        ctl.add("guards_use", [], f"var({i}).")
+
+    # Always include the trivial active-path case: if X and Y are adjacent (edge/2),
+    # then there is an active path of length 1 between them (unless conditioning on
+    # the endpoints). This is part of the baseline semantics (path [X,Y]) and also
+    # prevents clingo from simplifying rules that depend on ap/4 when no longer paths
+    # were grounded initially under skeleton pruning.
+    ctl.add(
+        "specific",
+        [],
+        "ap(X,Y,dir,S) :- edge(X,Y), not in(X,S), not in(Y,S), set(S), var(X), var(Y), X!=Y.",
+    )
+
+    # Collapsing active-path existence to ap3/3 (exists some ap/4).
+    # This avoids relying on `not ap(X,Y,_,S)` which is *not* reactive to
+    # newly introduced path-id symbols in incremental grounding.
+    ctl.add(
+        "specific",
+        [],
+        "ap3(X,Y,S) :- ap(X,Y,P,S), var(X), var(Y), set(S), X!=Y.",
+    )
+    ctl.add(
+        "specific",
+        [],
+        "ap3(X,Y,S) :- ap3(Y,X,S), var(X), var(Y), set(S), X!=Y.",
+    )
+
+    # Guard against clingo simplifications when skeleton_rules_reduction prunes all paths
+    # for a fact-pair at initial grounding time.
+    #
+    # Without this, rules like:
+    #   indep(X,Y,S) :- ext_dep(X,Y,S), not ap(X,Y,_,S).
+    # can get simplified into an unconditional indep/3 if ap/4 has no supporting rules,
+    # and later incremental grounding of ap/4 will not undo that simplification.
+    #
+    # We introduce a set-level external ap_guard_set/1 and a dummy ap/4 head that keeps
+    # ap/4 "alive" for *all* pairs and conditioning sets during grounding. This prevents
+    # irreversible simplification of rules depending on `not ap(...)` when skeleton
+    # pruning initially yields no paths for some pairs.
+    if skeleton_rules_reduction:
+        # IMPORTANT: clingo may simplify rules depending on `ap/4` at grounding time
+        # if `ap/4` has no support yet (e.g., due to skeleton pruning).
+        #
+        # To prevent irreversible simplification, we:
+        #  1) ground a part that only DECLARES the externals (so we can assign them)
+        #  2) assign them to None (undefined) BEFORE grounding the rules that use them
+        #  3) ground the rules that introduce dummy `ap/4` atoms guarded by these externals
+        #  4) later, during solving, force these externals to False.
+        for S in base_condition_sets:
+            if max_conditioning_size is not None and len(S) > max_conditioning_size:
+                continue
+            s_sym = _cond_to_symbol(S)
+            ctl.add("guards_decl", [], f"#external ap_guard_set({s_sym}).")
+            ctl.add(
+                "guards_use",
+                [],
+                f"ap(X,Y,guard,{s_sym}) :- ap_guard_set({s_sym}), var(X), var(Y), X!=Y.",
+            )
+            ap_guard_syms.append(Function("ap_guard_set", [s_sym]))
+    # Dynamic skeleton blocking is only needed/valid when using externals.
+    if skeleton_rules_reduction and ext_flag and block_pairs:
         ctl.add("specific", [], ":- block_edge(X,Y), edge(X,Y), X<Y, var(X), var(Y).")
         for (a, b) in sorted(block_pairs):
             ctl.add("specific", [], f"#external block_edge({a},{b}).")
 
     def _assign_block_edges():
-        if not skeleton_rules_reduction:
+        if not skeleton_rules_reduction or not ext_flag:
             return
-        active_pairs = {_pair_key(x, y) for (x, y) in indep_facts}
+        # Block an undirected pair (a,b) iff there exists any *currently active*
+        # ext_indep(a,b,S) (for any conditioning set S). This allows skeleton
+        # unblocking purely by releasing ext_indep externals, without regrounding.
         for (a, b) in block_pairs:
             sym = _block_sym(a, b)
-            val = (a, b) in active_pairs
+            val = False
+            # indep_facts stores conditioning sets for ordered pairs as they
+            # appear in the facts; check both orientations.
+            for (x, y) in ((a, b), (b, a)):
+                for cond in indep_facts.get((x, y), set()):
+                    ext_sym = Function("ext_indep", [Number(x), Number(y), _cond_to_symbol(cond)])
+                    if ext_values.get(ext_sym) is True:
+                        val = True
+                        break
+                if val:
+                    break
             try:
                 ctl.assign_external(sym, val)
                 ext_values[sym] = val
             except Exception:
                 if debug_enabled:
                     logger.debug("Failed to assign block_edge(%s,%s)", a, b)
+
+
 
     def _assign_fact_externals(removed: int = 0) -> None:
         """
@@ -549,7 +676,7 @@ def CausalABA(
         cutoff = max(0, len(facts) - int(removed or 0))
         for idx, fact in enumerate(facts):
             sym = Function(fact[3], [Number(fact[0]), Number(fact[2]), _cond_to_symbol(fact[1])])
-            # Keep prefix facts true; release removed facts instead of forcing false.
+            # Keep prefix facts true; release removed facts (None) to match baseline behavior.
             val = True if idx < cutoff else None
             try:
                 ctl.assign_external(sym, val)
@@ -559,6 +686,14 @@ def CausalABA(
             except Exception:
                 # Non-external facts (e.g., dep/indep without ext_) are loaded
                 # as hard constraints; assign_external is a no-op in that case.
+                continue
+
+        # Ensure ap_guard externals are always forced false.
+        for sym in ap_guard_syms:
+            try:
+                ctl.assign_external(sym, False)
+                ext_values[sym] = False
+            except Exception:
                 continue
 
     def _assumptions_from_exts() -> list[tuple[int, bool]]:
@@ -571,7 +706,7 @@ def CausalABA(
         for sym, val in ext_values.items():
             if val is None:
                 continue
-            if sym.name in ("active_pair", "block_edge"):
+            if sym.name in ("block_edge",):
                 assumptions.append((sym, bool(val)))
         return assumptions
 
@@ -584,9 +719,13 @@ def CausalABA(
         forbidden_edges = set(indep_facts)
         if debug_enabled:
             logger.debug("[skeleton] Forbidden edges: %s", forbidden_edges)
-        if forbidden_edges:
+        if forbidden_edges and not ext_flag:
+            # Non-external runs do not have a removal loop; keep the original
+            # pruning behavior to match the baseline solver.
             existing_edges = set(G.edge_list())
             G.remove_edges_from(existing_edges & forbidden_edges)
+        # For ext_flag runs, we keep the full skeleton and rely on dynamic
+        # block_edge/2 externals to disable/enable adjacency.
     if prior_knowledge is not None:
         # prune undirected skeleton using prior knowledge (symmetric with causalaba)
         req_dir = set(prior_knowledge.required)
@@ -635,33 +774,23 @@ def CausalABA(
                 for S in condition_sets:
                     if max_conditioning_size is not None and len(S) > max_conditioning_size:
                         continue
-                    s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
-                    nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})" for idx in range(1,len(path)-1)]
+                    s_str = 'empty' if not S else 's' + 'y'.join([str(i) for i in S])
+                    nbs = [
+                        f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})"
+                        for idx in range(1, len(path) - 1)
+                    ]
                     nbs_str = ", " + ','.join(nbs) if len(nbs) > 0 else ""
                     ctl.add("specific", [], f"ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
-                    if S in indep_facts.get((X, Y), set()):
-                        ext_premise = f"ext_indep({X},{Y},{s_str}), " if ext_flag else ""
-                        ctl.add("specific", [], f"dep({X},{Y},{s_str}) :- {ext_premise}ap({X},{Y},p{n_p},{s_str}).")
             else:
                 nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
                 nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
-                ctl.add("specific", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+                ctl.add(
+                    "specific",
+                    [],
+                    f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).",
+                )
             _PAIR_PATHS_ADDED.setdefault((X, Y), set()).add(tuple(path))
 
-        if (X, Y) in dep_facts:
-            if pre_grounding:
-                for S in dep_facts[(X, Y)]:
-                    if max_conditioning_size is not None and len(S) > max_conditioning_size:
-                        continue
-                    s_str = 'empty' if not S else 's' + 'y'.join([str(i) for i in S])
-                    ext_premise = f"ext_dep({X},{Y},{s_str}), " if ext_flag else ""
-                    ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- {ext_premise}not ap({X},{Y},_,{s_str}).")
-            else:
-                ext_premise = f"ext_dep({X},{Y},S), " if ext_flag else ""
-                ctl.add("specific", [], f"indep({X},{Y},S) :- {ext_premise}not ap({X},{Y},_,S), set(S).")
-        if (X, Y) in indep_facts and pre_grounding is False:
-            ext_premise = f"ext_indep({X},{Y},S), " if ext_flag else ""
-            ctl.add("specific", [], f"dep({X},{Y},S) :- {ext_premise}ap({X},{Y},_,S), set(S).")
 
 
     # Show directives
@@ -681,6 +810,21 @@ def CausalABA(
 
     # Ground the full base
     logger.info("   Grounding full base program...")
+    # Ground guard externals in two phases:
+    # - First declare them so assign_external works
+    # - Then temporarily set them TRUE while grounding guard rules, so `ap/4` atoms
+    #   exist in the grounding domain and rules depending on ap/4 are not dropped.
+    # - Later (before solving) we force these externals to FALSE.
+    if skeleton_rules_reduction and ap_guard_syms:
+        ctl.ground([("guards_decl", [])])
+        for sym in ap_guard_syms:
+            try:
+                ctl.assign_external(sym, True)
+                ext_values[sym] = True
+            except Exception:
+                pass
+        ctl.ground([("guards_use", [])])
+
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     if debug_enabled:
         try:
@@ -696,6 +840,18 @@ def CausalABA(
     # Activate all pair guards by default
     models = []
     n_models = 0
+
+    # Always disable ap_guard_set/1 before solving. During grounding we may
+    # temporarily set these externals to True to prevent clingo simplification,
+    # but leaving them enabled changes semantics (e.g., makes ap3/3 true for all
+    # pairs) and can cause UNSAT on valid instances.
+    if ap_guard_syms:
+        for sym in ap_guard_syms:
+            try:
+                ctl.assign_external(sym, False)
+                ext_values[sym] = False
+            except Exception:
+                pass
 
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
@@ -722,6 +878,14 @@ def CausalABA(
             ext_values[ext_sym] = True
             if debug_enabled:
                 logger.debug("[assign] %s = %s", ext_sym, True)
+        # Force ap_guard/3 false (guards were kept undefined during grounding).
+        if ap_guard_syms:
+            for sym in ap_guard_syms:
+                try:
+                    ctl.assign_external(sym, False)
+                    ext_values[sym] = False
+                except Exception:
+                    pass
         _assign_block_edges()
         last_syms = None
         logger.info("   Solving...")
@@ -780,8 +944,24 @@ def CausalABA(
     if (search_for_models != 'first') or n_models > 0:
         return [models, False]
 
+    # We are about to enter the incremental removal/grounding loop.
+    # Calling cleanup() here resets the solver state between solve() calls.
+    # This avoids rare clingo issues when grounding new program parts after
+    # an UNSAT solve (seen as "redefinition of atom <'_'>" during ground()).
+    try:
+        ctl.cleanup()
+    except Exception:
+        pass
+
     remove_n = 0
+
+    # (no dep_guard refresh: ext_dep semantics stay reactive via ap_guard_set + not ap)
     while n_models == 0 and remove_n < len(facts):
+        # Ensure the solver state is clean before any new incremental grounding.
+        try:
+            ctl.cleanup()
+        except Exception:
+            pass
         remove_n += 1
         fact_to_remove = facts[-remove_n]
         rem_X, rem_S, rem_Y, dep_type, fact_str = fact_to_remove[:5]
@@ -836,7 +1016,7 @@ def CausalABA(
             existing.remove(to_remove)
             if not existing:
                 del facts_group[target_key]
-        # Disable the external so it no longer participates in solving
+        # Release the removed external (None) to match baseline behavior.
         ext_sym = Function(dep_type, [Number(rem_X), Number(rem_Y), _cond_to_symbol(rem_S)])
         ctl.assign_external(ext_sym, None)
         try:
@@ -857,212 +1037,81 @@ def CausalABA(
             )
         _assign_block_edges()
 
-        # If we just removed an independence fact, mimic the baseline regrounding
-        # behavior (which recompiles the program when skeleton_rules_reduction is
-        # enabled). This keeps the conditioning-set domain and skeleton pruning in
-        # sync with the remaining facts, avoiding spurious UNSAT/extra models.
         if skeleton_rules_reduction and dep_type == "ext_indep":
-            if debug_enabled:
-                logger.debug("[reground] rebuilding control after removing %s", ext_sym)
-            # Rebuild a fresh Control mirroring the initial compilation step.
-            from clingo.control import Control
-            control_args = []
-            if cycle_length is not None:
-                control_args += [f"-c l_cyc={int(cycle_length)}"]
-            if collider_tree_depth is not None:
-                control_args += [f"-c l_b={int(collider_tree_depth)}"]
-            ctl = Control(control_args)
-            if observer is not None:
-                try:
-                    ctl.register_observer(observer)
-                    observer.set_ctl(ctl)
-                except Exception:
-                    logger.exception("Failed to register debug observer on reground")
-            ctl.configuration.solve.parallel_mode = threads or min(os.cpu_count() or 1, 64)
-            ctl.configuration.solve.models = out_n
-            ctl.configuration.solver.seed = "2024"
-            ctl.configuration.solve.opt_mode = opt_mode
-
-            # Recreate set facts based on remaining facts (matching baseline).
-            base_condition_sets = (
-                set().union(*indep_facts.values(), *dep_facts.values())
-                if skeleton_rules_reduction
-                else _powerset(range(n_nodes))
-            )
-            for S in base_condition_sets:
-                if max_conditioning_size is not None and len(S) > max_conditioning_size:
-                    continue
-                for s in S:
-                    ctl.add("specific", [], f"in({s}," + ('empty' if not S else 's'+'y'.join([str(i) for i in S])) + ").")
-
-            bounded_encoding_active = (cycle_length is not None and cycle_length > 0) or (
-                collider_tree_depth is not None and collider_tree_depth > 0
-            )
-            encoding_file = 'causalaba_bounded.lp' if bounded_encoding_active else 'causalaba.lp'
-            ctl.load(str(Path(__file__).resolve().parent / 'encodings' / encoding_file))
-            if facts_location:
-                ctl.load(facts_location)
-                if weak_constraints:
-                    ctl.load(facts_location.replace('.lp','_wc.lp'))
-
-            ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
-            ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
-
-            # Rebuild skeleton/path rules using current facts (as compile_and_ground does)
-            G_reg = rx.generators.complete_graph(n_nodes)
-            if skeleton_rules_reduction:
-                forbidden_edges = set(indep_facts)
-                if forbidden_edges:
-                    G_reg.remove_edges_from(set(G_reg.edge_list()) & forbidden_edges)
-                for (Xf, Yf) in forbidden_edges:
-                    ctl.add("specific", [], f":- edge({Xf},{Yf}).")
-            if prior_knowledge is not None:
-                req_dir = set(prior_knowledge.required)
-                req_undirected = {tuple(sorted((a, b))) for (a, b) in req_dir}
-                forb_dir = set(prior_knowledge.forbidden)
-                forb_counts = {}
-                for a, b in forb_dir:
-                    key = tuple(sorted((a, b)))
-                    forb_counts[key] = forb_counts.get(key, 0) + 1
-                to_remove = set()
-                for (u, v) in G_reg.edge_list():
-                    key = tuple(sorted((u, v)))
-                    if key in req_undirected:
-                        continue
-                    if forb_counts.get(key, 0) >= 2:
-                        to_remove.add((u, v))
-                if to_remove:
-                    G_reg.remove_edges_from(to_remove)
-                for (Xf, Yf) in prior_knowledge.forbidden:
-                    if not skeleton_rules_reduction or ((Xf, Yf) not in forbidden_edges and (Yf, Xf) not in forbidden_edges):
-                        ctl.add("specific", [], f":- arrow({Xf},{Yf}).")
-                for (Xr, Yr) in prior_knowledge.required:
-                    if not skeleton_rules_reduction or ((Xr, Yr) not in forbidden_edges and (Yr, Xr) not in forbidden_edges):
-                        ctl.add("specific", [], f"arrow({Xr},{Yr}).")
-
-            node_pairs = tuple(dep_facts | indep_facts) if skeleton_rules_reduction else tuple(combinations(range(n_nodes),2))
-            use_bounded_nb = bounded_encoding_active and collider_tree_depth is not None and collider_tree_depth > 0
-            n_p = 0
-            for (Xr, Yr) in node_pairs:
-                for path in _iter_paths_with_cutoff(G_reg, Xr, Yr, max_path_length):
-                    n_p += 1
-                    path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
-                    ctl.add("specific", [], f"p{n_p} :- {','.join(path_edges)}.")
-                    nb_pred = 'nb_b' if use_bounded_nb else 'nb'
-                    nbs = [f"{nb_pred}({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
-                    nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
-                    ctl.add("specific", [], f"ap({Xr},{Yr},p{n_p},S) :- p{n_p}, {nbs_str} not in({Xr},S), not in({Yr},S), set(S).")
-                if (Xr, Yr) in dep_facts:
-                    ext_premise = f"ext_dep({Xr},{Yr},S), " if ext_flag else ""
-                    ctl.add("specific", [], f"indep({Xr},{Yr},S) :- {ext_premise}not ap({Xr},{Yr},_,S), set(S).")
-                if (Xr, Yr) in indep_facts:
-                    ext_premise = f"ext_indep({Xr},{Yr},S), " if ext_flag else ""
-                    ctl.add("specific", [], f"dep({Xr},{Yr},S) :- {ext_premise}ap({Xr},{Yr},_,S), set(S).")
-
-            if 'arrow' in show:
-                ctl.add("base", [], "#show arrow/2.")
-            if 'indep' in show:
-                ctl.add("base", [], "#show indep/3.")
-            if 'dep' in show:
-                ctl.add("base", [], "#show dep/3.")
-            if 'ap' in show:
-                ctl.add("base", [], "#show ap/4.")
-            if 'ext' in show:
-                ctl.add("base", [], "#show ext_indep/3.")
-                ctl.add("base", [], "#show ext_dep/3.")
-                ctl.add("base", [], "#show block_edge/2.")
-                ctl.add("base", [], "#show active_pair/2.")
-
-            ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
-
-            # Reset incremental bookkeeping
-            _ACTIVE_PAIR_STATE = {}
-            _PAIR_PATHS_ADDED = {}
-            ext_values.clear()
-            # Reassign externals: remaining facts true, removed prefix released
-            _assign_fact_externals(remove_n)
-            _assign_block_edges()
-            if debug_enabled:
-                logger.debug("[reground] finished; continuing with rebuilt program")
-            # Skip incremental additions below for this iteration
-            models = []
-            last_syms = None
-            logger.info("   Solving...")
-            with ctl.solve(yield_=True) as handle:
-                for i, model in enumerate(handle):
-                    syms = model.symbols(shown=True)
-                    last_syms = syms
-                    if getattr(model, 'optimality_proven', False):
-                        models.append(syms)
-                    if opt_mode not in ("opt", "optN"):
-                        models.append(syms)
-                        break
-            if not models and last_syms is not None:
-                models.append(last_syms)
-            n_models = int(ctl.statistics['summary']['models']['enumerated'])
-            logger.info("[post-solve] models=%s", n_models)
-            if n_models > 0:
-                return [models, False]
-            # continue loop if still no models
-            continue
-        # Recompute active pairs to mirror baseline regrounding behavior
-        node_pairs = tuple(dep_facts | indep_facts) if skeleton_rules_reduction else tuple(combinations(range(n_nodes), 2))
-        # If a pair no longer has any facts, deactivate its path rules
-        pair_has_fact = (
-            (rem_X, rem_Y) in indep_facts
-            or (rem_X, rem_Y) in dep_facts
-            or (rem_Y, rem_X) in indep_facts
-            or (rem_Y, rem_X) in dep_facts
-        )
-        if debug_enabled:
-            logger.debug("[active_pair] (%s,%s) remaining facts? %s", rem_X, rem_Y, pair_has_fact)
-        if not pair_has_fact:
-            if (rem_X, rem_Y) in _ACTIVE_PAIR_STATE:
-                if debug_enabled:
-                    logger.debug("[active_pair] deactivating (%s,%s)", rem_X, rem_Y)
-                ctl.assign_external(Function("active_pair", [Number(rem_X), Number(rem_Y)]), False)
-                ext_values[Function("active_pair", [Number(rem_X), Number(rem_Y)])] = False
-                _ACTIVE_PAIR_STATE[(rem_X, rem_Y)] = False
-            if (rem_Y, rem_X) in _ACTIVE_PAIR_STATE:
-                if debug_enabled:
-                    logger.debug("[active_pair] deactivating (%s,%s)", rem_Y, rem_X)
-                ctl.assign_external(Function("active_pair", [Number(rem_Y), Number(rem_X)]), False)
-                ext_values[Function("active_pair", [Number(rem_Y), Number(rem_X)])] = False
-                _ACTIVE_PAIR_STATE[(rem_Y, rem_X)] = False
-
-        if skeleton_rules_reduction:
-            if dep_type == "ext_indep":
-                still_blocked = ((rem_X, rem_Y) in indep_facts) or ((rem_Y, rem_X) in indep_facts)
-                skeleton_expanded = not still_blocked
+            # If an indep fact removal unblocks an edge, new simple paths become possible.
+            # Those new paths can affect any remaining fact-pair (dep or indep) whose
+            # connectivity relies on the unblocked edge.
+            still_blocked = ((rem_X, rem_Y) in indep_facts) or ((rem_Y, rem_X) in indep_facts)
+            skeleton_expanded = not still_blocked
             if skeleton_expanded:
-                # Refresh path rules and constraints only when the skeleton expands.
-                for (px, py) in node_pairs:
-                    pre_pair_ap = _count_ap_for_pair(ctl, px, py)
-                    _add_pair_rules_incremental(
-                        ctl,
-                        n_nodes,
-                        px,
-                        py,
-                        indep_facts=indep_facts,
-                        dep_facts=dep_facts,
-                        ext_flag=ext_flag,
-                        prior_knowledge=prior_knowledge,
-                        max_path_length=max_path_length,
-                        max_conditioning_size=max_conditioning_size,
-                        collider_tree_depth=collider_tree_depth,
-                        pre_grounding=pre_grounding,
-                        ext_values=ext_values,
+                node_pairs_facts = list(dep_facts | indep_facts)
+
+                # Build the *previous* skeleton (before this removal) to detect whether
+                # the removed edge was a bridge between components.
+                forbidden_old = set(indep_facts)
+                forbidden_old.add(_pair_key(rem_X, rem_Y))
+                G_old = rx.generators.complete_graph(n_nodes)
+                if forbidden_old:
+                    existing_edges = set(G_old.edge_list())
+                    G_old.remove_edges_from(existing_edges & forbidden_old)
+
+                if prior_knowledge is not None:
+                    req_dir = set(prior_knowledge.required)
+                    req_undirected = {tuple(sorted((a, b))) for (a, b) in req_dir}
+                    forb_dir = set(prior_knowledge.forbidden)
+                    forb_counts = {}
+                    for a, b in forb_dir:
+                        key = tuple(sorted((a, b)))
+                        forb_counts[key] = forb_counts.get(key, 0) + 1
+                    to_remove = set()
+                    for (u, v) in G_old.edge_list():
+                        key = tuple(sorted((u, v)))
+                        if key in req_undirected:
+                            continue
+                        if forb_counts.get(key, 0) >= 2:
+                            to_remove.add((u, v))
+                    if to_remove:
+                        G_old.remove_edges_from(to_remove)
+
+                # Compute components in the old skeleton. If the removed edge connects
+                # two components, only pairs across those components can gain paths.
+                import networkx as _nx
+
+                H_old = _nx.Graph()
+                H_old.add_nodes_from(range(n_nodes))
+                H_old.add_edges_from(G_old.edge_list())
+                comps = list(_nx.connected_components(H_old))
+                comp_by_node = {}
+                for idx, comp in enumerate(comps):
+                    for node in comp:
+                        comp_by_node[int(node)] = idx
+
+                cx = comp_by_node.get(int(rem_X))
+                cy = comp_by_node.get(int(rem_Y))
+                if cx is not None and cy is not None and cx != cy:
+                    comp_x = comps[cx]
+                    comp_y = comps[cy]
+                    affected_pairs = [
+                        (px, py)
+                        for (px, py) in node_pairs_facts
+                        if (px in comp_x and py in comp_y) or (px in comp_y and py in comp_x)
+                    ]
+                else:
+                    # Edge was not a strict bridge; conservatively update all fact-pairs.
+                    affected_pairs = node_pairs_facts
+
+                if debug_enabled:
+                    logger.debug(
+                        "[increm] skeleton expanded by unblocking (%s,%s); updating %s pairs",
+                        rem_X,
+                        rem_Y,
+                        len(affected_pairs),
                     )
-                    post_pair_ap = _count_ap_for_pair(ctl, px, py)
-                    if debug_enabled:
-                        logger.debug(
-                            "[increm] ap(%s,%s,_,_) count Δ=%s (pre=%s → post=%s)",
-                            px,
-                            py,
-                            post_pair_ap - pre_pair_ap,
-                            pre_pair_ap,
-                            post_pair_ap,
-                        )
+
+                # No incremental grounding here: paths were pre-grounded on the full
+                # skeleton. Unblocking edges is handled by _assign_block_edges() based
+                # on current ext_indep assignments.
+
         if debug_enabled:
             for (dx, dy) in dep_facts:
                 logger.debug("[ap-sets] pair (%s,%s) has ap sets: %s", dx, dy, _ap_sets_for_pair(ctl, dx, dy))
