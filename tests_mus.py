@@ -137,7 +137,6 @@ class TestMUSAnalysis(unittest.TestCase):
         facts = []  # (fact_str, I, is_correct)
         facts_ext = []
         wrong_ext = []
-        wrong_true_ext = []
         count_wrong = 0
 
         for test in true_seplist:
@@ -155,12 +154,10 @@ class TestMUSAnalysis(unittest.TestCase):
                 count_wrong += 1
                 fact_str = test.replace("indep", "dep")
                 is_correct = False
-                wrong_true_ext.append(f"ext_{test}")  # ground-truth counterpart for MUS
             else:  # dep
                 count_wrong += 1
                 fact_str = test.replace("dep", "indep")
                 is_correct = False
-                wrong_true_ext.append(f"ext_{test}")
 
             facts.append((fact_str, I, is_correct))
             ext_line = f"ext_{fact_str}"
@@ -222,12 +219,12 @@ class TestMUSAnalysis(unittest.TestCase):
             self.assertGreater(remove_n, 0, "Expected removal of X>0 tests to reach SAT when UNSAT")
             self.assertGreater(len(models_after), 0, "Expected SAT after removing X tests")
 
-        # Step 3: Run MUS on PC facts plus the ground-truth counterparts of wrong facts
+        # Step 3: Run MUS on PC facts
         logging.info("Step 3: Running MUS analysis")
         fd_mus, facts_mus_file = tempfile.mkstemp(suffix='.lp', text=True)
         os.close(fd_mus)
         with open(facts_mus_file, 'w') as f:
-            for s in facts_ext + wrong_true_ext:
+            for s in facts_ext:
                 line = s if s.endswith('.') else s + '.'
                 f.write(f"{line}\n")
 
@@ -257,7 +254,7 @@ class TestMUSAnalysis(unittest.TestCase):
             logging.info(f"  Top frequent facts: {top_common if top_common else '(none)'}")
             
             # Analyze wrong vs correct fact frequencies in MUS
-            wrong_set = set(w + '.' if not w.endswith('.') else w for w in wrong_ext + wrong_true_ext)
+            wrong_set = set(w + '.' if not w.endswith('.') else w for w in wrong_ext)
             correct_facts = [f for f in fact_freq if f not in wrong_set]
             wrong_facts = [f for f in fact_freq if f in wrong_set]
             
@@ -276,7 +273,7 @@ class TestMUSAnalysis(unittest.TestCase):
         else:
             logging.info("  No MUS cores found")
 
-        wrong_set = set(w + '.' if not w.endswith('.') else w for w in wrong_ext + wrong_true_ext)
+        wrong_set = set(w + '.' if not w.endswith('.') else w for w in wrong_ext)
         if mus_result['n_mus'] > 0:
             for ms in mus_sets:
                 self.assertTrue(len(ms.intersection(wrong_set)) >= 1, "Each MUS should include at least one wrong/flipped test")
