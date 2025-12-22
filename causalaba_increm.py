@@ -2,21 +2,72 @@
 
 import logging
 import rustworkx as rx
-from clingo import Function, Number
+from clingo import Function, Number, Symbol
 import os
+import tracemalloc
 
 logger = logging.getLogger(__name__)
+
+
+def _tm_stage(msg: str) -> None:
+    """Log current/peak tracemalloc stats when enabled via env var.
+
+    This is intended for diagnosing benchmark memory spikes. It is a no-op
+    unless tracemalloc is already tracing and CAUSALABA_TMEM is set.
+    """
+    if not os.environ.get("CAUSALABA_TMEM"):
+        return
+    try:
+        if not tracemalloc.is_tracing():
+            return
+        current, peak = tracemalloc.get_traced_memory()
+        logger.info("[tm] %s current=%d peak=%d", msg, current, peak)
+    except Exception:
+        return
 
 
 def _should_debug(verbose: bool) -> bool:
     return verbose and logger.isEnabledFor(logging.DEBUG)
 
-from causalaba import (
-    compile_and_ground,
-    extract_test_elements_from_symbol,
-    PriorKnowledge,
-    CausalABA as _baseline_causalaba,
-)
+try:
+    from .causalaba import (
+        compile_and_ground,
+        extract_test_elements_from_symbol,
+        PriorKnowledge,
+        CausalABA as _baseline_causalaba,
+    )
+except ImportError:  # pragma: no cover
+    from causalaba import (
+        compile_and_ground,
+        extract_test_elements_from_symbol,
+        PriorKnowledge,
+        CausalABA as _baseline_causalaba,
+    )
+
+
+def _solve_with_timeout(ctl, *, solve_timeout: float | None, on_model, assumptions=None) -> bool:
+    """Run clingo solve with an optional hard wall-time limit.
+
+    Returns True if finished normally, False if cancelled due to timeout.
+    """
+    if solve_timeout is None:
+        with ctl.solve(yield_=True, assumptions=assumptions or []) as handle:
+            for model in handle:
+                on_model(model)
+        return True
+
+    handle = ctl.solve(async_=True, on_model=on_model, assumptions=assumptions or [])
+    finished = handle.wait(solve_timeout)
+    if not finished:
+        handle.cancel()
+        handle.wait()
+        try:
+            handle.get()
+        except Exception:
+            pass
+        return False
+    handle.get()
+    return True
 
 
 def _iter_paths_with_cutoff(graph, src, dst, cutoff):
@@ -38,22 +89,38 @@ def _iter_paths_with_cutoff(graph, src, dst, cutoff):
         return _gen()
 
 
-def _cond_to_symbol(S) -> Function:
+def _cond_to_symbol(S) -> Symbol:
     """
     Convert a conditioning set into the clingo symbol used in facts.
     """
+    # clingo.Symbol is the actual runtime type; clingo.Function is a factory.
+    if isinstance(S, Symbol):
+        return S
+    if isinstance(S, str):
+        return Function(S)
     try:
-        # Already a clingo term (e.g., Function('empty'))
-        if isinstance(S, Function):
-            return S
-        if isinstance(S, str):
-            return Function(S)
         S = tuple(sorted(S))
     except Exception:
-        pass
+        # Best-effort fallback; treat unknown as empty.
+        S = ()
     if not S:
         return Function("empty")
     return Function("s" + "y".join(str(i) for i in S))
+
+
+def _cond_to_term(S) -> str:
+    """Convert a conditioning set into the ASP term string used in facts."""
+    if isinstance(S, Symbol):
+        return str(S)
+    if isinstance(S, str):
+        return S
+    try:
+        S = tuple(sorted(S))
+    except Exception:
+        S = ()
+    if not S:
+        return "empty"
+    return "s" + "y".join(str(i) for i in S)
 
 
 def _pair_key(x: int, y: int) -> tuple[int, int]:
@@ -90,6 +157,37 @@ class _DebugObserver:
         self.minimize_rules: list[str] = []
         self.externals: list[str] = []
         self._lit_map: dict[int, str] = {}
+
+
+def _set_opt_mode_for_first(ctl, opt_mode: str):
+    """Prepare clingo config for `search_for_models='first'`.
+
+    For correctness parity with the baseline (and ABAPC expectations), we must
+    *not* change the requested optimization mode here. In particular, leaving
+    `optN` untouched ensures we enumerate all optimal models when requested.
+    """
+    try:
+        cfg = ctl.configuration.solve
+    except Exception:
+        return None
+
+    prev = None
+    try:
+        prev = getattr(cfg, "opt_mode", None)
+    except Exception:
+        prev = None
+
+    # Intentionally no changes to cfg.opt_mode.
+    return prev
+
+
+def _restore_opt_mode(ctl, prev_opt_mode):
+    if prev_opt_mode is None:
+        return
+    try:
+        ctl.configuration.solve.opt_mode = prev_opt_mode
+    except Exception:
+        return
 
     def set_ctl(self, ctl):
         self.ctl = ctl
@@ -261,6 +359,7 @@ def CausalABA(
     threads: int | None = None,
     debug_dump_path: str | None = None,
     debug_traces: bool = False,
+    solve_timeout: float | None = None,
     )->list:
     # For pre-grounding workloads, fall back to the baseline solver to retain
     # its proven correctness and grounding strategy.
@@ -286,6 +385,7 @@ def CausalABA(
             collider_tree_depth=collider_tree_depth,
             cycle_length=cycle_length,
             threads=threads,
+            solve_timeout=solve_timeout,
         )
     debug_enabled = _should_debug(debug_traces)
     logger.info("Running CausalABA")
@@ -332,7 +432,7 @@ def CausalABA(
                         )
                 except Exception:
                     pass
-                condition_set = tuple(sorted(list(S)))
+                condition_set = tuple(sorted(S))
                 facts_group = indep_facts if "indep" in line_clean else dep_facts
                 if (X,Y) not in facts_group:
                     facts_group[(X,Y)] = set()
@@ -340,12 +440,25 @@ def CausalABA(
                 if "indep" in line_clean:
                     block_pairs.add(_pair_key(X, Y))
 
-    # Match the baseline solver ordering: remove lowest-I facts first.
-    # Match baseline ordering: sort by strength only.
+    _tm_stage("after reading facts")
+
+    # Match baseline ordering: remove lowest-I facts first.
+    # Note: strength is often unknown (nan) for many callers; Python's sort is
+    # stable so order is preserved when strengths are equal.
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
     block_pairs |= {_pair_key(x, y) for (x, y) in indep_facts}
     if debug_enabled:
         logger.debug("Ordered facts for processing:\n%s", "\n".join([f[4] for f in facts]))
+
+    # Precompute clingo symbols for all external facts once.
+    # The remove-until-SAT loop can call solve hundreds of times; recreating
+    # Symbol objects (and conditioning-set symbols) per iteration is expensive
+    # and shows up in tracemalloc peaks.
+    fact_syms = [
+        Function(f[3], [Number(f[0]), Number(f[2]), _cond_to_symbol(f[1])])
+        for f in facts
+    ]
+    _tm_stage("after building fact_syms")
     # Important: build base without skeleton_rules_reduction so we don't add
     # permanent edge-forbidding constraints that cannot be retracted.
     # Build a pruned base without permanent edge-forbidding constraints.
@@ -378,17 +491,49 @@ def CausalABA(
     ctl.configuration.solve.opt_mode = opt_mode
 
     # Add set membership facts (bounded by max_conditioning_size)
-    from utils.graph_utils import powerset as _powerset
-    base_condition_sets = (
-        set().union(*indep_facts.values(), *dep_facts.values())
-        if skeleton_rules_reduction
-        else _powerset(range(n_nodes))
-    )
-    for S in base_condition_sets:
-        if max_conditioning_size is not None and len(S) > max_conditioning_size:
-            continue
-        for s in S:
-            ctl.add("specific", [], f"in({s}," + ('empty' if not S else 's'+'y'.join([str(i) for i in S])) + ").")
+    try:
+        from .utils.graph_utils import powerset as _powerset
+    except ImportError:  # pragma: no cover
+        from utils.graph_utils import powerset as _powerset
+    # Emitting in/2 and qpair/3 via thousands of ctl.add() calls creates a lot
+    # of Python-side allocation pressure (shows up in tracemalloc). Stream these
+    # generated facts into a temp .lp and load it instead.
+    import tempfile
+    gen_facts_path: Path | None = None
+    with tempfile.NamedTemporaryFile("w", suffix=".lp", delete=False) as gen_f:
+        gen_facts_path = Path(gen_f.name)
+        gen_f.write("#program specific.\n")
+
+        if skeleton_rules_reduction:
+            base_condition_sets: set[tuple[int, ...]] = set()
+            for v in indep_facts.values():
+                base_condition_sets |= v
+            for v in dep_facts.values():
+                base_condition_sets |= v
+            base_condition_iter = base_condition_sets
+        else:
+            base_condition_iter = _powerset(range(n_nodes))
+
+        for S in base_condition_iter:
+            if max_conditioning_size is not None and len(S) > max_conditioning_size:
+                continue
+            set_term = _cond_to_term(S)
+            for s in S:
+                gen_f.write(f"in({s},{set_term}).\n")
+
+        # Seed Bayes-ball query triples explicitly to keep grounding compact.
+        # We include all conditioning triples that appear in the input facts, even
+        # if some are initially inactive (fact_pct) or later removed (externals).
+        # Correctness is preserved because the hard constraints are driven by
+        # dep/3 and indep/3; qpair/3 only decides which ap3/3 atoms get computed.
+        for (X, Y), cond_sets in dep_facts.items():
+            for S in cond_sets:
+                gen_f.write(f"qpair({X},{Y},{_cond_to_term(S)}).\n")
+        for (X, Y), cond_sets in indep_facts.items():
+            for S in cond_sets:
+                gen_f.write(f"qpair({X},{Y},{_cond_to_term(S)}).\n")
+
+    _tm_stage("after writing generated facts lp")
 
     # Load encoding and (optional) facts
     bounded_encoding_active = (cycle_length is not None and cycle_length > 0) or (
@@ -404,6 +549,17 @@ def CausalABA(
     if ext_flag:
         ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
         ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+
+    if gen_facts_path is not None:
+        try:
+            ctl.load(str(gen_facts_path))
+        finally:
+            try:
+                gen_facts_path.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+    _tm_stage("after ctl.load inputs")
 
     # Enforce observational facts against active-path existence.
     # This works for both:
@@ -449,8 +605,6 @@ def CausalABA(
 
     bb_lines: list[str] = []
     bb_lines.append("% Query triples to evaluate (restrict to one orientation to match constraints).")
-    bb_lines.append("qpair(X,Y,S) :- dep(X,Y,S), set(S), var(X), var(Y), X<Y, X!=Y.")
-    bb_lines.append("qpair(X,Y,S) :- indep(X,Y,S), set(S), var(X), var(Y), X<Y, X!=Y.")
     if 'ap' in show:
         # Legacy/debug mode: allow users/tests to ask for active-path atoms even
         # without providing dep/indep facts.
@@ -527,6 +681,8 @@ def CausalABA(
 
     ctl.add("specific", [], "\n".join(bb_lines))
 
+    _tm_stage("after ctl.add bayesball rules")
+
     # NOTE: We no longer rely on explicit ap/4 path atoms nor on `not ap(...)`, so
     # the earlier ap_guard_set/1 machinery is not needed.
     # Dynamic skeleton blocking is only needed/valid when using externals.
@@ -575,8 +731,7 @@ def CausalABA(
         if not facts:
             return
         cutoff = max(0, len(facts) - int(removed or 0))
-        for idx, fact in enumerate(facts):
-            sym = Function(fact[3], [Number(fact[0]), Number(fact[2]), _cond_to_symbol(fact[1])])
+        for idx, sym in enumerate(fact_syms):
             # Keep prefix facts true; release removed facts (None) to match baseline behavior.
             val = True if idx < cutoff else None
             try:
@@ -635,6 +790,7 @@ def CausalABA(
     # Ground the full base
     logger.info("   Grounding full base program...")
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
+    _tm_stage("after ctl.ground")
     if debug_enabled:
         try:
             ext_deps = list(ctl.symbolic_atoms.by_signature("ext_dep", 3))
@@ -651,8 +807,7 @@ def CausalABA(
     n_models = 0
 
     if search_for_models == 'No':
-        for n, fact in enumerate(facts):
-            ext_sym = Function(fact[3], [Number(fact[0]), Number(fact[2]), _cond_to_symbol(fact[1])])
+        for n, (fact, ext_sym) in enumerate(zip(facts, fact_syms)):
             if fact[3] == "ext_indep" and set_indep_facts:
                 ctl.assign_external(ext_sym, True)
             elif n/len(facts) <= fact_pct:
@@ -661,16 +816,21 @@ def CausalABA(
                 ctl.assign_external(ext_sym, False)
             ext_values[ext_sym] = not (n/len(facts) > fact_pct and fact[3] != "ext_indep")
         _assign_block_edges()
-        with ctl.solve(yield_=True, assumptions=_assumptions_from_exts()) as handle:
-            for model in handle:
-                models.append(model.symbols(shown=True))
+        def _on_model_no(model):
+            models.append(model.symbols(shown=True))
+
+        _solve_with_timeout(
+            ctl,
+            solve_timeout=solve_timeout,
+            on_model=_on_model_no,
+            assumptions=_assumptions_from_exts(),
+        )
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         if n_models > 0:
             return [models, False]
 
     elif search_for_models == 'first':
-        for fact in facts:
-            ext_sym = Function(fact[3], [Number(fact[0]), Number(fact[2]), _cond_to_symbol(fact[1])])
+        for fact, ext_sym in zip(facts, fact_syms):
             ctl.assign_external(ext_sym, True)
             ext_values[ext_sym] = True
             if debug_enabled:
@@ -678,23 +838,35 @@ def CausalABA(
         _assign_block_edges()
         last_syms = None
         logger.info("   Solving...")
-        with ctl.solve(yield_=True, assumptions=_assumptions_from_exts()) as handle:
-            for i, model in enumerate(handle):
+        prev_opt_mode = _set_opt_mode_for_first(ctl, opt_mode)
+        try:
+            def _on_model_first(model):
+                nonlocal last_syms
                 syms = model.symbols(shown=True)
                 last_syms = syms
-                # Prefer collecting all optimal models when optimization is active
-                if getattr(model, 'optimality_proven', False):
+                if opt_mode in ("opt", "optN"):
+                    if getattr(model, 'optimality_proven', False):
+                        models.append(syms)
+                    return
+                # No optimization: first model is enough.
+                if not models:
                     models.append(syms)
-                # If no optimization is present, taking the first model is fine
-                if opt_mode not in ("opt", "optN"):
-                    models.append(syms)
-                    break
+
+            _solve_with_timeout(
+                ctl,
+                solve_timeout=solve_timeout,
+                on_model=_on_model_first,
+                assumptions=_assumptions_from_exts(),
+            )
+        finally:
+            _restore_opt_mode(ctl, prev_opt_mode)
         # Fallback: if optimization was requested but no optimality was proven (likely no #minimize),
         # return the last seen model so callers get a witness.
         if not models and last_syms is not None:
             models.append(last_syms)
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         logger.info("[first] found n_models=%s", n_models)
+        _tm_stage("after first solve")
         if debug_enabled:
             logger.debug("[first] models: %s", models)
         if n_models > 0 and models:
@@ -702,25 +874,34 @@ def CausalABA(
         
     elif 'subsets' in search_for_models:
         # Explore all subsets of facts by toggling externals; collect solutions.
-        from utils.graph_utils import powerset as _powerset
+        try:
+            from .utils.graph_utils import powerset as _powerset
+        except ImportError:  # pragma: no cover
+            from utils.graph_utils import powerset as _powerset
         set_of_models = []
         for f_to_remove in _powerset(facts):
             # Set all facts True first
-            for fact in facts:
-                ext_sym = Function(fact[3], [Number(fact[0]), Number(fact[2]), _cond_to_symbol(fact[1])])
+            for ext_sym in fact_syms:
                 ctl.assign_external(ext_sym, True)
             # Then disable the chosen subset (unless ext_indep with set_indep_facts flag)
             for fact in f_to_remove:
                 if fact[3] == "ext_indep" and set_indep_facts:
                     continue
+                # subsets mode is inherently exponential; keep this simple and correct.
                 ext_sym = Function(fact[3], [Number(fact[0]), Number(fact[2]), _cond_to_symbol(fact[1])])
                 ctl.assign_external(ext_sym, False)
 
             _assign_block_edges()
             curr = []
-            with ctl.solve(yield_=True, assumptions=_assumptions_from_exts()) as handle:
-                for model in handle:
-                    curr.append(model.symbols(shown=True))
+            def _on_model_sub(model):
+                curr.append(model.symbols(shown=True))
+
+            _solve_with_timeout(
+                ctl,
+                solve_timeout=solve_timeout,
+                on_model=_on_model_sub,
+                assumptions=_assumptions_from_exts(),
+            )
             n_curr = int(ctl.statistics['summary']['models']['enumerated'])
             if n_curr > 0:
                 if search_for_models == 'first_subsets':
@@ -733,256 +914,148 @@ def CausalABA(
     if (search_for_models != 'first') or n_models > 0:
         return [models, False]
 
-    remove_n = 0
+    # --- Remove-until-SAT (monotonic search) ---
+    # In this mode, we only toggle externals and re-solve; we do NOT add/ground
+    # new rules.
+    #
+    # The constraint set is monotonic in `removed`: releasing more externals can
+    # only relax the program, so satisfiable(rem) is monotone non-decreasing.
+    # Baseline removes facts one-by-one until SAT; that returns the *minimal*
+    # number of removed facts. We can find the same point with O(log n) solves.
 
-    # (no dep_guard refresh: ext_dep semantics stay reactive via ap_guard_set + not ap)
-    while n_models == 0 and remove_n < len(facts):
-        remove_n += 1
-        fact_to_remove = facts[-remove_n]
-        rem_X, rem_S, rem_Y, dep_type, fact_str = fact_to_remove[:5]
-        skeleton_expanded = False
-        if debug_enabled and remove_n == 1:
-            indep_cnt = _count_atoms(ctl, 'indep', 3)
-            dep_cnt = _count_atoms(ctl, 'dep', 3)
-            ap_cnt = _count_atoms(ctl, 'ap', 4)
-            logger.debug(
-                "[pre-remove] atoms indep=%s, dep=%s, ap=%s; facts=%s",
-                indep_cnt,
-                dep_cnt,
-                ap_cnt,
-                len(facts),
-            )
-            if facts:
-                last = facts[-1]
-                logger.debug("[pre-remove] last-to-remove candidate: %s", last[:5])
-        logger.info(
-            "[remove] removing external %s(%s,%s,%s)",
-            dep_type,
-            rem_X,
-            rem_Y,
-            rem_S,
-        )
-        facts_group = indep_facts if dep_type == "ext_indep" else dep_facts
-        if debug_enabled:
-            logger.debug(
-                "[in-remove] indep facts for pair (%s,%s): %s",
-                rem_X,
-                rem_Y,
-                facts_group.get((rem_X, rem_Y), set()),
-            )
-        target_key = (rem_X, rem_Y)
-        existing = facts_group.get(target_key, set())
-        if debug_enabled:
-            logger.debug("[in-remove] existing: %s", existing)
+    def _apply_removed(removed: int) -> None:
+        _assign_fact_externals(int(removed or 0))
+        _assign_block_edges()
 
-        to_remove = None
-        for t in existing:
-            if set(t) == set(rem_S):
-                to_remove = t
-                break
-        if to_remove is not None:
-            if debug_enabled:
-                logger.debug(
-                    "[in-remove] removing S for pair (%s,%s): %s",
-                    rem_X,
-                    rem_Y,
-                    to_remove,
-                )
-            existing.remove(to_remove)
-            if not existing:
-                del facts_group[target_key]
-        # Release the removed external (None) to match baseline behavior.
-        ext_sym = Function(dep_type, [Number(rem_X), Number(rem_Y), _cond_to_symbol(rem_S)])
-        ctl.assign_external(ext_sym, None)
+    def _is_satisfiable() -> bool:
+        """Check satisfiability *without* spending time optimizing.
+
+        Weak constraints never change satisfiable/unsatisfiable, but clingo's
+        optimization can make repeated checks (during binary search) extremely
+        slow. We temporarily set opt_mode=ignore and models=1.
+        """
+        cfg_solve = None
+        prev_opt_mode = None
+        prev_models = None
         try:
-            ext_values[ext_sym] = None
-        except Exception:
-            pass
-        # Re-apply remaining fact assignments defensively; this also ensures
-        # previously-assigned externals (e.g., ext_dep) stay enabled.
-        _assign_fact_externals(remove_n)
-
-        if debug_enabled:
-            logger.debug("[in-remove] existing: %s", existing)
-            logger.debug(
-                "[in-remove] indep facts all for pair (%s,%s): %s",
-                rem_X,
-                rem_Y,
-                indep_facts.get((rem_X, rem_Y), set()),
-            )
-        _assign_block_edges()
-
-        if skeleton_rules_reduction and dep_type == "ext_indep":
-            # If an indep fact removal unblocks an edge, new simple paths become possible.
-            # Those new paths can affect any remaining fact-pair (dep or indep) whose
-            # connectivity relies on the unblocked edge.
-            still_blocked = ((rem_X, rem_Y) in indep_facts) or ((rem_Y, rem_X) in indep_facts)
-            skeleton_expanded = not still_blocked
-            if skeleton_expanded:
-                node_pairs_facts = list(dep_facts | indep_facts)
-
-                # Build the *previous* skeleton (before this removal) to detect whether
-                # the removed edge was a bridge between components.
-                forbidden_old = set(indep_facts)
-                forbidden_old.add(_pair_key(rem_X, rem_Y))
-                G_old = rx.generators.complete_graph(n_nodes)
-                if forbidden_old:
-                    existing_edges = set(G_old.edge_list())
-                    G_old.remove_edges_from(existing_edges & forbidden_old)
-
-                if prior_knowledge is not None:
-                    req_dir = set(prior_knowledge.required)
-                    req_undirected = {tuple(sorted((a, b))) for (a, b) in req_dir}
-                    forb_dir = set(prior_knowledge.forbidden)
-                    forb_counts = {}
-                    for a, b in forb_dir:
-                        key = tuple(sorted((a, b)))
-                        forb_counts[key] = forb_counts.get(key, 0) + 1
-                    to_remove = set()
-                    for (u, v) in G_old.edge_list():
-                        key = tuple(sorted((u, v)))
-                        if key in req_undirected:
-                            continue
-                        if forb_counts.get(key, 0) >= 2:
-                            to_remove.add((u, v))
-                    if to_remove:
-                        G_old.remove_edges_from(to_remove)
-
-                # Compute components in the old skeleton. If the removed edge connects
-                # two components, only pairs across those components can gain paths.
-                import networkx as _nx
-
-                H_old = _nx.Graph()
-                H_old.add_nodes_from(range(n_nodes))
-                H_old.add_edges_from(G_old.edge_list())
-                comps = list(_nx.connected_components(H_old))
-                comp_by_node = {}
-                for idx, comp in enumerate(comps):
-                    for node in comp:
-                        comp_by_node[int(node)] = idx
-
-                cx = comp_by_node.get(int(rem_X))
-                cy = comp_by_node.get(int(rem_Y))
-                if cx is not None and cy is not None and cx != cy:
-                    comp_x = comps[cx]
-                    comp_y = comps[cy]
-                    affected_pairs = [
-                        (px, py)
-                        for (px, py) in node_pairs_facts
-                        if (px in comp_x and py in comp_y) or (px in comp_y and py in comp_x)
-                    ]
-                else:
-                    # Edge was not a strict bridge; conservatively update all fact-pairs.
-                    affected_pairs = node_pairs_facts
-
-                if debug_enabled:
-                    logger.debug(
-                        "[increm] skeleton expanded by unblocking (%s,%s); updating %s pairs",
-                        rem_X,
-                        rem_Y,
-                        len(affected_pairs),
-                    )
-
-                # No incremental grounding here: paths were pre-grounded on the full
-                # skeleton. Unblocking edges is handled by _assign_block_edges() based
-                # on current ext_indep assignments.
-
-        if debug_enabled:
-            for (dx, dy) in dep_facts:
-                logger.debug("[ap-sets] pair (%s,%s) has ap sets: %s", dx, dy, _ap_sets_for_pair(ctl, dx, dy))
-
-        # Defensive: re-apply fact externals after incremental grounding. This keeps
-        # behavior aligned with the baseline solver, which reassigns externals after
-        # each regrounding step.
-        _assign_fact_externals(remove_n)
-        _assign_block_edges()
-        if debug_enabled:
             try:
-                # Sanity-check that ext_dep assignments are actually fixed in the solver.
-                dep_syms = [
-                    Function(f[3], [Number(f[0]), Number(f[2]), _cond_to_symbol(f[1])])
-                    for f in facts
-                    if f[3] == "ext_dep"
-                ]
-                if dep_syms:
-                    check = ctl.solve(assumptions=[(dep_syms[0], False)])
-                    logger.debug("[debug] assume not %s satisfiable=%s", dep_syms[0], check.satisfiable)
+                cfg_solve = ctl.configuration.solve
+                prev_opt_mode = getattr(cfg_solve, "opt_mode", None)
+                prev_models = getattr(cfg_solve, "models", None)
+                try:
+                    cfg_solve.opt_mode = "ignore"
+                except Exception:
+                    pass
+                try:
+                    cfg_solve.models = 1
+                except Exception:
+                    pass
             except Exception:
-                logger.debug("[debug] failed ext_dep assumption check", exc_info=True)
+                cfg_solve = None
 
-        models = []
-        last_syms = None
-        logger.info("   Solving...")
-        with ctl.solve(yield_=True, assumptions=_assumptions_from_exts()) as handle:
-            for i, model in enumerate(handle):
-                syms = model.symbols(shown=True)
-                last_syms = syms
+            # Hard-timeout satisfiability checks too; treat timeout as "unknown"
+            # and conservatively return False so the search continues.
+            found = {"sat": False}
+
+            def _on_model_sat(_model):
+                found["sat"] = True
+
+            finished = _solve_with_timeout(
+                ctl,
+                solve_timeout=solve_timeout,
+                on_model=_on_model_sat,
+                assumptions=_assumptions_from_exts(),
+            )
+            if found["sat"]:
+                return True
+            if not finished:
+                return False
+            try:
+                res = ctl.solve(assumptions=_assumptions_from_exts())
+                return bool(getattr(res, "satisfiable", False))
+            except Exception:
+                return False
+        finally:
+            if cfg_solve is not None:
+                try:
+                    if prev_opt_mode is not None:
+                        cfg_solve.opt_mode = prev_opt_mode
+                except Exception:
+                    pass
+                try:
+                    if prev_models is not None:
+                        cfg_solve.models = prev_models
+                except Exception:
+                    pass
+
+    # Binary search the minimal removed count that yields SAT.
+    lo = 0
+    hi = len(facts)
+    # If already satisfiable, no removals needed.
+    if n_models == 0:
+        _apply_removed(0)
+        if _is_satisfiable():
+            lo = 0
+            hi = 0
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if debug_enabled:
+            logger.debug("[remove-search] trying removed=%s (lo=%s hi=%s)", mid, lo, hi)
+        _apply_removed(mid)
+        sat = _is_satisfiable()
+        if sat:
+            hi = mid
+        else:
+            lo = mid + 1
+
+    remove_n = lo
+    if remove_n > 0:
+        # Log the last fact that gets released at the minimal point.
+        ext_sym = fact_syms[-remove_n]
+        logger.info("[remove] minimal satisfiable removal is %s (releasing %s)", remove_n, ext_sym)
+
+    # Apply the chosen removal and collect a witness model (or optimal models
+    # when optimization is active), matching the earlier 'first' behavior.
+    _apply_removed(remove_n)
+    models = []
+    last_syms = None
+    logger.info("   Solving...")
+    prev_opt_mode = _set_opt_mode_for_first(ctl, opt_mode)
+    try:
+        def _on_model_post(model):
+            nonlocal last_syms
+            syms = model.symbols(shown=True)
+            last_syms = syms
+            if opt_mode in ("opt", "optN"):
                 if getattr(model, 'optimality_proven', False):
                     models.append(syms)
-                if opt_mode not in ("opt", "optN"):
-                    models.append(syms)
-                    break
-            result = handle.get()
-        if not models and last_syms is not None:
-            models.append(last_syms)
-        n_models = int(ctl.statistics['summary']['models']['enumerated'])
-        logger.info("[post-solve] models=%s", n_models)
-        if debug_enabled:
-            logger.debug("[post-solve] models: %s", models)
-        try:
-            if debug_enabled:
-                logger.debug("[post-solve] satisfiable=%s", result.satisfiable)
-        except Exception:
-            pass
-        if observer is not None and n_models == 0 and debug_dump_path and remove_n == 1:
-            logger.info("[debug] dumping grounded program to %s", debug_dump_path)
-            try:
-                observer.dump_to(debug_dump_path, ext_values, note=f"unsat after removal {remove_n}")
-            except Exception:
-                logger.exception("Failed to dump grounded program")
-        if n_models == 0 and debug_enabled:
-            try:
-                in_atoms = [str(it.symbol) for it in ctl.symbolic_atoms.by_signature('in', 2)]
-                set_atoms = [str(it.symbol) for it in ctl.symbolic_atoms.by_signature('set', 1)]
-                logger.debug("[debug] in/2 atoms: %s", in_atoms)
-                logger.debug("[debug] set/1 atoms: %s", set_atoms)
-                assumptions = []
-                def _lit(sym):
-                    for atom in ctl.symbolic_atoms.by_signature(sym.name, len(sym.arguments)):
-                        if atom.symbol == sym:
-                            return atom.literal
-                    return None
-                for (ix, iy), sets in indep_facts.items():
-                    for S in sets:
-                        sym = Function("ext_indep", [Number(ix), Number(iy), _cond_to_symbol(S)])
-                        lit = _lit(sym)
-                        if lit is not None:
-                            assumptions.append((lit, True))
-                for (dx, dy), sets in dep_facts.items():
-                    for S in sets:
-                        sym = Function("ext_dep", [Number(dx), Number(dy), _cond_to_symbol(S)])
-                        lit = _lit(sym)
-                        if lit is not None:
-                            assumptions.append((lit, True))
-                for (ax, ay), state in _ACTIVE_PAIR_STATE.items():
-                    sym = Function("active_pair", [Number(ax), Number(ay)])
-                    lit = _lit(sym)
-                    if lit is not None:
-                        assumptions.append((lit, bool(state)))
-                core_res = ctl.solve(assumptions=assumptions)
-                core = getattr(core_res, "unsat_core", [])
-                logger.debug(
-                    "[debug] assumption solve satisfiable=%s core_size=%s core=%s",
-                    core_res.satisfiable,
-                    len(core),
-                    [str(l) for l in core],
-                )
-            except Exception:
-                pass
-    if observer is not None and debug_dump_path:
+                return
+            if not models:
+                models.append(syms)
+
+        _solve_with_timeout(
+            ctl,
+            solve_timeout=solve_timeout,
+            on_model=_on_model_post,
+            assumptions=_assumptions_from_exts(),
+        )
+    finally:
+        _restore_opt_mode(ctl, prev_opt_mode)
+    if not models and last_syms is not None:
+        models.append(last_syms)
+    n_models = int(ctl.statistics['summary']['models']['enumerated'])
+    logger.info("[post-solve] models=%s", n_models)
+
+    # Optional debug dump when even the fully relaxed instance is UNSAT.
+    if observer is not None and n_models == 0 and debug_dump_path and remove_n >= len(facts):
         logger.info("[debug] dumping grounded program to %s", debug_dump_path)
         try:
-            observer.dump_to(debug_dump_path, ext_values, note=f"final after removal {remove_n}")
+            observer.dump_to(debug_dump_path, ext_values, note="unsat after releasing all facts")
         except Exception:
             logger.exception("Failed to dump grounded program")
+
+    # If still UNSAT, mirror baseline behavior: return no models.
+    if n_models == 0:
+        return [[], False]
+
     return [models, False]
