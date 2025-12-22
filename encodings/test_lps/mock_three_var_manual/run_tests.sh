@@ -42,10 +42,22 @@ echo ""
 echo "Expected: a single MUS containing all three mus(i) facts (all three input facts)"
 echo ""
 
+echo "TEST 4: CAMUS + print MCSes (MCS -> MUS)"
+echo "-------------------------------------"
+echo "Running: clingo facts_complete_causalaba_adorned.lp --output=smodels | wasp --mus=mus --mus-algorithm=camus --print-mcses -n 0"
+echo ""
+clingo encodings/test_lps/mock_three_var_manual/facts_complete_causalaba_adorned.lp --output=smodels 2>/dev/null | \
+  /vol/bitbucket/fr920/wasp/build/release/wasp --mus=mus --mus-algorithm=camus --print-mcses -n 0 2>&1 | \
+  grep -E "\[MCS|\[MUS"
+echo ""
+echo "Expected: three singleton MCSes (mus(1), mus(2), mus(3)) and one MUS containing all three"
+echo ""
+
 echo "============================================"
 echo "Summary"
 echo "============================================"
 echo "- facts_complete_causalaba.lp is UNSAT with all three facts."
 echo "- Commenting/removing any single fact makes it SAT (different models per removal)."
 echo "- facts_complete_causalaba_adorned.lp yields exactly one MUS over mus/1 containing all three facts."
+echo "- CAMUS mode prints MCSes during MUS computation when --print-mcses is enabled."
 echo ""

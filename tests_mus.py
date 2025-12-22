@@ -232,7 +232,9 @@ class TestMUSAnalysis(unittest.TestCase):
             n_nodes=n_nodes,
             facts_location=facts_mus_file,
             gringo_path="clingo",
-            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp"
+            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            mus_algorithm="camus",
+            print_mcses=True,
         )
 
         logging.info(f"MUS cores found: {mus_result['n_mus']}")
@@ -270,8 +272,89 @@ class TestMUSAnalysis(unittest.TestCase):
                 avg_wrong_freq = sum(fact_freq[f] for f in wrong_facts) / len(wrong_facts)
                 avg_correct_freq = sum(fact_freq[f] for f in correct_facts) / len(correct_facts) if correct_facts else 0
                 logging.info(f"  Avg appearances: wrong facts {avg_wrong_freq:.1f}, correct facts {avg_correct_freq:.1f}")
+
+            # Ordered ranking of facts by MUS frequency, explicitly labeled WRONG/CORRECT
+            n_mus = max(int(mus_result['n_mus'] or 0), 1)
+            ordered = [(f, fact_freq[f], (f in wrong_set)) for f in fact_freq]
+            ordered.sort(key=lambda t: (-t[1], t[0]))
+            logging.info("  Fact ranking by MUS frequency (count / n_mus):")
+            for fact, count, is_wrong in ordered[: min(30, len(ordered))]:
+                label = "WRONG" if is_wrong else "CORRECT"
+                pct = (count / n_mus) * 100.0
+                logging.info(f"    - {label}: {fact} ({count}/{n_mus} = {pct:.1f}%)")
+
+            # Print 3 smallest MUSes as examples
+            sorted_muses = sorted(enumerate(mus_result['mus_facts'], 1), key=lambda x: (len(x[1]), x[0]))
+            logging.info("  Examples of smallest MUSes:")
+            for idx, mus_facts in sorted_muses[:3]:
+                logging.info(f"    MUS #{idx} (size {len(mus_facts)}):")
+                for fact in mus_facts:
+                    label = "WRONG" if fact in wrong_set else "CORRECT"
+                    logging.info(f"      - {label}: {fact}")
         else:
             logging.info("  No MUS cores found")
+
+        # --------------------------
+        # MCS analysis (CAMUS)
+        # --------------------------
+        logging.info(f"MCSes found: {mus_result.get('n_mcs', 0)}")
+        mcs_sets = [set(mf) for mf in mus_result.get('mcs_facts', [])]
+        if mcs_sets:
+            # Only analyze PC-derived facts (filter out ground-truth counterparts)
+            pc_facts_set = set(s + '.' if not s.endswith('.') else s for s in facts_ext)
+            wrong_set = set(w + '.' if not w.endswith('.') else w for w in wrong_ext)
+            
+            # Filter MCS to only include PC facts
+            mcs_sets_pc_only = [ms.intersection(pc_facts_set) for ms in mcs_sets]
+            fact_freq = Counter(f for ms in mcs_sets_pc_only for f in ms)
+            
+            # Compute stats on PC facts only
+            sizes = [len(ms) for ms in mcs_sets_pc_only]
+            common_facts = set.intersection(*mcs_sets_pc_only) if mcs_sets_pc_only else set()
+            common_preview = sorted(common_facts)[:10]
+            if len(common_facts) > 10:
+                common_preview.append(f"... (+{len(common_facts) - 10} more)")
+            top_common = ', '.join(f"{f} ({fact_freq[f]}/{mus_result.get('n_mcs', 0)})" for f in sorted(fact_freq, key=lambda x: -fact_freq[x])[:5])
+            
+            logging.info(
+                f"  MCS sizes (PC facts only): min={min(sizes)}, max={max(sizes)}, avg={sum(sizes)/len(sizes):.2f}"
+            )
+            logging.info(
+                f"  PC facts present in all MCSes ({len(common_facts)}): {', '.join(common_preview) if common_preview else '(none)'}"
+            )
+            logging.info(f"  Top frequent PC facts: {top_common if top_common else '(none)'}")
+
+            # Analyze wrong vs correct fact frequencies in MCS (PC facts only)
+            correct_facts = [f for f in fact_freq if f not in wrong_set]
+            wrong_facts = [f for f in fact_freq if f in wrong_set]
+            logging.info(f"  Wrong PC facts in MCS: {len(wrong_facts)} unique, correct PC facts: {len(correct_facts)} unique")
+
+            if wrong_facts and mus_result.get('n_mcs', 0) > 0:
+                wrong_freq = [(f, fact_freq[f], fact_freq[f]/mus_result['n_mcs']*100) for f in wrong_facts]
+                wrong_freq.sort(key=lambda x: x[1], reverse=True)
+                top_wrong = ', '.join(f"{f} ({c}/{mus_result['n_mcs']} = {p:.1f}%)" for f, c, p in wrong_freq[:5])
+                logging.info(f"  Top wrong PC facts in MCS: {top_wrong}")
+
+            # Ordered ranking of PC facts by MCS frequency, explicitly labeled WRONG/CORRECT
+            n_mcs = max(int(mus_result.get('n_mcs', 0) or 0), 1)
+            ordered = [(f, fact_freq[f], (f in wrong_set)) for f in fact_freq]
+            ordered.sort(key=lambda t: (-t[1], t[0]))
+            logging.info("  PC Fact ranking by MCS frequency (count / n_mcs):")
+            for fact, count, is_wrong in ordered[: min(30, len(ordered))]:
+                label = "WRONG" if is_wrong else "CORRECT"
+                pct = (count / n_mcs) * 100.0
+                logging.info(f"    - {label}: {fact} ({count}/{n_mcs} = {pct:.1f}%)")
+
+            # Print 3 smallest MCSes as examples
+            sorted_mcses = sorted(enumerate(mus_result.get('mcs_facts', []), 1), key=lambda x: (len(x[1]), x[0]))
+            logging.info("  Examples of smallest MCSes:")
+            for idx, mcs_facts in sorted_mcses[:3]:
+                logging.info(f"    MCS #{idx} (size {len(mcs_facts)}):")
+                for fact in mcs_facts:
+                    label = "WRONG" if fact in wrong_set else "CORRECT"
+                    logging.info(f"      - {label}: {fact}")
+        else:
+            logging.info("  No MCSes found")
 
         wrong_set = set(w + '.' if not w.endswith('.') else w for w in wrong_ext)
         if mus_result['n_mus'] > 0:
@@ -385,7 +468,9 @@ class TestMUSAnalysis(unittest.TestCase):
             n_nodes=n_nodes,
             facts_location=facts_file,
             gringo_path="clingo",
-            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp"
+            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            mus_algorithm="camus",
+            print_mcses=True,
         )
         
         logging.info(f"  MUS cores found: {mus_result['n_mus']}")
@@ -396,6 +481,19 @@ class TestMUSAnalysis(unittest.TestCase):
         
         self.assertEqual(mus_result['n_mus'], 1, "Expected exactly one MUS")
         self.assertEqual(len(mus_result['mus_facts'][0]), 3, "Expected all three facts in the MUS")
+
+        # With CAMUS + --print-mcses, we should also see the 3 singleton MCSes.
+        self.assertEqual(mus_result.get('n_mcs', 0), 3, "Expected three singleton MCSes")
+        mcs_sets = [set(m) for m in mus_result.get('mcs_list', [])]
+        self.assertIn({1}, mcs_sets)
+        self.assertIn({2}, mcs_sets)
+        self.assertIn({3}, mcs_sets)
+
+        logging.info(f"  MCSes found: {mus_result.get('n_mcs', 0)}")
+        for i, mcs_facts in enumerate(mus_result.get('mcs_facts', [])):
+            logging.info(f"    MCS #{i+1}: {len(mcs_facts)} facts")
+            for fact in mcs_facts:
+                logging.info(f"      - {fact}")
         
         os.remove(facts_file)
 
@@ -434,7 +532,9 @@ class TestMUSAnalysis(unittest.TestCase):
             n_nodes=n_nodes,
             facts_location=facts_file,
             gringo_path="clingo",
-            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp"
+            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            mus_algorithm="camus",
+            print_mcses=True,
         )
 
         logging.info(f"MUS cores found: {mus_result['n_mus']}")
@@ -456,6 +556,13 @@ class TestMUSAnalysis(unittest.TestCase):
         has_B = any(ms == wrong_B for ms in mus_sets)
         self.assertTrue(has_A, "Contradictory pair (0,1) should be identified as a MUS")
         self.assertTrue(has_B, "Contradictory pair (2,3) should be identified as a MUS")
+
+        # Additional section: print MCSes (more actionable than just MUS)
+        logging.info(f"MCSes found: {mus_result.get('n_mcs', 0)}")
+        for i, mcs_facts in enumerate(mus_result.get('mcs_facts', [])):
+            logging.info(f"  MCS #{i+1}: {len(mcs_facts)} facts")
+            for fact in mcs_facts:
+                logging.info(f"    - {fact}")
 
         os.remove(facts_file)
 

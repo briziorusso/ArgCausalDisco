@@ -44,7 +44,9 @@ result = CausalABA_MUS(
     n_nodes=3,
     facts_location="facts.lp",
     gringo_path="clingo",
-    wasp_path="/path/to/wasp"
+    wasp_path="/path/to/wasp",
+    mus_algorithm="camus",
+    print_mcses=True,
 )
 
 print(f"Found {result['n_mus']} MUS cores")
@@ -111,6 +113,59 @@ ext_indep(0,1,empty) :- mus(3).
 When WASP runs with `--mus=mus`, it:
 1. Tests which subsets of {mus(1), mus(2), mus(3)} make the program UNSAT
 2. Returns the minimal ones (cannot remove any atom without becoming SAT)
+
+### MCSes (via CAMUS)
+
+WASP can optionally print **Minimal Correcting Sets (MCSes)** while computing MUSes when using the CAMUS algorithm.
+This can be helpful if you want to see (or parse) which assumptions must be removed to restore satisfiability.
+
+In our CausalABA workflow, **MCSes are computed over the same assumption atoms as MUSes**, and we map them back to the corresponding `ext_*` facts.
+
+CLI example (mock-three-var adorned encoding):
+
+```bash
+cd /vol/bitbucket/fr920/ArgCausalDisco-1/encodings/test_lps/mock_three_var_manual
+clingo facts_complete_causalaba_adorned.lp --output=smodels | \
+    /vol/bitbucket/fr920/wasp/build/release/wasp --mus=mus --mus-algorithm=camus --print-mcses -n 0
+```
+
+Typical output:
+
+```text
+[MCS #1]: mus(1)
+[MCS #2]: mus(2)
+[MCS #3]: mus(3)
+[MUS #1]: mus(1) mus(3) mus(2)
+```
+
+Python API example (return MUS + MCS):
+
+```python
+from causalaba_mus import CausalABA_MUS
+
+result = CausalABA_MUS(
+        n_nodes=3,
+        facts_location="facts.lp",
+        gringo_path="clingo",
+        wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+        mus_algorithm="camus",
+        print_mcses=True,
+)
+
+print(result["n_mus"], "MUSes")
+print(result.get("n_mcs", 0), "MCSes")
+print("Smallest MCS size:", min(map(len, result.get("mcs_facts", [])), default=None))
+```
+
+### MCS analysis summary (frequency + examples)
+
+In [tests_mus.py](tests_mus.py), the PC-based test prints an **MCS summary**:
+
+- **PC Fact ranking by MCS frequency**: counts how often each PC-derived `ext_*` fact appears across all MCSes.
+    - Intuition: facts that appear in many MCSes are frequently part of a minimal “fix”, so they are good candidates for review/removal.
+- **Examples of smallest MCSes**: prints a few smallest MCSes with facts labeled `WRONG`/`CORRECT` (based on ground truth comparison).
+
+This summary is designed to answer: “Which of the facts returned by PC (and input into CausalABA) are most often implicated in minimal corrections?”
 
 ### Mock-Three-Var Example
 

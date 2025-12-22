@@ -42,6 +42,27 @@ clingo facts_complete_causalaba_adorned.lp --output=smodels | \
 
 Expected: exactly one MUS, containing all three facts (mus(1), mus(2), mus(3)).
 
+4) Print MCSes during MUS computation (CAMUS)
+
+Also print the intermediate Minimal Correcting Sets (MCSes).
+
+```bash
+cd /vol/bitbucket/fr920/ArgCausalDisco-1/encodings/test_lps/mock_three_var_manual
+clingo facts_complete_causalaba_adorned.lp --output=smodels | \
+	/vol/bitbucket/fr920/wasp/build/release/wasp --mus=mus --mus-algorithm=camus --print-mcses -n 0
+```
+
+Observed output:
+
+```text
+[MCS #1]: mus(1)
+[MCS #2]: mus(2)
+[MCS #3]: mus(3)
+[MUS #1]: mus(1) mus(3) mus(2)
+```
+
+Interpretation (in this encoding): each singleton MCS corresponds to removing one of the three assumption facts; the unique MUS is the set of all three assumptions.
+
 ## Which file to use
 
 - facts_complete_causalaba.lp: baseline semantic encoding to check SAT/UNSAT of the full program.

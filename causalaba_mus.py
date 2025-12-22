@@ -30,6 +30,7 @@ import subprocess
 import re
 from pathlib import Path
 from itertools import combinations
+from typing import Optional, Tuple, List, Union
 from causalaba import compile_and_ground
 
 
@@ -68,8 +69,17 @@ def parse_facts_from_file(facts_location: str) -> tuple[list[str], dict[int, str
     return facts, fact_mapping
 
 
-def run_mus_solver(program_str: str, gringo_path: str = "clingo", 
-                   wasp_path: str = "wasp") -> list:
+def run_mus_solver(
+    program_str: str,
+    gringo_path: str = "clingo",
+    wasp_path: str = "wasp",
+    *,
+    mus_algorithm: Optional[str] = None,
+    print_mcses: bool = False,
+    camus_mcs_threshold: Optional[int] = None,
+    camus_mus_threshold: Optional[int] = None,
+    return_mcses: bool = False,
+) -> Union[List[List[int]], Tuple[List[List[int]], List[List[int]]]]:
     """
     Run MUS solver on ASP program using gringo and wasp.
     
@@ -79,7 +89,10 @@ def run_mus_solver(program_str: str, gringo_path: str = "clingo",
         wasp_path: Path to wasp executable
     
     Returns:
-        List of MUS, each MUS is a list of assumption indices (a(i) atoms)
+        If return_mcses is False (default):
+            List of MUS, each MUS is a list of assumption indices mus(i)
+        If return_mcses is True:
+            Tuple (mus_list, mcs_list), where each entry is a list of mus(i) indices.
     """
     logging.info("Running MUS solver...")
     
@@ -95,6 +108,23 @@ def run_mus_solver(program_str: str, gringo_path: str = "clingo",
         
         # Build wasp command to compute MUS over mus/1
         wasp_cmd = [wasp_path, '--mus=mus', '-n', '0']
+
+        # Optional: select MUS algorithm / print MCSes (CAMUS)
+        if print_mcses and mus_algorithm is None:
+            mus_algorithm = 'camus'
+
+        if mus_algorithm:
+            alg = mus_algorithm
+            if mus_algorithm == 'camus':
+                # WASP syntax: camus,[mcs_th,[mus_th]]
+                if camus_mcs_threshold is not None:
+                    alg = f"camus,{camus_mcs_threshold}"
+                    if camus_mus_threshold is not None:
+                        alg = f"{alg},{camus_mus_threshold}"
+            wasp_cmd.extend(['--mus-algorithm', alg])
+
+        if print_mcses:
+            wasp_cmd.append('--print-mcses')
         
         logging.debug(f"Clingo command: {' '.join(clingo_cmd)}")
         logging.debug(f"Wasp command: {' '.join(wasp_cmd)}")
@@ -116,15 +146,18 @@ def run_mus_solver(program_str: str, gringo_path: str = "clingo",
         )
         
         # Close clingo's stdout in parent so wasp receives EOF when clingo finishes
-        clingo_process.stdout.close()
+        if clingo_process.stdout is not None:
+            clingo_process.stdout.close()
         
         # Wait for wasp to complete
         wasp_output, wasp_error = wasp_process.communicate()
         
         # Wait for clingo to complete and get its stderr
         clingo_process.wait()
-        clingo_error = clingo_process.stderr.read()
-        clingo_process.stderr.close()
+        clingo_error = ""
+        if clingo_process.stderr is not None:
+            clingo_error = clingo_process.stderr.read()
+            clingo_process.stderr.close()
         
         if clingo_process.returncode != 0:
             logging.error(f"Clingo failed with return code {clingo_process.returncode}: {clingo_error}")
@@ -139,8 +172,9 @@ def run_mus_solver(program_str: str, gringo_path: str = "clingo",
         
         logging.debug(f"Wasp output:\n{wasp_output}")
         
-        # Parse MUS from output
-        mus_list = []
+        # Parse MUS/MCS from output
+        mus_list: List[List[int]] = []
+        mcs_list: List[List[int]] = []
         for line in wasp_output.split('\n'):
             if line.startswith('[MUS #'):
                 # Format: [MUS #1]: mus(1) mus(3) mus(2)
@@ -155,8 +189,20 @@ def run_mus_solver(program_str: str, gringo_path: str = "clingo",
                         logging.debug(f"Found MUS: {mus}")
                     else:
                         logging.debug("Found empty MUS (program is satisfiable)")
+            elif line.startswith('[MCS #'):
+                # Format: [MCS #1]: mus(1) mus(3)
+                match = re.search(r'\[MCS #\d+\]:\s*(.*)', line)
+                if match:
+                    mcs_content = match.group(1).strip()
+                    if mcs_content:
+                        mcs_predicates = re.findall(r'mus\((\d+)\)', mcs_content)
+                        mcs = [int(n) for n in mcs_predicates]
+                        mcs_list.append(mcs)
+                        logging.debug(f"Found MCS: {mcs}")
         
         logging.info(f"Total MUS found: {len(mus_list)}")
+        if print_mcses or return_mcses:
+            logging.info(f"Total MCS found: {len(mcs_list)}")
         
         # Cleanup
         try:
@@ -164,6 +210,9 @@ def run_mus_solver(program_str: str, gringo_path: str = "clingo",
         except:
             pass
         
+        if return_mcses:
+            return mus_list, mcs_list
+
         return mus_list
         
     except FileNotFoundError as e:
@@ -323,8 +372,17 @@ def build_mus_program(n_nodes: int, facts: list[str], facts_location: str = "") 
     return program
 
 
-def CausalABA_MUS(n_nodes: int, facts_location: str = "",
-                  gringo_path: str = "clingo", wasp_path: str = "wasp") -> dict:
+def CausalABA_MUS(
+    n_nodes: int,
+    facts_location: str = "",
+    gringo_path: str = "clingo",
+    wasp_path: str = "wasp",
+    *,
+    mus_algorithm: Optional[str] = None,
+    print_mcses: bool = False,
+    camus_mcs_threshold: Optional[int] = None,
+    camus_mus_threshold: Optional[int] = None,
+) -> dict:
     """
     Run CausalABA with MUS (Minimal Unsatisfiable Subset) analysis.
     
@@ -344,6 +402,9 @@ def CausalABA_MUS(n_nodes: int, facts_location: str = "",
             - 'mus_facts': List of MUS with actual fact strings
             - 'n_mus': Number of MUS found
             - 'fact_mapping': Mapping from fact indices to fact strings
+            - 'mcs_list' (optional): List of MCS (each MCS contains fact indices 1, 2, ...)
+            - 'mcs_facts' (optional): List of MCS with actual fact strings
+            - 'n_mcs' (optional): Number of MCS found
     """
     logging.info("Running CausalABA MUS analysis")
     
@@ -369,8 +430,33 @@ def CausalABA_MUS(n_nodes: int, facts_location: str = "",
     # Step 2: Build MUS program with assumption layer on top of CausalABA encoding
     program = build_mus_program(n_nodes, facts, facts_location)
     
-    # Step 3: Run MUS solver
-    mus_list = run_mus_solver(program, gringo_path, wasp_path)
+    # Step 3: Run MUS solver (optionally with CAMUS/MCS printing)
+    mus_list: List[List[int]] = []
+    mcs_list: List[List[int]] = []
+
+    if print_mcses or mus_algorithm:
+        mus_mcs = run_mus_solver(
+            program,
+            gringo_path,
+            wasp_path,
+            mus_algorithm=mus_algorithm,
+            print_mcses=print_mcses,
+            camus_mcs_threshold=camus_mcs_threshold,
+            camus_mus_threshold=camus_mus_threshold,
+            return_mcses=True,
+        )
+        if isinstance(mus_mcs, tuple):
+            mus_list, mcs_list = mus_mcs
+        else:
+            # Defensive fallback: older code paths may return only mus_list.
+            mus_list = mus_mcs
+            mcs_list = []
+    else:
+        mus_only = run_mus_solver(program, gringo_path, wasp_path)
+        if isinstance(mus_only, list):
+            mus_list = mus_only
+        else:
+            mus_list, mcs_list = mus_only
     
     # Step 4: Map MUS indices back to actual facts
     mus_facts = []
@@ -391,7 +477,10 @@ def CausalABA_MUS(n_nodes: int, facts_location: str = "",
         'mus_list': mus_list,
         'mus_facts': mus_facts,
         'n_mus': len(mus_list),
-        'fact_mapping': fact_mapping
+        'fact_mapping': fact_mapping,
+        'mcs_list': mcs_list,
+        'mcs_facts': [[fact_mapping.get(idx, f"mus({idx})") for idx in mcs] for mcs in mcs_list],
+        'n_mcs': len(mcs_list),
     }
     
     return result
