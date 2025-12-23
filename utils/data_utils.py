@@ -281,7 +281,15 @@ def simulate_dag(d, s0, graph_type):
     return B_perm
 
 
-def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_priority:int=2, stable:bool=True, seed:int=42):
+def simulate_data_and_run_PC(
+    G_true: nx.DiGraph,
+    alpha: float,
+    uc_rule: int = 3,
+    uc_priority: int = 2,
+    stable: bool = True,
+    seed: int = 42,
+    sample_size: int = 10000,
+):
     """A function to simulate data and run PC algorithm
 
     Args:
@@ -299,8 +307,8 @@ def simulate_data_and_run_PC(G_true:nx.DiGraph, alpha:float, uc_rule:int=3, uc_p
 
     truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
 
-    logging.info(f"Simulating data with {num_of_nodes} nodes, {10000} samples...")
-    data = simulate_discrete_data(num_of_nodes, 10000, truth_DAG_directed_edges, seed)
+    logging.info(f"Simulating data with {num_of_nodes} nodes, {sample_size} samples...")
+    data = simulate_discrete_data(num_of_nodes, sample_size, truth_DAG_directed_edges, seed)
 
     logging.info(f"Running PC algorithm...")
     cg = pc(data=data, alpha=alpha, ikb=True, uc_rule=uc_rule, uc_priority=uc_priority, stable=stable, verbose=False)
