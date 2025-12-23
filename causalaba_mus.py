@@ -74,6 +74,7 @@ def run_mus_solver(
     gringo_path: str = "clingo",
     wasp_path: str = "wasp",
     *,
+    max_muses: Optional[int] = None,
     mus_algorithm: Optional[str] = None,
     print_mcses: bool = False,
     camus_mcs_threshold: Optional[int] = None,
@@ -107,7 +108,9 @@ def run_mus_solver(
         clingo_cmd = [gringo_path, program_file, '--output=smodels']
         
         # Build wasp command to compute MUS over mus/1
-        wasp_cmd = [wasp_path, '--mus=mus', '-n', '0']
+        # Note: WASP can combine --mus with -n to enumerate MUSes.
+        # By default we use -n 0 (enumerate all), but callers can cap enumeration.
+        wasp_cmd = [wasp_path, '--mus=mus', '-n', str(max_muses) if max_muses is not None else '0']
 
         # Optional: select MUS algorithm / print MCSes (CAMUS)
         if print_mcses and mus_algorithm is None:
@@ -378,6 +381,7 @@ def CausalABA_MUS(
     gringo_path: str = "clingo",
     wasp_path: str = "wasp",
     *,
+    max_muses: Optional[int] = None,
     mus_algorithm: Optional[str] = None,
     print_mcses: bool = False,
     camus_mcs_threshold: Optional[int] = None,
@@ -439,6 +443,7 @@ def CausalABA_MUS(
             program,
             gringo_path,
             wasp_path,
+            max_muses=max_muses,
             mus_algorithm=mus_algorithm,
             print_mcses=print_mcses,
             camus_mcs_threshold=camus_mcs_threshold,
@@ -452,7 +457,7 @@ def CausalABA_MUS(
             mus_list = mus_mcs
             mcs_list = []
     else:
-        mus_only = run_mus_solver(program, gringo_path, wasp_path)
+        mus_only = run_mus_solver(program, gringo_path, wasp_path, max_muses=max_muses)
         if isinstance(mus_only, list):
             mus_list = mus_only
         else:
