@@ -17,6 +17,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from collections import Counter
+from dataclasses import dataclass
 import pandas as pd
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -26,6 +27,109 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, 'src'))
 
 from causalaba import CausalABA
 from causalaba_mus import CausalABA_MUS
+
+
+@dataclass(frozen=True)
+class RandomPCSimConfig:
+    n_nodes: int
+    alpha: float
+    graph_type: str
+    edge_per_node: int
+    seed: int
+    sample_size: int = 10000
+    uc_rule: int = 5
+    uc_priority: int = 2
+    stable: bool = True
+
+
+def build_random_pc_case(config: RandomPCSimConfig):
+    import networkx as nx
+    import numpy as np
+
+    from utils.graph_utils import (
+        find_all_d_separations_sets,
+        extract_test_elements_from_symbol,
+        initial_strength,
+    )
+    from utils.data_utils import simulate_dag, simulate_data_and_run_PC
+    from utils.helpers import random_stability
+
+    n_nodes = config.n_nodes
+    s0 = int(n_nodes * config.edge_per_node)
+    max_edges = int(n_nodes * (n_nodes - 1) / 2)
+    if s0 > max_edges:
+        s0 = max_edges
+
+    random_stability(config.seed)
+    B_true = simulate_dag(d=n_nodes, s0=s0, graph_type=config.graph_type)
+    G_true = nx.DiGraph(
+        pd.DataFrame(
+            B_true,
+            columns=[f"X{i+1}" for i in range(n_nodes)],
+            index=[f"X{i+1}" for i in range(n_nodes)],
+        )
+    )
+    relabel_dict = {f"X{i+1}": i for i in range(n_nodes)}
+    G_true1 = nx.relabel_nodes(G_true, relabel_dict)
+
+    true_seplist = find_all_d_separations_sets(G_true, verbose=False)
+
+    random_stability(config.seed)
+    data, cg = simulate_data_and_run_PC(
+        G_true,
+        config.alpha,
+        uc_rule=config.uc_rule,
+        uc_priority=config.uc_priority,
+        stable=config.stable,
+        seed=config.seed,
+        sample_size=config.sample_size,
+    )
+
+    facts = []  # (fact_str, I, is_correct)
+    facts_ext = []
+    wrong_ext = []
+    count_wrong = 0
+
+    for test in true_seplist:
+        X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+        test_PC = [t for t in cg.sepset[X, Y] if set(t[0]) == S]
+        if len(test_PC) != 1:
+            continue
+
+        p = test_PC[0][1]
+        dep_type_PC = "indep" if p > config.alpha else "dep"
+        I = initial_strength(p, len(S), config.alpha, 0.5, n_nodes)
+
+        if dep_type == dep_type_PC:
+            fact_str = test
+            is_correct = True
+        elif dep_type == "indep":
+            count_wrong += 1
+            fact_str = test.replace("indep", "dep")
+            is_correct = False
+        else:  # dep
+            count_wrong += 1
+            fact_str = test.replace("dep", "indep")
+            is_correct = False
+
+        facts.append((fact_str, I, is_correct))
+        ext_line = f"ext_{fact_str}"
+        facts_ext.append(ext_line)
+        if not is_correct:
+            wrong_ext.append(ext_line)
+
+    return {
+        "B_true": B_true,
+        "G_true": G_true,
+        "G_true1": G_true1,
+        "true_seplist": true_seplist,
+        "data": data,
+        "cg": cg,
+        "facts": facts,
+        "facts_ext": facts_ext,
+        "wrong_ext": wrong_ext,
+        "count_wrong": count_wrong,
+    }
 
 
 def logger_setup(scenario="test_mus"):
@@ -45,6 +149,43 @@ class TestMUSAnalysis(unittest.TestCase):
     subsets of facts that violate causal graph constraints. Facts are guarded
     by choice rules {mus(i)}. and conditionally activated.
     """
+
+    def randomG_PC_case(
+        self,
+        n_nodes: int,
+        edge_per_node: int = 2,
+        graph_type: str = "ER",
+        seed: int = 2024,
+        alpha: float = 0.05,
+        sample_size: int = 10000,
+        uc_rule: int = 5,
+        uc_priority: int = 2,
+        stable: bool = True,
+    ):
+        """Build a random-DAG + PC fact set case (similar to tests.py::randomG_PC_facts).
+
+        Returns a dict with keys like: facts, facts_ext, wrong_ext, count_wrong, cg, true_seplist, G_true1.
+        """
+        config = RandomPCSimConfig(
+            n_nodes=n_nodes,
+            alpha=alpha,
+            graph_type=graph_type,
+            edge_per_node=edge_per_node,
+            seed=seed,
+            sample_size=sample_size,
+            uc_rule=uc_rule,
+            uc_priority=uc_priority,
+            stable=stable,
+        )
+        logging.info(
+            "Sim config: "
+            f"n_nodes={config.n_nodes}, alpha={config.alpha}, graph_type={config.graph_type}, "
+            f"edge_per_node={config.edge_per_node}, seed={config.seed}, sample_size={config.sample_size}, "
+            f"uc_rule={config.uc_rule}, uc_priority={config.uc_priority}, stable={config.stable}"
+        )
+        case = build_random_pc_case(config)
+        case["config"] = config
+        return case
 
     def test_parsing_facts_from_file(self):
         """Test parsing ext_indep/ext_dep facts from a file."""
@@ -78,12 +219,12 @@ class TestMUSAnalysis(unittest.TestCase):
         """Follow test_abapc_four_node_example and append MUS analysis.
 
         We reuse the exact fact construction from test_abapc_four_node_example:
-        facts come from PC output versus ground truth (no synthetic contradictions),
+                facts come from PC output versus ground truth (no synthetic contradictions),
         then we run:
         - CausalABA with all facts (expect UNSAT or at least allow removal),
         - CausalABA with search_for_models='first' (removal strategy),
-        - MUS over the fact set plus the ground-truth counterparts of wrong facts
-          to highlight which tests are inconsistent.
+                - MUS/MCS over the PC fact set (CAMUS + --print-mcses) to highlight which
+                    PC tests are implicated in contradictions.
         """
         logger_setup()
         logging.info("===============Running test_mus_links_wrong_tests_four_node_abapc===============")
@@ -366,6 +507,272 @@ class TestMUSAnalysis(unittest.TestCase):
         os.remove(facts_wc_file)
         os.remove(facts_mus_file)
 
+    def test_mus_mcs_random_five_node_abapc(self):
+        """Random 5-node variant of the PC→ABAPC→MUS/MCS pipeline.
+
+        This mirrors the intent of `randomG_PC_facts` in `tests.py`, but compares against
+        the *normal* ABAPC configuration (search_for_models='first') rather than
+        search_for_models='all_subsets'.
+
+        Steps:
+        1) Build a random 5-node DAG, run PC, and construct the `ext_*` facts.
+        2) Run CausalABA with all PC facts (fixed seed chosen to be UNSAT).
+        3) Run ABAPC removal with search_for_models='first' to restore SAT.
+        4) Run MUS+MCS analysis on the PC fact set only (CAMUS + --print-mcses).
+        """
+        logger_setup()
+        logging.info("===============Running test_mus_mcs_random_five_node_abapc===============")
+
+        import types
+
+        # Stub notears to avoid heavy optional dependency required by cd_algorithms.models
+        if 'notears.nonlinear' not in sys.modules:
+            notears_module = types.ModuleType('notears')
+            notears_nonlinear_module = types.ModuleType('notears.nonlinear')
+
+            class _DummyMLP:
+                pass
+
+            def _dummy_notears_nonlinear(*args, **kwargs):
+                raise ImportError("notears is not installed in this test environment")
+
+            notears_nonlinear_module.NotearsMLP = _DummyMLP
+            notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+            sys.modules['notears'] = notears_module
+            sys.modules['notears.nonlinear'] = notears_nonlinear_module
+
+        # Deterministic configuration (seed chosen to yield UNSAT for step 1)
+        case = self.randomG_PC_case(
+            n_nodes=5,
+            edge_per_node=2,
+            graph_type="ER",
+            seed=2004,
+            alpha=0.05,
+            sample_size=10000,
+            uc_rule=5,
+            stable=True,
+        )
+        config = case["config"]
+        n_nodes = config.n_nodes
+        facts = case["facts"]
+        facts_ext = case["facts_ext"]
+        wrong_ext = case["wrong_ext"]
+        count_wrong = case["count_wrong"]
+        true_seplist = case["true_seplist"]
+        cg = case["cg"]
+        G_true1 = case["G_true1"]
+
+        logging.info(f"Seed: {config.seed}")
+        logging.info(f"True DAG: {G_true1.edges}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
+        logging.info(f"Number of wrong facts: {count_wrong} ({(count_wrong/len(facts))*100 if facts else 0:.2f}%)")
+        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
+
+        self.assertGreater(len(facts_ext), 0, "Expected at least one PC-derived fact")
+        self.assertGreater(count_wrong, 0, "Expected at least one wrong PC fact for MUS analysis")
+
+        # Write facts to temp files (base + I + wc) for CausalABA
+        fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd)
+        facts_I_file = facts_file.replace('.lp', '_I.lp')
+        facts_wc_file = facts_file.replace('.lp', '_wc.lp')
+
+        with open(facts_file, 'w') as f:
+            for s in facts_ext:
+                line = s if s.endswith('.') else s + '.'
+                f.write(f"#external {line}\n")
+
+        with open(facts_I_file, 'w') as f:
+            for fact, s in zip(facts, facts_ext):
+                line = s if s.endswith('.') else s + '.'
+                I = fact[1]
+                f.write(f"{line} I={I}, NA\n")
+
+        with open(facts_wc_file, 'w') as f:
+            for fact, s in zip(facts, facts_ext):
+                line = s if s.endswith('.') else s + '.'
+                I = fact[1]
+                f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
+
+        # Step 1: Run with all facts (expected UNSAT for this seed)
+        logging.info("Step 1: Testing with all facts")
+        models_all, _ = CausalABA(n_nodes, facts_file, weak_constraints=True, print_models=False)
+        logging.info(f"  → {len(models_all)} models")
+        self.assertEqual(len(models_all), 0, "Expected UNSAT with all PC facts for the chosen seed")
+
+        # Step 2: Apply ABAPC removal strategy (search='first')
+        logging.info("Step 2: Applying removal strategy (search_for_models='first')")
+        models_after, multiple, stats, remove_n = CausalABA(
+            n_nodes,
+            facts_file,
+            weak_constraints=True,
+            search_for_models='first',
+            print_models=False,
+            return_statistics=True,
+        )
+        logging.info(f"  → Facts removed: {remove_n}")
+        logging.info(f"  → Models found after removal: {len(models_after)}")
+
+        self.assertGreater(remove_n, 0, "Expected removal of X>0 tests to reach SAT")
+        self.assertGreater(len(models_after), 0, "Expected SAT after removing X tests")
+
+        # Derive which facts were removed by ABAPC 'first'.
+        # CausalABA sorts facts by descending I and then removes from the tail until SAT.
+        def _canon_fact(s: str) -> str:
+            return s if s.endswith('.') else s + '.'
+
+        facts_with_I = []
+        for (fact_str, I, _is_correct), ext_line in zip(facts, facts_ext):
+            stmt = _canon_fact(ext_line)
+            facts_with_I.append((float(I), stmt))
+        facts_sorted_by_I = sorted(facts_with_I, key=lambda t: t[0], reverse=True)
+        removed_facts = [stmt for _I, stmt in facts_sorted_by_I[-remove_n:]] if remove_n else []
+        removed_set = set(removed_facts)
+        all_pc_facts_set = set(stmt for _I, stmt in facts_sorted_by_I)
+        kept_set = all_pc_facts_set.difference(removed_set)
+
+        wrong_set = set(_canon_fact(w) for w in wrong_ext)
+        wrong_all = wrong_set & all_pc_facts_set
+        wrong_removed = wrong_set & removed_set
+        wrong_kept = wrong_set & kept_set
+
+        removed_preview = sorted(removed_facts)[:10]
+        if len(removed_facts) > 10:
+            removed_preview.append(f"... (+{len(removed_facts) - 10} more)")
+        logging.info(
+            f"  ABAPC removed facts (lowest I): {len(removed_facts)} / {len(all_pc_facts_set)}"
+        )
+        logging.info(
+            f"  Removed preview: {', '.join(removed_preview) if removed_preview else '(none)'}"
+        )
+        logging.info(
+            f"  Wrong PC facts (all): {len(wrong_all)} / {len(all_pc_facts_set)} ({(len(wrong_all)/len(all_pc_facts_set))*100 if all_pc_facts_set else 0:.2f}%)"
+        )
+        logging.info(
+            f"  Wrong among REMOVED: {len(wrong_removed)} / {len(removed_set)} ({(len(wrong_removed)/len(removed_set))*100 if removed_set else 0:.2f}%)"
+        )
+        logging.info(
+            f"  Wrong among KEPT: {len(wrong_kept)} / {len(kept_set)} ({(len(wrong_kept)/len(kept_set))*100 if kept_set else 0:.2f}%)"
+        )
+
+        # Step 3: Run MUS/MCS on PC facts only
+        logging.info("Step 3: Running MUS/MCS analysis")
+        fd_mus, facts_mus_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd_mus)
+        with open(facts_mus_file, 'w') as f:
+            for s in facts_ext:
+                line = s if s.endswith('.') else s + '.'
+                f.write(f"{line}\n")
+
+        mus_result = CausalABA_MUS(
+            n_nodes=n_nodes,
+            facts_location=facts_mus_file,
+            gringo_path="clingo",
+            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            max_muses=500,
+            mus_algorithm="camus",
+            print_mcses=True,
+            camus_mcs_threshold=50,
+            camus_mus_threshold=300,
+        )
+
+        logging.info(f"MUS cores found: {mus_result['n_mus']}")
+        logging.info(f"MCSes found: {mus_result.get('n_mcs', 0)}")
+        self.assertGreater(mus_result['n_mus'], 0, "Expected at least one MUS")
+        self.assertGreater(mus_result.get('n_mcs', 0), 0, "Expected at least one MCS")
+
+        mus_sets = [set(_canon_fact(f) for f in mf) for mf in mus_result['mus_facts']]
+        for ms in mus_sets:
+            self.assertTrue(
+                len(ms.intersection(wrong_set)) >= 1,
+                "Each MUS should include at least one wrong/flipped test",
+            )
+
+        # --------------------------
+        # Link ABAPC removals vs MUS/MCS rankings
+        # --------------------------
+        mus_freq = Counter(f for ms in mus_sets for f in ms)
+        n_mus = max(int(mus_result.get('n_mus', 0) or 0), 1)
+        mcs_sets = [set(_canon_fact(f) for f in mf) for mf in mus_result.get('mcs_facts', [])]
+        mcs_freq = Counter(f for cs in mcs_sets for f in cs)
+        n_mcs = max(int(mus_result.get('n_mcs', 0) or 0), 1)
+
+        wrong_in_mus_unique = set(mus_freq.keys()) & wrong_set
+        wrong_in_mcs_unique = set(mcs_freq.keys()) & wrong_set
+        logging.info(
+            f"  Wrong facts appearing in MUSes: {len(wrong_in_mus_unique)} / {len(wrong_all)} unique"
+        )
+        logging.info(
+            f"  Wrong facts appearing in MCSes: {len(wrong_in_mcs_unique)} / {len(wrong_all)} unique"
+        )
+
+        def _log_ranked(title: str, freq: Counter, denom: int, top_k: int = 20) -> list[str]:
+            ordered = sorted(freq.items(), key=lambda kv: (-kv[1], kv[0]))
+            top_facts = [f for f, _c in ordered[: min(top_k, len(ordered))]]
+            logging.info(title)
+            for fact, count in ordered[: min(top_k, len(ordered))]:
+                pct = (count / denom) * 100.0
+                label_wc = "WRONG" if fact in wrong_set else "CORRECT"
+                label_rm = "REMOVED" if fact in removed_set else "KEPT"
+                logging.info(f"    - {label_rm} | {label_wc}: {fact} ({count}/{denom} = {pct:.1f}%)")
+            return top_facts
+
+        top_mus = _log_ranked("  Top facts by MUS frequency (all PC facts):", mus_freq, n_mus, top_k=20)
+        top_mcs = _log_ranked("  Top facts by MCS frequency (all PC facts):", mcs_freq, n_mcs, top_k=20)
+
+        for k in (5, 10, 20):
+            k_mus = set(top_mus[: min(k, len(top_mus))])
+            k_mcs = set(top_mcs[: min(k, len(top_mcs))])
+            logging.info(
+                f"  Overlap with ABAPC removed (top-{k}): MUS={len(k_mus & removed_set)}/{len(k_mus) or 1}, MCS={len(k_mcs & removed_set)}/{len(k_mcs) or 1}"
+            )
+
+        # Rank removed facts by how often they appear in MUS/MCS
+        removed_by_mus = sorted(
+            ((f, mus_freq.get(f, 0)) for f in removed_facts),
+            key=lambda t: (-t[1], t[0]),
+        )
+        removed_by_mcs = sorted(
+            ((f, mcs_freq.get(f, 0)) for f in removed_facts),
+            key=lambda t: (-t[1], t[0]),
+        )
+        logging.info("  ABAPC-REMOVED facts ranked by MUS frequency (count / n_mus):")
+        for fact, count in removed_by_mus[:20]:
+            pct = (count / n_mus) * 100.0
+            label_wc = "WRONG" if fact in wrong_set else "CORRECT"
+            logging.info(f"    - {label_wc}: {fact} ({count}/{n_mus} = {pct:.1f}%)")
+        logging.info("  ABAPC-REMOVED facts ranked by MCS frequency (count / n_mcs):")
+        for fact, count in removed_by_mcs[:20]:
+            pct = (count / n_mcs) * 100.0
+            label_wc = "WRONG" if fact in wrong_set else "CORRECT"
+            logging.info(f"    - {label_wc}: {fact} ({count}/{n_mcs} = {pct:.1f}%)")
+
+        # Examples of smallest MUSes and MCSes
+        sorted_muses = sorted(enumerate(mus_result.get('mus_facts', []), 1), key=lambda x: (len(x[1]), x[0]))
+        logging.info("  Examples of smallest MUSes:")
+        for idx, mus_facts in sorted_muses[:3]:
+            logging.info(f"    MUS #{idx} (size {len(mus_facts)}):")
+            for fact in mus_facts:
+                label_wc = "WRONG" if fact in wrong_set else "CORRECT"
+                label_rm = "REMOVED" if fact in removed_set else "KEPT"
+                logging.info(f"      - {label_rm} | {label_wc}: {fact}")
+
+        sorted_mcses = sorted(enumerate(mus_result.get('mcs_facts', []), 1), key=lambda x: (len(x[1]), x[0]))
+        logging.info("  Examples of smallest MCSes:")
+        for idx, mcs_facts in sorted_mcses[:3]:
+            logging.info(f"    MCS #{idx} (size {len(mcs_facts)}):")
+            for fact in mcs_facts:
+                label_wc = "WRONG" if fact in wrong_set else "CORRECT"
+                label_rm = "REMOVED" if fact in removed_set else "KEPT"
+                logging.info(f"      - {label_rm} | {label_wc}: {fact}")
+
+        os.remove(facts_file)
+        os.remove(facts_I_file)
+        os.remove(facts_wc_file)
+        os.remove(facts_mus_file)
+
     def test_adorning_with_mus_assumptions(self):
         """Test that facts are correctly adorned with mus/1 assumptions.
         
@@ -565,6 +972,183 @@ class TestMUSAnalysis(unittest.TestCase):
                 logging.info(f"    - {fact}")
 
         os.remove(facts_file)
+
+    def test_mus_mcs_random_sizes_abapc(self):
+        """Run MUS/MCS analysis across multiple node sizes (5, 6, 10) without code duplication.
+        
+        This test parameterizes test_mus_mcs_random_five_node_abapc across different graph
+        sizes, using unittest.TestCase.subTest to organize results by size.
+        """
+        logger_setup()
+        logging.info("===============Running test_mus_mcs_random_sizes_abapc===============")
+
+        import types
+
+        # Stub notears once to avoid repeated imports
+        if 'notears.nonlinear' not in sys.modules:
+            notears_module = types.ModuleType('notears')
+            notears_nonlinear_module = types.ModuleType('notears.nonlinear')
+
+            class _DummyMLP:
+                pass
+
+            def _dummy_notears_nonlinear(*args, **kwargs):
+                raise ImportError("notears is not installed in this test environment")
+
+            notears_nonlinear_module.NotearsMLP = _DummyMLP
+            notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+            sys.modules['notears'] = notears_module
+            sys.modules['notears.nonlinear'] = notears_nonlinear_module
+
+        # Run for multiple node sizes
+        for n_nodes in (5, 6, 10):
+            with self.subTest(n_nodes=n_nodes):
+                logging.info(f"\n--- Running for n_nodes={n_nodes} ---")
+                self._run_mus_mcs_for_size(n_nodes)
+
+    def _run_mus_mcs_for_size(self, n_nodes: int):
+        """Helper to run the full MUS/MCS pipeline for a given node size.
+        
+        This extracts the core logic of test_mus_mcs_random_five_node_abapc so it can
+        be parameterized across different sizes without code duplication.
+        """
+        import types
+
+        # Stub notears again for this sub-run (if needed)
+        if 'notears.nonlinear' not in sys.modules:
+            notears_module = types.ModuleType('notears')
+            notears_nonlinear_module = types.ModuleType('notears.nonlinear')
+
+            class _DummyMLP:
+                pass
+
+            def _dummy_notears_nonlinear(*args, **kwargs):
+                raise ImportError("notears is not installed in this test environment")
+
+            notears_nonlinear_module.NotearsMLP = _DummyMLP
+            notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+            sys.modules['notears'] = notears_module
+            sys.modules['notears.nonlinear'] = notears_nonlinear_module
+
+        # Use a deterministic seed based on n_nodes to ensure reproducibility
+        seed_map = {5: 2004, 6: 2005, 10: 2010}
+        seed = seed_map.get(n_nodes, 2004)
+
+        # Deterministic configuration
+        case = self.randomG_PC_case(
+            n_nodes=n_nodes,
+            edge_per_node=2,
+            graph_type="ER",
+            seed=seed,
+            alpha=0.05,
+            sample_size=10000,
+            uc_rule=5,
+            stable=True,
+        )
+        config = case["config"]
+        facts = case["facts"]
+        facts_ext = case["facts_ext"]
+        wrong_ext = case["wrong_ext"]
+        count_wrong = case["count_wrong"]
+        true_seplist = case["true_seplist"]
+        cg = case["cg"]
+        G_true1 = case["G_true1"]
+
+        logging.info(f"Config: n_nodes={n_nodes}, seed={seed}")
+        logging.info(f"True DAG: {G_true1.edges}")
+        logging.info(f"Number of total independence statements: {len(true_seplist)}")
+        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
+        logging.info(f"Number of wrong facts: {count_wrong} ({(count_wrong/len(facts))*100 if facts else 0:.2f}%)")
+        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
+
+        # Basic assertions
+        self.assertGreater(len(facts_ext), 0, f"Expected at least one PC-derived fact for n_nodes={n_nodes}")
+        self.assertGreater(count_wrong, 0, f"Expected at least one wrong PC fact for MUS analysis for n_nodes={n_nodes}")
+
+        # Write facts to temp files (base + I + wc) for CausalABA
+        fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd)
+        facts_I_file = facts_file.replace('.lp', '_I.lp')
+        facts_wc_file = facts_file.replace('.lp', '_wc.lp')
+
+        with open(facts_file, 'w') as f:
+            for s in facts_ext:
+                line = s if s.endswith('.') else s + '.'
+                f.write(f"#external {line}\n")
+
+        with open(facts_I_file, 'w') as f:
+            for fact, s in zip(facts, facts_ext):
+                line = s if s.endswith('.') else s + '.'
+                I = fact[1]
+                f.write(f"{line} I={I}, NA\n")
+
+        with open(facts_wc_file, 'w') as f:
+            for fact, s in zip(facts, facts_ext):
+                line = s if s.endswith('.') else s + '.'
+                I = fact[1]
+                f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
+
+        # Step 1: Run with all facts
+        logging.info("Step 1: Testing with all facts")
+        models_all, _ = CausalABA(n_nodes, facts_file, weak_constraints=True, print_models=False)
+        logging.info(f"  → {len(models_all)} models")
+
+        # Step 2: Apply ABAPC removal strategy (search='first')
+        logging.info("Step 2: Applying removal strategy (search_for_models='first')")
+        models_after, multiple, stats, remove_n = CausalABA(
+            n_nodes,
+            facts_file,
+            weak_constraints=True,
+            search_for_models='first',
+            print_models=False,
+            return_statistics=True,
+        )
+        logging.info(f"  → Facts removed: {remove_n}")
+        logging.info(f"  → Models found after removal: {len(models_after)}")
+
+        # For larger sizes, we may not enforce UNSAT for all seeds; just assert we can reach SAT
+        if len(models_all) == 0:
+            self.assertGreater(remove_n, 0, f"Expected removal of X>0 tests to reach SAT for n_nodes={n_nodes}")
+            self.assertGreater(len(models_after), 0, f"Expected SAT after removing X tests for n_nodes={n_nodes}")
+
+        # Step 3: Run MUS/MCS on PC facts only
+        logging.info("Step 3: Running MUS/MCS analysis")
+        fd_mus, facts_mus_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd_mus)
+        with open(facts_mus_file, 'w') as f:
+            for s in facts_ext:
+                line = s if s.endswith('.') else s + '.'
+                f.write(f"{line}\n")
+
+        # Cap MUS enumeration for larger sizes to keep runtime reasonable
+        max_muses = 500 if n_nodes <= 6 else 200
+        mus_result = CausalABA_MUS(
+            n_nodes=n_nodes,
+            facts_location=facts_mus_file,
+            gringo_path="clingo",
+            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            max_muses=max_muses,
+            mus_algorithm="camus",
+            print_mcses=True,
+            camus_mcs_threshold=50,
+            camus_mus_threshold=300,
+        )
+
+        logging.info(f"MUS cores found: {mus_result['n_mus']}")
+        logging.info(f"MCSes found: {mus_result.get('n_mcs', 0)}")
+
+        # Basic assertion: we expect at least some MUSes for contradiction cases
+        if len(models_all) == 0:
+            self.assertGreater(mus_result['n_mus'], 0, f"Expected at least one MUS for UNSAT case (n_nodes={n_nodes})")
+
+        # Clean up temp files
+        os.remove(facts_file)
+        os.remove(facts_I_file)
+        os.remove(facts_wc_file)
+        os.remove(facts_mus_file)
+
+        logging.info(f"✓ Completed run for n_nodes={n_nodes}\n")
 
 
 if __name__ == '__main__':
