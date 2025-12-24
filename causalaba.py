@@ -18,6 +18,7 @@ __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
 import os, sys
 import logging
+import time
 from clingo.control import Control
 from clingo import Function, Number
 import rustworkx as rx
@@ -27,8 +28,46 @@ from itertools import combinations
 from datetime import datetime
 from pathlib import Path
 # sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
-from utils.graph_utils import powerset, extract_test_elements_from_symbol
-from utils.prior_knowledge import PriorKnowledge
+try:
+    from .utils.graph_utils import powerset, extract_test_elements_from_symbol
+    from .utils.prior_knowledge import PriorKnowledge
+except ImportError:  # pragma: no cover
+    from utils.graph_utils import powerset, extract_test_elements_from_symbol
+    from utils.prior_knowledge import PriorKnowledge
+
+def _solve_with_timeout(
+    ctl: Control,
+    *,
+    solve_timeout: float | None,
+    on_model,
+    assumptions=None,
+) -> bool:
+    """Run clingo solve and call on_model(model) for each model.
+
+    Returns True if finished normally, False if cancelled due to timeout.
+    """
+    if solve_timeout is None:
+        with ctl.solve(yield_=True, assumptions=assumptions or []) as handle:
+            for model in handle:
+                on_model(model)
+        return True
+
+    # Async solve allows us to enforce a wall-time timeout without SIGALRM or
+    # killing the whole process.
+    handle = ctl.solve(async_=True, on_model=on_model, assumptions=assumptions or [])
+    finished = handle.wait(solve_timeout)
+    if not finished:
+        handle.cancel()
+        # Ensure clingo releases resources.
+        handle.wait()
+        try:
+            handle.get()
+        except Exception:
+            pass
+        return False
+    # Force completion.
+    handle.get()
+    return True
 
 def compile_and_ground(n_nodes:int, facts_location:str="",
                 skeleton_rules_reduction:bool=False,
@@ -48,7 +87,10 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 collider_tree_depth: int | None = None,
                 cycle_length: int | None = None,
                 threads: int | None = None,
+                deadline: float | None = None,
                 )->Control:
+
+    t_compile0 = time.perf_counter()
 
     logging.info("Compiling the program")
     ### Create Control
@@ -80,6 +122,8 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
         (S for S in base_condition_sets if max_conditioning_size is None or len(S) <= max_conditioning_size)
     )
     for S in tqdm(condition_sets):
+        if deadline is not None and time.perf_counter() > deadline:
+            raise TimeoutError("compile_and_ground exceeded wall-time budget")
         for s in S:
             set_str = f"in({s},{'s' + 'y'.join([str(i) for i in S])})."
             ctl.add("specific", [], set_str)
@@ -166,7 +210,11 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     use_bounded_nb = bounded_encoding_active and collider_tree_depth is not None and collider_tree_depth > 0
 
     for (X, Y) in tqdm(node_pairs):
+        if deadline is not None and time.perf_counter() > deadline:
+            raise TimeoutError("compile_and_ground exceeded wall-time budget")
         for path in _iter_paths_with_cutoff(G, X, Y, max_path_length):
+            if deadline is not None and time.perf_counter() > deadline:
+                raise TimeoutError("compile_and_ground exceeded wall-time budget")
             n_p += 1
             ### add path rule
             path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
@@ -237,9 +285,43 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
 
     ### Ground
     logging.info("   Grounding...")
-    start_ground = datetime.now()
+    peak_before_ground = None
+    try:
+        import tracemalloc as _tracemalloc  # local import to avoid overhead
+
+        if _tracemalloc.is_tracing():
+            _cur, _peak = _tracemalloc.get_traced_memory()
+            peak_before_ground = int(_peak)
+    except Exception:
+        peak_before_ground = None
+
+    t_ground0 = time.perf_counter()
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
-    logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
+    t_ground1 = time.perf_counter()
+
+    peak_after_ground = None
+    try:
+        import tracemalloc as _tracemalloc  # local import
+
+        if _tracemalloc.is_tracing():
+            _cur, _peak = _tracemalloc.get_traced_memory()
+            peak_after_ground = int(_peak)
+    except Exception:
+        peak_after_ground = None
+    # Store profiling info on the Control so callers (baseline/binsearch) can
+    # accumulate across potential regrounds.
+    try:
+        ctl._causalaba_profile = {
+            "compile_sec": max(0.0, t_ground0 - t_compile0),
+            "ground_sec": max(0.0, t_ground1 - t_ground0),
+            "paths_added": int(n_p),
+            "pairs_considered": int(len(node_pairs)),
+            "peak_after_compile_bytes": peak_before_ground,
+            "peak_after_ground_bytes": peak_after_ground,
+        }
+    except Exception:
+        pass
+    logging.info(f"   Grounding time: {t_ground1 - t_ground0:0.3f}s")
 
     return ctl
 
@@ -264,12 +346,16 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 collider_tree_depth: int | None = None,
                 cycle_length: int | None = None,
                 threads: int | None = None,
+                solve_timeout: float | None = None,
                 )->list:
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
     
     """
     logging.info(f"Running CausalABA")
+
+    # Treat solve_timeout as a wall-clock budget for the whole run (ground+solve).
+    deadline = (time.perf_counter() + float(solve_timeout)) if solve_timeout is not None else None
     
     # (X, Y) -> their condition sets S
     indep_facts: dict[tuple, set[tuple]] = {}
@@ -305,6 +391,24 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 facts_group[(X,Y)].add(condition_set)
 
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
+    profile: dict = {
+        "compile_sec_total": 0.0,
+        "compile_sec_last": 0.0,
+        "ground_sec_total": 0.0,
+        "ground_sec_last": 0.0,
+        "solve_sec_total": 0.0,
+        "solve_sec_last": 0.0,
+        "compile_calls": 0,
+        "ground_calls_internal": 0,
+        "solve_calls_internal": 0,
+        "paths_added_total": 0,
+        "paths_added_last": 0,
+        "peak_after_compile_bytes": None,
+        "peak_after_ground_bytes": None,
+        "peak_after_solve_bytes_last": None,
+        "peak_after_solve_bytes_max": None,
+    }
+
     ctl = compile_and_ground(
         n_nodes,
         facts_location,
@@ -323,7 +427,24 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         collider_tree_depth=collider_tree_depth,
         cycle_length=cycle_length,
         threads=threads,
+        deadline=deadline,
     )
+
+    try:
+        p = getattr(ctl, "_causalaba_profile", None)
+        if isinstance(p, dict):
+            profile["compile_calls"] += 1
+            profile["ground_calls_internal"] += 1
+            profile["compile_sec_last"] = float(p.get("compile_sec", 0.0))
+            profile["ground_sec_last"] = float(p.get("ground_sec", 0.0))
+            profile["compile_sec_total"] += profile["compile_sec_last"]
+            profile["ground_sec_total"] += profile["ground_sec_last"]
+            profile["paths_added_last"] = int(p.get("paths_added", 0))
+            profile["paths_added_total"] += profile["paths_added_last"]
+            profile["peak_after_compile_bytes"] = p.get("peak_after_compile_bytes")
+            profile["peak_after_ground_bytes"] = p.get("peak_after_ground_bytes")
+    except Exception:
+        pass
 
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
@@ -338,11 +459,38 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
         models = []
         logging.info("   Solving...")
-        with ctl.solve(yield_=True) as handle:
-            for model in handle:
-                models.append(model.symbols(shown=True))
-                if print_models:
-                    logging.info(f"Answer {len(models)}: {model}")
+        def _on_model(model):
+            models.append(model.symbols(shown=True))
+            if print_models:
+                logging.info(f"Answer {len(models)}: {model}")
+
+        # Use remaining time from overall deadline for initial solve
+        remaining_timeout = None
+        if deadline is not None:
+            remaining_timeout = max(0.0, deadline - time.perf_counter())
+            if remaining_timeout == 0.0:
+                logging.error("Timeout: no time remaining for initial solve.")
+                finished = False
+            else:
+                t_s0 = time.perf_counter()
+                finished = _solve_with_timeout(ctl, solve_timeout=remaining_timeout, on_model=_on_model)
+        else:
+            t_s0 = time.perf_counter()
+            finished = _solve_with_timeout(ctl, solve_timeout=solve_timeout, on_model=_on_model)
+        t_s1 = time.perf_counter()
+        profile["solve_calls_internal"] += 1
+        profile["solve_sec_last"] = max(0.0, t_s1 - t_s0)
+        profile["solve_sec_total"] += profile["solve_sec_last"]
+        try:
+            import tracemalloc as _tracemalloc
+
+            if _tracemalloc.is_tracing():
+                _cur, _peak = _tracemalloc.get_traced_memory()
+                profile["peak_after_solve_bytes_last"] = int(_peak)
+                prev = profile.get("peak_after_solve_bytes_max")
+                profile["peak_after_solve_bytes_max"] = int(_peak) if prev is None else max(int(prev), int(_peak))
+        except Exception:
+            pass
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         logging.info(f"Number of models: {n_models}")
         times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
@@ -354,12 +502,42 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
         models = []
         logging.info("   Solving...")
-        with ctl.solve(yield_=True) as handle:
-            for i, model in enumerate(handle):
-                if model.optimality_proven:
-                    models.append(model.symbols(shown=True))
-                if print_models:
-                    logging.info(f"Answer {i}: {model}")
+        i_counter = {"i": 0}
+
+        def _on_model(model):
+            i_counter["i"] += 1
+            if model.optimality_proven:
+                models.append(model.symbols(shown=True))
+            if print_models:
+                logging.info(f"Answer {i_counter['i']}: {model}")
+
+        # Use remaining time from overall deadline for initial solve
+        remaining_timeout = None
+        if deadline is not None:
+            remaining_timeout = max(0.0, deadline - time.perf_counter())
+            if remaining_timeout == 0.0:
+                logging.error("Timeout: no time remaining for initial solve.")
+                finished = False
+            else:
+                t_s0 = time.perf_counter()
+                finished = _solve_with_timeout(ctl, solve_timeout=remaining_timeout, on_model=_on_model)
+        else:
+            t_s0 = time.perf_counter()
+            finished = _solve_with_timeout(ctl, solve_timeout=solve_timeout, on_model=_on_model)
+        t_s1 = time.perf_counter()
+        profile["solve_calls_internal"] += 1
+        profile["solve_sec_last"] = max(0.0, t_s1 - t_s0)
+        profile["solve_sec_total"] += profile["solve_sec_last"]
+        try:
+            import tracemalloc as _tracemalloc
+
+            if _tracemalloc.is_tracing():
+                _cur, _peak = _tracemalloc.get_traced_memory()
+                profile["peak_after_solve_bytes_last"] = int(_peak)
+                prev = profile.get("peak_after_solve_bytes_max")
+                profile["peak_after_solve_bytes_max"] = int(_peak) if prev is None else max(int(prev), int(_peak))
+        except Exception:
+            pass
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         logging.info(f"Number of models: {n_models}")
         times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
@@ -369,6 +547,10 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
 
         ## start removing facts if no models are found
         while n_models == 0 and remove_n < len(facts):
+            # Stop if deadline exceeded before attempting another iteration
+            if deadline is not None and time.perf_counter() > deadline:
+                logging.error("Timeout: removal loop exceeded overall budget.")
+                break
             remove_n += 1
             logging.info(f"Number of facts removed: {remove_n}/{len(facts)}")
 
@@ -394,6 +576,15 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             if reground:
                 ### Save external statements
                 logging.info("Recompiling and regrounding...")
+                # Compute remaining time for regrounding and pass as a deadline
+                reground_deadline = None
+                if deadline is not None:
+                    reground_remaining = max(0.0, deadline - time.perf_counter())
+                    if reground_remaining <= 0.0:
+                        logging.error("Timeout: no time remaining to reground.")
+                        break
+                    reground_deadline = time.perf_counter() + reground_remaining
+
                 ctl = compile_and_ground(
                     n_nodes,
                     facts_location,
@@ -412,7 +603,23 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     collider_tree_depth=collider_tree_depth,
                     cycle_length=cycle_length,
                     threads=threads,
+                    deadline=reground_deadline,
                 )
+                try:
+                    p = getattr(ctl, "_causalaba_profile", None)
+                    if isinstance(p, dict):
+                        profile["compile_calls"] += 1
+                        profile["ground_calls_internal"] += 1
+                        profile["compile_sec_last"] = float(p.get("compile_sec", 0.0))
+                        profile["ground_sec_last"] = float(p.get("ground_sec", 0.0))
+                        profile["compile_sec_total"] += profile["compile_sec_last"]
+                        profile["ground_sec_total"] += profile["ground_sec_last"]
+                        profile["paths_added_last"] = int(p.get("paths_added", 0))
+                        profile["paths_added_total"] += profile["paths_added_last"]
+                        profile["peak_after_compile_bytes"] = p.get("peak_after_compile_bytes")
+                        profile["peak_after_ground_bytes"] = p.get("peak_after_ground_bytes")
+                except Exception:
+                    pass
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
@@ -421,12 +628,42 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
             models = []
             logging.info("   Solving...")
-            with ctl.solve(yield_=True) as handle:
-                for i, model in enumerate(handle):
-                    if model.optimality_proven:
-                        models.append(model.symbols(shown=True))
-                    if print_models:
-                        logging.info(f"Answer {i}: {model}")
+            i_counter = {"i": 0}
+
+            def _on_model2(model):
+                i_counter["i"] += 1
+                if model.optimality_proven:
+                    models.append(model.symbols(shown=True))
+                if print_models:
+                    logging.info(f"Answer {i_counter['i']}: {model}")
+
+            # If we already hit the timeout in the initial solve, stop trying
+            # additional removal iterations.
+            if solve_timeout is not None and not finished:
+                break
+            # Use remaining time from deadline for each removal iteration solve
+            rem_timeout = None
+            if deadline is not None:
+                rem_timeout = max(0.0, deadline - time.perf_counter())
+                if rem_timeout == 0.0:
+                    logging.error("Timeout: no time remaining for solve in removal loop.")
+                    break
+            t_s0 = time.perf_counter()
+            finished = _solve_with_timeout(ctl, solve_timeout=rem_timeout if deadline is not None else solve_timeout, on_model=_on_model2)
+            t_s1 = time.perf_counter()
+            profile["solve_calls_internal"] += 1
+            profile["solve_sec_last"] = max(0.0, t_s1 - t_s0)
+            profile["solve_sec_total"] += profile["solve_sec_last"]
+            try:
+                import tracemalloc as _tracemalloc
+
+                if _tracemalloc.is_tracing():
+                    _cur, _peak = _tracemalloc.get_traced_memory()
+                    profile["peak_after_solve_bytes_last"] = int(_peak)
+                    prev = profile.get("peak_after_solve_bytes_max")
+                    profile["peak_after_solve_bytes_max"] = int(_peak) if prev is None else max(int(prev), int(_peak))
+            except Exception:
+                pass
             n_models = int(ctl.statistics['summary']['models']['enumerated'])
             logging.info(f"Number of models: {n_models}")
             times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
@@ -465,7 +702,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             return [set_of_models, True]
 
     if return_statistics:
-        return [models, False, ctl.statistics, remove_n if 'remove_n' in locals() else 0]
+        return [models, False, ctl.statistics, remove_n if 'remove_n' in locals() else 0, profile]
     else:
         return [models, False]
 

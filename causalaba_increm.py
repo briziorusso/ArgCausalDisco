@@ -1,10 +1,9 @@
-####passes all but gets stuck on grounding for ??
-
 import logging
 import rustworkx as rx
 from clingo import Function, Number, Symbol
 import os
 import tracemalloc
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -391,6 +390,62 @@ def CausalABA(
     logger.info("Running CausalABA")
     # Reset per-run incremental bookkeeping to avoid cross-run contamination
     _reset_incremental_state()
+
+    t_compile0 = time.perf_counter()
+    profile: dict = {
+        "compile_sec_total": 0.0,
+        "compile_sec_last": 0.0,
+        "ground_sec_total": 0.0,
+        "ground_sec_last": 0.0,
+        "solve_sec_total": 0.0,
+        "solve_sec_last": 0.0,
+        "compile_calls": 0,
+        "ground_calls_internal": 0,
+        "solve_calls_internal": 0,
+        "sat_check_sec_total": 0.0,
+        "sat_check_sec_last": 0.0,
+        "final_opt_sec": 0.0,
+        "peak_after_compile_bytes": None,
+        "peak_after_ground_bytes": None,
+        "peak_after_solve_bytes_last": None,
+        "peak_after_solve_bytes_max": None,
+    }
+
+    def _record_solve(duration_sec: float, *, kind: str | None = None) -> None:
+        try:
+            d = float(duration_sec)
+        except Exception:
+            d = 0.0
+        if d < 0:
+            d = 0.0
+        profile["solve_calls_internal"] += 1
+        profile["solve_sec_last"] = d
+        profile["solve_sec_total"] += d
+        if kind == "satcheck":
+            profile["sat_check_sec_last"] = d
+            profile["sat_check_sec_total"] += d
+        elif kind == "final":
+            profile["final_opt_sec"] = d
+
+        try:
+            import tracemalloc as _tracemalloc
+
+            if _tracemalloc.is_tracing():
+                _cur, _peak = _tracemalloc.get_traced_memory()
+                profile["peak_after_solve_bytes_last"] = int(_peak)
+                prev = profile.get("peak_after_solve_bytes_max")
+                profile["peak_after_solve_bytes_max"] = int(_peak) if prev is None else max(int(prev), int(_peak))
+        except Exception:
+            pass
+
+    def _ret(models_out, multiple: bool, remove_n: int = 0):
+        if return_statistics:
+            try:
+                stats = ctl.statistics  # type: ignore[name-defined]
+            except Exception:
+                stats = {}
+            return [models_out, multiple, stats, int(remove_n or 0), profile]
+        return [models_out, multiple]
 
     indep_facts: dict[tuple, set[tuple]] = {}
     dep_facts: dict[tuple, set[tuple]] = {}
@@ -789,7 +844,34 @@ def CausalABA(
 
     # Ground the full base
     logger.info("   Grounding full base program...")
+    # Treat everything up to this point as "compile" for profiling purposes.
+    profile["compile_calls"] += 1
+    profile["compile_sec_last"] = max(0.0, time.perf_counter() - t_compile0)
+    profile["compile_sec_total"] += profile["compile_sec_last"]
+
+    try:
+        import tracemalloc as _tracemalloc
+
+        if _tracemalloc.is_tracing():
+            _cur, _peak = _tracemalloc.get_traced_memory()
+            profile["peak_after_compile_bytes"] = int(_peak)
+    except Exception:
+        pass
+
+    t_ground0 = time.perf_counter()
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
+    t_ground1 = time.perf_counter()
+    profile["ground_calls_internal"] += 1
+    profile["ground_sec_last"] = max(0.0, t_ground1 - t_ground0)
+    profile["ground_sec_total"] += profile["ground_sec_last"]
+    try:
+        import tracemalloc as _tracemalloc
+
+        if _tracemalloc.is_tracing():
+            _cur, _peak = _tracemalloc.get_traced_memory()
+            profile["peak_after_ground_bytes"] = int(_peak)
+    except Exception:
+        pass
     _tm_stage("after ctl.ground")
     if debug_enabled:
         try:
@@ -819,15 +901,18 @@ def CausalABA(
         def _on_model_no(model):
             models.append(model.symbols(shown=True))
 
+        t_s0 = time.perf_counter()
         _solve_with_timeout(
             ctl,
             solve_timeout=solve_timeout,
             on_model=_on_model_no,
             assumptions=_assumptions_from_exts(),
         )
+        t_s1 = time.perf_counter()
+        _record_solve(t_s1 - t_s0)
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         if n_models > 0:
-            return [models, False]
+            return _ret(models, False, 0)
 
     elif search_for_models == 'first':
         for fact, ext_sym in zip(facts, fact_syms):
@@ -852,12 +937,15 @@ def CausalABA(
                 if not models:
                     models.append(syms)
 
+            t_s0 = time.perf_counter()
             _solve_with_timeout(
                 ctl,
                 solve_timeout=solve_timeout,
                 on_model=_on_model_first,
                 assumptions=_assumptions_from_exts(),
             )
+            t_s1 = time.perf_counter()
+            _record_solve(t_s1 - t_s0)
         finally:
             _restore_opt_mode(ctl, prev_opt_mode)
         # Fallback: if optimization was requested but no optimality was proven (likely no #minimize),
@@ -870,7 +958,7 @@ def CausalABA(
         if debug_enabled:
             logger.debug("[first] models: %s", models)
         if n_models > 0 and models:
-            return [models, False]
+            return _ret(models, False, 0)
         
     elif 'subsets' in search_for_models:
         # Explore all subsets of facts by toggling externals; collect solutions.
@@ -896,23 +984,26 @@ def CausalABA(
             def _on_model_sub(model):
                 curr.append(model.symbols(shown=True))
 
+            t_s0 = time.perf_counter()
             _solve_with_timeout(
                 ctl,
                 solve_timeout=solve_timeout,
                 on_model=_on_model_sub,
                 assumptions=_assumptions_from_exts(),
             )
+            t_s1 = time.perf_counter()
+            _record_solve(t_s1 - t_s0)
             n_curr = int(ctl.statistics['summary']['models']['enumerated'])
             if n_curr > 0:
                 if search_for_models == 'first_subsets':
-                    return [curr, False]
+                    return _ret(curr, False, 0)
                 set_of_models.append(curr)
 
         if len(set_of_models) > 0:
-            return [set_of_models, True]
+            return _ret(set_of_models, True, 0)
 
     if (search_for_models != 'first') or n_models > 0:
-        return [models, False]
+        return _ret(models, False, 0)
 
     # --- Remove-until-SAT (monotonic search) ---
     # In this mode, we only toggle externals and re-solve; we do NOT add/ground
@@ -960,18 +1051,24 @@ def CausalABA(
             def _on_model_sat(_model):
                 found["sat"] = True
 
+            t0 = time.perf_counter()
             finished = _solve_with_timeout(
                 ctl,
                 solve_timeout=solve_timeout,
                 on_model=_on_model_sat,
                 assumptions=_assumptions_from_exts(),
             )
+            t1 = time.perf_counter()
+            _record_solve(t1 - t0, kind="satcheck")
             if found["sat"]:
                 return True
             if not finished:
                 return False
             try:
+                t2 = time.perf_counter()
                 res = ctl.solve(assumptions=_assumptions_from_exts())
+                t3 = time.perf_counter()
+                _record_solve(t3 - t2, kind="satcheck")
                 return bool(getattr(res, "satisfiable", False))
             except Exception:
                 return False
@@ -1033,12 +1130,15 @@ def CausalABA(
             if not models:
                 models.append(syms)
 
+        t_f0 = time.perf_counter()
         _solve_with_timeout(
             ctl,
             solve_timeout=solve_timeout,
             on_model=_on_model_post,
             assumptions=_assumptions_from_exts(),
         )
+        t_f1 = time.perf_counter()
+        _record_solve(t_f1 - t_f0, kind="final")
     finally:
         _restore_opt_mode(ctl, prev_opt_mode)
     if not models and last_syms is not None:
@@ -1056,6 +1156,6 @@ def CausalABA(
 
     # If still UNSAT, mirror baseline behavior: return no models.
     if n_models == 0:
-        return [[], False]
+        return _ret([], False, remove_n)
 
-    return [models, False]
+    return _ret(models, False, remove_n)
