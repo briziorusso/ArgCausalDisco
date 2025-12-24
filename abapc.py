@@ -23,11 +23,19 @@ import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
 from itertools import combinations
-from cd_algorithms.PC import pc
-from causalaba_increm import CausalABA as CausalABA_increm
+try:
+    from .cd_algorithms.PC import pc
+    from .causalaba_increm import CausalABA as CausalABA_increm
+except ImportError:  # pragma: no cover
+    from cd_algorithms.PC import pc
+    from causalaba_increm import CausalABA as CausalABA_increm
 # sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
-from utils.helpers import logger_setup, random_stability
-from utils.graph_utils import initial_strength, set_of_models_to_set_of_graphs
+try:
+    from .utils.helpers import logger_setup, random_stability
+    from .utils.graph_utils import initial_strength, set_of_models_to_set_of_graphs
+except ImportError:  # pragma: no cover
+    from utils.helpers import logger_setup, random_stability
+    from utils.graph_utils import initial_strength, set_of_models_to_set_of_graphs
 
 def ABAPC(data, 
           seed=2024, alpha=0.05, indep_test='fisherz',
@@ -134,9 +142,14 @@ def ABAPC(data,
     set_of_model_sets = []
     # Choose solver variant lazily to avoid unnecessary imports.
     if use_incremental:
+        logging.info("ABAPC is using incremental CausalABA (Bayes-ball / incremental grounding)")
         CausalSolver = CausalABA_increm
     else:
-        from causalaba import CausalABA as CausalSolver
+        logging.info("ABAPC is using baseline CausalABA (path enumeration)")
+        try:
+            from .causalaba import CausalABA as CausalSolver
+        except ImportError:  # pragma: no cover
+            from causalaba import CausalABA as CausalSolver
 
     model_sets, multiple_solutions = CausalSolver(
         n_nodes,

@@ -26,9 +26,18 @@ import pydot
 import logging
 import gc
 gc.set_threshold(0,0,0)
-from abapc import ABAPC
-from cd_algorithms.PC import pc
-from utils.helpers import random_stability, get_freer_gpu
+try:
+    from ..abapc import ABAPC
+except ImportError:  # pragma: no cover
+    from abapc import ABAPC
+try:
+    from .PC import pc
+except ImportError:  # pragma: no cover
+    from cd_algorithms.PC import pc
+try:
+    from ..utils.helpers import random_stability, get_freer_gpu
+except ImportError:  # pragma: no cover
+    from utils.helpers import random_stability, get_freer_gpu
 from math import floor
 
 try:

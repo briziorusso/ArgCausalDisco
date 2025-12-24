@@ -5,20 +5,39 @@ import fnmatch
 import argparse
 from pathlib import Path
 import shutil
+import signal
+import faulthandler
+import resource
+import sys
 
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from cd_algorithms.models import run_method
-from utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
-from utils.helpers import random_stability, logger_setup
-from utils.data_utils import (
-    load_bnlearn_data_dag,
-    simulate_dag,
-    simulate_discrete_data,
-    simulate_linear_continuous_data,
-    BIF_FOLDER_MAP,
-)
+
+# Prefer package-relative imports to avoid accidentally importing modules from a
+# different checkout (e.g., ArgCausalDisco-1) when PYTHONPATH is set broadly.
+try:
+    from .cd_algorithms.models import run_method
+    from .utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
+    from .utils.helpers import random_stability, logger_setup
+    from .utils.data_utils import (
+        load_bnlearn_data_dag,
+        simulate_dag,
+        simulate_discrete_data,
+        simulate_linear_continuous_data,
+        BIF_FOLDER_MAP,
+    )
+except ImportError:  # pragma: no cover
+    from cd_algorithms.models import run_method
+    from utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
+    from utils.helpers import random_stability, logger_setup
+    from utils.data_utils import (
+        load_bnlearn_data_dag,
+        simulate_dag,
+        simulate_discrete_data,
+        simulate_linear_continuous_data,
+        BIF_FOLDER_MAP,
+    )
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -224,6 +243,56 @@ results_path = Path(args.results_dir)
 results_path.mkdir(parents=True, exist_ok=True)
 logger_setup(str(results_path / f'log_{version}.log'))
 
+# Log which code is actually executing/imported. This helps detect accidental
+# execution from a different checkout (e.g., ArgCausalDisco vs ArgCausalDisco-1).
+try:
+    import cd_algorithms.models as _models_mod
+    import abapc as _abapc_mod
+    logging.info(f"experiments.py path: {__file__}")
+    logging.info(f"cwd: {os.getcwd()}")
+    logging.info(f"cd_algorithms.models path: {_models_mod.__file__}")
+    logging.info(f"abapc.py path: {_abapc_mod.__file__}")
+except Exception as _e:  # pragma: no cover
+    logging.warning(f"Could not log import paths: {_e}")
+
+
+# If this process is terminated externally (SIGTERM => exit code 143),
+# write a clear breadcrumb to disk to diagnose what happened.
+_signal_log_path = results_path / f"signal_{version}.log"
+
+
+def _write_signal_breadcrumb(sig_name: str) -> None:
+    try:
+        ru = resource.getrusage(resource.RUSAGE_SELF)
+        # ru_maxrss is KiB on Linux
+        maxrss_kib = getattr(ru, "ru_maxrss", None)
+    except Exception:
+        maxrss_kib = None
+    try:
+        with open(_signal_log_path, "a") as f:
+            f.write(f"\n--- {datetime.now().isoformat()} received {sig_name} (pid={os.getpid()}) ---\n")
+            if maxrss_kib is not None:
+                f.write(f"ru_maxrss_kib={maxrss_kib}\n")
+            f.write("Stack trace (all threads):\n")
+            faulthandler.dump_traceback(file=f, all_threads=True)
+    except Exception:
+        # Best-effort only
+        pass
+
+
+def _handle_sigterm(signum, frame):  # noqa: ARG001
+    _write_signal_breadcrumb("SIGTERM")
+    raise SystemExit(143)
+
+
+def _handle_sigint(signum, frame):  # noqa: ARG001
+    _write_signal_breadcrumb("SIGINT")
+    raise SystemExit(130)
+
+
+signal.signal(signal.SIGTERM, _handle_sigterm)
+signal.signal(signal.SIGINT, _handle_sigint)
+
 sample_size = args.sample_size
 n_runs = args.n_runs
 device = args.device
@@ -251,6 +320,8 @@ sz_ratio = args.sz_ratio
 lb_ratio = args.lb_ratio
 lcyc_ratio = args.lcyc_ratio
 abapc_solver = args.abapc_solver
+
+logging.info(f"ABAPC solver selection: {abapc_solver}")
 
 model_list = args.models
 names_dict = {
@@ -489,8 +560,19 @@ for dataset_name, src, info in datasets:
                     raise ValueError(f'Unknown random method {method}')
                 B_est = simulate_dag(d=B_true.shape[1], s0=s0, graph_type='ER')
                 elapsed = (datetime.now() - start).total_seconds()
-                mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true).metrics
-                mt_dag = DAGMetrics(B_est, B_true).metrics
+                try:
+                    mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true).metrics
+                    mt_dag = DAGMetrics(B_est, B_true).metrics
+                except Exception as e:
+                    logging.error(f'DAGMetrics computation failed for random baseline: {e}')
+                    mt_cpdag = {
+                        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
+                        'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
+                    }
+                    mt_dag = {
+                        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
+                        'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
+                    }
             else:
                 W_est, elapsed = run_method(
                     X_s, method, seed, test_alpha=test_alpha, test_name=test_name,
@@ -524,14 +606,28 @@ for dataset_name, src, info in datasets:
                     }
                 else:
                     B_est_binary = (W_est != 0).astype(int)
-                    mt_cpdag = DAGMetrics(dag2cpdag(B_est_binary.copy()), B_true).metrics
+                    try:
+                        mt_cpdag = DAGMetrics(dag2cpdag(B_est_binary.copy()), B_true).metrics
+                    except Exception as e:
+                        logging.error(f'DAGMetrics computation failed for CPDAG: {e}')
+                        mt_cpdag = {
+                            'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
+                            'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
+                        }
                     B_est = (W_est > 0).astype(int)
                     bidirected_mask = (B_est == 1) & (B_est.T == 1)
                     if bidirected_mask.any():
                         logging.warning('Estimated graph contains bidirected edges; removing them before DAG metrics computation.')
                         B_est[bidirected_mask] = 0
                     if is_dag(B_est):
-                        mt_dag = DAGMetrics(B_est, B_true).metrics
+                        try:
+                            mt_dag = DAGMetrics(B_est, B_true).metrics
+                        except Exception as e:
+                            logging.error(f'DAGMetrics computation failed for DAG: {e}')
+                            mt_dag = {
+                                'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
+                                'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
+                            }
                     else:
                         logging.warning('Estimated graph is not a DAG after bidirected edge removal; skipping DAG metrics for this run.')
                         mt_dag = {
@@ -541,6 +637,15 @@ for dataset_name, src, info in datasets:
 
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_dag})
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_cpdag})
+
+            # Early validation: check for null SID on first run to catch config issues immediately
+            if idx == completed_runs and mt_cpdag.get('sid') is None and method not in ['random', 'random_edge']:
+                logging.error(
+                    f"SID is null for {display_name} on {dataset_name} (first run). "
+                    f"This likely means R SID package is not installed or DAGMetrics is failing. "
+                    f"Stopping to avoid wasting time on {n_runs} runs with missing metrics."
+                )
+                raise SystemExit(1)
 
             dag_row = {'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_dag, 'run_idx': idx, 'seed': seed}
             if isinstance(mt_cpdag.get('sid'), tuple):

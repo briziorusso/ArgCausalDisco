@@ -25,11 +25,15 @@ def logger_setup(output_file:str="", continue_logging=False):
             output_path = output_dir / f"{output_path.name}.log"
 
     file_mode = 'a' if continue_logging else 'w'
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(message)s',
-                        datefmt='%m-%d %H:%M',
-                        filename=str(output_path),
-                        filemode=file_mode, force=True)
+    # File logs should include timestamps so long-running jobs can be reconstructed.
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(name)-8s %(module)-12s - %(levelname)-8s %(message)s',
+        datefmt='%m-%d %H:%M:%S',
+        filename=str(output_path),
+        filemode=file_mode,
+        force=True,
+    )
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
