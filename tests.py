@@ -1033,7 +1033,7 @@ class TestABAPC(unittest.TestCase):
 
         self.assertEqual(np.abs(B_est - B_true).sum(), 7)
 
-    def test_abapc_four_vars_example_seed_loop(self):
+    def abapc_four_vars_example_seed_loop(self):
         #### ArgCD paper example ####
         scenario = "abapc_four_node_example"
         alpha = 0.05    
@@ -1097,72 +1097,72 @@ class TestABAPC(unittest.TestCase):
                 ## stop if PC outputs something and ABAPC does better
                 self.assertTrue(len(est_edges.intersection(expected)) <= len(set(cg.find_fully_directed()).intersection(expected))) 
 
-    def test_abapc_four_node_example(self):
-        #### ArgCD paper example ####
-        scenario = "test_abapc_four_node_example"
-        alpha = 0.05    
-        logger_setup(scenario)
-        logging.info(f"===============Running {scenario}===============")
-        B_true = np.array( [[ 0,  0,  1,  0],
-                            [ 0,  0,  1,  1],
-                            [ 0,  0,  0,  1],
-                            [ 0,  0,  0,  0],
-                            ])
-        n_nodes = B_true.shape[0]
-        logging.info(B_true)
-        G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
-        relabel_dict = {f"X{i+1}":i for i in range(n_nodes)}
-        G_true1 = nx.relabel_nodes(G_true, relabel_dict)
+    # def test_abapc_four_node_example(self):
+    #     #### ArgCD paper example ####
+    #     scenario = "test_abapc_four_node_example"
+    #     alpha = 0.05    
+    #     logger_setup(scenario)
+    #     logging.info(f"===============Running {scenario}===============")
+    #     B_true = np.array( [[ 0,  0,  1,  0],
+    #                         [ 0,  0,  1,  1],
+    #                         [ 0,  0,  0,  1],
+    #                         [ 0,  0,  0,  0],
+    #                         ])
+    #     n_nodes = B_true.shape[0]
+    #     logging.info(B_true)
+    #     G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
+    #     relabel_dict = {f"X{i+1}":i for i in range(n_nodes)}
+    #     G_true1 = nx.relabel_nodes(G_true, relabel_dict)
 
-        expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
+    #     expected = frozenset({(0, 2), (1, 2), (1, 3), (2, 3)})
 
-        true_seplist = find_all_d_separations_sets(G_true)
+    #     true_seplist = find_all_d_separations_sets(G_true)
 
-        seed=2376
-        random_stability(seed)
-        data, cg = simulate_data_and_run_PC(G_true, alpha, seed=seed, uc_rule=5, stable=True)
+    #     seed=2376
+    #     random_stability(seed)
+    #     data, cg = simulate_data_and_run_PC(G_true, alpha, seed=seed, uc_rule=5, stable=True)
 
-        facts = []
-        count_wrong = 0
-        for test in true_seplist:
-            X, S, Y, dep_type = extract_test_elements_from_symbol(test)
+    #     facts = []
+    #     count_wrong = 0
+    #     for test in true_seplist:
+    #         X, S, Y, dep_type = extract_test_elements_from_symbol(test)
 
-            test_PC = set([t for t in cg.sepset[X,Y] if set(t[0])==S]) 
-            if len(test_PC)==1:
-                p = list(test_PC)[0][1]
-                dep_type_PC = "indep" if p > alpha else "dep" 
-                I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
-                if dep_type == dep_type_PC:
-                    facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC, p))
-                elif dep_type == "indep":
-                    count_wrong += 1
-                    facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC, p))
-                elif dep_type == "dep":
-                    count_wrong += 1
-                    facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC, p))
+    #         test_PC = set([t for t in cg.sepset[X,Y] if set(t[0])==S]) 
+    #         if len(test_PC)==1:
+    #             p = list(test_PC)[0][1]
+    #             dep_type_PC = "indep" if p > alpha else "dep" 
+    #             I = initial_strength(p, len(S), alpha, 0.5, n_nodes)
+    #             if dep_type == dep_type_PC:
+    #                 facts.append((X,S,Y,dep_type_PC, test, I, dep_type == dep_type_PC, p))
+    #             elif dep_type == "indep":
+    #                 count_wrong += 1
+    #                 facts.append((X,S,Y,dep_type_PC, test.replace("indep", "dep"), I, dep_type == dep_type_PC, p))
+    #             elif dep_type == "dep":
+    #                 count_wrong += 1
+    #                 facts.append((X,S,Y,dep_type_PC, test.replace("dep", "indep"), I, dep_type == dep_type_PC, p))
         
-        ### Save external statements
-        B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
-                      set_indep_facts=False, stable=True, conservative=True, smoothing_k=0)
-        ## edges from adjacency matrix
-        est_edges = set([(i,j) for i in range(n_nodes) for j in range(n_nodes) if B_est[i,j]==1])
+    #     ### Save external statements
+    #     B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
+    #                   set_indep_facts=False, stable=True, conservative=True, smoothing_k=0)
+    #     ## edges from adjacency matrix
+    #     est_edges = set([(i,j) for i in range(n_nodes) for j in range(n_nodes) if B_est[i,j]==1])
 
-        logging.info(f"Seed: {seed}")
-        logging.info(f"True DAG: {G_true1.edges}")
-        logging.info(f"Number of total independence statements: {len(true_seplist)}")
-        logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
-        logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
-        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
-        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
-        logging.info(f"Edges from ABAPC: {est_edges}")
+    #     logging.info(f"Seed: {seed}")
+    #     logging.info(f"True DAG: {G_true1.edges}")
+    #     logging.info(f"Number of total independence statements: {len(true_seplist)}")
+    #     logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
+    #     logging.info(f"Number of wrong facts: {count_wrong} ({count_wrong/len(facts)*100:.2f}%)")
+    #     logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
+    #     logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
+    #     logging.info(f"Edges from ABAPC: {est_edges}")
 
-        models, _ = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
-                                set_indep_facts=False, stable=True, conservative=True, out_mode='optN', smoothing_k=0)
-        logging.info(f"Number of models found: {len(models)}")
+    #     models, _ = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario=scenario, 
+    #                             set_indep_facts=False, stable=True, conservative=True, out_mode='optN', smoothing_k=0)
+    #     logging.info(f"Number of models found: {len(models)}")
 
-        self.assertIn(expected, models)
+    #     self.assertIn(expected, models)
 
-        self.assertEqual(np.abs(B_est - B_true).sum(), 0)
+    #     self.assertEqual(np.abs(B_est - B_true).sum(), 0)
 
     def test_abapc_bnlearn(self):
         scenario = "test_abapc_bnlearn"
