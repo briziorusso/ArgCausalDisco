@@ -27,6 +27,7 @@ import sys
 import logging
 import tempfile
 import subprocess
+import time
 import re
 from pathlib import Path
 from itertools import combinations
@@ -80,6 +81,7 @@ def run_mus_solver(
     camus_mcs_threshold: Optional[int] = None,
     camus_mus_threshold: Optional[int] = None,
     return_mcses: bool = False,
+    solve_timeout: Optional[float] = None,
 ) -> Union[List[List[int]], Tuple[List[List[int]], List[List[int]]]]:
     """
     Run MUS solver on ASP program using gringo and wasp.
@@ -152,8 +154,33 @@ def run_mus_solver(
         if clingo_process.stdout is not None:
             clingo_process.stdout.close()
         
-        # Wait for wasp to complete
-        wasp_output, wasp_error = wasp_process.communicate()
+        # Wait for wasp to complete (with optional timeout)
+        try:
+            if solve_timeout is not None:
+                wasp_output, wasp_error = wasp_process.communicate(timeout=solve_timeout)
+            else:
+                wasp_output, wasp_error = wasp_process.communicate()
+        except subprocess.TimeoutExpired:
+            logging.error(f"Wasp MUS solve timed out after {solve_timeout} seconds. Cancelling processes.")
+            try:
+                wasp_process.kill()
+            except Exception:
+                pass
+            try:
+                clingo_process.kill()
+            except Exception:
+                pass
+            # Attempt to collect any partial outputs (likely none)
+            try:
+                wasp_output, wasp_error = wasp_process.communicate(timeout=1)
+            except Exception:
+                wasp_output, wasp_error = "", ""
+            try:
+                clingo_process.wait(timeout=1)
+            except Exception:
+                pass
+            # Return empty results to indicate timeout
+            return [] if not return_mcses else ([], [])
         
         # Wait for clingo to complete and get its stderr
         clingo_process.wait()
@@ -227,7 +254,13 @@ def run_mus_solver(
         return []
 
 
-def build_mus_program(n_nodes: int, facts: list[str], facts_location: str = "") -> str:
+def build_mus_program(
+    n_nodes: int,
+    facts: list[str],
+    facts_location: str = "",
+    *,
+    deadline: Optional[float] = None,
+) -> str:
     """
     Build an ASP program for MUS computation using CausalABA's compile_and_ground.
     
@@ -314,7 +347,7 @@ def build_mus_program(n_nodes: int, facts: list[str], facts_location: str = "") 
             ctl = compile_and_ground(
                 n_nodes,
                 facts_location=facts_location,
-                skeleton_rules_reduction=False,
+                skeleton_rules_reduction=True,  # Enable skeleton-rules optimization for MUS
                 weak_constraints=False,
                 indep_facts=indep_facts,
                 dep_facts=dep_facts,
@@ -328,7 +361,8 @@ def build_mus_program(n_nodes: int, facts: list[str], facts_location: str = "") 
                 max_conditioning_size=None,
                 collider_tree_depth=None,
                 cycle_length=None,
-                dump_specific=specific_rules_file
+                dump_specific=specific_rules_file,
+                deadline=deadline,
             )
             
             # Load the dumped specific rules
@@ -386,6 +420,7 @@ def CausalABA_MUS(
     print_mcses: bool = False,
     camus_mcs_threshold: Optional[int] = None,
     camus_mus_threshold: Optional[int] = None,
+    solve_timeout: Optional[float] = None,
 ) -> dict:
     """
     Run CausalABA with MUS (Minimal Unsatisfiable Subset) analysis.
@@ -432,12 +467,52 @@ def CausalABA_MUS(
         logging.debug(f"  Preview facts: {preview} (showing 5 of {len(fact_mapping)})")
     
     # Step 2: Build MUS program with assumption layer on top of CausalABA encoding
-    program = build_mus_program(n_nodes, facts, facts_location)
+    # Treat solve_timeout as an end-to-end budget (build + solve)
+    deadline = (time.perf_counter() + float(solve_timeout)) if solve_timeout is not None else None
+    build_start = time.perf_counter()
+    try:
+        program = build_mus_program(n_nodes, facts, facts_location, deadline=deadline)
+        build_time = time.perf_counter() - build_start
+        logging.info(f"MUS Build time: {build_time:.3f}s (nodes={n_nodes})")
+    except TimeoutError:
+        build_time = time.perf_counter() - build_start
+        logging.error("MUS program build exceeded the timeout budget.")
+        logging.info(f"MUS Build time: {build_time:.3f}s (nodes={n_nodes})")
+        # Return empty results to indicate timeout (consistent with solver timeout behavior)
+        return {
+            'mus_list': [],
+            'mus_facts': [],
+            'n_mus': 0,
+            'fact_mapping': fact_mapping,
+            'mcs_list': [],
+            'mcs_facts': [],
+            'n_mcs': 0,
+            'mus_build_time': build_time,
+            'mus_solve_time': 0.0,
+            'mus_total_time': build_time,
+        }
+
+    # Compute remaining time for the solver stage
+    remaining_timeout: Optional[float] = None
+    if deadline is not None:
+        remaining_timeout = max(0.0, deadline - time.perf_counter())
+        if remaining_timeout == 0.0:
+            logging.error("No time remaining for MUS solve after build phase.")
+            return {
+                'mus_list': [],
+                'mus_facts': [],
+                'n_mus': 0,
+                'fact_mapping': fact_mapping,
+                'mcs_list': [],
+                'mcs_facts': [],
+                'n_mcs': 0,
+            }
     
     # Step 3: Run MUS solver (optionally with CAMUS/MCS printing)
     mus_list: List[List[int]] = []
     mcs_list: List[List[int]] = []
 
+    solve_start = time.perf_counter()
     if print_mcses or mus_algorithm:
         mus_mcs = run_mus_solver(
             program,
@@ -449,6 +524,7 @@ def CausalABA_MUS(
             camus_mcs_threshold=camus_mcs_threshold,
             camus_mus_threshold=camus_mus_threshold,
             return_mcses=True,
+            solve_timeout=remaining_timeout,
         )
         if isinstance(mus_mcs, tuple):
             mus_list, mcs_list = mus_mcs
@@ -457,11 +533,20 @@ def CausalABA_MUS(
             mus_list = mus_mcs
             mcs_list = []
     else:
-        mus_only = run_mus_solver(program, gringo_path, wasp_path, max_muses=max_muses)
+        mus_only = run_mus_solver(
+            program,
+            gringo_path,
+            wasp_path,
+            max_muses=max_muses,
+            solve_timeout=remaining_timeout,
+        )
         if isinstance(mus_only, list):
             mus_list = mus_only
         else:
             mus_list, mcs_list = mus_only
+    solve_time = time.perf_counter() - solve_start
+    total_time = build_time + solve_time
+    logging.info(f"MUS Solve time: {solve_time:.3f}s; Total: {total_time:.3f}s (nodes={n_nodes})")
     
     # Step 4: Map MUS indices back to actual facts
     mus_facts = []
@@ -486,6 +571,9 @@ def CausalABA_MUS(
         'mcs_list': mcs_list,
         'mcs_facts': [[fact_mapping.get(idx, f"mus({idx})") for idx in mcs] for mcs in mcs_list],
         'n_mcs': len(mcs_list),
+        'mus_build_time': build_time,
+        'mus_solve_time': solve_time,
+        'mus_total_time': total_time,
     }
     
     return result
