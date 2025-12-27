@@ -114,115 +114,137 @@ def profile_once(
     max_muses: int,
     camus_mcs_threshold: int,
     camus_mus_threshold: int,
-) -> None:
+) -> bool:
     _ensure_notears_stub()
 
     # Minimal progress markers so we know the run is alive; heavy logs stay quiet
     logging.info(f"[start] n_nodes={n_nodes}: compiling/grounding + solving (quiet)...")
 
-    with _quiet_phase():
-        config = RandomPCSimConfig(
-            n_nodes=n_nodes,
-            alpha=0.05,
-            graph_type=graph_type,
-            edge_per_node=edge_per_node,
-            seed=seed,
-            sample_size=10000,
-            uc_rule=5,
-            uc_priority=2,
-            stable=True,
-        )
-        case = build_random_pc_case(config)
-        facts = case["facts"]
-        facts_ext = case["facts_ext"]
+    # Track if we hit a timeout during computation
+    early_timeout = False
+    timeout_phase = None
+    abapc_time = solve_timeout
+    mus_time = solve_timeout
+    remove_n = 0
+    mus_result = {'n_mus': 0, 'n_mcs': 0}
+    ground_time = 0.0
+    mem_before = _mem_mb()
+    mem_abapc = mem_before
+    mem_mus = mem_before
 
-        # Persist facts for solvers
-        import tempfile
-
-        fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
-        os.close(fd)
-        facts_I_file = facts_file.replace('.lp', '_I.lp')
-        facts_wc_file = facts_file.replace('.lp', '_wc.lp')
-        with open(facts_file, 'w') as f:
-            for s in facts_ext:
-                line = s if s.endswith('.') else s + '.'
-                f.write(f"#external {line}\n")
-        with open(facts_I_file, 'w') as f:
-            for fact, s in zip(facts, facts_ext):
-                line = s if s.endswith('.') else s + '.'
-                I = fact[1]
-                f.write(f"{line} I={I}, NA\n")
-        with open(facts_wc_file, 'w') as f:
-            for fact, s in zip(facts, facts_ext):
-                line = s if s.endswith('.') else s + '.'
-                I = fact[1]
-                f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
-
-        # --- ABAPC (removal) ---
-        mem_before = _mem_mb()
-        start_abapc = datetime.now()
-        models_after, _multiple, _stats, remove_n = CausalABA(
-            n_nodes,
-            facts_file,
-            weak_constraints=True,
-            search_for_models='first',
-            skeleton_rules_reduction=True,
-            print_models=False,
-            return_statistics=True,
-            solve_timeout=solve_timeout,
-        )
-        abapc_time = (datetime.now() - start_abapc).total_seconds()
-        mem_abapc = _mem_mb()
-
-        # --- MUS ---
-        import tempfile as _tf
-
-        fd_mus, facts_mus_file = _tf.mkstemp(suffix='.lp', text=True)
-        os.close(fd_mus)
-        with open(facts_mus_file, 'w') as f:
-            for s in facts_ext:
-                line = s if s.endswith('.') else s + '.'
-                f.write(f"{line}\n")
-
-        start_mus = datetime.now()
-        mus_result = CausalABA_MUS(
-            n_nodes=n_nodes,
-            facts_location=facts_mus_file,
-            gringo_path="clingo",
-            wasp_path=wasp_path,
-            max_muses=max_muses,
-            mus_algorithm="camus",
-            print_mcses=True,
-            camus_mcs_threshold=camus_mcs_threshold,
-            camus_mus_threshold=camus_mus_threshold,
-            solve_timeout=solve_timeout,
-        )
-        mus_time = (datetime.now() - start_mus).total_seconds()
-        mem_mus = _mem_mb()
-
-        # --- Grounding time (shared) ---
-        indep_facts, dep_facts = _parse_ext_facts_to_dicts(facts_ext)
-        timing = {}
-        try:
-            _ = compile_and_ground(
-                n_nodes,
-                facts_location="",
-                skeleton_rules_reduction=True,
-                weak_constraints=False,
-                indep_facts=indep_facts,
-                dep_facts=dep_facts,
-                opt_mode='optN',
-                out_n=0,
-                show=['arrow'],
-                pre_grounding=False,
-                ext_flag=False,
-                prior_knowledge=None,
-                timing_recorder=timing,
+    try:
+        with _quiet_phase():
+            config = RandomPCSimConfig(
+                n_nodes=n_nodes,
+                alpha=0.05,
+                graph_type=graph_type,
+                edge_per_node=edge_per_node,
+                seed=seed,
+                sample_size=10000,
+                uc_rule=5,
+                uc_priority=2,
+                stable=True,
             )
-            ground_time = timing.get('ground_sec_total', 0.0)
-        except Exception as e:
-            ground_time = min(abapc_time * 0.1, 0.1)
-            logging.debug(f"Grounding measurement fallback: {ground_time:.3f}s (error: {e})")
+            case = build_random_pc_case(config)
+            facts = case["facts"]
+            facts_ext = case["facts_ext"]
+
+            # Persist facts for solvers
+            import tempfile
+
+            fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
+            os.close(fd)
+            facts_I_file = facts_file.replace('.lp', '_I.lp')
+            facts_wc_file = facts_file.replace('.lp', '_wc.lp')
+            with open(facts_file, 'w') as f:
+                for s in facts_ext:
+                    line = s if s.endswith('.') else s + '.'
+                    f.write(f"#external {line}\n")
+            with open(facts_I_file, 'w') as f:
+                for fact, s in zip(facts, facts_ext):
+                    line = s if s.endswith('.') else s + '.'
+                    I = fact[1]
+                    f.write(f"{line} I={I}, NA\n")
+            with open(facts_wc_file, 'w') as f:
+                for fact, s in zip(facts, facts_ext):
+                    line = s if s.endswith('.') else s + '.'
+                    I = fact[1]
+                    f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
+
+            # --- ABAPC (removal) ---
+            mem_before = _mem_mb()
+            start_abapc = datetime.now()
+            models_after, _multiple, _stats, remove_n = CausalABA(
+                n_nodes,
+                facts_file,
+                weak_constraints=True,
+                search_for_models='first',
+                skeleton_rules_reduction=True,
+                print_models=False,
+                return_statistics=True,
+                solve_timeout=solve_timeout,
+            )
+            abapc_time = (datetime.now() - start_abapc).total_seconds()
+            mem_abapc = _mem_mb()
+
+            # --- MUS ---
+            import tempfile as _tf
+
+            fd_mus, facts_mus_file = _tf.mkstemp(suffix='.lp', text=True)
+            os.close(fd_mus)
+            with open(facts_mus_file, 'w') as f:
+                for s in facts_ext:
+                    line = s if s.endswith('.') else s + '.'
+                    f.write(f"{line}\n")
+
+            start_mus = datetime.now()
+            mus_result = CausalABA_MUS(
+                n_nodes=n_nodes,
+                facts_location=facts_mus_file,
+                gringo_path="clingo",
+                wasp_path=wasp_path,
+                max_muses=max_muses,
+                mus_algorithm="camus",
+                print_mcses=True,
+                camus_mcs_threshold=camus_mcs_threshold,
+                camus_mus_threshold=camus_mus_threshold,
+                solve_timeout=solve_timeout,
+            )
+            mus_time = (datetime.now() - start_mus).total_seconds()
+            mem_mus = _mem_mb()
+
+            # --- Grounding time (shared) ---
+            indep_facts, dep_facts = _parse_ext_facts_to_dicts(facts_ext)
+            timing = {}
+            try:
+                _ = compile_and_ground(
+                    n_nodes,
+                    facts_location="",
+                    skeleton_rules_reduction=True,
+                    weak_constraints=False,
+                    indep_facts=indep_facts,
+                    dep_facts=dep_facts,
+                    opt_mode='optN',
+                    out_n=0,
+                    show=['arrow'],
+                    pre_grounding=False,
+                    ext_flag=False,
+                    prior_knowledge=None,
+                    timing_recorder=timing,
+                )
+                ground_time = timing.get('ground_sec_total', 0.0)
+            except Exception as e:
+                ground_time = min(abapc_time * 0.1, 0.1)
+                logging.debug(f"Grounding measurement fallback: {ground_time:.3f}s (error: {e})")
+
+    except TimeoutError as e:
+        early_timeout = True
+        # Determine which phase timed out based on error message
+        err_str = str(e)
+        if 'compile_and_ground' in err_str:
+            timeout_phase = 'grounding'
+        else:
+            timeout_phase = 'solving'
 
     logging.info(f"[done] n_nodes={n_nodes}: compute finished; summary below")
 
@@ -252,20 +274,24 @@ def profile_once(
     ratio_total = mus_time / abapc_time if abapc_time > 0 else 0.0
     ratio_solve = mus_solve_time / abapc_solve_time if abapc_solve_time > 0 else 0.0
     logging.info(f"  Total time ratio (MUS/ABAPC):   {ratio_total:8.2f}x")
-    logging.info(f"  Solve time ratio (WASP/clingo): {ratio_solve:8.2f}x  (should be main difference)")
+    logging.info(f"  Solve time ratio (WASP/clingo): {ratio_solve:8.2f}x")
 
-    # Detect timeout conditions (within 1s of budget to account for overhead)
-    abapc_timed_out = abapc_time >= (solve_timeout - 1.0)
-    mus_timed_out = mus_time >= (solve_timeout - 1.0)
+    # Detect timeout conditions
+    abapc_timed_out = early_timeout or abapc_time >= (solve_timeout - 1.0)
+    mus_timed_out = early_timeout or mus_time >= (solve_timeout - 1.0)
 
     logging.info("-- Results --")
     result_parts = [f"remove_n={remove_n}", f"mus_count={mus_result.get('n_mus', 0)}", f"mcs_count={mus_result.get('n_mcs', 0)}"]
-    if abapc_timed_out:
-        result_parts.append(f"⚠ ABAPC TIMEOUT ({abapc_time:.1f}s)")
-    if mus_timed_out:
-        result_parts.append(f"⚠ MUS TIMEOUT ({mus_time:.1f}s)")
+    if early_timeout:
+        result_parts.append(f"⚠ EARLY TIMEOUT during {timeout_phase} ({solve_timeout}s budget)")
+    else:
+        if abapc_timed_out:
+            result_parts.append(f"⚠ ABAPC TIMEOUT ({abapc_time:.1f}s)")
+        if mus_timed_out:
+            result_parts.append(f"⚠ MUS TIMEOUT ({mus_time:.1f}s)")
     logging.info(f"  {', '.join(result_parts)}")
-    if remove_n == 0 and mus_result.get('n_mus', 0) == 0:
+    is_sat = (remove_n == 0 and mus_result.get('n_mus', 0) == 0)
+    if is_sat:
         logging.info(f"  SAT: no removals and no MUS/MCS (seed={seed}, n={n_nodes})")
 
     for path in (facts_file, facts_I_file, facts_wc_file, facts_mus_file):
@@ -273,6 +299,8 @@ def profile_once(
             os.remove(path)
         except Exception:
             pass
+
+    return is_sat
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -286,6 +314,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--camus-mcs-threshold", type=int, default=50, help="CAMUS MCS threshold")
     parser.add_argument("--camus-mus-threshold", type=int, default=300, help="CAMUS MUS threshold")
     parser.add_argument("--seed-base", type=int, default=2004, help="Base seed; incremented by node size for determinism")
+    parser.add_argument("--rep_unsat", type=int, default=0, help="Retries with new seeds when an instance is SAT (no removals and no MUS/MCS)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -302,18 +331,36 @@ def main(argv: list[str] | None = None) -> int:
         f"Profile config: node_sizes={node_sizes}, solve_timeout={args.solve_timeout}s, edge_per_node={args.edge_per_node}, graph_type={args.graph_type}"
     )
     for n in node_sizes:
-        seed = args.seed_base + (n - node_sizes[0])
-        profile_once(
+        base_seed = args.seed_base# + (n - node_sizes[0])
+        curr_seed = base_seed
+        logging.info(f"\n=== Profiling n_nodes={n} (base={args.seed_base}, seed={curr_seed}) ===")
+        is_sat = profile_once(
             n_nodes=n,
             edge_per_node=args.edge_per_node,
             solve_timeout=args.solve_timeout,
             graph_type=args.graph_type,
-            seed=seed,
+            seed=curr_seed,
             wasp_path=args.wasp_path,
             max_muses=args.max_muses,
             camus_mcs_threshold=args.camus_mcs_threshold,
             camus_mus_threshold=args.camus_mus_threshold,
         )
+        attempts = 0
+        while is_sat and attempts < args.rep_unsat:
+            attempts += 1
+            curr_seed += 1
+            logging.info(f"[retry] n_nodes={n}: SAT instance; trying seed={curr_seed} ({attempts}/{args.rep_unsat})")
+            is_sat = profile_once(
+                n_nodes=n,
+                edge_per_node=args.edge_per_node,
+                solve_timeout=args.solve_timeout,
+                graph_type=args.graph_type,
+                seed=curr_seed,
+                wasp_path=args.wasp_path,
+                max_muses=args.max_muses,
+                camus_mcs_threshold=args.camus_mcs_threshold,
+                camus_mus_threshold=args.camus_mus_threshold,
+            )
     return 0
 
 
