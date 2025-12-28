@@ -89,6 +89,16 @@ tests_mus.py::TestMUSAnalysis::test_mock_three_var_manual_vs_mus PASSED
 tests_mus.py::TestMUSAnalysis::test_parsing_facts_from_file PASSED
 ```
 
+Run a single test:
+
+```bash
+# Just the parsing test
+python -m pytest tests_mus.py::TestMUSAnalysis::test_parsing_facts_from_file -v
+
+# Just the mock-three-var integration test
+python -m pytest tests_mus.py::TestMUSAnalysis::test_mock_three_var_manual_vs_mus -v
+```
+
 ## How It Works
 
 ### The mus/1 Assumption Framework
@@ -197,10 +207,106 @@ Steps:
 
 ## Dependencies
 
-- `clingo` — ASP grounder (5.8.0+)
-- `WASP` — ASP solver with MUS support (2.0+)
-- `causalaba.py` — CausalABA framework
-- Standard Python libraries: os, sys, logging, tempfile, subprocess, re, pathlib
+The MUS analysis pipeline requires:
+
+- **Python** (3.9+): Core runtime
+- **clingo** (5.6.2+): ASP grounder and solver (for compiling and grounding CausalABA programs)
+- **WASP** (2.0+): ASP solver with MUS/MCS support (for computing minimal unsatisfiable subsets)
+- **Python packages**: pandas, numpy, scikit-learn, causal-learn, gcastle, networkx (see below)
+
+### Python Environment Setup
+
+#### 1. Create a Conda Environment
+
+If you don't have a conda environment yet, create one:
+
+```bash
+cd /vol/bitbucket/fr920
+conda create -n aba-env python=3.10 -y
+conda activate aba-env
+```
+
+#### 2. Install Core Dependencies
+
+Install clingo via conda (recommended):
+
+```bash
+conda install -c conda-forge clingo=5.6.2 -y
+```
+
+Install Python packages:
+
+```bash
+cd /vol/bitbucket/fr920/ArgCausalDisco-1
+pip install -r requirements.txt
+```
+
+**Note:** Some packages in `requirements.txt` (e.g., `gcastle`, `notears`) have optional dependencies. For basic MUS profiling, you can install only the essentials:
+
+```bash
+pip install pandas numpy scikit-learn networkx tqdm
+```
+
+#### 3. Build or Locate WASP
+
+WASP is required for MUS computation. You have two options:
+
+**Option A: Use Pre-built WASP (if available)**
+
+If WASP is already built in your workspace:
+
+```bash
+# Check if WASP binary exists
+ls -la /vol/bitbucket/fr920/wasp/build/release/wasp
+```
+
+If the binary exists, set its path when running the profiler:
+
+```bash
+python scripts/mus_abapc_profile.py \
+    --node-sizes 7 \
+    --wasp-path /vol/bitbucket/fr920/wasp/build/release/wasp \
+    --emit-lp results/mus_adorned.lp
+```
+
+**Option B: Build WASP from Source**
+
+If WASP is not built, clone and build it:
+
+```bash
+cd /vol/bitbucket/fr920
+git clone https://github.com/potassco/wasp.git  # If not already cloned
+cd wasp
+mkdir -p build/release
+cd build/release
+cmake ../.. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+```
+
+After building, the binary will be at `/vol/bitbucket/fr920/wasp/build/release/wasp`.
+
+**Verify WASP is working:**
+
+```bash
+/vol/bitbucket/fr920/wasp/build/release/wasp --version
+```
+
+### Optional: Test the Setup
+
+Run a quick smoke test:
+
+```bash
+cd /vol/bitbucket/fr920/ArgCausalDisco-1
+
+# Test clingo
+clingo --version
+
+# Test WASP
+/vol/bitbucket/fr920/wasp/build/release/wasp --version
+
+# Run a small MUS test
+python -m pytest tests_mus.py::TestMUSAnalysis::test_parsing_facts_from_file -v
+```
 
 ## Notes
 
@@ -208,4 +314,141 @@ Steps:
 - Conditioning set membership (in/2) must be explicitly declared for non-empty sets
 - No `#show` directives — WASP parses raw output containing `[MUS #i]: ...` lines
 - For reproducibility, fact order in files is preserved through indexing
+
+## External MUS Run (Adorned .lp)
+
+You can generate a complete adorned MUS program and execute it externally with clingo + WASP.
+
+### Single Run with Fixed Path
+
+1) Emit the adorned program for a single random graph (example: 7 nodes, seed 2004):
+
+```bash
+cd /vol/bitbucket/fr920/ArgCausalDisco-1
+python scripts/mus_abapc_profile.py \
+    --node-sizes 7 \
+    --seed-base 2004 \
+    --solve-timeout 120 \
+    --emit-lp results/mus_adorned_7_2004.lp
+```
+
+2) Run externally (CAMUS with MCS printing):
+
+```bash
+clingo results/mus_adorned_7_2004.lp --output=smodels | \
+    /vol/bitbucket/fr920/wasp/build/release/wasp --mus=mus --mus-algorithm=camus --print-mcses -n 0
+```
+
+### Sweep with Auto-Naming
+
+To profile multiple node sizes and auto-generate one `.lp` per `(n_nodes, seed)`:
+
+```bash
+python scripts/mus_abapc_profile.py \
+    --node-sizes 5,6,7,8 \
+    --seed-base 2004 \
+    --solve-timeout 120 \
+    --emit-lp-dir results/mus_programs/
+```
+
+This creates:
+- `results/mus_programs/mus_5_2004.lp`
+- `results/mus_programs/mus_6_2004.lp`
+- `results/mus_programs/mus_7_2004.lp`
+- `results/mus_programs/mus_8_2004.lp`
+
+With retries on SAT:
+
+```bash
+python scripts/mus_abapc_profile.py \
+    --node-sizes 5,6,7,8 \
+    --seed-base 2004 \
+    --solve-timeout 120 \
+    --rep_unsat 2 \
+    --emit-lp-dir results/mus_programs/
+```
+
+When a SAT instance is found, a retry seed is used (2005, 2006, etc.), and the new `.lp` filename reflects it.
+
+**Note:** `--emit-lp` and `--emit-lp-dir` are mutually exclusive; if both are specified, `--emit-lp` takes precedence.
+
+The `mus(i)` indices in the output correspond to the order of the facts in the emitted program.
+
+## Running All MUS Tests Together
+
+To run all MUS-related tests in one shot:
+
+```bash
+cd /vol/bitbucket/fr920/ArgCausalDisco-1
+python -m pytest tests_mus.py -xvs
+```
+
+Use `-k <substring>` to filter:
+
+```bash
+python -m pytest -k mus -v
+```
+
+## Quick Reference: Full Workflow
+
+### 1. Setup (One-Time)
+
+```bash
+conda create -n aba-env python=3.10 -y
+conda activate aba-env
+conda install -c conda-forge clingo=5.6.2 -y
+cd /vol/bitbucket/fr920/ArgCausalDisco-1
+pip install pandas numpy scikit-learn networkx tqdm  # Minimal dependencies
+```
+
+Build WASP (if not already built):
+
+```bash
+cd /vol/bitbucket/fr920
+git clone https://github.com/potassco/wasp.git
+cd wasp
+mkdir -p build/release && cd build/release
+cmake ../.. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+```
+
+### 2. Run Tests
+
+```bash
+cd /vol/bitbucket/fr920/ArgCausalDisco-1
+python -m pytest tests_mus.py -xvs
+```
+
+### 3. Profile Single Instance and Emit .lp
+
+```bash
+python scripts/mus_abapc_profile.py \
+    --node-sizes 7 \
+    --seed-base 2004 \
+    --solve-timeout 120 \
+    --emit-lp results/mus_adorned_7_2004.lp
+```
+
+### 4. Run Emitted Program Externally
+
+```bash
+clingo results/mus_adorned_7_2004.lp --output=smodels | \
+    /vol/bitbucket/fr920/wasp/build/release/wasp \
+    --mus=mus --mus-algorithm=camus --print-mcses -n 0
+```
+
+### 5. Profile a Sweep with Auto-Naming and Retries
+
+```bash
+python scripts/mus_abapc_profile.py \
+    --node-sizes 5,6,7,8 \
+    --seed-base 2004 \
+    --solve-timeout 120 \
+    --rep_unsat 2 \
+    --emit-lp-dir results/mus_programs/
+```
+
+This creates:
+- `results/mus_programs/mus_5_2004.lp`, `mus_6_2004.lp`, `mus_7_2004.lp`, `mus_8_2004.lp` (initial seeds)
+- Any retry files if SAT instances are found (e.g., `mus_6_2005.lp` if seed 2004 was SAT)
 

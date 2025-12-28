@@ -27,7 +27,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from tests_mus import RandomPCSimConfig, build_random_pc_case  # noqa: E402
 from causalaba import CausalABA, compile_and_ground  # noqa: E402
-from causalaba_mus import CausalABA_MUS  # noqa: E402
+from causalaba_mus import CausalABA_MUS, build_mus_program  # noqa: E402
 
 
 # Some optional deps used by cd_algorithms.models (e.g., notears) are not installed in
@@ -114,6 +114,7 @@ def profile_once(
     max_muses: int,
     camus_mcs_threshold: int,
     camus_mus_threshold: int,
+    emit_lp_path: str | None = None,
 ) -> bool:
     _ensure_notears_stub()
 
@@ -197,6 +198,17 @@ def profile_once(
                     line = s if s.endswith('.') else s + '.'
                     f.write(f"{line}\n")
 
+            # Optionally emit a complete adorned MUS program for external execution
+            if emit_lp_path:
+                try:
+                    program = build_mus_program(n_nodes, facts_ext, facts_mus_file, deadline=None)
+                    out_path = Path(emit_lp_path)
+                    out_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(out_path, 'w') as outf:
+                        outf.write(program)
+                except Exception as e:
+                    logging.debug(f"Emit LP failed: {e}")
+
             start_mus = datetime.now()
             mus_result = CausalABA_MUS(
                 n_nodes=n_nodes,
@@ -246,6 +258,8 @@ def profile_once(
         else:
             timeout_phase = 'solving'
 
+    if emit_lp_path:
+        logging.info(f"[emit] MUS program written to {emit_lp_path}")
     logging.info(f"[done] n_nodes={n_nodes}: compute finished; summary below")
 
     abapc_solve_time = max(0.0, abapc_time - ground_time)
@@ -315,6 +329,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--camus-mus-threshold", type=int, default=300, help="CAMUS MUS threshold")
     parser.add_argument("--seed-base", type=int, default=2004, help="Base seed; incremented by node size for determinism")
     parser.add_argument("--rep_unsat", type=int, default=0, help="Retries with new seeds when an instance is SAT (no removals and no MUS/MCS)")
+    parser.add_argument("--emit-lp", type=str, default="", help="Write complete adorned MUS program to this .lp path for external execution")
+    parser.add_argument("--emit-lp-dir", type=str, default="", help="Auto-name and write adorned MUS programs to this directory (names: mus_<n_nodes>_<seed>.lp)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -334,6 +350,14 @@ def main(argv: list[str] | None = None) -> int:
         base_seed = args.seed_base# + (n - node_sizes[0])
         curr_seed = base_seed
         logging.info(f"\n=== Profiling n_nodes={n} (base={args.seed_base}, seed={curr_seed}) ===")
+        # Determine the LP output path for this (n, seed) pair
+        emit_lp_path = None
+        if args.emit_lp:
+            emit_lp_path = args.emit_lp
+        elif args.emit_lp_dir:
+            Path(args.emit_lp_dir).mkdir(parents=True, exist_ok=True)
+            emit_lp_path = str(Path(args.emit_lp_dir) / f"mus_{n}_{curr_seed}.lp")
+        
         is_sat = profile_once(
             n_nodes=n,
             edge_per_node=args.edge_per_node,
@@ -344,12 +368,16 @@ def main(argv: list[str] | None = None) -> int:
             max_muses=args.max_muses,
             camus_mcs_threshold=args.camus_mcs_threshold,
             camus_mus_threshold=args.camus_mus_threshold,
+            emit_lp_path=emit_lp_path,
         )
         attempts = 0
         while is_sat and attempts < args.rep_unsat:
             attempts += 1
             curr_seed += 1
             logging.info(f"[retry] n_nodes={n}: SAT instance; trying seed={curr_seed} ({attempts}/{args.rep_unsat})")
+            # Update LP path for retry seed
+            if args.emit_lp_dir:
+                emit_lp_path = str(Path(args.emit_lp_dir) / f"mus_{n}_{curr_seed}.lp")
             is_sat = profile_once(
                 n_nodes=n,
                 edge_per_node=args.edge_per_node,
@@ -360,6 +388,7 @@ def main(argv: list[str] | None = None) -> int:
                 max_muses=args.max_muses,
                 camus_mcs_threshold=args.camus_mcs_threshold,
                 camus_mus_threshold=args.camus_mus_threshold,
+                emit_lp_path=emit_lp_path,
             )
     return 0
 
