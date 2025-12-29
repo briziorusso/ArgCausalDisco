@@ -207,7 +207,7 @@ parser.add_argument('--test_name', choices=['fisherz', 'chisq', 'gsq', 'kci', 'f
 
 ## ABAPC specific
 parser.add_argument('--S_weight', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC: use S_weight')
-parser.add_argument('--pre_grounding', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC: use pre_grounding')
+parser.add_argument('--pre_grounding', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC: use pre_grounding (slower for incremental; use only for baseline)')
 parser.add_argument('--skeleton_rules_reduction', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC: use skeleton_rules_reduction')
 parser.add_argument('--disable_reground', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC: disable regrounding')
 parser.add_argument('--return_statistics', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC: return statistics')

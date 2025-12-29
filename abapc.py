@@ -54,6 +54,7 @@ def ABAPC(data,
           cycle_length: int | None = None,
           threads: int | None = None,
           use_incremental: bool = True,
+          verbosity: int = 0,
           ):
     """
     Args:
@@ -172,6 +173,7 @@ def ABAPC(data,
         collider_tree_depth=collider_tree_depth,
         cycle_length=cycle_length,
         threads=threads,
+        verbosity=verbosity,
     )
 
     if multiple_solutions:
