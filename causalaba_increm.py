@@ -35,12 +35,18 @@ try:
         PriorKnowledge,
         CausalABA as _baseline_causalaba,
     )
+    from .causalaba_binsearch import (
+        CausalABA as _binsearch_causalaba,
+    )
 except ImportError:  # pragma: no cover
     from causalaba import (
         compile_and_ground,
         extract_test_elements_from_symbol,
         PriorKnowledge,
         CausalABA as _baseline_causalaba,
+    )
+    from causalaba_binsearch import (
+        CausalABA as _binsearch_causalaba,
     )
 
 
@@ -359,11 +365,12 @@ def CausalABA(
     debug_dump_path: str | None = None,
     debug_traces: bool = False,
     solve_timeout: float | None = None,
+    verbosity: int = 0,
     )->list:
-    # For pre-grounding workloads, fall back to the baseline solver to retain
-    # its proven correctness and grounding strategy.
+    # For pre-grounding workloads, fall back to the baseline grounding
+    # with binary-search removal to improve solve-time over linear removal.
     if pre_grounding:
-        return _baseline_causalaba(
+        return _binsearch_causalaba(
             n_nodes,
             facts_location,
             print_models=print_models,
@@ -385,8 +392,9 @@ def CausalABA(
             cycle_length=cycle_length,
             threads=threads,
             solve_timeout=solve_timeout,
+            verbosity=verbosity,
         )
-    debug_enabled = _should_debug(debug_traces)
+    _verb = int(verbosity or 0)
     logger.info("Running CausalABA")
     # Reset per-run incremental bookkeeping to avoid cross-run contamination
     _reset_incremental_state()
@@ -397,6 +405,12 @@ def CausalABA(
         "compile_sec_last": 0.0,
         "ground_sec_total": 0.0,
         "ground_sec_last": 0.0,
+        # Fine-grained compile/ground breakdown
+        "write_gen_lp_sec": 0.0,
+        "load_encoding_sec": 0.0,
+        "load_facts_sec": 0.0,
+        "load_wc_sec": 0.0,
+        "add_bayesball_sec": 0.0,
         "solve_sec_total": 0.0,
         "solve_sec_last": 0.0,
         "compile_calls": 0,
@@ -457,6 +471,9 @@ def CausalABA(
     ext_values: dict[Function, bool | None] = {}
     enable_observer = debug_traces or bool(debug_dump_path)
     observer = _DebugObserver() if enable_observer else None
+    debug_enabled = _should_debug(debug_traces)
+    
+    _t_facts_read_start = time.perf_counter()
     if facts_location:
         facts_loc = facts_location.replace(".lp","_I.lp") if weak_constraints else facts_location
         with open(facts_loc, 'r') as file:
@@ -475,8 +492,8 @@ def CausalABA(
                     X, S, Y, dep_type = extract_test_elements_from_symbol(line_clean)
                     facts.append((X,S,Y, dep_type, line_clean, float('nan'), "unknown"))
                 # Debug: print raw fact and parsed tuple
-                try:
-                    if debug_enabled:
+                if _verb >= 2 or (debug_enabled and _verb >= 1):
+                    try:
                         logger.debug(
                             "[facts] read raw: '%s' -> dep_type=%s, X=%s, Y=%s, S=%s",
                             line.strip(),
@@ -485,8 +502,8 @@ def CausalABA(
                             Y,
                             sorted(list(S)),
                         )
-                except Exception:
-                    pass
+                    except Exception:
+                        pass
                 condition_set = tuple(sorted(S))
                 facts_group = indep_facts if "indep" in line_clean else dep_facts
                 if (X,Y) not in facts_group:
@@ -494,15 +511,38 @@ def CausalABA(
                 facts_group[(X,Y)].add(condition_set)
                 if "indep" in line_clean:
                     block_pairs.add(_pair_key(X, Y))
+    
+    try:
+        _t_facts_read_end = time.perf_counter()
+        logger.info("[facts] read %d facts in %.3fs", len(facts), _t_facts_read_end - _t_facts_read_start)
+    except Exception:
+        pass
 
     _tm_stage("after reading facts")
+
+    # Dynamic bound for conditioning size: if not provided, restrict to the
+    # largest conditioning set actually observed in the input facts. This
+    # avoids emitting unnecessary in(N,S) membership facts and keeps grounding
+    # compact on pre-grounding style workloads.
+    _t_bounds0 = time.perf_counter()
+    try:
+        _max_sz_seen = 0
+        for _v in list(indep_facts.values()) + list(dep_facts.values()):
+            for _S in _v:
+                if len(_S) > _max_sz_seen:
+                    _max_sz_seen = len(_S)
+        if max_conditioning_size is None and _max_sz_seen > 0:
+            max_conditioning_size = _max_sz_seen
+        logger.info("[bounds] inferred max_conditioning_size=%s (computed in %.3fs)", max_conditioning_size, time.perf_counter() - _t_bounds0)
+    except Exception:
+        pass
 
     # Match baseline ordering: remove lowest-I facts first.
     # Note: strength is often unknown (nan) for many callers; Python's sort is
     # stable so order is preserved when strengths are equal.
     facts = sorted(facts, key=lambda x: x[5], reverse=True)
     block_pairs |= {_pair_key(x, y) for (x, y) in indep_facts}
-    if debug_enabled:
+    if _verb >= 2 or (debug_enabled and _verb >= 1):
         logger.debug("Ordered facts for processing:\n%s", "\n".join([f[4] for f in facts]))
 
     # Precompute clingo symbols for all external facts once.
@@ -555,6 +595,9 @@ def CausalABA(
     # generated facts into a temp .lp and load it instead.
     import tempfile
     gen_facts_path: Path | None = None
+    _t_gen0 = time.perf_counter()
+    _gen_in_count = 0
+    _gen_qpair_count = 0
     with tempfile.NamedTemporaryFile("w", suffix=".lp", delete=False) as gen_f:
         gen_facts_path = Path(gen_f.name)
         gen_f.write("#program specific.\n")
@@ -575,6 +618,7 @@ def CausalABA(
             set_term = _cond_to_term(S)
             for s in S:
                 gen_f.write(f"in({s},{set_term}).\n")
+                _gen_in_count += 1
 
         # Seed Bayes-ball query triples explicitly to keep grounding compact.
         # We include all conditioning triples that appear in the input facts, even
@@ -584,22 +628,48 @@ def CausalABA(
         for (X, Y), cond_sets in dep_facts.items():
             for S in cond_sets:
                 gen_f.write(f"qpair({X},{Y},{_cond_to_term(S)}).\n")
+                _gen_qpair_count += 1
         for (X, Y), cond_sets in indep_facts.items():
             for S in cond_sets:
                 gen_f.write(f"qpair({X},{Y},{_cond_to_term(S)}).\n")
+                _gen_qpair_count += 1
 
     _tm_stage("after writing generated facts lp")
+    try:
+        _t_gen_end = time.perf_counter()
+        profile["write_gen_lp_sec"] = max(0.0, _t_gen_end - _t_gen0)
+        logger.info("[gen-facts] wrote %d in/2 + %d qpair/3 atoms in %.3fs", _gen_in_count, _gen_qpair_count, profile["write_gen_lp_sec"])
+    except Exception:
+        pass
 
     # Load encoding and (optional) facts
     bounded_encoding_active = (cycle_length is not None and cycle_length > 0) or (
         collider_tree_depth is not None and collider_tree_depth > 0
     )
     encoding_file = 'causalaba_bounded.lp' if bounded_encoding_active else 'causalaba.lp'
+    _t_load_enc0 = time.perf_counter()
     ctl.load(str(Path(__file__).resolve().parent / 'encodings' / encoding_file))
+    try:
+        profile["load_encoding_sec"] = max(0.0, time.perf_counter() - _t_load_enc0)
+        logger.info("[load] encoding (%s) in %.3fs", encoding_file, profile["load_encoding_sec"])
+    except Exception:
+        pass
     if facts_location:
+        _t_load_f0 = time.perf_counter()
         ctl.load(facts_location)
+        try:
+            profile["load_facts_sec"] = max(0.0, time.perf_counter() - _t_load_f0)
+            logger.info("[load] facts in %.3fs", profile["load_facts_sec"])
+        except Exception:
+            pass
         if weak_constraints:
+            _t_load_wc0 = time.perf_counter()
             ctl.load(facts_location.replace('.lp','_wc.lp'))
+            try:
+                profile["load_wc_sec"] = max(0.0, time.perf_counter() - _t_load_wc0)
+                logger.info("[load] weak constraints in %.3fs", profile["load_wc_sec"])
+            except Exception:
+                pass
 
     if ext_flag:
         ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
@@ -734,7 +804,13 @@ def CausalABA(
     bb_lines.append("% Backwards-compatible alias for callers/tests that expect ap/4 atoms.")
     bb_lines.append("ap(X,Y,bb,S) :- ap3(X,Y,S), qpair(X,Y,S).")
 
+    _t_bb0 = time.perf_counter()
     ctl.add("specific", [], "\n".join(bb_lines))
+    try:
+        profile["add_bayesball_sec"] = max(0.0, time.perf_counter() - _t_bb0)
+        logger.info("[bayes-ball] added %d rule lines in %.3fs", len(bb_lines), profile["add_bayesball_sec"])
+    except Exception:
+        pass
 
     _tm_stage("after ctl.add bayesball rules")
 
@@ -858,12 +934,18 @@ def CausalABA(
     except Exception:
         pass
 
+    profile["ground_calls_internal"] += 1
+    # Ground all parts together in a single call (required for correct program composition)
+    _t_ground_start = time.perf_counter()
     t_ground0 = time.perf_counter()
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     t_ground1 = time.perf_counter()
-    profile["ground_calls_internal"] += 1
     profile["ground_sec_last"] = max(0.0, t_ground1 - t_ground0)
     profile["ground_sec_total"] += profile["ground_sec_last"]
+    try:
+        logger.info("[ground] total=%.3fs", profile["ground_sec_last"])
+    except Exception:
+        pass
     try:
         import tracemalloc as _tracemalloc
 
@@ -873,7 +955,9 @@ def CausalABA(
     except Exception:
         pass
     _tm_stage("after ctl.ground")
-    if debug_enabled:
+    t_post_ground = time.perf_counter()
+    logger.info("[timing] post-ground start")
+    if _verb >= 2 or (debug_enabled and _verb >= 1):
         try:
             ext_deps = list(ctl.symbolic_atoms.by_signature("ext_dep", 3))
             ext_indeps = list(ctl.symbolic_atoms.by_signature("ext_indep", 3))
@@ -910,19 +994,29 @@ def CausalABA(
         )
         t_s1 = time.perf_counter()
         _record_solve(t_s1 - t_s0)
+        try:
+            logger.info("[timing] mode=No solve=%.3fs since-ground=%.3fs", t_s1 - t_s0, t_s1 - t_post_ground)
+        except Exception:
+            pass
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         if n_models > 0:
             return _ret(models, False, 0)
 
     elif search_for_models == 'first':
+        _t_first_setup = time.perf_counter()
         for fact, ext_sym in zip(facts, fact_syms):
             ctl.assign_external(ext_sym, True)
             ext_values[ext_sym] = True
-            if debug_enabled:
+            if _verb >= 2 or (debug_enabled and _verb >= 1):
                 logger.debug("[assign] %s = %s", ext_sym, True)
         _assign_block_edges()
+        try:
+            logger.info("[timing] first-setup=%.3fs", time.perf_counter() - _t_first_setup)
+        except Exception:
+            pass
         last_syms = None
-        logger.info("   Solving...")
+        logger.info("[first-solve] activated %d facts, solving...", len(facts))
+        _t_first_solve = time.perf_counter()
         prev_opt_mode = _set_opt_mode_for_first(ctl, opt_mode)
         try:
             def _on_model_first(model):
@@ -946,6 +1040,10 @@ def CausalABA(
             )
             t_s1 = time.perf_counter()
             _record_solve(t_s1 - t_s0)
+            try:
+                logger.info("[timing] first-solve=%.3fs since-ground=%.3fs", t_s1 - t_s0, t_s1 - t_post_ground)
+            except Exception:
+                pass
         finally:
             _restore_opt_mode(ctl, prev_opt_mode)
         # Fallback: if optimization was requested but no optimality was proven (likely no #minimize),
@@ -953,7 +1051,11 @@ def CausalABA(
         if not models and last_syms is not None:
             models.append(last_syms)
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
-        logger.info("[first] found n_models=%s", n_models)
+        try:
+            _t_first_end = time.perf_counter()
+            logger.info("[first-solve] found n_models=%s in %.3fs", n_models, _t_first_end - _t_first_solve)
+        except Exception:
+            pass
         _tm_stage("after first solve")
         if debug_enabled:
             logger.debug("[first] models: %s", models)
@@ -978,8 +1080,9 @@ def CausalABA(
                 # subsets mode is inherently exponential; keep this simple and correct.
                 ext_sym = Function(fact[3], [Number(fact[0]), Number(fact[2]), _cond_to_symbol(fact[1])])
                 ctl.assign_external(ext_sym, False)
-
-            _assign_block_edges()
+            # Avoid extra per-iteration overhead: block-edge assignment is not
+            # required for correctness in subsets enumeration and adds
+            # significant cost. Baseline subsets mode does not perform it.
             curr = []
             def _on_model_sub(model):
                 curr.append(model.symbols(shown=True))
@@ -989,7 +1092,9 @@ def CausalABA(
                 ctl,
                 solve_timeout=solve_timeout,
                 on_model=_on_model_sub,
-                assumptions=_assumptions_from_exts(),
+                # Assumptions are unnecessary here; toggled externals suffice.
+                # Dropping them aligns with baseline behavior and reduces solve overhead.
+                assumptions=None,
             )
             t_s1 = time.perf_counter()
             _record_solve(t_s1 - t_s0)
@@ -1018,6 +1123,8 @@ def CausalABA(
         _assign_fact_externals(int(removed or 0))
         _assign_block_edges()
 
+    satcheck_stats = {"calls": 0, "sec": 0.0, "timeouts": 0}
+
     def _is_satisfiable() -> bool:
         """Check satisfiability *without* spending time optimizing.
 
@@ -1025,6 +1132,8 @@ def CausalABA(
         optimization can make repeated checks (during binary search) extremely
         slow. We temporarily set opt_mode=ignore and models=1.
         """
+        satcheck_stats["calls"] += 1
+        _t_satcheck0 = time.perf_counter()
         cfg_solve = None
         prev_opt_mode = None
         prev_models = None
@@ -1061,16 +1170,21 @@ def CausalABA(
             t1 = time.perf_counter()
             _record_solve(t1 - t0, kind="satcheck")
             if found["sat"]:
+                satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
                 return True
             if not finished:
+                satcheck_stats["timeouts"] += 1
+                satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
                 return False
             try:
                 t2 = time.perf_counter()
                 res = ctl.solve(assumptions=_assumptions_from_exts())
                 t3 = time.perf_counter()
                 _record_solve(t3 - t2, kind="satcheck")
+                satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
                 return bool(getattr(res, "satisfiable", False))
             except Exception:
+                satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
                 return False
         finally:
             if cfg_solve is not None:
@@ -1088,6 +1202,7 @@ def CausalABA(
     # Binary search the minimal removed count that yields SAT.
     lo = 0
     hi = len(facts)
+    _t_binsearch_start = time.perf_counter()
     # If already satisfiable, no removals needed.
     if n_models == 0:
         _apply_removed(0)
@@ -1096,7 +1211,7 @@ def CausalABA(
             hi = 0
     while lo < hi:
         mid = (lo + hi) // 2
-        if debug_enabled:
+        if _verb >= 2 or (debug_enabled and _verb >= 1):
             logger.debug("[remove-search] trying removed=%s (lo=%s hi=%s)", mid, lo, hi)
         _apply_removed(mid)
         sat = _is_satisfiable()
@@ -1106,10 +1221,16 @@ def CausalABA(
             lo = mid + 1
 
     remove_n = lo
+    try:
+        _t_binsearch_end = time.perf_counter()
+        logger.info("[remove-search] completed in %.3fs, minimal removal=%s facts", _t_binsearch_end - _t_binsearch_start, remove_n)
+        logger.info("[satcheck] calls=%d time=%.3fs time_since_ground=%.3fs timeouts=%d", satcheck_stats["calls"], satcheck_stats["sec"], _t_binsearch_end - t_post_ground, satcheck_stats["timeouts"])
+    except Exception:
+        pass
     if remove_n > 0:
         # Log the last fact that gets released at the minimal point.
         ext_sym = fact_syms[-remove_n]
-        logger.info("[remove] minimal satisfiable removal is %s (releasing %s)", remove_n, ext_sym)
+        logger.info("[remove] releasing %s", ext_sym)
 
     # Apply the chosen removal and collect a witness model (or optimal models
     # when optimization is active), matching the earlier 'first' behavior.
@@ -1139,16 +1260,25 @@ def CausalABA(
         )
         t_f1 = time.perf_counter()
         _record_solve(t_f1 - t_f0, kind="final")
+        try:
+            logger.info("[timing] final-solve=%.3fs since-ground=%.3fs", t_f1 - t_f0, t_f1 - t_post_ground)
+        except Exception:
+            pass
     finally:
         _restore_opt_mode(ctl, prev_opt_mode)
     if not models and last_syms is not None:
         models.append(last_syms)
     n_models = int(ctl.statistics['summary']['models']['enumerated'])
     logger.info("[post-solve] models=%s", n_models)
+    try:
+        logger.info("[timing] total post-ground=%.3fs", time.perf_counter() - t_post_ground)
+    except Exception:
+        pass
 
     # Optional debug dump when even the fully relaxed instance is UNSAT.
     if observer is not None and n_models == 0 and debug_dump_path and remove_n >= len(facts):
-        logger.info("[debug] dumping grounded program to %s", debug_dump_path)
+        if _verb >= 1 or debug_enabled:
+            logger.info("[debug] dumping grounded program to %s", debug_dump_path)
         try:
             observer.dump_to(debug_dump_path, ext_values, note="unsat after releasing all facts")
         except Exception:
