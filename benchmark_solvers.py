@@ -168,6 +168,7 @@ def run_solver(
     threads: int | None = None,
     tracemalloc_top: int = 0,
     tracemalloc_group: str = "lineno",
+    verbosity: int = 0,
 ) -> dict:
     logger = logging.getLogger(__name__)
 
@@ -221,23 +222,44 @@ def run_solver(
             disable_reground,
             timeout,
         )
-        res = solver(
-            n_nodes,
-            str(facts_path),
-            weak_constraints=weak_constraints,
-            fact_pct=fact_pct,
-            opt_mode=opt_mode,
-            out_n=out_n,
-            search_for_models="first",
-            print_models=False,
-            skeleton_rules_reduction=skeleton_rules_reduction,
-            disable_reground=disable_reground,
-            return_statistics=True,
-            solve_timeout=float(timeout) if timeout else None,
-            max_path_length=max_path_length,
-            max_conditioning_size=max_conditioning_size,
-            threads=threads,
-        )
+        try:
+            res = solver(
+                n_nodes,
+                str(facts_path),
+                weak_constraints=weak_constraints,
+                fact_pct=fact_pct,
+                opt_mode=opt_mode,
+                out_n=out_n,
+                search_for_models="first",
+                print_models=False,
+                skeleton_rules_reduction=skeleton_rules_reduction,
+                disable_reground=disable_reground,
+                return_statistics=True,
+                solve_timeout=float(timeout) if timeout else None,
+                max_path_length=max_path_length,
+                max_conditioning_size=max_conditioning_size,
+                threads=threads,
+                verbosity=verbosity,
+            )
+        except TypeError:
+            # Solver may not support verbosity; call without it.
+            res = solver(
+                n_nodes,
+                str(facts_path),
+                weak_constraints=weak_constraints,
+                fact_pct=fact_pct,
+                opt_mode=opt_mode,
+                out_n=out_n,
+                search_for_models="first",
+                print_models=False,
+                skeleton_rules_reduction=skeleton_rules_reduction,
+                disable_reground=disable_reground,
+                return_statistics=True,
+                solve_timeout=float(timeout) if timeout else None,
+                max_path_length=max_path_length,
+                max_conditioning_size=max_conditioning_size,
+                threads=threads,
+            )
         # Normalize solver return shapes.
         # Expected (bench-enhanced): [models, multiple, clingo_stats, remove_n, profile]
         # Legacy: [models, multiple]
@@ -445,7 +467,7 @@ def main() -> None:
         "--solvers",
         type=str,
         default="both",
-        choices=["both", "baseline", "incremental", "binsearch", "weakc", "all"],
+        choices=["both", "baseline", "incremental", "binsearch", "weakc", "dep_first", "all"],
         help="Which solver(s) to run",
     )
     ap.add_argument(
@@ -461,10 +483,19 @@ def main() -> None:
         choices=["lineno", "filename"],
         help="Group tracemalloc stats by line or file",
     )
+    ap.add_argument(
+        "--verbosity",
+        type=int,
+        default=0,
+        choices=[0, 1, 2],
+        help="Verbosity: 0=normal, 1=more info, 2=debug detail",
+    )
     args = ap.parse_args()
 
+    # Map verbosity to logging level: 0->INFO, 1/2->DEBUG
+    log_level = logging.INFO if args.verbosity == 0 else logging.DEBUG
     logging.basicConfig(
-        level=logging.INFO,
+        level=log_level,
         format="%(asctime)s %(levelname)s:%(name)s:%(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
@@ -511,6 +542,7 @@ def main() -> None:
                             threads=args.threads,
                             tracemalloc_top=args.tracemalloc_top,
                             tracemalloc_group=args.tracemalloc_group,
+                            verbosity=args.verbosity,
                         )
                     )
                 if args.solvers in ("both", "all", "incremental"):
@@ -533,6 +565,7 @@ def main() -> None:
                             threads=args.threads,
                             tracemalloc_top=args.tracemalloc_top,
                             tracemalloc_group=args.tracemalloc_group,
+                            verbosity=args.verbosity,
                         )
                     )
 
@@ -555,6 +588,7 @@ def main() -> None:
                             threads=args.threads,
                             tracemalloc_top=args.tracemalloc_top,
                             tracemalloc_group=args.tracemalloc_group,
+                            verbosity=args.verbosity,
                         )
                     )
 
@@ -577,6 +611,53 @@ def main() -> None:
                             threads=args.threads,
                             tracemalloc_top=args.tracemalloc_top,
                             tracemalloc_group=args.tracemalloc_group,
+                            verbosity=args.verbosity,
+                        )
+                    )
+
+                if args.solvers in ("all", "dep_first"):
+                    # Dep-first: baseline grounding + dep-only removal (no reground) + binary search
+                    def _run_dep_first(n, facts_path, fact_pct, weak_constraints, skeleton_rules_reduction, disable_reground, solve_timeout=None, **kwargs):
+                        return CausalABA_Binsearch(
+                            n,
+                            str(facts_path),
+                            print_models=False,
+                            skeleton_rules_reduction=skeleton_rules_reduction,
+                            weak_constraints=weak_constraints,
+                            fact_pct=fact_pct,
+                            set_indep_facts=False,
+                            opt_mode=kwargs.get("opt_mode", "optN"),
+                            out_n=kwargs.get("out_n", 0),
+                            search_for_models="dep_first",
+                            show=["arrow"],
+                            pre_grounding=True,
+                            disable_reground=disable_reground,
+                            return_statistics=True,
+                            max_path_length=kwargs.get("max_path_length"),
+                            max_conditioning_size=kwargs.get("max_conditioning_size"),
+                            threads=kwargs.get("threads"),
+                            solve_timeout=solve_timeout,
+                            verbosity=kwargs.get("verbosity", 0),
+                        )
+                    results.append(
+                        run_solver(
+                            "dep_first",
+                            _run_dep_first,
+                            n,
+                            facts_path,
+                            args.fact_pct,
+                            True,
+                            args.skeleton_rules_reduction,
+                            args.disable_reground,
+                            args.timeout,
+                            opt_mode=args.opt_mode,
+                            out_n=args.out_n,
+                            max_path_length=args.max_path_length,
+                            max_conditioning_size=args.max_conditioning_size,
+                            threads=args.threads,
+                            tracemalloc_top=args.tracemalloc_top,
+                            tracemalloc_group=args.tracemalloc_group,
+                            verbosity=args.verbosity,
                         )
                     )
 
