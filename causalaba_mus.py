@@ -1,22 +1,31 @@
-"""MUS (Minimal Unsatisfiable Subset) analysis for CausalABA
+"""MUS/MCS support for CausalABA via an external ASP core solver.
 
-This module computes MUS using the full CausalABA encoding with active paths
-and d-separation. MUS identifies minimal subsets of independence/dependence facts
-that create unsatisfiability.
+This module builds an *adorned* ASP program where each "wrong test" is guarded by
+an assumption atom `mus(i)`:
 
-Copyright 2025 Fabrizio Russo, Department of Computing, Imperial College London
+- A choice layer `{mus(i)}.` makes each test optionally enabled.
+- The original test constraint/fact is rewritten as `fact :- mus(i).` so it only
+  applies when its assumption is selected.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+Then we compute:
 
-    http://www.apache.org/licenses/LICENSE-2.0
+- **MUSes**: minimal sets of assumptions that still make the program UNSAT.
+- **MCSes** (optionally): minimal sets of assumptions to *remove* to regain SAT.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License."""
+We do this by piping clingo's smodels output into WASP, which implements MUS/MCS
+enumeration algorithms:
+
+  clingo adorned.lp --output=smodels | wasp --mus=mus --mus-algorithm=camus --print-mcses -n 0
+
+The main entrypoint is `CausalABA_MUS(...)`, which can also *emit* the adorned
+program to disk (for reproducible standalone runs) instead of invoking solvers.
+
+Notes:
+- This code expects `clingo` and `wasp` to be available (usually `aba-env` + the
+  repo-local WASP build).
+- WASP's `-n` behaviour matters: `-n 0` means "enumerate all"; omitting `-n`
+  often means "return one" depending on build/config.
+"""
 
 __author__ = "Fabrizio Russo"
 __email__ = "fabrizio@imperial.ac.uk"
@@ -36,18 +45,21 @@ from causalaba import compile_and_ground
 
 
 def parse_facts_from_file(facts_location: str) -> tuple[list[str], dict[int, str]]:
-    """
-    Parse independence and dependence facts from a file.
+    """Parse `ext_indep` / `ext_dep` facts from a `.lp` / `.asp` text file.
     
-    Recognizes patterns:
-    - ext_indep(X,Y,S).
-    - ext_dep(X,Y,S).
+    Used by tests/harnesses to load facts from `encodings/test_lps/...`.
+    
+    The parser is intentionally permissive:
+    - Ignores blank lines and comment lines starting with `%`.
+    - Ignores ASP directives starting with `#`.
+    - Collects only lines containing `ext_indep` or `ext_dep`.
     
     Args:
-        facts_location: Path to the facts file
+        facts_location: Path to an ASP file.
     
     Returns:
-        Tuple of (list of fact strings, dict mapping indices to fact strings)
+        `(facts, fact_mapping)` where `facts` is a list of fact strings without the trailing `.`
+        and `fact_mapping` maps 1-based indices to the original fact strings including the `.`.
     """
     facts = []
     fact_mapping = {}
@@ -83,19 +95,26 @@ def run_mus_solver(
     return_mcses: bool = False,
     solve_timeout: Optional[float] = None,
 ) -> Union[List[List[int]], Tuple[List[List[int]], List[List[int]]]]:
-    """
-    Run MUS solver on ASP program using gringo and wasp.
+    """Run the external `clingo | wasp` pipeline to enumerate MUSes (and optionally MCSes).
+    
+    The input `program_str` is expected to be an adorned program that contains assumption atoms named `mus/1`.
+    
+    This executes:
+      `clingo <tmp.lp> --output=smodels | wasp --mus=mus ...`
     
     Args:
-        program_str: Complete ASP program as string
-        gringo_path: Path to clingo executable
-        wasp_path: Path to wasp executable
+        program_str: Full adorned ASP program as a string.
+        gringo_path: Path/name for the clingo binary (kept as `gringo_path` for historical reasons).
+        wasp_path: Path to the WASP binary.
+        max_muses: If provided, passes `-n <max_muses>`; use `0` to enumerate all.
+        mus_algorithm: Optional WASP `--mus-algorithm` value (e.g. `camus`).
+        print_mcses: If True, passes `--print-mcses` and enables CAMUS by default.
+        return_mcses: If True, returns `(mus_list, mcs_list)`; otherwise returns only `mus_list`.
+        solve_timeout: Optional timeout (seconds) for the overall external run.
     
     Returns:
-        If return_mcses is False (default):
-            List of MUS, each MUS is a list of assumption indices mus(i)
-        If return_mcses is True:
-            Tuple (mus_list, mcs_list), where each entry is a list of mus(i) indices.
+        Either `mus_list` (list of MUSes, each a list of ints), or `(mus_list, mcs_list)` when
+        `return_mcses=True`.
     """
     logging.info("Running MUS solver...")
     
@@ -266,21 +285,27 @@ def build_mus_program(
     deadline: Optional[float] = None,
     timing_recorder: dict | None = None,
 ) -> str:
-    """
-    Build an ASP program for MUS computation using CausalABA's compile_and_ground.
+    """Build the full adorned program used for MUS/MCS enumeration.
     
-    This function:
-    1. Calls compile_and_ground with dump_specific to get the generated specific rules
-    2. Loads the base causalaba.lp encoding
-    3. Combines with adorned facts and MUS assumption layer
+    This uses `compile_and_ground(...)` to obtain the base CausalABA encoding for `n_nodes`, then
+    adds an assumption layer over the provided wrong-test facts.
+    
+    The resulting program contains:
+    - a `{mus(i)}.` choice rule for each fact (1-based indexing), and
+    - a guarded form `fact :- mus(i).` so each test can be toggled via assumptions.
     
     Args:
-        n_nodes: Number of nodes in the causal graph
-        facts: List of fact strings (without period, e.g., "ext_indep(1,2,s0)")
-        facts_location: Path to facts file (used by compile_and_ground to extract indep/dep facts)
+        n_nodes: Number of variables/nodes for the instance.
+        facts: Wrong-test facts/constraints (typically derived from PC output).
+        facts_location: Optional path used to derive a "specific rules" file.
+        deadline: Optional absolute perf_counter deadline for the build phase.
+        timing_recorder: Optional dict to accumulate build/compile timings.
     
     Returns:
-        Ungrounded ASP program text (will be grounded by run_mus_solver)
+        The complete adorned ASP program as a string.
+    
+    Raises:
+        TimeoutError: If `deadline` is exceeded during program construction.
     """
     logging.debug("Building MUS program using compile_and_ground...")
     
@@ -430,29 +455,22 @@ def CausalABA_MUS(
     emit_lp: Optional[str] = None,
     timing_recorder: dict | None = None,
 ) -> dict:
-    """
-    Run CausalABA with MUS (Minimal Unsatisfiable Subset) analysis.
+    """High-level MUS/MCS analysis over `ext_indep`/`ext_dep` wrong-test facts.
     
-    This function builds an ASP program that includes the full CausalABA
-    encoding with active paths, then uses wasp to compute MUS over the assumption
-    atoms mus(i), which correspond directly to the input facts.
+    Workflow:
+    1) Parse wrong-test facts from `facts_location`.
+    2) Build the adorned program via `build_mus_program(...)`.
+    3) Optionally write the program to `emit_lp` (for reproducibility).
+    4) Run `run_mus_solver(...)` to enumerate MUSes (and optionally MCSes).
     
-    Args:
-        n_nodes: Number of nodes in the causal graph
-        facts_location: Path to the facts file containing ext_indep/ext_dep statements
-        gringo_path: Path to clingo executable (default: "clingo")
-        wasp_path: Path to wasp executable
-        emit_lp: Optional path to save the complete MUS program (for debugging/comparison)
+    Reproducible external run (after emitting):
+    
+      clingo adorned.lp --output=smodels | wasp \
+          --mus=mus --mus-algorithm=camus --print-mcses -n 0
     
     Returns:
-        Dictionary with:
-            - 'mus_list': List of MUS (each MUS contains fact indices 1, 2, ...)
-            - 'mus_facts': List of MUS with actual fact strings
-            - 'n_mus': Number of MUS found
-            - 'fact_mapping': Mapping from fact indices to fact strings
-            - 'mcs_list' (optional): List of MCS (each MCS contains fact indices 1, 2, ...)
-            - 'mcs_facts' (optional): List of MCS with actual fact strings
-            - 'n_mcs' (optional): Number of MCS found
+        A dict containing `mus_list`, `mus_facts`, `n_mus`, `fact_mapping`, and (when enabled)
+        `mcs_list`, `mcs_facts`, `n_mcs`, plus timing fields.
     """
     logging.info("Running CausalABA MUS analysis")
     

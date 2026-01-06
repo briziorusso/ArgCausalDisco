@@ -1,10 +1,30 @@
 #!/usr/bin/env python3
-"""Profile ABAPC removal vs MUS solving across node sizes.
+"""Profile ABAPC removal vs MUS/MCS across random-PC instances.
 
-This script provides a friendly CLI wrapper around tests_mus.py functionality,
-allowing easy configuration of node sizes, timeouts, and MUS/MCS limits without
-the verbose pytest command syntax.
+This is a small CLI wrapper around the integration pipeline in `tests_mus.py`.
+It is intended for:
+
+- running the ABAPC removal strategy and MUS/MCS analysis across node sizes,
+- printing the phase-by-phase timing summary (ABAPC vs MUS),
+- optionally emitting the *complete adorned MUS program* (`--emit-lp` / `--emit-lp-dir`) so you can reproduce
+  the MUS/MCS run externally with `clingo --output=smodels | wasp ...`.
+
+Typical usage:
+
+  python scripts/mus_abapc_profile.py --node-sizes 5,6,7,8 --solve-timeout 120
+
+Emit an adorned program and run it manually:
+
+  python scripts/mus_abapc_profile.py --node-sizes 7 --seed-base 2004 --emit-lp results/mus_7_2004.lp
+  clingo results/mus_7_2004.lp --output=smodels | wasp \
+      --mus=mus --mus-algorithm=camus --print-mcses -n 0
+
+Notes on MUS enumeration (`--max-muses`):
+- `--max-muses ''` omits `-n` (WASP default behaviour).
+- `--max-muses 0` passes `-n 0` (enumerate all MUS).
+- `--max-muses N` passes `-n N`.
 """
+
 
 from __future__ import annotations
 
@@ -25,6 +45,18 @@ import tests_mus  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the profiler.
+
+    Examples:
+
+      python scripts/mus_abapc_profile.py --node-sizes 9 --solve-timeout 800 --quiet --out-n 1
+
+      # Emit one adorned program per size/seed
+      python scripts/mus_abapc_profile.py --node-sizes 5,7,8 --emit-lp-dir results/mus_programs/
+
+    Returns:
+        Process exit code (0 on success).
+    """
     parser = argparse.ArgumentParser(
         description="Profile ABAPC removal vs MUS solving time/memory across node sizes. "
         "This is a CLI wrapper around tests_mus.py functionality.",

@@ -1,13 +1,41 @@
-"""MUS (Minimal Unsatisfiable Subset) tests for CausalABA.
+"""MUS/MCS analysis tests + reproducible profiling harness.
 
-This module tests MUS functionality using the full CausalABA encoding with
-active paths and d-separation semantics. MUS identifies minimal subsets of
-independence/dependence facts that create unsatisfiability when combined with
-the causal graph constraints. Facts are guarded by mus/1 assumption atoms to
-enable WASP to compute minimal cores.
+This file serves two roles:
 
-Copyright 2025 Fabrizio Russo, Department of Computing, Imperial College London
-Licensed under the Apache License, Version 2.0
+1) **pytest/unittest tests** for the MUS assumption-layer and small sanity cases.
+2) A **scriptable harness** for generating random PC-based instances, running:
+   - ABAPC removal (`CausalABA(..., search_for_models='first')`), and
+   - MUS/MCS analysis (`CausalABA_MUS(...)`),
+   while printing a phase-by-phase timing comparison.
+
+Key tests:
+
+- `test_parsing_facts_from_file`: ensures we correctly read `ext_indep`/`ext_dep` facts and ignore comments/directives.
+- `test_adorning_with_mus_assumptions`: validates `{mus(i)}.` choice rules and `fact :- mus(i).` guarding.
+- `test_mock_three_var_manual_vs_mus`: smallest end-to-end example; matches the manual folder
+  `encodings/test_lps/mock_three_var_manual/`.
+- `test_mus_links_wrong_tests_four_node_abapc`: links PC-derived wrong tests to MUS/MCS on a fixed 4-node case.
+- `test_mus_mcs_random_five_node_abapc`: PC → ABAPC → MUS/MCS on a deterministic 5-node seed.
+- `test_mus_mcs_random_sizes_abapc`: same pipeline across multiple sizes (`--node-sizes`).
+
+Run via pytest:
+
+  python -m pytest tests_mus.py -xvs
+  python -m pytest tests_mus.py::TestMUSAnalysis::test_mock_three_var_manual_vs_mus -v
+
+Run as a script (uses argparse at bottom):
+
+  python tests_mus.py --node-sizes 7,8 --solve-timeout 120 --max-muses 0 --emit-lp results/mus_{n}.lp
+
+To reproduce a run externally once you emitted an adorned `.lp`:
+
+  clingo results/mus_7.lp --output=smodels | wasp \
+      --mus=mus --mus-algorithm=camus --print-mcses -n 0
+
+Important knobs:
+- `--graph-type`: random DAG family passed to the simulator (default: ER).
+- `--opt-mode`, `--out-n`: passed to the ABAPC run (`CausalABA`) to control clingo optimization and model bound.
+- `--max-muses`: controls whether WASP receives `-n`.
 """
 
 import os
@@ -397,7 +425,7 @@ class TestMUSAnalysis(unittest.TestCase):
             n_nodes=n_nodes,
             facts_location=facts_mus_file,
             gringo_path="clingo",
-            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            wasp_path="wasp",
             mus_algorithm="camus",
             print_mcses=True,
         )
@@ -694,7 +722,7 @@ class TestMUSAnalysis(unittest.TestCase):
             n_nodes=n_nodes,
             facts_location=facts_mus_file,
             gringo_path="clingo",
-            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            wasp_path="wasp",
             max_muses=500,
             mus_algorithm="camus",
             print_mcses=True,
@@ -899,7 +927,7 @@ class TestMUSAnalysis(unittest.TestCase):
             n_nodes=n_nodes,
             facts_location=facts_file,
             gringo_path="clingo",
-            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            wasp_path="wasp",
             mus_algorithm="camus",
             print_mcses=True,
         )
@@ -965,7 +993,7 @@ class TestMUSAnalysis(unittest.TestCase):
             n_nodes=n_nodes,
             facts_location=facts_file,
             gringo_path="clingo",
-            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            wasp_path="wasp",
             mus_algorithm="camus",
             print_mcses=True,
         )
@@ -1212,7 +1240,7 @@ class TestMUSAnalysis(unittest.TestCase):
             n_nodes=n_nodes,
             facts_location=facts_mus_file,
             gringo_path="clingo",
-            wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
+            wasp_path="wasp",
             max_muses=max_muses_arg,
             mus_algorithm="camus",
             print_mcses=True,
