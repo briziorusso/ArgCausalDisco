@@ -111,8 +111,12 @@ def run_mus_solver(
         
         # Build wasp command to compute MUS over mus/1
         # Note: WASP can combine --mus with -n to enumerate MUSes.
-        # By default we use -n 0 (enumerate all), but callers can cap enumeration.
-        wasp_cmd = [wasp_path, '--mus=mus', '-n', str(max_muses) if max_muses is not None else '0']
+        # - If max_muses is None: omit -n flag (WASP default: outputs only 1 MUS but finds all MCS)
+        # - If max_muses == 0: use -n 0 (enumerate all MUS)
+        # - If max_muses > 0: use -n <max_muses> (limit MUS enumeration)
+        wasp_cmd = [wasp_path, '--mus=mus']
+        if max_muses is not None:
+            wasp_cmd.extend(['-n', str(max_muses)])
 
         # Optional: select MUS algorithm / print MCSes (CAMUS)
         if print_mcses and mus_algorithm is None:
@@ -260,6 +264,7 @@ def build_mus_program(
     facts_location: str = "",
     *,
     deadline: Optional[float] = None,
+    timing_recorder: dict | None = None,
 ) -> str:
     """
     Build an ASP program for MUS computation using CausalABA's compile_and_ground.
@@ -363,6 +368,7 @@ def build_mus_program(
                 cycle_length=None,
                 dump_specific=specific_rules_file,
                 deadline=deadline,
+                timing_recorder=timing_recorder,
             )
             
             # Load the dumped specific rules
@@ -399,7 +405,7 @@ def build_mus_program(
     program_lines.append("")
     program_lines.append("% ===== Adorned Facts =====")
     
-    # Add adorned facts: fact :- mus(i)
+    # Add adorned facts: fact:- mus(i) (no spaces around :- for WASP compatibility)
     for i, fact in enumerate(facts, 1):
         program_lines.append(f"{fact}:-mus({i}).")
     
@@ -421,6 +427,8 @@ def CausalABA_MUS(
     camus_mcs_threshold: Optional[int] = None,
     camus_mus_threshold: Optional[int] = None,
     solve_timeout: Optional[float] = None,
+    emit_lp: Optional[str] = None,
+    timing_recorder: dict | None = None,
 ) -> dict:
     """
     Run CausalABA with MUS (Minimal Unsatisfiable Subset) analysis.
@@ -434,6 +442,7 @@ def CausalABA_MUS(
         facts_location: Path to the facts file containing ext_indep/ext_dep statements
         gringo_path: Path to clingo executable (default: "clingo")
         wasp_path: Path to wasp executable
+        emit_lp: Optional path to save the complete MUS program (for debugging/comparison)
     
     Returns:
         Dictionary with:
@@ -471,9 +480,15 @@ def CausalABA_MUS(
     deadline = (time.perf_counter() + float(solve_timeout)) if solve_timeout is not None else None
     build_start = time.perf_counter()
     try:
-        program = build_mus_program(n_nodes, facts, facts_location, deadline=deadline)
+        program = build_mus_program(n_nodes, facts, facts_location, deadline=deadline, timing_recorder=timing_recorder)
         build_time = time.perf_counter() - build_start
         logging.info(f"MUS Build time: {build_time:.3f}s (nodes={n_nodes})")
+        
+        # Optionally save the complete MUS program for debugging
+        if emit_lp:
+            with open(emit_lp, 'w') as f:
+                f.write(program)
+            logging.info(f"Emitted complete MUS program to {emit_lp}")
     except TimeoutError:
         build_time = time.perf_counter() - build_start
         logging.error("MUS program build exceeded the timeout budget.")

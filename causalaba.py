@@ -340,6 +340,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 cycle_length: int | None = None,
                 threads: int | None = None,
                 solve_timeout: float | None = None,
+                timing_recorder: dict | None = None,
                 )->list:
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
@@ -349,6 +350,12 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
 
     # Treat solve_timeout as a wall-clock budget for the whole run (ground+solve).
     deadline = (time.perf_counter() + float(solve_timeout)) if solve_timeout is not None else None
+
+    # Optional timing: track grounding/solving time spent on UNSAT instances
+    # during the removal loop (search_for_models='first') before SAT is reached.
+    if timing_recorder is not None:
+        timing_recorder.setdefault('unsat_ground_sec_total', 0.0)
+        timing_recorder.setdefault('unsat_solve_sec_total', 0.0)
     
     # (X, Y) -> their condition sets S
     indep_facts: dict[tuple, set[tuple]] = {}
@@ -403,6 +410,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         cycle_length=cycle_length,
         threads=threads,
         deadline=deadline,
+        timing_recorder=timing_recorder,
     )
 
     if search_for_models == 'No':
@@ -492,6 +500,13 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         logging.info(f"Number of models: {n_models}")
         times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
         logging.info(f"Times: {times}")
+
+        if timing_recorder is not None and n_models == 0:
+            try:
+                timing_recorder['unsat_ground_sec_total'] += float(timing_recorder.get('ground_sec_total', 0.0))
+                timing_recorder['unsat_solve_sec_total'] += max(0.0, solve_ended - solve_started)
+            except Exception:
+                pass
         remove_n = 0
         logging.info(f"Number of facts removed: {remove_n}")
 
@@ -504,6 +519,8 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
 
             remove_n += 1
             logging.info(f"Number of facts removed: {remove_n}")
+
+            iter_ground_sec = 0.0
 
             reground = False
             fact_to_remove = facts[-remove_n]
@@ -527,6 +544,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             if reground:
                 ### Save external statements
                 logging.info("Recompiling and regrounding...")
+                reground_timing: dict = {}
                 # Compute remaining time for the regrounding phase
                 reground_deadline = None
                 if deadline is not None:
@@ -554,7 +572,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     collider_tree_depth=collider_tree_depth,
                     cycle_length=cycle_length,
                     deadline=reground_deadline,
+                    timing_recorder=reground_timing,
                 )
+                iter_ground_sec = float(reground_timing.get('ground_sec_total', 0.0))
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
                     logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
@@ -587,9 +607,14 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             else:
                 logging.info(f"Removal iteration {remove_n} solve budget: {solve_timeout}s")
             t_s0 = time.perf_counter()
-            finished = _solve_with_timeout(ctl, solve_timeout=remaining_timeout if deadline is not None else solve_timeout, on_model=_on_model2)
+            finished = _solve_with_timeout(
+                ctl,
+                solve_timeout=remaining_timeout if deadline is not None else solve_timeout,
+                on_model=_on_model2,
+            )
+            t_s1 = time.perf_counter()
             if not finished:
-                elapsed = time.perf_counter() - t_s0
+                elapsed = t_s1 - t_s0
                 budget = remaining_timeout if remaining_timeout is not None else solve_timeout
                 total_budget = solve_timeout if solve_timeout is not None else "unlimited"
                 logging.error(f"Solve timed out after {elapsed:.3f}s (remaining budget={budget:.3f}s of {total_budget}s total) [phase=removal, iter={remove_n}]")
@@ -602,6 +627,13 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 logging.warning(f"Could not access solver statistics: {e}")
                 n_models = len(models)
                 logging.info(f"Number of models: {n_models}")
+
+            if timing_recorder is not None and n_models == 0:
+                try:
+                    timing_recorder['unsat_ground_sec_total'] += float(iter_ground_sec)
+                    timing_recorder['unsat_solve_sec_total'] += max(0.0, t_s1 - t_s0)
+                except Exception:
+                    pass
         
     elif 'subsets' in search_for_models:
         set_of_models = []

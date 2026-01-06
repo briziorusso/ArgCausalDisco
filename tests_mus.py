@@ -40,6 +40,10 @@ def _parse_node_sizes(raw: str) -> tuple[int, ...]:
 MUS_SOLVE_TIMEOUT = int(os.environ.get("MUS_SOLVE_TIMEOUT", "60"))
 MUS_NODE_SIZES = _parse_node_sizes(os.environ.get("MUS_NODE_SIZES", "5,7,9"))
 MUS_EDGE_PER_NODE = int(os.environ.get("MUS_EDGE_PER_NODE", "2"))
+MUS_EMIT_LP = os.environ.get("MUS_EMIT_LP", "")
+MUS_MAX_MUSES = os.environ.get("MUS_MAX_MUSES", "")  # "" = omit -n flag (WASP default: 1 MUS output), "0" = unlimited, ">0" = limit
+MUS_MCS_THRESHOLD = int(os.environ.get("MUS_MCS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
+MUS_MUS_THRESHOLD = int(os.environ.get("MUS_MUS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
 
 
 @dataclass(frozen=True)
@@ -1021,11 +1025,20 @@ class TestMUSAnalysis(unittest.TestCase):
                 logging.info(f"\n--- Running for n_nodes={n_nodes} ---")
                 self._run_mus_mcs_for_size(n_nodes)
 
-    def _run_mus_mcs_for_size(self, n_nodes: int):
+    def _run_mus_mcs_for_size(self, n_nodes: int, seed: int = None):
         """Helper to run the full MUS/MCS pipeline for a given node size.
         
         This extracts the core logic of test_mus_mcs_random_five_node_abapc so it can
         be parameterized across different sizes without code duplication.
+        
+        Args:
+            n_nodes: Number of nodes in the random graph
+            seed: Optional random seed; if None, uses default seed_map based on n_nodes
+        
+        Returns a dict with keys:
+        - 'was_sat': bool, True if ABAPC found the instance was already SAT (remove_n == 0)
+        - 'abapc_timeout': bool, True if ABAPC hit timeout
+        - 'mus_timeout': bool, True if MUS hit timeout
         """
         import types
         import re
@@ -1046,9 +1059,10 @@ class TestMUSAnalysis(unittest.TestCase):
             sys.modules['notears'] = notears_module
             sys.modules['notears.nonlinear'] = notears_nonlinear_module
 
-        # Use a deterministic seed based on n_nodes to ensure reproducibility
-        seed_map = {5: 2004, 6: 2005, 10: 2010}
-        seed = seed_map.get(n_nodes, 2004)
+        # Use a deterministic seed based on n_nodes to ensure reproducibility (unless overridden)
+        if seed is None:
+            seed_map = {5: 2004, 6: 2005, 10: 2010}
+            seed = seed_map.get(n_nodes, 2004)
 
         # Deterministic configuration
         case = self.randomG_PC_case(
@@ -1108,28 +1122,41 @@ class TestMUSAnalysis(unittest.TestCase):
         # Step 1: Run CasusalABA with all facts and apply ABAPC removal strategy (search='first')
         logging.info("Step 1: Run CasusalABA with all facts and apply removal strategy (search_for_models='first') if UNSAT")
         start_abapc = datetime.now()
+        abapc_timing = {}  # To capture compile/ground breakdown
         models_after, multiple, stats, remove_n = CausalABA(
             n_nodes,
             facts_file,
             weak_constraints=True,
             search_for_models='first',
+            # opt_mode='opt',
+            # out_n=1,
             skeleton_rules_reduction=True,
             print_models=False,
             return_statistics=True,
             solve_timeout=MUS_SOLVE_TIMEOUT,
-            
+            timing_recorder=abapc_timing,
         )
         abapc_time = datetime.now() - start_abapc
+        
+        # Extract detailed timing from clingo statistics
+        abapc_times = {}
+        try:
+            abapc_times = {key: stats['summary']['times'][key] for key in ['total', 'cpu', 'solve']}
+        except (KeyError, TypeError):
+            abapc_times = {'total': abapc_time.total_seconds(), 'cpu': 0, 'solve': 0}
+        
+        logging.info(f"  → Total facts: {len(facts)}")
+        logging.info(f"  → Wrong facts: {count_wrong}")
         logging.info(f"  → Facts removed: {remove_n}")
         logging.info(f"  → Models found after removal: {len(models_after)}")
         logging.info(f"  → ABAPC time: {abapc_time.total_seconds():.3f}s")
 
         # For larger sizes, we may not enforce UNSAT for all seeds; just assert we can reach SAT
         # If we hit the timeout before reaching SAT, skip the assertion (timeout is the real limit)
-        timeout_hit = abapc_time.total_seconds() >= (MUS_SOLVE_TIMEOUT - 0.5)
-        if remove_n > 0 and not timeout_hit:
+        abapc_timeout = abapc_time.total_seconds() >= (MUS_SOLVE_TIMEOUT - 0.5)
+        if remove_n > 0 and not abapc_timeout:
             self.assertGreater(len(models_after), 0, f"Expected SAT after removing {remove_n} tests for n_nodes={n_nodes}")
-        elif remove_n > 0 and timeout_hit and len(models_after) == 0:
+        elif remove_n > 0 and abapc_timeout and len(models_after) == 0:
             logging.warning(f"⚠ Timeout hit after {abapc_time.total_seconds():.1f}s before reaching SAT (removed {remove_n} tests, n_nodes={n_nodes})")
 
         # Step 3: Run MUS/MCS on PC facts only
@@ -1142,119 +1169,174 @@ class TestMUSAnalysis(unittest.TestCase):
                 f.write(f"{line}\n")
 
         # Cap MUS enumeration for larger sizes to keep runtime reasonable
-        max_muses = 500 if n_nodes <= 6 else 200
+        # But allow environment variables to override for full exploration
+        if MUS_MAX_MUSES != "":
+            max_muses = int(MUS_MAX_MUSES) if MUS_MAX_MUSES != "0" else 0
+        else:
+            # Default: limit for faster testing
+            max_muses = 500 if n_nodes <= 6 else 200
+        
+        # Use environment thresholds: 0 means None (no threshold), otherwise use value or defaults
+        if MUS_MCS_THRESHOLD == 0 and MUS_MAX_MUSES == "":
+            # When MUS_MAX_MUSES is empty (replicating manual WASP), default to no thresholds
+            mcs_threshold = None
+            mus_threshold = None
+        elif MUS_MCS_THRESHOLD == 0:
+            # When MUS_MCS_THRESHOLD explicitly 0, use defaults for faster testing
+            mcs_threshold = 50
+            mus_threshold = 300 if MUS_MUS_THRESHOLD == 0 else MUS_MUS_THRESHOLD
+        else:
+            mcs_threshold = MUS_MCS_THRESHOLD
+            mus_threshold = MUS_MUS_THRESHOLD if MUS_MUS_THRESHOLD > 0 else None
+        
         start_mus = datetime.now()
+        
+        # Optionally emit the complete MUS program for debugging
+        emit_lp_path = None
+        if MUS_EMIT_LP:
+            emit_lp_path = MUS_EMIT_LP.replace('{n}', str(n_nodes))
+            logging.info(f"Will emit MUS program to {emit_lp_path}")
+        
+        # Special handling: if MUS_MAX_MUSES is empty string, pass None to omit -n flag
+        max_muses_arg = None if MUS_MAX_MUSES == "" else max_muses
+        
+        mus_timing = {}  # To capture compile/ground breakdown
         mus_result = CausalABA_MUS(
             n_nodes=n_nodes,
             facts_location=facts_mus_file,
             gringo_path="clingo",
             wasp_path="/vol/bitbucket/fr920/wasp/build/release/wasp",
-            max_muses=max_muses,
+            max_muses=max_muses_arg,
             mus_algorithm="camus",
             print_mcses=True,
-            camus_mcs_threshold=50,
-            camus_mus_threshold=300,
+            camus_mcs_threshold=mcs_threshold,
+            camus_mus_threshold=mus_threshold,
             solve_timeout=MUS_SOLVE_TIMEOUT,
+            emit_lp=emit_lp_path,
+            timing_recorder=mus_timing,
         )
         mus_time = datetime.now() - start_mus
 
         mus_timeout = mus_time.total_seconds() >= (MUS_SOLVE_TIMEOUT - 0.5)
-        if mus_timeout and mus_result.get('n_mus', 0) == 0:
-            self.fail(
-                f"MUS timed out after {mus_time.total_seconds():.2f}s before finding any MUS (n_nodes={n_nodes})"
-            )
 
-        logging.info(f"MUS cores found: {mus_result['n_mus']}")
-        logging.info(f"MCSes found: {mus_result.get('n_mcs', 0)}")
+        logging.info(f"  → MUS found: {mus_result['n_mus']}")
+        logging.info(f"  → MCS found: {mus_result.get('n_mcs', 0)}")
         logging.info(f"  → MUS time: {mus_time.total_seconds():.3f}s")
 
-        # Basic assertion: we expect at least some MUSes for contradiction cases
-        if remove_n > 0:
-            self.assertGreater(mus_result['n_mus'], 0, f"Expected at least one MUS for UNSAT case (n_nodes={n_nodes})")
-
-        # ===== TIMING COMPARISON (Grounding vs Solving Split) =====
-        logging.info("\n" + "="*90)
-        logging.info(f"TIMING COMPARISON: GROUNDING + SOLVING (n_nodes={n_nodes})")
-        logging.info("="*90)
-        
-        # Measure grounding time by doing a timed compile_and_ground with PC facts
-        logging.info("Measuring grounding time (clingo pass only)...")
-        from causalaba import compile_and_ground
-        
-        # Parse PC facts into indep/dep dicts for skeleton reduction
-        def _parse_ext_facts_to_dicts(ext_facts_list):
-            indep, dep = {}, {}
-            for line in ext_facts_list:
-                line = line.strip()
-                if not line:
-                    continue
-                if line.endswith('.'):
-                    line = line[:-1]
-                m = re.match(r'(ext_indep|ext_dep)\((\d+),(\d+),([^\)]+)\)', line)
-                if not m:
-                    continue
-                fact_type, x, y, s = m.groups()
-                x, y = int(x), int(y)
-                if s == 'empty':
-                    S = ()
-                else:
-                    ms = re.match(r's((?:0|[1-9]\d*)*)', s)
-                    if ms:
-                        idxs = ms.group(1)
-                        S = tuple(int(idxs[i]) for i in range(len(idxs))) if idxs else ()
-                    else:
-                        S = ()
-                target = indep if fact_type == 'ext_indep' else dep
-                target.setdefault((x, y), set()).add(S)
-            return indep, dep
-
-        indep_facts, dep_facts = _parse_ext_facts_to_dicts(facts_ext)
-
-        timing = {}
+        # ===== TIMING COMPARISON (Phase Breakdown) =====
         try:
-            _ = compile_and_ground(
-                n_nodes,
-                facts_location="",
-                skeleton_rules_reduction=True,
-                weak_constraints=False,
-                indep_facts=indep_facts,
-                dep_facts=dep_facts,
-                opt_mode='optN',
-                out_n=0,
-                show=['arrow'],
-                pre_grounding=False,
-                ext_flag=False,
-                prior_knowledge=None,
-                timing_recorder=timing,
+            header = f"TIMING COMPARISON (n_nodes={n_nodes})"
+            prefix = "  "
+            logging.info("\n" +  29*" "+ "=" * 60)
+            logging.info(prefix + header)
+            logging.info("=" * 60)
+            
+            # Extract ABAPC timing breakdown
+            abapc_compile = abapc_timing.get('compile_sec_total', 0.0)
+            abapc_ground = abapc_timing.get('ground_sec_total', 0.0)
+            abapc_unsat_ground = abapc_timing.get('unsat_ground_sec_total', 0.0)
+            abapc_unsat_solve = abapc_timing.get('unsat_solve_sec_total', 0.0)
+            abapc_solve = stats.get('summary', {}).get('times', {}).get('solve', 0.0) if stats else 0.0
+            abapc_total = abapc_time.total_seconds()
+            # Sys (residual) time captures everything not covered by the measured phases.
+            # For ABAPC removal, this includes Python overhead + reground/solve work not
+            # reflected in the final ctl.statistics (which is for the last ctl only).
+            abapc_sys = max(
+                0.0,
+                abapc_total
+                - abapc_compile
+                - abapc_ground
+                - abapc_solve
+                - abapc_unsat_ground
+                - abapc_unsat_solve,
             )
-            ground_time = timing.get('ground_sec_total', 0.0)
-        except Exception as e:
-            # Fallback: estimate grounding time as small fraction of total
-            ground_time = min(abapc_time.total_seconds() * 0.1, 0.1)
-            logging.debug(f"Grounding measurement fallback: {ground_time:.3f}s")
-        
-        abapc_solve_time = max(0, abapc_time.total_seconds() - ground_time)
-        mus_solve_time = max(0, mus_time.total_seconds() - ground_time)
-        
-        logging.info(f"  Measured grounding time (clingo):     {ground_time:8.3f}s")
-        logging.info("")
-        logging.info(f"  ┌─ ABAPC (removal strategy):")
-        logging.info(f"  │   Grounding:  {ground_time:8.3f}s")
-        logging.info(f"  │   Solving:    {abapc_solve_time:8.3f}s")
-        logging.info(f"  │   Total:      {abapc_time.total_seconds():8.3f}s")
-        logging.info(f"  │")
-        logging.info(f"  └─ MUS solver (full analysis):")
-        logging.info(f"      Grounding:  {ground_time:8.3f}s (shared, clingo)")
-        logging.info(f"      Solving:    {mus_solve_time:8.3f}s (WASP)")
-        logging.info(f"      Total:      {mus_time.total_seconds():8.3f}s")
-        logging.info("")
-        
-        ratio_total = mus_time.total_seconds() / abapc_time.total_seconds() if abapc_time.total_seconds() > 0 else 0
-        ratio_solve = mus_solve_time / abapc_solve_time if abapc_solve_time > 0 else 0
-        
-        logging.info(f"  Total time ratio (MUS/ABAPC):   {ratio_total:8.2f}x")
-        logging.info(f"  Solve time ratio (WASP/clingo): {ratio_solve:8.2f}x  (should be main difference)")
-        logging.info("="*90 + "\n")
+            
+            # Extract MUS timing breakdown
+            # Note: MUS uses WASP which works differently from clingo:
+            # - compile_and_ground is called in build_mus_program (captured in mus_timing)
+            # - Then clingo re-grounds the full program and pipes to WASP (captured in mus_solve_time)
+            # - WASP computes MUS internally without streaming (no Python enumeration overhead)
+            mus_compile = mus_timing.get('compile_sec_total', 0.0)
+            mus_ground = mus_timing.get('ground_sec_total', 0.0)
+            mus_solve = mus_result.get('mus_solve_time', 0.0)  # This is clingo grounding + WASP execution
+            mus_total = mus_time.total_seconds()
+            # Sys (residual) time captures wrapper overhead around the external solver.
+            mus_sys = max(0.0, mus_total - mus_compile - mus_ground - mus_solve)
+            
+            # Detect which phase timed out for ABAPC
+            abapc_timeout_phase = None
+            if abapc_timeout:
+                # For removal strategy with timeout:
+                # - If we found 0 models, the timeout was during the solve/reground iterations
+                # - The "enumerate" time is actually solve time from multiple removal iterations
+                # - We'll label it all as "solve" time since that's what was happening
+                if len(models_after) == 0:
+                    abapc_timeout_phase = 'solve'
+                    # Recalculate: all non-compile/ground time was actually solving
+                    abapc_solve = max(0.0, abapc_total - abapc_compile - abapc_ground)
+                    abapc_sys = 0.0
+                else:
+                    # If we found models, timeout was during enumeration
+                    abapc_timeout_phase = 'sys'
+            
+            # Detect which phase timed out for MUS
+            mus_timeout_phase = None
+            if mus_timeout:
+                # For WASP MUS solver:
+                # - If we found 0 MUS and 0 MCS, timeout was during solve (WASP couldn't finish)
+                # - If we found some MUS/MCS, timeout was during enumerate (WASP was enumerating more)
+                # - Unlike clingo, WASP does all computation internally (no Python enumeration overhead)
+                n_mus = len(mus_result.get('mus_list', []))
+                n_mcs = len(mus_result.get('mcs_list', []))
+                if n_mus == 0 and n_mcs == 0:
+                    mus_timeout_phase = 'solve'
+                    # Recalculate: all non-compile/ground time was actually solving
+                    mus_solve = max(0.0, mus_total - mus_compile - mus_ground)
+                    mus_sys = 0.0
+                else:
+                    # Found some results, so timeout was during enumeration of additional MUS/MCS
+                    mus_timeout_phase = 'sys'
+            
+            # Format timing displays with timeout indicators
+            def format_time(val, timeout_phase, phase_name):
+                if timeout_phase == phase_name:
+                    return f"Timed out ({MUS_SOLVE_TIMEOUT}s)"
+                return f"{val:.3f}s"
+
+            def fmt_cell(val, timeout_phase, phase_name, width: int = 16) -> str:
+                return f"{format_time(val, timeout_phase, phase_name):>{width}}"
+            
+            logging.info("")
+            logging.info(f"  ┌─ ABAPC removal strategy:")
+            logging.info(f"  │   Compiling:      {fmt_cell(abapc_compile, abapc_timeout_phase, 'compile')}")
+            logging.info(f"  │   UNSAT grounding:{abapc_unsat_ground:>15.3f}s")
+            logging.info(f"  │   UNSAT solving:  {abapc_unsat_solve:>15.3f}s")
+            logging.info(f"  │   SAT grounding:  {fmt_cell(abapc_ground, abapc_timeout_phase, 'ground')}")
+            logging.info(f"  │   SAT solving:    {fmt_cell(abapc_solve, abapc_timeout_phase, 'solve')}")
+            logging.info(f"  │   Sys (residual): {fmt_cell(abapc_sys, abapc_timeout_phase, 'sys')}")
+            logging.info(f"  │   Total:          {abapc_total:>15.3f}s")
+            logging.info(f"  │")
+            logging.info(f"  └─ ABAPC MUS/MCS analysis:")
+            logging.info(f"      Compiling:      {fmt_cell(mus_compile, mus_timeout_phase, 'compile')}")
+            logging.info(f"      Grounding:      {fmt_cell(mus_ground, mus_timeout_phase, 'ground')}")
+            logging.info(f"      Solving:        {fmt_cell(mus_solve, mus_timeout_phase, 'solve')}")
+            logging.info(f"      Sys (residual): {fmt_cell(mus_sys, mus_timeout_phase, 'sys')}")
+            logging.info(f"      Total:          {mus_total:>15.3f}s")
+            logging.info("")
+            
+            if not (abapc_timeout or mus_timeout):
+                ratio_total = mus_total / abapc_total if abapc_total > 0 else 0
+                ratio_solve = mus_solve / abapc_solve if abapc_solve > 0 else 0
+                
+                logging.info(f"  Total time ratio (MUS/ABAPC):   {ratio_total:8.2f}x")
+                logging.info(f"  Solve time ratio (WASP/clingo): {ratio_solve:8.2f}x")
+            else:
+                logging.info(f"  (Timing ratios not computed due to timeout)")
+            logging.info("=" * 60 + "\n")
+        except Exception as timing_error:
+            # If timing measurement fails, still show what we have
+            logging.warning(f"Timing comparison measurement failed: {timing_error}")
+            logging.info("=" * 60 + "\n")
 
         # Clean up temp files
         os.remove(facts_file)
@@ -1263,6 +1345,24 @@ class TestMUSAnalysis(unittest.TestCase):
         os.remove(facts_mus_file)
 
         logging.info(f"✓ Completed run for n_nodes={n_nodes}\n")
+        
+        # Assertions after timing comparison so it always displays
+        # Basic assertion: we expect at least some MUSes for contradiction cases
+        if remove_n > 0:
+            self.assertGreater(mus_result['n_mus'], 0, f"Expected at least one MUS for UNSAT case (n_nodes={n_nodes})")
+        
+        # Final MUS timeout assertion
+        if mus_timeout and mus_result.get('n_mus', 0) == 0:
+            self.fail(
+                f"MUS timed out after {mus_time.total_seconds():.2f}s before finding any MUS (n_nodes={n_nodes})"
+            )
+        
+        # Return status info for retry logic
+        return {
+            'was_sat': remove_n == 0,
+            'abapc_timeout': abapc_timeout,
+            'mus_timeout': mus_timeout,
+        }
 
 
 if __name__ == '__main__':
@@ -1285,16 +1385,44 @@ if __name__ == '__main__':
         default=MUS_EDGE_PER_NODE,
         help="Edge-per-node multiplier for random graph generation",
     )
+    parser.add_argument(
+        "--emit-lp",
+        type=str,
+        default=MUS_EMIT_LP,
+        help="Path to emit complete MUS program (use {n} for node count placeholder, e.g., /tmp/test_{n}node.lp)",
+    )
+    parser.add_argument(
+        "--max-muses",
+        type=str,
+        default=MUS_MAX_MUSES,
+        help="Max MUS to enumerate: '' (empty)=omit -n flag (WASP default: 1 MUS output), '0'=unlimited, '>0'=limit to N",
+    )
+    parser.add_argument(
+        "--mcs-threshold",
+        type=int,
+        default=MUS_MCS_THRESHOLD,
+        help="CAMUS MCS threshold (0=unlimited, default=50)",
+    )
+    parser.add_argument(
+        "--mus-threshold",
+        type=int,
+        default=MUS_MUS_THRESHOLD,
+        help="CAMUS MUS threshold (0=unlimited, default=300)",
+    )
     args, remaining = parser.parse_known_args()
 
     MUS_SOLVE_TIMEOUT = args.solve_timeout
     MUS_NODE_SIZES = _parse_node_sizes(args.node_sizes)
     MUS_EDGE_PER_NODE = args.edge_per_node
+    MUS_EMIT_LP = args.emit_lp
+    MUS_MAX_MUSES = args.max_muses
+    MUS_MCS_THRESHOLD = args.mcs_threshold
+    MUS_MUS_THRESHOLD = args.mus_threshold
 
     start = datetime.now()
     logger_setup()
     logging.info(
-        f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}"
+        f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}, emit_lp={MUS_EMIT_LP or '(none)'}, max_muses={MUS_MAX_MUSES}, mcs_threshold={MUS_MCS_THRESHOLD}, mus_threshold={MUS_MUS_THRESHOLD}"
     )
     unittest.main(argv=[sys.argv[0]] + remaining, verbosity=2)
     logging.info(f"Total test time={str(datetime.now()-start)}")

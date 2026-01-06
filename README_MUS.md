@@ -429,6 +429,10 @@ python scripts/mus_abapc_profile.py \
     --emit-lp results/mus_adorned_7_2004.lp
 ```
 
+The timing summary reports:
+- **UNSAT grounding** / **UNSAT solving**: time spent re-grounding / re-solving instances that still return 0 models during ABAPC removal (before SAT is reached).
+- **Sys (residual)**: remaining wall time not attributed to compile/ground/solve phases (and not attributed to UNSAT phases for ABAPC). This is often Python/wrapper overhead plus clingo work not reflected in the final `ctl.statistics` (which is for the last SAT instance only).
+
 ### 4. Run Emitted Program Externally
 
 ```bash
@@ -436,6 +440,11 @@ clingo results/mus_adorned_7_2004.lp --output=smodels | \
     /vol/bitbucket/fr920/wasp/build/release/wasp \
     --mus=mus --mus-algorithm=camus --print-mcses -n 0
 ```
+
+Notes on WASP enumeration:
+- `-n 0` enumerates all MUS.
+- Omitting `-n` uses WASP's default (typically prints 1 MUS while still computing MCS depending on algorithm).
+- In the profiling script, pass `--max-muses ''` to omit `-n`.
 
 ### 5. Profile a Sweep with Auto-Naming and Retries
 
