@@ -45,6 +45,13 @@ MUS_MAX_MUSES = os.environ.get("MUS_MAX_MUSES", "")  # "" = omit -n flag (WASP d
 MUS_MCS_THRESHOLD = int(os.environ.get("MUS_MCS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
 MUS_MUS_THRESHOLD = int(os.environ.get("MUS_MUS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
 
+# Random graph family used by build_random_pc_case/randomG_PC_case.
+MUS_GRAPH_TYPE = os.environ.get("MUS_GRAPH_TYPE", "ER")
+
+# ABAPC/Clingo options passed into CausalABA (removal strategy).
+MUS_ABAPC_OUT_N = int(os.environ.get("MUS_ABAPC_OUT_N", "0"))
+MUS_ABAPC_OPT_MODE = os.environ.get("MUS_ABAPC_OPT_MODE", "optN")
+
 
 @dataclass(frozen=True)
 class RandomPCSimConfig:
@@ -1068,7 +1075,7 @@ class TestMUSAnalysis(unittest.TestCase):
         case = self.randomG_PC_case(
             n_nodes=n_nodes,
             edge_per_node=MUS_EDGE_PER_NODE,
-            graph_type="ER",
+            graph_type=MUS_GRAPH_TYPE,
             seed=seed,
             alpha=0.05,
             sample_size=10000,
@@ -1128,8 +1135,8 @@ class TestMUSAnalysis(unittest.TestCase):
             facts_file,
             weak_constraints=True,
             search_for_models='first',
-            # opt_mode='opt',
-            # out_n=1,
+            opt_mode=MUS_ABAPC_OPT_MODE,
+            out_n=MUS_ABAPC_OUT_N,
             skeleton_rules_reduction=True,
             print_models=False,
             return_statistics=True,
@@ -1398,6 +1405,24 @@ if __name__ == '__main__':
         help="Max MUS to enumerate: '' (empty)=omit -n flag (WASP default: 1 MUS output), '0'=unlimited, '>0'=limit to N",
     )
     parser.add_argument(
+        "--graph-type",
+        type=str,
+        default=MUS_GRAPH_TYPE,
+        help="Random graph type for PC simulation (default: ER)",
+    )
+    parser.add_argument(
+        "--out-n",
+        type=int,
+        default=MUS_ABAPC_OUT_N,
+        help="Clingo -n model bound for ABAPC removal (0=all; default: 0)",
+    )
+    parser.add_argument(
+        "--opt-mode",
+        type=str,
+        default=MUS_ABAPC_OPT_MODE,
+        help="Clingo opt_mode for ABAPC removal (default: optN)",
+    )
+    parser.add_argument(
         "--mcs-threshold",
         type=int,
         default=MUS_MCS_THRESHOLD,
@@ -1416,13 +1441,19 @@ if __name__ == '__main__':
     MUS_EDGE_PER_NODE = args.edge_per_node
     MUS_EMIT_LP = args.emit_lp
     MUS_MAX_MUSES = args.max_muses
+    MUS_GRAPH_TYPE = args.graph_type
+    MUS_ABAPC_OUT_N = args.out_n
+    MUS_ABAPC_OPT_MODE = args.opt_mode
     MUS_MCS_THRESHOLD = args.mcs_threshold
     MUS_MUS_THRESHOLD = args.mus_threshold
 
     start = datetime.now()
     logger_setup()
     logging.info(
-        f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}, emit_lp={MUS_EMIT_LP or '(none)'}, max_muses={MUS_MAX_MUSES}, mcs_threshold={MUS_MCS_THRESHOLD}, mus_threshold={MUS_MUS_THRESHOLD}"
+        f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}, "
+        f"graph_type={MUS_GRAPH_TYPE}, opt_mode={MUS_ABAPC_OPT_MODE}, out_n={MUS_ABAPC_OUT_N}, "
+        f"emit_lp={MUS_EMIT_LP or '(none)'}, max_muses={MUS_MAX_MUSES}, mcs_threshold={MUS_MCS_THRESHOLD}, mus_threshold={MUS_MUS_THRESHOLD}"
     )
+
     unittest.main(argv=[sys.argv[0]] + remaining, verbosity=2)
     logging.info(f"Total test time={str(datetime.now()-start)}")

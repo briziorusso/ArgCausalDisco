@@ -49,6 +49,24 @@ def main(argv: list[str] | None = None) -> int:
         help="Edge-per-node multiplier for random DAG generation (default: 2)"
     )
     parser.add_argument(
+        "--graph-type",
+        type=str,
+        default="ER",
+        help="Random graph type for PC simulation (default: ER)"
+    )
+    parser.add_argument(
+        "--out-n",
+        type=int,
+        default=0,
+        help="Clingo -n model bound for ABAPC removal (0=all; default: 0)"
+    )
+    parser.add_argument(
+        "--opt-mode",
+        type=str,
+        default="optN",
+        help="Clingo opt_mode for ABAPC removal (default: optN)"
+    )
+    parser.add_argument(
         "--seed-base",
         type=int,
         default=2004,
@@ -106,6 +124,9 @@ def main(argv: list[str] | None = None) -> int:
     tests_mus.MUS_MCS_THRESHOLD = args.mcs_threshold
     tests_mus.MUS_MUS_THRESHOLD = args.mus_threshold
     tests_mus.MUS_EMIT_LP = args.emit_lp
+    tests_mus.MUS_GRAPH_TYPE = args.graph_type
+    tests_mus.MUS_ABAPC_OUT_N = args.out_n
+    tests_mus.MUS_ABAPC_OPT_MODE = args.opt_mode
 
     # Setup logging with custom filter for quiet mode
     class QuietModeFilter(logging.Filter):
@@ -261,8 +282,9 @@ def main(argv: list[str] | None = None) -> int:
 
     logging.info(
         f"Profile config: node_sizes={tests_mus.MUS_NODE_SIZES}, solve_timeout={tests_mus.MUS_SOLVE_TIMEOUT}s, "
-        f"edge_per_node={tests_mus.MUS_EDGE_PER_NODE}, max_muses={tests_mus.MUS_MAX_MUSES!r}, "
-        f"mcs_threshold={tests_mus.MUS_MCS_THRESHOLD}, mus_threshold={tests_mus.MUS_MUS_THRESHOLD}, "
+        f"edge_per_node={tests_mus.MUS_EDGE_PER_NODE}, graph_type={tests_mus.MUS_GRAPH_TYPE}, "
+        f"opt_mode={tests_mus.MUS_ABAPC_OPT_MODE}, out_n={tests_mus.MUS_ABAPC_OUT_N}, "
+        f"max_muses={tests_mus.MUS_MAX_MUSES!r}, mcs_threshold={tests_mus.MUS_MCS_THRESHOLD}, mus_threshold={tests_mus.MUS_MUS_THRESHOLD}, "
         f"emit_lp={tests_mus.MUS_EMIT_LP or '(none)'}"
     )
 
