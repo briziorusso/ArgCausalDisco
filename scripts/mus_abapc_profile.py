@@ -125,8 +125,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--emit-lp",
         type=str,
+        nargs="?",
+        const="__AUTO__",
         default="",
-        help="Path to emit complete MUS program (use {n} for node count placeholder, e.g., /tmp/test_{n}node.lp)"
+        help=(
+            "Emit one adorned MUS program. If PATH is omitted (just `--emit-lp`), uses "
+            "results/adornedLP_{n}_{seed}.lp. You may use placeholders {n} and {seed} in PATH."
+        ),
     )
     parser.add_argument(
         "--emit-lp-dir",
@@ -147,6 +152,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     
     args = parser.parse_args(argv)
+
+    # Normalize common boolean-like values so users can't accidentally write to a file named 'True'.
+    if isinstance(args.emit_lp, str):
+        v = args.emit_lp.strip().lower()
+        if v in ('true', '1', 'yes', 'y'):  # treat as 'auto path'
+            args.emit_lp = '__AUTO__'
+        elif v in ('false', '0', 'no', 'n'):
+            args.emit_lp = ''
 
     # Configure test suite globals
     tests_mus.MUS_SOLVE_TIMEOUT = args.solve_timeout
@@ -334,10 +347,21 @@ def main(argv: list[str] | None = None) -> int:
                 logging.info(f"Profiling n_nodes={n_nodes} (seed={curr_seed})")
                 logging.info('='*90)
             
+            # Handle emit-lp (single file)
+            if args.emit_lp:
+                if args.emit_lp == '__AUTO__':
+                    Path('results').mkdir(parents=True, exist_ok=True)
+                    tests_mus.MUS_EMIT_LP = str(Path('results') / f"adornedLP_{n_nodes}_{curr_seed}.lp")
+                else:
+                    # Expand placeholders early so tests_mus gets a concrete path.
+                    tests_mus.MUS_EMIT_LP = (
+                        args.emit_lp.replace('{n}', str(n_nodes)).replace('{seed}', str(curr_seed))
+                    )
+
             # Handle emit-lp-dir
             if args.emit_lp_dir:
                 Path(args.emit_lp_dir).mkdir(parents=True, exist_ok=True)
-                tests_mus.MUS_EMIT_LP = str(Path(args.emit_lp_dir) / f"mus_{n_nodes}_{curr_seed}.lp")
+                tests_mus.MUS_EMIT_LP = str(Path(args.emit_lp_dir) / f"adornedLP_{n_nodes}_{curr_seed}.lp")
             
             # Run the test
             try:

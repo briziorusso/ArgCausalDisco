@@ -25,7 +25,7 @@ Run via pytest:
 
 Run as a script (uses argparse at bottom):
 
-  python tests_mus.py --node-sizes 7,8 --solve-timeout 120 --max-muses 0 --emit-lp results/mus_{n}.lp
+  python tests_mus.py --node-sizes 7,8 --solve-timeout 120 --max-muses 0 --emit-lp results/adornedLP_{n}.lp
 
 To reproduce a run externally once you emitted an adorned `.lp`:
 
@@ -1229,10 +1229,25 @@ class TestMUSAnalysis(unittest.TestCase):
         
         start_mus = datetime.now()
         
-        # Optionally emit the complete MUS program for debugging
+        # Optionally emit the complete MUS program for debugging.
+        # Accept common boolean-like values (e.g. MUS_EMIT_LP=True) by mapping them to a default path,
+        # so we don't accidentally write to a file literally named 'True'.
         emit_lp_path = None
-        if MUS_EMIT_LP:
-            emit_lp_path = MUS_EMIT_LP.replace('{n}', str(n_nodes))
+        emit_lp_spec = MUS_EMIT_LP
+        if isinstance(emit_lp_spec, str):
+            spec = emit_lp_spec.strip()
+            if spec.lower() in ("true", "1", "yes", "y"):
+                spec = "results/adornedLP_{n}_{seed}.lp"
+            elif spec.lower() in ("false", "0", "no", "n"):
+                spec = ""
+        else:
+            spec = "results/adornedLP_{n}_{seed}.lp" if emit_lp_spec else ""
+
+        if spec:
+            emit_lp_path = spec.replace('{n}', str(n_nodes)).replace('{seed}', str(seed))
+            emit_dir = os.path.dirname(emit_lp_path)
+            if emit_dir:
+                os.makedirs(emit_dir, exist_ok=True)
             logging.info(f"Will emit MUS program to {emit_lp_path}")
         
         # Special handling: if MUS_MAX_MUSES is empty string, pass None to omit -n flag
