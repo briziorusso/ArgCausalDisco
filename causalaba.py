@@ -356,6 +356,8 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
     if timing_recorder is not None:
         timing_recorder.setdefault('unsat_ground_sec_total', 0.0)
         timing_recorder.setdefault('unsat_solve_sec_total', 0.0)
+        timing_recorder.setdefault('timed_out', False)
+        timing_recorder.setdefault('timeout_phase', None)
     
     # (X, Y) -> their condition sets S
     indep_facts: dict[tuple, set[tuple]] = {}
@@ -453,6 +455,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             budget = remaining_timeout if remaining_timeout is not None else solve_timeout
             total_budget = solve_timeout if solve_timeout is not None else "unlimited"
             logging.error(f"Solve timed out after {elapsed:.3f}s (budget={budget:.3f}s of {total_budget} total) [phase=initial, mode=No]")
+            if timing_recorder is not None:
+                timing_recorder['timed_out'] = True
+                timing_recorder['timeout_phase'] = 'solve'
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         logging.info(f"Number of models: {n_models}")
         times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
@@ -496,6 +501,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             budget = remaining_timeout if remaining_timeout is not None else solve_timeout
             total_budget = solve_timeout if solve_timeout is not None else "unlimited"
             logging.error(f"Solve timed out after {elapsed:.3f}s (budget={budget:.3f}s of {total_budget} total) [phase=initial, mode=first]")
+            if timing_recorder is not None:
+                timing_recorder['timed_out'] = True
+                timing_recorder['timeout_phase'] = 'solve'
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
         logging.info(f"Number of models: {n_models}")
         times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
@@ -515,6 +523,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             # Check if we've exhausted the deadline before attempting another removal iteration
             if deadline is not None and time.perf_counter() > deadline:
                 logging.error(f"Timeout: removal iteration {remove_n} exceeded overall solve_timeout budget.")
+                if timing_recorder is not None:
+                    timing_recorder['timed_out'] = True
+                    timing_recorder['timeout_phase'] = 'solve'
                 break
 
             remove_n += 1
@@ -551,6 +562,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     reground_remaining = max(0.0, deadline - time.perf_counter())
                     if reground_remaining <= 0:
                         logging.error(f"Timeout: no time remaining for reground in removal iteration {remove_n}.")
+                        if timing_recorder is not None:
+                            timing_recorder['timed_out'] = True
+                            timing_recorder['timeout_phase'] = 'ground'
                         break
                     reground_deadline = time.perf_counter() + reground_remaining
 
@@ -602,6 +616,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 remaining_timeout = max(0.0, deadline - time.perf_counter())
                 if remaining_timeout == 0:
                     logging.error(f"Timeout: no time remaining for solve in removal iteration {remove_n}.")
+                    if timing_recorder is not None:
+                        timing_recorder['timed_out'] = True
+                        timing_recorder['timeout_phase'] = 'solve'
                     break
                 logging.info(f"Removal iteration {remove_n} solve budget (remaining from {solve_timeout}s total): {remaining_timeout:.3f}s")
             else:
@@ -618,6 +635,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 budget = remaining_timeout if remaining_timeout is not None else solve_timeout
                 total_budget = solve_timeout if solve_timeout is not None else "unlimited"
                 logging.error(f"Solve timed out after {elapsed:.3f}s (remaining budget={budget:.3f}s of {total_budget}s total) [phase=removal, iter={remove_n}]")
+                if timing_recorder is not None:
+                    timing_recorder['timed_out'] = True
+                    timing_recorder['timeout_phase'] = 'solve'
             try:
                 n_models = int(ctl.statistics['summary']['models']['enumerated'])
                 logging.info(f"Number of models: {n_models}")

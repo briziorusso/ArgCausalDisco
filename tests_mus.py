@@ -1188,7 +1188,10 @@ class TestMUSAnalysis(unittest.TestCase):
 
         # For larger sizes, we may not enforce UNSAT for all seeds; just assert we can reach SAT
         # If we hit the timeout before reaching SAT, skip the assertion (timeout is the real limit)
-        abapc_timeout = abapc_time.total_seconds() >= (MUS_SOLVE_TIMEOUT - 0.5)
+        abapc_timeout = bool(abapc_timing.get('timed_out', False))
+        # Fallback heuristic (older CausalABA versions may not set timing_recorder flags).
+        if (not abapc_timeout) and (len(models_after) == 0):
+            abapc_timeout = abapc_time.total_seconds() >= (MUS_SOLVE_TIMEOUT - 0.5)
         if remove_n > 0 and not abapc_timeout:
             self.assertGreater(len(models_after), 0, f"Expected SAT after removing {remove_n} tests for n_nodes={n_nodes}")
         elif remove_n > 0 and abapc_timeout and len(models_after) == 0:
@@ -1300,20 +1303,20 @@ class TestMUSAnalysis(unittest.TestCase):
             
             # Detect which phase timed out for ABAPC
             abapc_timeout_phase = None
+            abapc_phase_hint = abapc_timing.get('timeout_phase', None) if isinstance(abapc_timing, dict) else None
             if abapc_timeout:
-                # For removal strategy with timeout:
-                # - If we found 0 models, the timeout was during the solve/reground iterations
-                # - The "enumerate" time is actually solve time from multiple removal iterations
-                # - We'll label it all as "solve" time since that's what was happening
+                # Prefer a phase hint from CausalABA if available.
+                if abapc_phase_hint in ('compile', 'ground', 'solve', 'sys'):
+                    abapc_timeout_phase = abapc_phase_hint
+
+                # In practice ABAPC timeouts happen while clingo is still solving/enumerating.
+                # If we reached the timeout before SAT (0 models), treat everything after compile/ground as solve.
                 if len(models_after) == 0:
                     abapc_timeout_phase = 'solve'
-                    # Recalculate: all non-compile/ground time was actually solving
                     abapc_solve = max(0.0, abapc_total - abapc_compile - abapc_ground)
                     abapc_sys = 0.0
                 else:
-                    # If we found models, timeout was during enumeration
-                    abapc_timeout_phase = 'sys'
-            
+                    abapc_timeout_phase = 'solve'
             # Detect which phase timed out for MUS
             mus_timeout_phase = None
             if mus_timeout:
@@ -1335,7 +1338,9 @@ class TestMUSAnalysis(unittest.TestCase):
             # Format timing displays with timeout indicators
             def format_time(val, timeout_phase, phase_name):
                 if timeout_phase == phase_name:
-                    return f"Timed out ({MUS_SOLVE_TIMEOUT}s)"
+                    # Keep the measured value (often partial) and annotate the timeout,
+                    # instead of replacing it with the budget (which is misleading).
+                    return f"{val:.3f}s (timeout @{MUS_SOLVE_TIMEOUT}s)"
                 return f"{val:.3f}s"
 
             def fmt_cell(val, timeout_phase, phase_name, width: int = 16) -> str:
