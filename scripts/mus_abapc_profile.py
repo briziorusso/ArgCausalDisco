@@ -41,7 +41,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import test infrastructure
-import tests_mus  # noqa: E402
+tests_mus = None  # imported lazily inside main()
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -150,8 +150,21 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Reduce logging noise (set logging level to WARNING for tidier copy/paste output)"
     )
+    parser.add_argument(
+        "--keep-temp-files",
+        type=str,
+        default="",
+        help="Directory to save temp facts files (.lp, _I.lp, _wc.lp). Files are named <n_nodes>_<seed>_facts*.lp (default: temp files are deleted)"
+    )
     
     args = parser.parse_args(argv)
+
+    # Import heavy deps only after argparse, so `--help` works without full env.
+    global tests_mus
+    if tests_mus is None:
+        import tests_mus as _tests_mus  # noqa: E402
+
+        tests_mus = _tests_mus
 
     # Normalize common boolean-like values so users can't accidentally write to a file named 'True'.
     if isinstance(args.emit_lp, str):
@@ -172,6 +185,7 @@ def main(argv: list[str] | None = None) -> int:
     tests_mus.MUS_GRAPH_TYPE = args.graph_type
     tests_mus.MUS_ABAPC_OUT_N = args.out_n
     tests_mus.MUS_ABAPC_OPT_MODE = args.opt_mode
+    tests_mus.MUS_KEEP_TEMP_FILES = args.keep_temp_files
 
     # Setup logging with custom filter for quiet mode
     class QuietModeFilter(logging.Filter):
@@ -330,7 +344,7 @@ def main(argv: list[str] | None = None) -> int:
         f"edge_per_node={tests_mus.MUS_EDGE_PER_NODE}, graph_type={tests_mus.MUS_GRAPH_TYPE}, "
         f"opt_mode={tests_mus.MUS_ABAPC_OPT_MODE}, out_n={tests_mus.MUS_ABAPC_OUT_N}, "
         f"max_muses={tests_mus.MUS_MAX_MUSES!r}, mcs_threshold={tests_mus.MUS_MCS_THRESHOLD}, mus_threshold={tests_mus.MUS_MUS_THRESHOLD}, "
-        f"emit_lp={tests_mus.MUS_EMIT_LP or '(none)'}"
+        f"emit_lp={tests_mus.MUS_EMIT_LP or '(none)'}, keep_temp_files={tests_mus.MUS_KEEP_TEMP_FILES or '(none)'}"
     )
 
     # Create test instance

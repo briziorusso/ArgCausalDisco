@@ -47,15 +47,26 @@ import unittest
 from datetime import datetime
 from collections import Counter
 from dataclasses import dataclass
-import pandas as pd
+from pathlib import Path
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, PROJECT_ROOT)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT))
 sys.path.insert(0, os.path.join(PROJECT_ROOT, 'src'))
 
-from causalaba import CausalABA
-from causalaba_mus import CausalABA_MUS
+CausalABA = None
+CausalABA_MUS = None
+
+
+def _ensure_solvers_imported() -> None:
+    """Import solver modules lazily so `--help` works without clingo/wasp installed."""
+    global CausalABA, CausalABA_MUS
+    if CausalABA is None or CausalABA_MUS is None:
+        from causalaba import CausalABA as _CausalABA
+        from causalaba_mus import CausalABA_MUS as _CausalABA_MUS
+
+        CausalABA = _CausalABA
+        CausalABA_MUS = _CausalABA_MUS
 
 
 def _parse_node_sizes(raw: str) -> tuple[int, ...]:
@@ -80,6 +91,9 @@ MUS_GRAPH_TYPE = os.environ.get("MUS_GRAPH_TYPE", "ER")
 MUS_ABAPC_OUT_N = int(os.environ.get("MUS_ABAPC_OUT_N", "0"))
 MUS_ABAPC_OPT_MODE = os.environ.get("MUS_ABAPC_OPT_MODE", "optN")
 
+# Directory to save temp facts files for inspection (default: "" = delete temp files)
+MUS_KEEP_TEMP_FILES = os.environ.get("MUS_KEEP_TEMP_FILES", "")
+
 
 @dataclass(frozen=True)
 class RandomPCSimConfig:
@@ -97,6 +111,7 @@ class RandomPCSimConfig:
 def build_random_pc_case(config: RandomPCSimConfig):
     import networkx as nx
     import numpy as np
+    import pandas as pd
 
     from utils.graph_utils import (
         find_all_d_separations_sets,
@@ -281,6 +296,8 @@ class TestMUSAnalysis(unittest.TestCase):
         logger_setup()
         logging.info("===============Running test_mus_links_wrong_tests_four_node_abapc===============")
 
+        _ensure_solvers_imported()
+
         import networkx as nx
         import numpy as np
         import types
@@ -312,6 +329,8 @@ class TestMUSAnalysis(unittest.TestCase):
             ]
         )
         n_nodes = B_true.shape[0]
+        import pandas as pd
+
         G_true = nx.DiGraph(
             pd.DataFrame(
                 B_true,
@@ -574,6 +593,8 @@ class TestMUSAnalysis(unittest.TestCase):
         """
         logger_setup()
         logging.info("===============Running test_mus_mcs_random_five_node_abapc===============")
+
+        _ensure_solvers_imported()
 
         import types
 
@@ -872,6 +893,8 @@ class TestMUSAnalysis(unittest.TestCase):
         """
         logger_setup()
         logging.info("===============Running test_mock_three_var_manual_vs_mus===============")
+
+        _ensure_solvers_imported()
         
         n_nodes = 3
         fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
@@ -972,6 +995,8 @@ class TestMUSAnalysis(unittest.TestCase):
         """
         logger_setup()
         logging.info("===============Running test_mus_catches_wrong_facts_on_four_nodes===============")
+
+        _ensure_solvers_imported()
 
         n_nodes = 4
         fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
@@ -1078,6 +1103,8 @@ class TestMUSAnalysis(unittest.TestCase):
         import types
         import re
 
+        _ensure_solvers_imported()
+
         # Stub notears again for this sub-run (if needed)
         if 'notears.nonlinear' not in sys.modules:
             notears_module = types.ModuleType('notears')
@@ -1153,6 +1180,19 @@ class TestMUSAnalysis(unittest.TestCase):
                 line = s if s.endswith('.') else s + '.'
                 I = fact[1]
                 f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
+
+        # Optionally save temp files to permanent location for inspection
+        if MUS_KEEP_TEMP_FILES:
+            keep_dir = Path(MUS_KEEP_TEMP_FILES)
+            keep_dir.mkdir(parents=True, exist_ok=True)
+            
+            import shutil
+            base_name = f"{n_nodes}_{seed}_facts"
+            shutil.copy(facts_file, keep_dir / f"{base_name}.lp")
+            shutil.copy(facts_I_file, keep_dir / f"{base_name}_I.lp")
+            shutil.copy(facts_wc_file, keep_dir / f"{base_name}_wc.lp")
+            
+            logging.info(f"  → Saved temp files to {keep_dir / base_name}*.lp")
 
         # Step 1: Run CasusalABA with all facts and apply ABAPC removal strategy (search='first')
         logging.info("Step 1: Run CasusalABA with all facts and apply removal strategy (search_for_models='first') if UNSAT")
