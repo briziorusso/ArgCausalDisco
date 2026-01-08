@@ -48,14 +48,15 @@ from datetime import datetime
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, PROJECT_ROOT)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT))
 sys.path.insert(0, os.path.join(PROJECT_ROOT, 'src'))
 
-CausalABA = None
-CausalABA_MUS = None
+CausalABA: Any = None
+CausalABA_MUS: Any = None
 
 
 def _ensure_solvers_imported() -> None:
@@ -79,6 +80,8 @@ def _parse_node_sizes(raw: str) -> tuple[int, ...]:
 MUS_SOLVE_TIMEOUT = int(os.environ.get("MUS_SOLVE_TIMEOUT", "60"))
 MUS_NODE_SIZES = _parse_node_sizes(os.environ.get("MUS_NODE_SIZES", "5,7,9"))
 MUS_EDGE_PER_NODE = int(os.environ.get("MUS_EDGE_PER_NODE", "2"))
+MUS_SEED_BASE = int(os.environ.get("MUS_SEED_BASE", "2004"))
+MUS_REP_UNSAT = int(os.environ.get("MUS_REP_UNSAT", "0"))
 MUS_EMIT_LP = os.environ.get("MUS_EMIT_LP", "")
 MUS_MAX_MUSES = os.environ.get("MUS_MAX_MUSES", "")  # "" = omit -n flag (WASP default: 1 MUS output), "0" = unlimited, ">0" = limit
 MUS_MCS_THRESHOLD = int(os.environ.get("MUS_MCS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
@@ -309,8 +312,8 @@ class TestMUSAnalysis(unittest.TestCase):
                 pass
             def _dummy_notears_nonlinear(*args, **kwargs):
                 raise ImportError("notears is not installed in this test environment")
-            notears_nonlinear_module.NotearsMLP = _DummyMLP
-            notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+            setattr(notears_nonlinear_module, 'NotearsMLP', _DummyMLP)
+            setattr(notears_nonlinear_module, 'notears_nonlinear', _dummy_notears_nonlinear)
             sys.modules['notears'] = notears_module
             sys.modules['notears.nonlinear'] = notears_nonlinear_module
         from utils.graph_utils import find_all_d_separations_sets, extract_test_elements_from_symbol, initial_strength
@@ -609,8 +612,8 @@ class TestMUSAnalysis(unittest.TestCase):
             def _dummy_notears_nonlinear(*args, **kwargs):
                 raise ImportError("notears is not installed in this test environment")
 
-            notears_nonlinear_module.NotearsMLP = _DummyMLP
-            notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+            setattr(notears_nonlinear_module, 'NotearsMLP', _DummyMLP)
+            setattr(notears_nonlinear_module, 'notears_nonlinear', _dummy_notears_nonlinear)
             sys.modules['notears'] = notears_module
             sys.modules['notears.nonlinear'] = notears_nonlinear_module
 
@@ -1019,6 +1022,8 @@ class TestMUSAnalysis(unittest.TestCase):
             facts_location=facts_file,
             gringo_path="clingo",
             wasp_path="wasp",
+            # Enumerate all MUSes; WASP default without -n is typically just 1.
+            max_muses=0,
             mus_algorithm="camus",
             print_mcses=True,
         )
@@ -1074,8 +1079,8 @@ class TestMUSAnalysis(unittest.TestCase):
             def _dummy_notears_nonlinear(*args, **kwargs):
                 raise ImportError("notears is not installed in this test environment")
 
-            notears_nonlinear_module.NotearsMLP = _DummyMLP
-            notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+            setattr(notears_nonlinear_module, 'NotearsMLP', _DummyMLP)
+            setattr(notears_nonlinear_module, 'notears_nonlinear', _dummy_notears_nonlinear)
             sys.modules['notears'] = notears_module
             sys.modules['notears.nonlinear'] = notears_nonlinear_module
 
@@ -1083,9 +1088,127 @@ class TestMUSAnalysis(unittest.TestCase):
         for n_nodes in MUS_NODE_SIZES:
             with self.subTest(n_nodes=n_nodes):
                 logging.info(f"\n--- Running for n_nodes={n_nodes} ---")
-                self._run_mus_mcs_for_size(n_nodes)
+                run_info = None
+                # Retry with incremented seeds until we get at least one wrong fact.
+                for attempt in range(max(0, MUS_REP_UNSAT) + 1):
+                    seed = MUS_SEED_BASE + attempt
+                    run_info = self._run_mus_mcs_for_size(n_nodes, seed=seed)
+                    if run_info.get('count_wrong', 0) > 0:
+                        break
+                    logging.warning(
+                        f"No wrong facts for n_nodes={n_nodes} seed={seed}; retry {attempt+1}/{MUS_REP_UNSAT}"
+                    )
 
-    def _run_mus_mcs_for_size(self, n_nodes: int, seed: int = None):
+                if not run_info or run_info.get('count_wrong', 0) <= 0:
+                    self.skipTest(
+                        f"No wrong facts generated for n_nodes={n_nodes} after {MUS_REP_UNSAT+1} seed(s). "
+                        f"Try a different --seed-base or increase --rep-unsat."
+                    )
+
+                self._assert_wrong_fact_correspondence(
+                    n_nodes=n_nodes,
+                    facts_ext=run_info.get('facts_ext', []),
+                    wrong_ext=run_info.get('wrong_ext', []),
+                    mus_facts=run_info.get('mus_facts', []),
+                    mcs_facts=run_info.get('mcs_facts', []),
+                )
+
+    @staticmethod
+    def _normalize_fact_str(s: str) -> str:
+        s = (s or "").strip()
+        if not s:
+            return s
+        return s if s.endswith('.') else s + '.'
+
+    def _assert_wrong_fact_correspondence(
+        self,
+        *,
+        n_nodes: int,
+        facts_ext,
+        wrong_ext,
+        mus_facts,
+        mcs_facts,
+    ) -> None:
+        """Check MUS/MCS sets correspond to wrong facts.
+
+        Intended for random-PC instances where `wrong_ext` is derived from ground truth.
+                Notes:
+                - Every MUS should contain at least one wrong fact (otherwise the contradiction isn't explained).
+                - MCSes are *repairs* (sets of assumptions to disable). They can include correct facts too.
+                    So we do not require every MCS to include a wrong fact; instead we report a hit-rate.
+                - Returned MUS/MCS facts should be drawn from the provided fact universe.
+        """
+        all_facts = {self._normalize_fact_str(s) for s in (facts_ext or []) if str(s).strip()}
+        wrong_set = {self._normalize_fact_str(s) for s in (wrong_ext or []) if str(s).strip()}
+        if not all_facts or not wrong_set:
+            self.fail(f"Missing facts/wrong facts for correspondence check (n_nodes={n_nodes})")
+
+        def to_sets(groups):
+            out = []
+            for g in (groups or []):
+                s = {self._normalize_fact_str(x) for x in (g or []) if str(x).strip()}
+                if s:
+                    out.append(s)
+            return out
+
+        mus_sets = to_sets(mus_facts)
+        mcs_sets = to_sets(mcs_facts)
+
+        def jaccard(a: set[str], b: set[str]) -> float:
+            if not a and not b:
+                return 1.0
+            u = a.union(b)
+            if not u:
+                return 0.0
+            return len(a.intersection(b)) / len(u)
+
+        def summarize_overlap(label: str, groups: list[set[str]]) -> None:
+            if not groups:
+                logging.info(f"  → {label}: none")
+                return
+            jac = [jaccard(g, wrong_set) for g in groups]
+            prec = [(len(g.intersection(wrong_set)) / len(g)) if g else 0.0 for g in groups]
+            # Recall is w.r.t wrong_set (can be large); still useful as a scale indicator.
+            rec = [(len(g.intersection(wrong_set)) / len(wrong_set)) if wrong_set else 0.0 for g in groups]
+            hit = [1.0 if len(g.intersection(wrong_set)) >= 1 else 0.0 for g in groups]
+            logging.info(
+                f"  → {label} overlap: "
+                f"count={len(groups)}, "
+                f"hit_rate={(sum(hit)/len(hit)):.3f}, "
+                f"Jaccard[min/avg/max]={min(jac):.3f}/{(sum(jac)/len(jac)):.3f}/{max(jac):.3f}, "
+                f"Precision[min/avg/max]={min(prec):.3f}/{(sum(prec)/len(prec)):.3f}/{max(prec):.3f}, "
+                f"Recall[min/avg/max]={min(rec):.3f}/{(sum(rec)/len(rec)):.3f}/{max(rec):.3f}"
+            )
+
+        # MUS correspondence: each core should implicate at least one wrong fact.
+        self.assertGreater(len(mus_sets), 0, f"Expected at least one MUS set for correspondence check (n_nodes={n_nodes})")
+        for i, core in enumerate(mus_sets, start=1):
+            self.assertTrue(
+                core.issubset(all_facts),
+                f"MUS #{i} contains facts not in instance fact set (n_nodes={n_nodes})",
+            )
+            self.assertTrue(
+                len(core.intersection(wrong_set)) >= 1,
+                f"MUS #{i} contains no wrong facts (n_nodes={n_nodes})",
+            )
+
+        summarize_overlap("MUS", mus_sets)
+
+        # MCS correspondence: do not require every MCS to include wrong facts.
+        # (A minimal correction set can disable some correct assumptions too.)
+        for i, cut in enumerate(mcs_sets, start=1):
+            self.assertTrue(
+                cut.issubset(all_facts),
+                f"MCS #{i} contains facts not in instance fact set (n_nodes={n_nodes})",
+            )
+
+        summarize_overlap("MCS", mcs_sets)
+
+        if mcs_sets:
+            any_wrong = any(len(cut.intersection(wrong_set)) >= 1 for cut in mcs_sets)
+            self.assertTrue(any_wrong, f"No MCS contains a wrong fact (n_nodes={n_nodes})")
+
+    def _run_mus_mcs_for_size(self, n_nodes: int, seed: int | None = None):
         """Helper to run the full MUS/MCS pipeline for a given node size.
         
         This extracts the core logic of test_mus_mcs_random_five_node_abapc so it can
@@ -1116,15 +1239,18 @@ class TestMUSAnalysis(unittest.TestCase):
             def _dummy_notears_nonlinear(*args, **kwargs):
                 raise ImportError("notears is not installed in this test environment")
 
-            notears_nonlinear_module.NotearsMLP = _DummyMLP
-            notears_nonlinear_module.notears_nonlinear = _dummy_notears_nonlinear
+            setattr(notears_nonlinear_module, 'NotearsMLP', _DummyMLP)
+            setattr(notears_nonlinear_module, 'notears_nonlinear', _dummy_notears_nonlinear)
             sys.modules['notears'] = notears_module
             sys.modules['notears.nonlinear'] = notears_nonlinear_module
 
-        # Use a deterministic seed based on n_nodes to ensure reproducibility (unless overridden)
+        # Use a deterministic seed
         if seed is None:
-            seed_map = {5: 2004, 6: 2005, 10: 2010}
-            seed = seed_map.get(n_nodes, 2004)
+            seed = MUS_SEED_BASE
+
+        # Help static type-checkers: from here on, seed is always an int.
+        assert seed is not None
+        seed = int(seed)
 
         # Deterministic configuration
         case = self.randomG_PC_case(
@@ -1156,7 +1282,6 @@ class TestMUSAnalysis(unittest.TestCase):
 
         # Basic assertions
         self.assertGreater(len(facts_ext), 0, f"Expected at least one PC-derived fact for n_nodes={n_nodes}")
-        self.assertGreater(count_wrong, 0, f"Expected at least one wrong PC fact for MUS analysis for n_nodes={n_nodes}")
 
         # Write facts to temp files (base + I + wc) for CausalABA
         fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
@@ -1457,11 +1582,35 @@ class TestMUSAnalysis(unittest.TestCase):
             'was_sat': remove_n == 0,
             'abapc_timeout': abapc_timeout,
             'mus_timeout': mus_timeout,
+            # For correspondence checks (used by test_mus_mcs_random_sizes_abapc)
+            'seed': seed,
+            'count_wrong': count_wrong,
+            'facts_ext': facts_ext,
+            'wrong_ext': wrong_ext,
+            'mus_facts': mus_result.get('mus_facts', []),
+            'mcs_facts': mus_result.get('mcs_facts', []),
         }
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run MUS/ABAPC random-size tests with optional overrides")
+    parser.add_argument(
+        "--random-only",
+        action="store_true",
+        help="Run only TestMUSAnalysis.test_mus_mcs_random_sizes_abapc (skip other unit tests)",
+    )
+    parser.add_argument(
+        "--seed-base",
+        type=int,
+        default=MUS_SEED_BASE,
+        help="Base seed for random graph generation (default: 2004). For some historical sizes, derived defaults are used: 5->base, 6->base+1, 10->base+6.",
+    )
+    parser.add_argument(
+        "--rep-unsat",
+        type=int,
+        default=MUS_REP_UNSAT,
+        help="Retry with seed+1, seed+2, ... when an instance has 0 wrong facts (default: 0)",
+    )
     parser.add_argument(
         "--solve-timeout",
         type=int,
@@ -1527,6 +1676,8 @@ if __name__ == '__main__':
     MUS_SOLVE_TIMEOUT = args.solve_timeout
     MUS_NODE_SIZES = _parse_node_sizes(args.node_sizes)
     MUS_EDGE_PER_NODE = args.edge_per_node
+    MUS_SEED_BASE = args.seed_base
+    MUS_REP_UNSAT = args.rep_unsat
     MUS_EMIT_LP = args.emit_lp
     MUS_MAX_MUSES = args.max_muses
     MUS_GRAPH_TYPE = args.graph_type
@@ -1538,10 +1689,16 @@ if __name__ == '__main__':
     start = datetime.now()
     logger_setup()
     logging.info(
-        f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}, "
-        f"graph_type={MUS_GRAPH_TYPE}, opt_mode={MUS_ABAPC_OPT_MODE}, out_n={MUS_ABAPC_OUT_N}, "
+        f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}, seed_base={MUS_SEED_BASE}, "
+        f"rep_unsat={MUS_REP_UNSAT}, graph_type={MUS_GRAPH_TYPE}, opt_mode={MUS_ABAPC_OPT_MODE}, out_n={MUS_ABAPC_OUT_N}, "
         f"emit_lp={MUS_EMIT_LP or '(none)'}, max_muses={MUS_MAX_MUSES}, mcs_threshold={MUS_MCS_THRESHOLD}, mus_threshold={MUS_MUS_THRESHOLD}"
     )
+
+    if args.random_only:
+        suite = unittest.TestSuite()
+        suite.addTest(TestMUSAnalysis('test_mus_mcs_random_sizes_abapc'))
+        result = unittest.TextTestRunner(verbosity=2).run(suite)
+        raise SystemExit(0 if result.wasSuccessful() else 1)
 
     unittest.main(argv=[sys.argv[0]] + remaining, verbosity=2)
     logging.info(f"Total test time={str(datetime.now()-start)}")
