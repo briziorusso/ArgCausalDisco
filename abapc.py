@@ -119,7 +119,12 @@ def ABAPC(data,
     with open(facts_location_wc, "w") as f:
         for n, s in enumerate(facts):
             if n/len(facts) <= base_fact_pct:
-                f.write(f":~ ext_{s[4]} [-{int(s[5]*1e14)*2}]\n")
+                try:
+                    w = int(round(float(s[5]) * 9_999_999))
+                except Exception:
+                    w = 0
+                w = max(1, min(9_999_999, w))
+                f.write(f":~ ext_{s[4]} [-{w}]\n")
     ### Save inner strengths
     with open(facts_location_I, "w") as f:
         for n, s in enumerate(facts):

@@ -406,10 +406,29 @@ class TestMUSAnalysis(unittest.TestCase):
                 f.write(f"{line} I={I}, NA\n")
 
         with open(facts_wc_file, 'w') as f:
+            weights: list[int] = []
             for fact, s in zip(facts, facts_ext):
                 line = s if s.endswith('.') else s + '.'
                 I = fact[1]
-                f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
+                # Weights must be integers with at most 7 digits.
+                # Map I in [0,1] to [1, 9_999_999] using rounding.
+                try:
+                    w = int(round(float(I) * 9_999_999))
+                except Exception:
+                    w = 0
+                w = max(1, min(9_999_999, w))
+                weights.append(w)
+                f.write(f":~ {line} [-{w}]\n")
+
+        if facts_ext:
+            try:
+                w_min = min(weights) if weights else None
+                w_max = max(weights) if weights else None
+                logging.info(
+                    f"Weak-constraint weights: min={w_min}, max={w_max}, max_digits={len(str(w_max)) if w_max is not None else 'NA'}"
+                )
+            except Exception:
+                pass
 
         # Step 1: Run with all facts (may be UNSAT). If UNSAT, removal should fix it.
         logging.info("Step 1: Testing with all facts")
@@ -670,7 +689,12 @@ class TestMUSAnalysis(unittest.TestCase):
             for fact, s in zip(facts, facts_ext):
                 line = s if s.endswith('.') else s + '.'
                 I = fact[1]
-                f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
+                try:
+                    w = int(round(float(I) * 9_999_999))
+                except Exception:
+                    w = 0
+                w = max(1, min(9_999_999, w))
+                f.write(f":~ {line} [-{w}]\n")
 
         # Step 1: Run with all facts (expected UNSAT for this seed)
         logging.info("Step 1: Testing with all facts")
@@ -1301,10 +1325,27 @@ class TestMUSAnalysis(unittest.TestCase):
                 f.write(f"{line} I={I}, NA\n")
 
         with open(facts_wc_file, 'w') as f:
+            weights: list[int] = []
             for fact, s in zip(facts, facts_ext):
                 line = s if s.endswith('.') else s + '.'
                 I = fact[1]
-                f.write(f":~ {line} [-{int(I*1e14)*2}]\n")
+                try:
+                    w = int(round(float(I) * 9_999_999))
+                except Exception:
+                    w = 0
+                w = max(1, min(9_999_999, w))
+                weights.append(w)
+                f.write(f":~ {line} [-{w}]\n")
+
+        if facts_ext:
+            try:
+                w_min = min(weights) if weights else None
+                w_max = max(weights) if weights else None
+                logging.info(
+                    f"Weak-constraint weights: min={w_min}, max={w_max}, max_digits={len(str(w_max)) if w_max is not None else 'NA'}"
+                )
+            except Exception:
+                pass
 
         # Optionally save temp files to permanent location for inspection
         if MUS_KEEP_TEMP_FILES:
