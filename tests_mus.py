@@ -86,7 +86,7 @@ MUS_SOLVE_TIMEOUT = int(os.environ.get("MUS_SOLVE_TIMEOUT", "60"))
 MUS_NODE_SIZES = _parse_node_sizes(os.environ.get("MUS_NODE_SIZES", "5,7,9"))
 MUS_EDGE_PER_NODE = int(os.environ.get("MUS_EDGE_PER_NODE", "2"))
 MUS_SEED_BASE = int(os.environ.get("MUS_SEED_BASE", "2004"))
-MUS_REP_UNSAT = int(os.environ.get("MUS_REP_UNSAT", "0"))
+MUS_REP_UNSAT = int(os.environ.get("MUS_REP_UNSAT", "2"))
 MUS_RANDOM_REPS = int(os.environ.get("MUS_RANDOM_REPS", "1"))
 MUS_EMIT_LP = os.environ.get("MUS_EMIT_LP", "")
 MUS_MAX_MUSES = os.environ.get("MUS_MAX_MUSES", "")  # "" = omit -n flag (WASP default: 1 MUS output), "0" = unlimited, ">0" = limit
@@ -1116,39 +1116,200 @@ class TestMUSAnalysis(unittest.TestCase):
             sys.modules['notears.nonlinear'] = notears_nonlinear_module
 
         graph_types = MUS_GRAPH_TYPES or (MUS_GRAPH_TYPE,)
+        # If running multiple repetitions, collect per-(graph_type,n_nodes) summaries.
+        rep_summaries: dict[tuple[str, int], list[dict[str, Any]]] = {}
+        rep_outcomes: dict[tuple[str, int], dict[str, int]] = {}
+
         # Run for multiple node sizes, repetitions, and graph types.
         for graph_idx, graph_type in enumerate(graph_types):
             for n_nodes in MUS_NODE_SIZES:
+                key = (str(graph_type), int(n_nodes))
+                rep_summaries.setdefault(key, [])
+                rep_outcomes.setdefault(key, {'completed': 0, 'timed_out': 0, 'startSAT': 0, 'no_wrong': 0})
+
                 for rep_idx in range(max(1, MUS_RANDOM_REPS)):
                     with self.subTest(n_nodes=n_nodes, graph_type=graph_type, rep=rep_idx):
                         logging.info(f"\n--- Running n_nodes={n_nodes} graph_type={graph_type} rep={rep_idx} ---")
                         run_info = None
-                        # Deterministic per-case seed (stable across runs)
-                        seed0 = int(MUS_SEED_BASE) + int(rep_idx) + (1000 * int(n_nodes)) + (100000 * int(graph_idx))
-                        # Retry with incremented seeds until we get at least one wrong fact.
+                        selected_run: dict[str, Any] | None = None
+                        saw_timeout = False
+                        saw_sat = False
+                        saw_no_wrong = False
+                        # Seed policy: always start from --seed-base,
+                        # then retries just add +1. When running multiple reps, we stride seeds 
+                        # by (rep_unsat+1) so each rep explores a different instance without 
+                        # overlapping the retry window of another rep.
+                        stride = max(1, int(MUS_REP_UNSAT) + 1)
+                        seed0 = int(MUS_SEED_BASE) + (int(rep_idx) * stride)
+                        # Retry with incremented seeds until we get an UNSAT instance (i.e., ABAPC removes >0)
+                        # that also has at least one wrong fact.
                         for attempt in range(max(0, MUS_REP_UNSAT) + 1):
                             seed = seed0 + attempt
                             run_info = self._run_mus_mcs_for_size(n_nodes, seed=seed, graph_type=graph_type)
-                            if run_info.get('count_wrong', 0) > 0:
-                                break
-                            logging.warning(
-                                f"No wrong facts for n_nodes={n_nodes} graph_type={graph_type} seed={seed}; "
-                                f"retry {attempt+1}/{MUS_REP_UNSAT}"
-                            )
+                            if run_info.get('abapc_timeout', False) or run_info.get('mus_timeout', False):
+                                saw_timeout = True
+                            if run_info.get('was_sat', False):
+                                saw_sat = True
+                                logging.info(
+                                    f"Instance already SAT (no removal) for n_nodes={n_nodes} graph_type={graph_type} seed={seed}; "
+                                    f"trying next seed {attempt+1}/{MUS_REP_UNSAT}"
+                                )
+                                continue
 
-                        if not run_info or run_info.get('count_wrong', 0) <= 0:
+                            if run_info.get('count_wrong', 0) <= 0:
+                                saw_no_wrong = True
+                                logging.warning(
+                                    f"No wrong facts for n_nodes={n_nodes} graph_type={graph_type} seed={seed}; "
+                                    f"retry {attempt+1}/{MUS_REP_UNSAT}"
+                                )
+                                continue
+
+                            selected_run = run_info
+                            break
+
+                        if not selected_run:
+                            last_seed = (run_info or {}).get('seed', None)
+                            last_was_sat = bool((run_info or {}).get('was_sat', False))
+                            last_wrong = int((run_info or {}).get('count_wrong', 0) or 0)
+                            # Track why this rep didn't produce a usable run.
+                            if saw_timeout:
+                                rep_outcomes[key]['timed_out'] += 1
+                            elif saw_sat or last_was_sat:
+                                rep_outcomes[key]['startSAT'] += 1
+                            elif saw_no_wrong or last_wrong <= 0:
+                                rep_outcomes[key]['no_wrong'] += 1
                             self.skipTest(
-                                f"No wrong facts generated for n_nodes={n_nodes} graph_type={graph_type} "
-                                f"after {MUS_REP_UNSAT+1} seed(s). Try a different --seed-base or increase --rep-unsat."
+                                f"No suitable UNSAT instance with wrong facts for n_nodes={n_nodes} graph_type={graph_type} "
+                                f"after {MUS_REP_UNSAT+1} seed(s). Last_seed={last_seed}, last_was_sat={last_was_sat}, last_count_wrong={last_wrong}. "
+                                f"Try a different --seed-base or increase --rep-unsat."
                             )
 
-                        self._assert_wrong_fact_correspondence(
+                        rep_outcomes[key]['completed'] += 1
+
+                        overlap = self._assert_wrong_fact_correspondence(
                             n_nodes=n_nodes,
-                            facts_ext=run_info.get('facts_ext', []),
-                            wrong_ext=run_info.get('wrong_ext', []),
-                            mus_facts=run_info.get('mus_facts', []),
-                            mcs_facts=run_info.get('mcs_facts', []),
+                            facts_ext=selected_run.get('facts_ext', []),
+                            wrong_ext=selected_run.get('wrong_ext', []),
+                            removed_facts=selected_run.get('removed_facts', []),
+                            mus_facts=selected_run.get('mus_facts', []),
+                            mcs_facts=selected_run.get('mcs_facts', []),
                         )
+
+                        rep_summaries[key].append(
+                            {
+                                'seed': selected_run.get('seed'),
+                                'abapc_time_sec': float(selected_run.get('abapc_time_sec', 0.0) or 0.0),
+                                'mus_time_sec': float(selected_run.get('mus_time_sec', 0.0) or 0.0),
+                                'n_facts': int(len(selected_run.get('facts_ext', []) or [])),
+                                'n_wrong': int(selected_run.get('count_wrong', 0) or 0),
+                                'overlap': overlap or {},
+                            }
+                        )
+
+                # Per-(graph_type,n_nodes) aggregate summary over reps.
+                if MUS_RANDOM_REPS > 1:
+                    rows = rep_summaries.get(key, [])
+                    outs = rep_outcomes.get(key, {})
+                    if rows:
+                        def _avg_min_max(vals: list[float]) -> tuple[float, float, float]:
+                            if not vals:
+                                return (0.0, 0.0, 0.0)
+                            return (sum(vals) / len(vals), min(vals), max(vals))
+
+                        abapc_vals = [r.get('abapc_time_sec', 0.0) for r in rows if r.get('abapc_time_sec', 0.0) > 0]
+                        mus_vals = [r.get('mus_time_sec', 0.0) for r in rows if r.get('mus_time_sec', 0.0) > 0]
+                        abapc_avg, abapc_min, abapc_max = _avg_min_max(abapc_vals)
+                        mus_avg, mus_min, mus_max = _avg_min_max(mus_vals)
+
+                        def _fmt_triple(min_v: float, avg_v: float, max_v: float) -> str:
+                            return f"{min_v:7.3f} / {avg_v:7.3f} / {max_v:7.3f}"
+
+                        def _fmt_count_triple(min_v: float, avg_v: float, max_v: float) -> str:
+                            return f"{min_v:7.0f} / {avg_v:7.1f} / {max_v:7.0f}"
+
+                        logging.info("\n" + 29*" "+"=" * 60)
+                        logging.info(
+                            f"SUMMARY OVER REPS (n_nodes={n_nodes}, graph_type={graph_type}, reps={MUS_RANDOM_REPS}, completed={len(rows)})"
+                        )
+                        logging.info("=" * 60)
+                        logging.info("  [min/avg/max]")
+                        logging.info(f"  {'completed runs':<18}: {outs.get('completed', len(rows))}/{MUS_RANDOM_REPS}")
+                        logging.info(f"  {'timed out':<18}: {outs.get('timed_out', 0)}")
+                        logging.info(f"  {'startSAT':<18}: {outs.get('startSAT', 0)}")
+                        if outs.get('no_wrong', 0):
+                            logging.info(f"  {'no_wrong':<18}: {outs.get('no_wrong', 0)}")
+                        logging.info(f"  {'ABAPC total (s)':<18}: {_fmt_triple(abapc_min, abapc_avg, abapc_max)}")
+                        logging.info(f"  {'MUS total (s)':<18}: {_fmt_triple(mus_min, mus_avg, mus_max)}")
+
+                        facts_vals = [float(r.get('n_facts', 0) or 0) for r in rows if (r.get('n_facts', 0) or 0) > 0]
+                        wrong_vals = [float(r.get('n_wrong', 0) or 0) for r in rows]
+                        if facts_vals:
+                            f_avg, f_min, f_max = _avg_min_max(facts_vals)
+                            logging.info(f"  {'facts (n)':<18}: {_fmt_count_triple(f_min, f_avg, f_max)}")
+                        if wrong_vals:
+                            w_avg, w_min, w_max = _avg_min_max(wrong_vals)
+                            logging.info(f"  {'wrong (n)':<18}: {_fmt_count_triple(w_min, w_avg, w_max)}")
+
+                        def _metric_vals(group: str, metric: str, stat: str = 'avg') -> list[float]:
+                            out: list[float] = []
+                            for r in rows:
+                                g = (r.get('overlap') or {}).get(group) or {}
+                                m = (g.get(metric) or {})
+                                v = m.get(stat)
+                                if v is not None:
+                                    out.append(float(v))
+                            return out
+
+                        def _count_vals(group: str) -> list[float]:
+                            out: list[float] = []
+                            for r in rows:
+                                g = (r.get('overlap') or {}).get(group) or {}
+                                c = g.get('count')
+                                if c is not None:
+                                    out.append(float(c))
+                            return out
+
+                        def _metric_triplet_over_reps(group: str, metric: str) -> tuple[float, float, float] | None:
+                            # We summarize across reps using the per-run distribution over sets:
+                            #   min = min_over_reps(per_run_min)
+                            #   avg = avg_over_reps(per_run_avg)
+                            #   max = max_over_reps(per_run_max)
+                            mins = _metric_vals(group, metric, stat='min')
+                            avgs = _metric_vals(group, metric, stat='avg')
+                            maxs = _metric_vals(group, metric, stat='max')
+                            if not mins and not avgs and not maxs:
+                                return None
+                            min_v = min(mins) if mins else 0.0
+                            avg_v = (sum(avgs) / len(avgs)) if avgs else 0.0
+                            max_v = max(maxs) if maxs else 0.0
+                            return (min_v, avg_v, max_v)
+
+                        for group in ('Removal', 'MUS', 'MCS'):
+                            logging.info(f"\n  {group}:")
+                            nsets_vals = _count_vals(group)
+                            if nsets_vals:
+                                c_avg, c_min, c_max = _avg_min_max(nsets_vals)
+                                logging.info(f"    {'n_sets':<10}: {_fmt_count_triple(c_min, c_avg, c_max)}")
+                            else:
+                                logging.info(f"    {'n_sets':<10}: none")
+
+                            # Aggregate set sizes across reps (per-run set_size is already min/avg/max over sets)
+                            t_sz = _metric_triplet_over_reps(group, 'set_size')
+                            if t_sz:
+                                mn, av, mx = t_sz
+                                logging.info(f"    {'set_size':<10}: {_fmt_triple(mn, av, mx)}")
+                            else:
+                                logging.info(f"    {'set_size':<10}: none")
+
+                            for metric in ('hit_rate', 'jaccard', 'precision', 'recall', 'f1'):
+                                t = _metric_triplet_over_reps(group, metric)
+                                if not t:
+                                    logging.info(f"    {metric:<10}: none")
+                                    continue
+                                mn, av, mx = t
+                                logging.info(f"    {metric:<10}: {_fmt_triple(mn, av, mx)}")
+
+                        logging.info("=" * 60)
 
     @staticmethod
     def _normalize_fact_str(s: str) -> str:
@@ -1163,9 +1324,10 @@ class TestMUSAnalysis(unittest.TestCase):
         n_nodes: int,
         facts_ext,
         wrong_ext,
+        removed_facts,
         mus_facts,
         mcs_facts,
-    ) -> None:
+    ) -> dict[str, Any]:
         """Check MUS/MCS sets correspond to wrong facts.
 
         Intended for random-PC instances where `wrong_ext` is derived from ground truth.
@@ -1177,6 +1339,7 @@ class TestMUSAnalysis(unittest.TestCase):
         """
         all_facts = {self._normalize_fact_str(s) for s in (facts_ext or []) if str(s).strip()}
         wrong_set = {self._normalize_fact_str(s) for s in (wrong_ext or []) if str(s).strip()}
+        removed_set = {self._normalize_fact_str(s) for s in (removed_facts or []) if str(s).strip()}
         if not all_facts or not wrong_set:
             self.fail(f"Missing facts/wrong facts for correspondence check (n_nodes={n_nodes})")
 
@@ -1199,23 +1362,72 @@ class TestMUSAnalysis(unittest.TestCase):
                 return 0.0
             return len(a.intersection(b)) / len(u)
 
-        def summarize_overlap(label: str, groups: list[set[str]]) -> None:
+        def summarize_overlap(label: str, groups: list[set[str]]) -> dict[str, Any]:
+            def _mmx(xs: list[float]) -> dict[str, float]:
+                if not xs:
+                    return {'min': 0.0, 'avg': 0.0, 'max': 0.0}
+                return {'min': min(xs), 'avg': (sum(xs) / len(xs)), 'max': max(xs)}
+
+            def _fmt_triple(d: dict[str, float]) -> str:
+                return f"{d['min']:7.3f} / {d['avg']:7.3f} / {d['max']:7.3f}"
+
             if not groups:
-                logging.info(f"  → {label}: none")
-                return
+                out = {
+                    'count': 0,
+                    'set_size': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                    'hit_rate': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                    'jaccard': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                    'precision': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                    'recall': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                    'f1': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                }
+                logging.info(f"  {label}:")
+                logging.info(f"    {'n_sets':<10}: {out['count']:7d}")
+                logging.info(f"    {'set_size':<10}: {_fmt_triple(out['set_size'])}")
+                logging.info(f"    {'hit_rate':<10}: {_fmt_triple(out['hit_rate'])}")
+                logging.info(f"    {'jaccard':<10}: {_fmt_triple(out['jaccard'])}")
+                logging.info(f"    {'precision':<10}: {_fmt_triple(out['precision'])}")
+                logging.info(f"    {'recall':<10}: {_fmt_triple(out['recall'])}")
+                logging.info(f"    {'f1':<10}: {_fmt_triple(out['f1'])}")
+                return out
+
             jac = [jaccard(g, wrong_set) for g in groups]
             prec = [(len(g.intersection(wrong_set)) / len(g)) if g else 0.0 for g in groups]
             # Recall is w.r.t wrong_set (can be large); still useful as a scale indicator.
             rec = [(len(g.intersection(wrong_set)) / len(wrong_set)) if wrong_set else 0.0 for g in groups]
+            f1 = [((2 * p * r) / (p + r)) if (p + r) > 0 else 0.0 for p, r in zip(prec, rec)]
             hit = [1.0 if len(g.intersection(wrong_set)) >= 1 else 0.0 for g in groups]
-            logging.info(
-                f"  → {label} overlap: "
-                f"count={len(groups)}, "
-                f"hit_rate={(sum(hit)/len(hit)):.3f}, "
-                f"Jaccard[min/avg/max]={min(jac):.3f}/{(sum(jac)/len(jac)):.3f}/{max(jac):.3f}, "
-                f"Precision[min/avg/max]={min(prec):.3f}/{(sum(prec)/len(prec)):.3f}/{max(prec):.3f}, "
-                f"Recall[min/avg/max]={min(rec):.3f}/{(sum(rec)/len(rec)):.3f}/{max(rec):.3f}"
-            )
+
+            out = {
+                'count': len(groups),
+                'set_size': _mmx([float(len(g)) for g in groups]),
+                'hit_rate': _mmx(hit),
+                'jaccard': _mmx(jac),
+                'precision': _mmx(prec),
+                'recall': _mmx(rec),
+                'f1': _mmx(f1),
+            }
+
+            logging.info(f"  {label}:")
+            logging.info(f"    {'n_sets':<10}: {out['count']:7d}")
+            logging.info(f"    {'set_size':<10}: {_fmt_triple(out['set_size'])}")
+            logging.info(f"    {'hit_rate':<10}: {_fmt_triple(out['hit_rate'])}")
+            logging.info(f"    {'jaccard':<10}: {_fmt_triple(out['jaccard'])}")
+            logging.info(f"    {'precision':<10}: {_fmt_triple(out['precision'])}")
+            logging.info(f"    {'recall':<10}: {_fmt_triple(out['recall'])}")
+            logging.info(f"    {'f1':<10}: {_fmt_triple(out['f1'])}")
+
+            return out
+
+        # Removal (ABAPC): removed facts should align with wrong facts.
+        removal_groups: list[set[str]] = [removed_set] if removed_set else []
+
+        logging.info(f"\n")
+        logging.info("=" * 60)
+        logging.info(f" OVERLAP SUMMARY (n_nodes={n_nodes})")
+        logging.info("=" * 60)
+        logging.info("  [min/avg/max]")
+        removal_summary = summarize_overlap("Removal", removal_groups)
 
         # MUS correspondence: in many cases MUS cores implicate wrong facts, but for some
         # random instances a core can be composed entirely of (ground-truth) correct facts.
@@ -1230,7 +1442,7 @@ class TestMUSAnalysis(unittest.TestCase):
         any_wrong_mus = any(len(core.intersection(wrong_set)) >= 1 for core in mus_sets)
         self.assertTrue(any_wrong_mus, f"No MUS contains a wrong fact (n_nodes={n_nodes})")
 
-        summarize_overlap("MUS", mus_sets)
+        mus_summary = summarize_overlap("MUS", mus_sets)
 
         # MCS correspondence: do not require every MCS to include wrong facts.
         # (A minimal correction set can disable some correct assumptions too.)
@@ -1240,11 +1452,19 @@ class TestMUSAnalysis(unittest.TestCase):
                 f"MCS #{i} contains facts not in instance fact set (n_nodes={n_nodes})",
             )
 
-        summarize_overlap("MCS", mcs_sets)
+        mcs_summary = summarize_overlap("MCS", mcs_sets)
+
+        logging.info("=" * 60)
 
         if mcs_sets:
             any_wrong = any(len(cut.intersection(wrong_set)) >= 1 for cut in mcs_sets)
             self.assertTrue(any_wrong, f"No MCS contains a wrong fact (n_nodes={n_nodes})")
+
+        return {
+            'Removal': removal_summary,
+            'MUS': mus_summary,
+            'MCS': mcs_summary,
+        }
 
     def _run_mus_mcs_for_size(self, n_nodes: int, seed: int | None = None, graph_type: str | None = None):
         """Helper to run the full MUS/MCS pipeline for a given node size.
@@ -1411,6 +1631,15 @@ class TestMUSAnalysis(unittest.TestCase):
         logging.info(f"  → Facts removed: {remove_n}")
         logging.info(f"  → Models found after removal: {len(models_after)}")
         logging.info(f"  → ABAPC time: {abapc_time.total_seconds():.3f}s")
+
+        # Derive which facts were removed by ABAPC 'first'.
+        # CausalABA sorts facts by descending I and then removes from the tail until SAT.
+        facts_with_I: list[tuple[float, str]] = []
+        for (fact_str, I, _is_correct), ext_line in zip(facts, facts_ext):
+            stmt = self._normalize_fact_str(ext_line)
+            facts_with_I.append((float(I), stmt))
+        facts_sorted_by_I = sorted(facts_with_I, key=lambda t: t[0], reverse=True)
+        removed_facts = [stmt for _I, stmt in facts_sorted_by_I[-remove_n:]] if remove_n else []
 
         # For larger sizes, we may not enforce UNSAT for all seeds; just assert we can reach SAT
         # If we hit the timeout before reaching SAT, skip the assertion (timeout is the real limit)
@@ -1644,12 +1873,16 @@ class TestMUSAnalysis(unittest.TestCase):
             'was_sat': remove_n == 0,
             'abapc_timeout': abapc_timeout,
             'mus_timeout': mus_timeout,
+            'abapc_time_sec': abapc_time.total_seconds(),
+            'mus_time_sec': mus_time.total_seconds(),
+            'remove_n': remove_n,
             # For correspondence checks (used by test_mus_mcs_random_sizes_abapc)
             'seed': seed,
             'graph_type': graph_type,
             'count_wrong': count_wrong,
             'facts_ext': facts_ext,
             'wrong_ext': wrong_ext,
+            'removed_facts': removed_facts,
             'n_mus': mus_result.get('n_mus', 0),
             'n_mcs': mus_result.get('n_mcs', 0),
             'mus_facts': mus_result.get('mus_facts', []),
@@ -1674,7 +1907,7 @@ if __name__ == '__main__':
         "--rep-unsat",
         type=int,
         default=MUS_REP_UNSAT,
-        help="Retry with seed+1, seed+2, ... when an instance has 0 wrong facts (default: 0)",
+        help="Retry with seed+1, seed+2, ... when an instance is already SAT or has 0 wrong facts (default: 2)",
     )
     parser.add_argument(
         "--random-reps",
