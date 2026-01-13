@@ -90,7 +90,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 timing_recorder: dict | None = None,
                 )->Control:
 
-    logging.info("Compiling the program")
+    logging.debug("Entering compile_and_ground")
     _t0 = time.perf_counter()
     ### Create Control
     cpu_count = min(os.cpu_count() or 1, 64)
@@ -129,7 +129,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     condition_sets = (
         (S for S in base_condition_sets if max_conditioning_size is None or len(S) <= max_conditioning_size)
     )
-    for S in tqdm(condition_sets):
+    for S in condition_sets:
         if deadline is not None and time.perf_counter() > deadline:
             raise TimeoutError("compile_and_ground exceeded wall-time budget")
         for s in S:
@@ -194,7 +194,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
                 logging.warning(f"Required edge ({X},{Y}) is in the forbidden edges set.")
 
     node_pairs = tuple(dep_facts | indep_facts if skeleton_rules_reduction else combinations(range(n_nodes),2))
-    logging.info(f"{len(node_pairs) / (n_nodes*(n_nodes-1)/2):.2%} of all node pairs will be considered for active paths.")
+    logging.debug(f"{len(node_pairs) / (n_nodes*(n_nodes-1)/2):.2%} of all node pairs will be considered for active paths.")
 
     if skeleton_rules_reduction is False:
         pre_grounding = False
@@ -217,7 +217,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
 
     use_bounded_nb = bounded_encoding_active and collider_tree_depth is not None and collider_tree_depth > 0
 
-    for (X, Y) in tqdm(node_pairs):
+    for (X, Y) in node_pairs:
         if deadline is not None and time.perf_counter() > deadline:
             raise TimeoutError("compile_and_ground exceeded wall-time budget")
         for path in _iter_paths_with_cutoff(G, X, Y, max_path_length):
@@ -271,7 +271,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
             ext_premise = f"ext_indep({X},{Y},S), " if ext_flag else ""
             add_specific(f"dep({X},{Y},S) :- {ext_premise}ap({X},{Y},_,S), set(S).")
 
-    logging.info(f"{n_p} active paths added.")
+    logging.debug(f"{n_p} active paths added.")
 
     ### add show statements
     if 'arrow' in show:
@@ -293,11 +293,10 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
 
     ### Dump specific rules to file if requested
     if dump_specific is not None and specific_rules is not None:
-        logging.info(f"Dumping specific rules to {dump_specific}")
         with open(dump_specific, 'w') as f:
             for rule in specific_rules:
                 f.write(rule + '\n')
-        logging.info(f"Dumped {len(specific_rules)} specific rules")
+        logging.debug(f"   Dumped {len(specific_rules)} specific rules to {dump_specific}")
 
     ### Ground
     logging.info("   Grounding...")
@@ -516,7 +515,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             except Exception:
                 pass
         remove_n = 0
-        logging.info(f"Number of facts removed: {remove_n}")
+        logging.debug(f"Number of facts removed: {remove_n}")
 
         ## start removing facts if no models are found
         while n_models == 0 and remove_n < len(facts):
@@ -529,7 +528,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 break
 
             remove_n += 1
-            logging.info(f"Number of facts removed: {remove_n}")
+            logging.debug(f"Number of facts removed: {remove_n}")
 
             iter_ground_sec = 0.0
 
@@ -554,7 +553,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
 
             if reground:
                 ### Save external statements
-                logging.info("Recompiling and regrounding...")
+                logging.info(f"Facts removed: {remove_n} -> Recompiling and regrounding...")
                 reground_timing: dict = {}
                 # Compute remaining time for the regrounding phase
                 reground_deadline = None
@@ -596,7 +595,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), None)
                     logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
             models = []
-            logging.info("   Solving...")
+            logging.debug("   Solving...")
             i_counter = {"i": 0}
 
             def _on_model2(model):
@@ -620,9 +619,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                         timing_recorder['timed_out'] = True
                         timing_recorder['timeout_phase'] = 'solve'
                     break
-                logging.info(f"Removal iteration {remove_n} solve budget (remaining from {solve_timeout}s total): {remaining_timeout:.3f}s")
+                logging.debug(f"Removal iteration {remove_n} solve budget (remaining from {solve_timeout}s total): {remaining_timeout:.3f}s")
             else:
-                logging.info(f"Removal iteration {remove_n} solve budget: {solve_timeout}s")
+                logging.debug(f"Removal iteration {remove_n} solve budget: {solve_timeout}s")
             t_s0 = time.perf_counter()
             finished = _solve_with_timeout(
                 ctl,
@@ -640,9 +639,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     timing_recorder['timeout_phase'] = 'solve'
             try:
                 n_models = int(ctl.statistics['summary']['models']['enumerated'])
-                logging.info(f"Number of models: {n_models}")
+                logging.debug(f"Number of models: {n_models}")
                 times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
-                logging.info(f"Times: {times}")
+                logging.debug(f"Times: {times}")
             except (KeyError, TypeError, AttributeError) as e:
                 logging.warning(f"Could not access solver statistics: {e}")
                 n_models = len(models)

@@ -78,7 +78,7 @@ def parse_facts_from_file(facts_location: str) -> tuple[list[str], dict[int, str
                     facts.append(line[:-1])  # Remove trailing period
                     fact_mapping[fact_counter] = line  # Keep period for display
     
-    logging.info(f"Parsed {len(facts)} facts from {facts_location}")
+    logging.debug(f"Parsed {len(facts)} facts from {facts_location}")
     return facts, fact_mapping
 
 
@@ -116,7 +116,10 @@ def run_mus_solver(
         Either `mus_list` (list of MUSes, each a list of ints), or `(mus_list, mcs_list)` when
         `return_mcses=True`.
     """
-    logging.info("Running MUS solver...")
+    if print_mcses:
+        logging.info("   Solving for MUS and MCS...")
+    else:
+        logging.info("   Solving for MUS...")
     
     try:
         # Write program to temporary file
@@ -252,10 +255,6 @@ def run_mus_solver(
                         mcs = [int(n) for n in mcs_predicates]
                         mcs_list.append(mcs)
                         logging.debug(f"Found MCS: {mcs}")
-        
-        logging.info(f"Total MUS found: {len(mus_list)}")
-        if print_mcses or return_mcses:
-            logging.info(f"Total MCS found: {len(mcs_list)}")
         
         # Cleanup
         try:
@@ -472,7 +471,7 @@ def CausalABA_MUS(
         A dict containing `mus_list`, `mus_facts`, `n_mus`, `fact_mapping`, and (when enabled)
         `mcs_list`, `mcs_facts`, `n_mcs`, plus timing fields.
     """
-    logging.info("Running CausalABA MUS analysis")
+    logging.info("Running CausalABA MUS...")
     
     if not facts_location:
         logging.error("facts_location is required for MUS analysis")
@@ -485,7 +484,7 @@ def CausalABA_MUS(
         logging.error(f"No ext_indep/ext_dep facts found in {facts_location}")
         return {'mus_list': [], 'mus_facts': [], 'n_mus': 0, 'fact_mapping': {}}
     
-    logging.info(f"Found {len(facts)} facts to analyze for MUS")
+    logging.debug(f"Found {len(facts)} facts to analyze for MUS")
     if len(fact_mapping) <= 20:
         for idx, fact in fact_mapping.items():
             logging.debug(f"  Fact {idx}: {fact}")
@@ -500,7 +499,7 @@ def CausalABA_MUS(
     try:
         program = build_mus_program(n_nodes, facts, facts_location, deadline=deadline, timing_recorder=timing_recorder)
         build_time = time.perf_counter() - build_start
-        logging.info(f"MUS Build time: {build_time:.3f}s (nodes={n_nodes})")
+        logging.info(f"   MUS Build time: {build_time:.3f}s (nodes={n_nodes})")
         
         # Optionally save the complete MUS program for debugging
         if emit_lp:
@@ -510,7 +509,7 @@ def CausalABA_MUS(
     except TimeoutError:
         build_time = time.perf_counter() - build_start
         logging.error("MUS program build exceeded the timeout budget.")
-        logging.info(f"MUS Build time: {build_time:.3f}s (nodes={n_nodes})")
+        logging.info(f"   MUS Build time: {build_time:.3f}s (nodes={n_nodes})")
         # Return empty results to indicate timeout (consistent with solver timeout behavior)
         return {
             'mus_list': [],
@@ -590,11 +589,11 @@ def CausalABA_MUS(
     if mus_list:
         sizes = [len(m) for m in mus_list]
         logging.info(
-            f"MUS facts resolved: {len(mus_list)} cores (min={min(sizes)}, max={max(sizes)}, avg={sum(sizes)/len(sizes):.2f})"
+            f"   MUS facts resolved: {len(mus_list)} cores (min={min(sizes)}, max={max(sizes)}, avg={sum(sizes)/len(sizes):.2f})"
         )
-        logging.debug(f"MUS facts (resolved): {mus_facts}")
+        logging.debug(f"   MUS facts (resolved): {mus_facts}")
     else:
-        logging.info("MUS facts (resolved): []")
+        logging.info("   MUS facts (resolved): []")
     
     result = {
         'mus_list': mus_list,
