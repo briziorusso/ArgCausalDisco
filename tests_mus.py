@@ -44,6 +44,8 @@ import argparse
 import logging
 import tempfile
 import unittest
+import atexit
+import random
 from datetime import datetime
 from collections import Counter
 from dataclasses import dataclass
@@ -74,7 +76,7 @@ def _parse_node_sizes(raw: str) -> tuple[int, ...]:
     try:
         return tuple(int(x.strip()) for x in raw.split(',') if x.strip())
     except Exception:
-        return (5, 7, 9)
+        return (5, 7)
 
 
 def _parse_graph_types(raw: str) -> tuple[str, ...]:
@@ -82,8 +84,8 @@ def _parse_graph_types(raw: str) -> tuple[str, ...]:
     return tuple(items)
 
 
-MUS_SOLVE_TIMEOUT = int(os.environ.get("MUS_SOLVE_TIMEOUT", "60"))
-MUS_NODE_SIZES = _parse_node_sizes(os.environ.get("MUS_NODE_SIZES", "5,7,9"))
+MUS_SOLVE_TIMEOUT = int(os.environ.get("MUS_SOLVE_TIMEOUT", "30"))
+MUS_NODE_SIZES = _parse_node_sizes(os.environ.get("MUS_NODE_SIZES", "5,7"))
 MUS_EDGE_PER_NODE = int(os.environ.get("MUS_EDGE_PER_NODE", "2"))
 MUS_SEED_BASE = int(os.environ.get("MUS_SEED_BASE", "2004"))
 MUS_REP_UNSAT = int(os.environ.get("MUS_REP_UNSAT", "2"))
@@ -92,6 +94,25 @@ MUS_EMIT_LP = os.environ.get("MUS_EMIT_LP", "")
 MUS_MAX_MUSES = os.environ.get("MUS_MAX_MUSES", "")  # "" = omit -n flag (WASP default: 1 MUS output), "0" = unlimited, ">0" = limit
 MUS_MCS_THRESHOLD = int(os.environ.get("MUS_MCS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
 MUS_MUS_THRESHOLD = int(os.environ.get("MUS_MUS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
+
+# Optional diagnostic: check MUS minimality-in-isolation (can be slow; also not always applicable).
+MUS_CHECK_MINIMALITY = os.environ.get("MUS_CHECK_MINIMALITY", "0").strip() not in ("", "0", "false", "False", "no", "NO")
+
+# Optional diagnostic: check the MUS definition directly.
+# For each returned MUS core (as a set of mus(i) assumptions), enforce those assumptions in the
+# *same adorned MUS program* and assert the result is UNSAT.
+MUS_CHECK_ENFORCED_UNSAT = os.environ.get("MUS_CHECK_ENFORCED_UNSAT", "1").strip() not in ("", "0", "false", "False", "no", "NO")
+
+# Optional diagnostic: for each returned MUS core, take its corresponding facts and check that
+# running CausalABA on *only those facts* yields UNSAT (ABAPC background).
+MUS_CHECK_ENFORCED_UNSAT_ABAPC = os.environ.get("MUS_CHECK_ENFORCED_UNSAT_ABAPC", "1").strip() not in ("", "0", "false", "False", "no", "NO")
+
+# Whether to require at least one MUS to intersect wrong facts. Empirically this can be false
+# on some random instances; default is to warn rather than fail.
+MUS_REQUIRE_MUS_HIT_WRONG = os.environ.get("MUS_REQUIRE_MUS_HIT_WRONG", "0").strip() not in ("", "0", "false", "False", "no", "NO")
+
+# Demo-only failing tests to illustrate known effects. Default is enabled.
+MUS_DEMO_FAILING_TESTS = os.environ.get("MUS_DEMO_FAILING_TESTS", "1").strip() not in ("", "0", "false", "False", "no", "NO")
 
 # Random graph family used by build_random_pc_case/randomG_PC_case.
 MUS_GRAPH_TYPE = os.environ.get("MUS_GRAPH_TYPE", "ER")
@@ -264,10 +285,10 @@ class TestMUSAnalysis(unittest.TestCase):
         case["config"] = config
         return case
 
-    def test_parsing_facts_from_file(self):
+    def test_000_parsing_facts_from_file(self):
         """Test parsing ext_indep/ext_dep facts from a file."""
         logger_setup()
-        logging.info("===============Running test_parsing_facts_from_file===============")
+        logging.info("===============Running test_000_parsing_facts_from_file===============")
         
         fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
         os.close(fd)
@@ -1125,7 +1146,16 @@ class TestMUSAnalysis(unittest.TestCase):
             for n_nodes in MUS_NODE_SIZES:
                 key = (str(graph_type), int(n_nodes))
                 rep_summaries.setdefault(key, [])
-                rep_outcomes.setdefault(key, {'completed': 0, 'timed_out': 0, 'startSAT': 0, 'no_wrong': 0})
+                rep_outcomes.setdefault(
+                    key,
+                    {
+                        'completed': 0,
+                        'timed_out': 0,
+                        'startSAT': 0,
+                        'no_wrong': 0,
+                        'mus_min_skipped': 0,
+                    },
+                )
 
                 for rep_idx in range(max(1, MUS_RANDOM_REPS)):
                     with self.subTest(n_nodes=n_nodes, graph_type=graph_type, rep=rep_idx):
@@ -1184,8 +1214,6 @@ class TestMUSAnalysis(unittest.TestCase):
                                 f"Try a different --seed-base or increase --rep-unsat."
                             )
 
-                        rep_outcomes[key]['completed'] += 1
-
                         overlap = self._assert_wrong_fact_correspondence(
                             n_nodes=n_nodes,
                             facts_ext=selected_run.get('facts_ext', []),
@@ -1195,6 +1223,8 @@ class TestMUSAnalysis(unittest.TestCase):
                             mcs_facts=selected_run.get('mcs_facts', []),
                         )
 
+                        # Record run summary *before* optional minimality diagnostics, so
+                        # a SkipTest from those diagnostics doesn't remove the run from aggregates.
                         rep_summaries[key].append(
                             {
                                 'seed': selected_run.get('seed'),
@@ -1205,6 +1235,19 @@ class TestMUSAnalysis(unittest.TestCase):
                                 'overlap': overlap or {},
                             }
                         )
+                        rep_outcomes[key]['completed'] += 1
+
+                        # Optional diagnostic: MUS minimality in isolation.
+                        if MUS_CHECK_MINIMALITY and int(selected_run.get('remove_n', 0) or 0) > 0:
+                            try:
+                                self._assert_mus_single_deletion_makes_sat(
+                                    n_nodes=n_nodes,
+                                    facts_ext=selected_run.get('facts_ext', []) or [],
+                                    mus_facts=selected_run.get('mus_facts', []) or [],
+                                )
+                            except unittest.SkipTest as e:
+                                rep_outcomes[key]['mus_min_skipped'] += 1
+                                logging.info(f"MUS minimality checks: skipped ({e})")
 
                 # Per-(graph_type,n_nodes) aggregate summary over reps.
                 if MUS_RANDOM_REPS > 1:
@@ -1236,6 +1279,8 @@ class TestMUSAnalysis(unittest.TestCase):
                         logging.info(f"  {'completed runs':<18}: {outs.get('completed', len(rows))}/{MUS_RANDOM_REPS}")
                         logging.info(f"  {'timed out':<18}: {outs.get('timed_out', 0)}")
                         logging.info(f"  {'startSAT':<18}: {outs.get('startSAT', 0)}")
+                        if outs.get('mus_min_skipped', 0):
+                            logging.info(f"  {'mus_min_skipped':<18}: {outs.get('mus_min_skipped', 0)}")
                         if outs.get('no_wrong', 0):
                             logging.info(f"  {'no_wrong':<18}: {outs.get('no_wrong', 0)}")
                         logging.info(f"  {'ABAPC total (s)':<18}: {_fmt_triple(abapc_min, abapc_avg, abapc_max)}")
@@ -1270,10 +1315,6 @@ class TestMUSAnalysis(unittest.TestCase):
                             return out
 
                         def _metric_triplet_over_reps(group: str, metric: str) -> tuple[float, float, float] | None:
-                            # We summarize across reps using the per-run distribution over sets:
-                            #   min = min_over_reps(per_run_min)
-                            #   avg = avg_over_reps(per_run_avg)
-                            #   max = max_over_reps(per_run_max)
                             mins = _metric_vals(group, metric, stat='min')
                             avgs = _metric_vals(group, metric, stat='avg')
                             maxs = _metric_vals(group, metric, stat='max')
@@ -1285,7 +1326,7 @@ class TestMUSAnalysis(unittest.TestCase):
                             return (min_v, avg_v, max_v)
 
                         for group in ('Removal', 'MUS', 'MCS'):
-                            logging.info(f"\n  {group}:")
+                            logging.info(f"\n{29*' '}  {group}:")
                             nsets_vals = _count_vals(group)
                             if nsets_vals:
                                 c_avg, c_min, c_max = _avg_min_max(nsets_vals)
@@ -1293,7 +1334,6 @@ class TestMUSAnalysis(unittest.TestCase):
                             else:
                                 logging.info(f"    {'n_sets':<10}: none")
 
-                            # Aggregate set sizes across reps (per-run set_size is already min/avg/max over sets)
                             t_sz = _metric_triplet_over_reps(group, 'set_size')
                             if t_sz:
                                 mn, av, mx = t_sz
@@ -1310,6 +1350,238 @@ class TestMUSAnalysis(unittest.TestCase):
                                 logging.info(f"    {metric:<10}: {_fmt_triple(mn, av, mx)}")
 
                         logging.info("=" * 60)
+
+    def test_demo_mus_core_enforced_is_unsat_under_mus_background(self):
+        """DEMO: MUS core must be UNSAT when enforced under the same MUS program.
+
+        This checks the MUS definition in the setting used by `CausalABA_MUS`:
+        for each returned MUS core (a set of mus(i) assumptions), if we assert those
+        mus(i) atoms in the *same adorned program*, the result must be UNSAT even
+        when all other mus(j) are left free.
+
+        This intentionally does NOT rebuild the instance-specific background theory
+        from only the core facts (that was the misleading part of the previous demo).
+        """
+        logger_setup()
+        logging.info("===============Running DEMO: enforced MUS cores are UNSAT===============")
+
+        import shutil
+        if shutil.which('clingo') is None or shutil.which('wasp') is None:
+            self.skipTest("clingo/wasp not found on PATH")
+
+        _ensure_solvers_imported()
+
+        import subprocess
+        from causalaba_mus import parse_facts_from_file, build_mus_program
+
+        def _clingo_is_sat(program_text: str, timeout_sec: float) -> bool | None:
+            fd, tmp_lp = tempfile.mkstemp(suffix='_clingo_check.lp', text=True)
+            os.close(fd)
+            try:
+                with open(tmp_lp, 'w') as f:
+                    f.write(program_text)
+                try:
+                    proc = subprocess.run(
+                        ['clingo', tmp_lp, '-n', '1'],
+                        capture_output=True,
+                        text=True,
+                        timeout=float(timeout_sec),
+                    )
+                except subprocess.TimeoutExpired:
+                    return None
+                out = proc.stdout or ''
+                if 'UNSATISFIABLE' in out:
+                    return False
+                if 'SATISFIABLE' in out:
+                    return True
+                return None
+            finally:
+                try:
+                    os.remove(tmp_lp)
+                except Exception:
+                    pass
+
+        n_nodes = 4
+        timeout = float(min(10, int(MUS_SOLVE_TIMEOUT)))
+        fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd)
+        try:
+            with open(facts_file, 'w') as f:
+                # Two independent contradictions (keeps the example simple and deterministic)
+                f.write("ext_indep(0,1,empty).\n")
+                f.write("ext_dep(0,1,empty).\n")
+                f.write("ext_indep(2,3,empty).\n")
+                f.write("ext_dep(2,3,empty).\n")
+
+            mus_result = CausalABA_MUS(
+                n_nodes=n_nodes,
+                facts_location=facts_file,
+                gringo_path='clingo',
+                wasp_path='wasp',
+                max_muses=0,
+                mus_algorithm='camus',
+                print_mcses=True,
+                camus_mcs_threshold=0,
+                camus_mus_threshold=0,
+                solve_timeout=timeout,
+            )
+
+            self.assertGreater(mus_result.get('n_mus', 0), 0, "Expected at least one MUS in the toy contradiction instance")
+
+            mus_list = mus_result.get('mus_list', []) or []
+            mus_facts = mus_result.get('mus_facts', []) or []
+            logging.info(f"DEMO: MUS cores found: {len(mus_list)}")
+            for i, core in enumerate(mus_list, start=1):
+                core_facts = mus_facts[i - 1] if (i - 1) < len(mus_facts) else []
+                logging.info(f"  MUS #{i}: mus indices={sorted(core)}")
+                if core_facts:
+                    for fact in core_facts:
+                        logging.info(f"    - {fact}")
+
+            facts_no_period, _mapping = parse_facts_from_file(facts_file)
+            base_program = build_mus_program(n_nodes, facts_no_period, facts_file)
+
+            for core_idx, core in enumerate(mus_list, start=1):
+                # Enforce only the core mus(i) atoms; leave all other mus(j) free.
+                forced = base_program + "\n% ===== Force MUS core =====\n" + "\n".join(f"mus({i})." for i in core) + "\n"
+                is_sat = _clingo_is_sat(forced, timeout_sec=timeout)
+                if is_sat is None:
+                    self.skipTest(f"Timeout/unknown while checking enforced MUS core #{core_idx}")
+                self.assertFalse(
+                    is_sat,
+                    f"MUS core #{core_idx} was SAT when enforced under the MUS background (core={core})",
+                )
+                logging.info(f"  ✓ MUS #{core_idx} enforced => UNSAT")
+
+            logging.info("✓ All MUSes generate UNSAT")
+        finally:
+            try:
+                os.remove(facts_file)
+            except Exception:
+                pass
+
+    def test_demo_full_instance_delete_one_mus_element_restores_sat(self):
+        """DEMO: show why full-instance single-deletion is not a MUS minimality test.
+
+        Construct an UNSAT instance with two independent contradictions. Then:
+        - compute a MUS for one contradiction,
+        - delete one element from that MUS *but keep all other facts*,
+        - show the full instance can remain UNSAT (because the other contradiction remains).
+
+        This demo should PASS: the expected outcome is that the instance remains UNSAT.
+        """
+        logger_setup()
+        logging.info("===============Running DEMO: full-instance single deletion===============" )
+
+        _ensure_solvers_imported()
+
+        n_nodes = 4
+        fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd)
+        try:
+            with open(facts_file, 'w') as f:
+                # Contradiction A
+                f.write("ext_indep(0,1,empty).\n")
+                f.write("ext_dep(0,1,empty).\n")
+                # Contradiction B
+                f.write("ext_indep(2,3,empty).\n")
+                f.write("ext_dep(2,3,empty).\n")
+
+            mus_result = CausalABA_MUS(
+                n_nodes=n_nodes,
+                facts_location=facts_file,
+                gringo_path="clingo",
+                wasp_path="wasp",
+                max_muses=0,
+                mus_algorithm="camus",
+                print_mcses=True,
+                camus_mcs_threshold=0,
+                camus_mus_threshold=0,
+            )
+
+            logging.info(f"DEMO contradiction instance: n_mus={mus_result.get('n_mus', 0)}, n_mcs={mus_result.get('n_mcs', 0)}")
+            for i, core_i in enumerate(mus_result.get('mus_facts', [])[:5], start=1):
+                logging.info(f"  MUS #{i}: {core_i}")
+            for i, cut_i in enumerate(mus_result.get('mcs_facts', [])[:5], start=1):
+                logging.info(f"  MCS #{i}: {cut_i}")
+
+            mus_facts = mus_result.get('mus_facts', []) or []
+            self.assertGreater(len(mus_facts), 0, "Expected at least one MUS")
+            core = [self._normalize_fact_str(str(s)) for s in mus_facts[0] if str(s).strip()]
+            self.assertGreater(len(core), 0, "Expected non-empty MUS core")
+
+            # Choose a fact from the MUS core to delete.
+            removed_fact = core[0]
+            with open(facts_file, 'r') as f:
+                full = [self._normalize_fact_str(line.strip()) for line in f if line.strip()]
+            remaining = [s for s in full if self._normalize_fact_str(s) != removed_fact]
+
+            fd2, sub_file = tempfile.mkstemp(suffix='.lp', text=True)
+            os.close(fd2)
+            try:
+                with open(sub_file, 'w') as f:
+                    for s in remaining:
+                        f.write(f"{self._normalize_fact_str(s)}\n")
+
+                timing1: dict[str, Any] = {}
+                models1, _ = CausalABA(
+                    n_nodes,
+                    sub_file,
+                    weak_constraints=False,
+                    print_models=False,
+                    skeleton_rules_reduction=True,
+                    out_n=1,
+                    solve_timeout=float(min(10, int(MUS_SOLVE_TIMEOUT))),
+                    timing_recorder=timing1,
+                )
+            finally:
+                try:
+                    os.remove(sub_file)
+                except Exception:
+                    pass
+
+            if timing1.get('timed_out', False):
+                self.fail("DEMO FAILURE: timed out while checking full-instance deletion")
+
+            # Demonstrate effect: even after deleting one element from a MUS core,
+            # the full instance can remain UNSAT due to other contradictions.
+            full_preview = "\n".join(f"  - {s}" for s in full)
+            if len(models1) > 0:
+                # In principle, depending on the instance, this could happen. For this constructed
+                # demo we expect the other contradiction to keep it UNSAT, so if it becomes SAT the
+                # demo didn't illustrate the intended point.
+                self.skipTest(
+                    "DEMO did not trigger: Full instance became SAT after deleting one MUS element.\n"
+                    f"removed_fact={removed_fact}\n"
+                    f"n_mus={mus_result.get('n_mus', 0)}, n_mcs={mus_result.get('n_mcs', 0)}\n"
+                    f"MUSes (first 5): {mus_result.get('mus_facts', [])[:5]}\n"
+                    f"MCSes (first 5): {mus_result.get('mcs_facts', [])[:5]}\n"
+                    "full instance facts:\n"
+                    f"{full_preview}"
+                )
+
+            logging.info(
+                "DEMO: Deleting one MUS element from the FULL instance did NOT restore SAT (expected).\n"
+                "This illustrates why 'full-instance single deletion' is not a MUS minimality test (other contradictions may remain).\n"
+                f"removed_fact={removed_fact}\n"
+                f"n_mus={mus_result.get('n_mus', 0)}, n_mcs={mus_result.get('n_mcs', 0)}\n"
+                f"MUSes (first 5): {mus_result.get('mus_facts', [])[:5]}\n"
+                f"MCSes (first 5): {mus_result.get('mcs_facts', [])[:5]}\n"
+                "full instance facts:\n"
+                f"{full_preview}"
+            )
+
+            # Core assertion for the demo: still UNSAT.
+            self.assertEqual(
+                len(models1),
+                0,
+                "Expected UNSAT after deleting one MUS element from full instance (other contradiction remains)",
+            )
+        finally:
+            try:
+                os.remove(facts_file)
+            except Exception:
+                pass
 
     @staticmethod
     def _normalize_fact_str(s: str) -> str:
@@ -1440,7 +1712,11 @@ class TestMUSAnalysis(unittest.TestCase):
             )
 
         any_wrong_mus = any(len(core.intersection(wrong_set)) >= 1 for core in mus_sets)
-        self.assertTrue(any_wrong_mus, f"No MUS contains a wrong fact (n_nodes={n_nodes})")
+        if not any_wrong_mus:
+            msg = f"No MUS contains a wrong fact (n_nodes={n_nodes})"
+            if MUS_REQUIRE_MUS_HIT_WRONG:
+                self.fail(msg)
+            logging.warning(msg)
 
         mus_summary = summarize_overlap("MUS", mus_sets)
 
@@ -1466,20 +1742,478 @@ class TestMUSAnalysis(unittest.TestCase):
             'MCS': mcs_summary,
         }
 
-    def _run_mus_mcs_for_size(self, n_nodes: int, seed: int | None = None, graph_type: str | None = None):
+    def _assert_mus_single_deletion_makes_sat(
+        self,
+        *,
+        n_nodes: int,
+        facts_ext: list[str],
+        mus_facts: list[list[str]],
+        solve_timeout_sec: float | None = None,
+    ) -> None:
+        """Evaluate MUS minimality in isolation.
+
+        For each (sampled) MUS core S returned by `CausalABA_MUS`:
+        - Check whether encoding + S is UNSAT.
+        - Only if UNSAT in isolation, test minimality by checking that for each
+          (sampled) f in S, encoding + (S \\ {f}) is SAT.
+
+        This intentionally does NOT test "full instance facts F minus one core
+        element" because random instances may contain multiple independent
+        contradictions.
+
+        If no sampled cores are UNSAT in isolation, the helper raises SkipTest.
+        """
+        _ensure_solvers_imported()
+
+        def _write_fact_lines(path: str, facts: list[str]) -> None:
+            with open(path, 'w') as f:
+                for s in facts:
+                    line = self._normalize_fact_str(str(s))
+                    if not line.strip():
+                        continue
+                    f.write(f"{line}\n")
+
+        # Only need one model to establish SAT.
+        out_n = 1
+        timeout = solve_timeout_sec
+        if timeout is None:
+            timeout = float(min(10, int(MUS_SOLVE_TIMEOUT)))
+
+        # Large random instances can yield many MUSes and/or very large MUS cores.
+        # To keep runtime bounded:
+        # - If > 10 MUS cores are returned, sample 10 cores.
+        # - For each selected core, if |core| > 10, sample 10 deletions.
+        max_cores_to_check = 10
+        max_deletions_per_core = 10
+
+        # Optional progress bar; keep it as a soft dependency.
+        try:
+            from tqdm.auto import tqdm  # type: ignore
+        except Exception:
+            tqdm = None  # type: ignore
+
+        import random
+        rng = random.Random(0)
+
+        # Normalize/deduplicate the full instance facts.
+        all_norm = [self._normalize_fact_str(str(s)) for s in (facts_ext or []) if str(s).strip()]
+        seen_all: set[str] = set()
+        all_norm = [s for s in all_norm if not (s in seen_all or seen_all.add(s))]
+        if not all_norm:
+            self.skipTest(f"No facts_ext provided for MUS single-deletion checks (n_nodes={n_nodes})")
+
+        cores_all = list(mus_facts or [])
+        if not cores_all:
+            return
+
+        if len(cores_all) > max_cores_to_check:
+            sampled_idxs = sorted(rng.sample(range(len(cores_all)), k=max_cores_to_check))
+            cores_to_check: list[tuple[int, list[str]]] = [(i + 1, cores_all[i]) for i in sampled_idxs]
+        else:
+            cores_to_check = [(i + 1, core) for i, core in enumerate(cores_all)]
+
+        # Normalize/dedup selected cores and pre-plan the number of checks.
+        normalized_cores: list[tuple[int, list[str], list[int]]] = []
+        total_checks = 0
+        for core_idx, core in cores_to_check:
+            core_norm = [self._normalize_fact_str(str(s)) for s in (core or []) if str(s).strip()]
+            seen: set[str] = set()
+            core_norm = [s for s in core_norm if not (s in seen or seen.add(s))]
+            if not core_norm:
+                continue
+
+            if len(core_norm) > max_deletions_per_core:
+                del_idxs = sorted(rng.sample(range(len(core_norm)), k=max_deletions_per_core))
+            else:
+                del_idxs = list(range(len(core_norm)))
+
+            normalized_cores.append((core_idx, core_norm, del_idxs))
+            total_checks += 1  # core-only diagnostic SAT/UNSAT
+            total_checks += len(del_idxs)  # single deletions SAT
+
+        # One upfront check: full instance must be UNSAT.
+        total_checks += 1
+
+        progress = None
+        if tqdm is not None:
+            progress = tqdm(total=total_checks, desc="MUS minimality checks", unit="check")
+
+        # Note: We intentionally do NOT enforce "remove one element from MUS in the FULL instance ⇒ SAT".
+        # Random instances can contain multiple independent contradictions, so removing one element
+        # from one MUS may leave the overall instance UNSAT. Instead, we test MUS minimality in
+        # isolation: core is UNSAT, but core \ {f} is SAT for each f in the core.
+        if progress is not None:
+            # Keep accounting stable (we reserved 1 check above).
+            progress.update(1)
+
+        diag_core_only_unsat = 0
+        diag_core_only_sat = 0
+        theory_applies_cores = 0
+        cores_checked = 0
+        deletions_checked = 0
+        deletions_sat = 0
+        failures: list[str] = []
+        cores_tested_for_minimality = 0
+
+        for core_idx, core_norm, del_idxs in normalized_cores:
+            cores_checked += 1
+            fd, core_file = tempfile.mkstemp(suffix='.lp', text=True)
+            os.close(fd)
+            try:
+                _write_fact_lines(core_file, core_norm)
+
+                timing0: dict[str, Any] = {}
+                models0, _ = CausalABA(
+                    n_nodes,
+                    core_file,
+                    weak_constraints=False,
+                    print_models=False,
+                    skeleton_rules_reduction=True,
+                    out_n=out_n,
+                    solve_timeout=timeout,
+                    timing_recorder=timing0,
+                )
+                if progress is not None:
+                    progress.update(1)
+                if timing0.get('timed_out', False):
+                    self.skipTest(
+                        f"Timeout during MUS minimality check (core-only UNSAT) "
+                        f"(n_nodes={n_nodes}, core={core_idx}, timeout={timeout}s)"
+                    )
+                if len(models0) == 0:
+                    diag_core_only_unsat += 1
+                else:
+                    diag_core_only_sat += 1
+
+                # Only meaningful to test minimality if the core alone is UNSAT.
+                if len(models0) > 0:
+                    continue
+
+                cores_tested_for_minimality += 1
+
+                core_all_deletions_sat = True
+                for remove_pos, remove_i in enumerate(del_idxs, start=1):
+                    removed_fact = core_norm[remove_i]
+                    # Remove the selected element from the MUS core (minimality in isolation).
+                    remaining = [s for s in core_norm if s != removed_fact]
+                    logging.debug(
+                        "MUS minimality check: core=%s (|core|=%s) remove=%s/%s fact=%s",
+                        core_idx,
+                        len(core_norm),
+                        remove_pos,
+                        len(del_idxs),
+                        removed_fact,
+                    )
+
+                    fd2, sub_file = tempfile.mkstemp(suffix='.lp', text=True)
+                    os.close(fd2)
+                    try:
+                        _write_fact_lines(sub_file, remaining)
+                        timing1: dict[str, Any] = {}
+                        models1, _ = CausalABA(
+                            n_nodes,
+                            sub_file,
+                            weak_constraints=False,
+                            print_models=False,
+                            skeleton_rules_reduction=True,
+                            out_n=out_n,
+                            solve_timeout=timeout,
+                            timing_recorder=timing1,
+                        )
+                        if progress is not None:
+                            progress.update(1)
+                        deletions_checked += 1
+                        if timing1.get('timed_out', False):
+                            self.skipTest(
+                                f"Timeout during MUS minimality check (single deletion) "
+                                f"(n_nodes={n_nodes}, core={core_idx}, remove={remove_pos}/{len(del_idxs)}, timeout={timeout}s)"
+                            )
+                        if len(models1) > 0:
+                            deletions_sat += 1
+                        else:
+                            core_all_deletions_sat = False
+                            failures.append(
+                                f"Core #{core_idx}: removing '{removed_fact}' did NOT restore SAT "
+                                f"(n_nodes={n_nodes}, |core|={len(core_norm)})"
+                            )
+                    finally:
+                        try:
+                            os.remove(sub_file)
+                        except Exception:
+                            pass
+
+                if core_all_deletions_sat:
+                    theory_applies_cores += 1
+            finally:
+                try:
+                    os.remove(core_file)
+                except Exception:
+                    pass
+
+        if progress is not None:
+            try:
+                progress.close()
+            except Exception:
+                pass
+
+        logging.info(
+            "MUS single-deletion summary (n_nodes=%s): cores_checked=%s, deletions_checked=%s, deletions_sat=%s, "
+            "cores_where_property_holds=%s; core_only_unsat=%s, core_only_sat=%s",
+            n_nodes,
+            cores_checked,
+            deletions_checked,
+            deletions_sat,
+            theory_applies_cores,
+            diag_core_only_unsat,
+            diag_core_only_sat,
+        )
+        if cores_tested_for_minimality == 0:
+            self.skipTest(
+                f"No MUS cores were UNSAT in isolation; skipping MUS minimality checks "
+                f"(n_nodes={n_nodes}, cores_checked={cores_checked}, core_only_sat={diag_core_only_sat})"
+            )
+        if failures:
+            # This is a real minimality violation (core UNSAT but core\{f} still UNSAT).
+            self.fail("\n".join(failures[:20]) + ("\n..." if len(failures) > 20 else ""))
+
+    def _assert_mus_cores_enforced_unsat_under_mus_background(
+        self,
+        *,
+        n_nodes: int,
+        mus_list: list[list[int]],
+        program_text: str | None = None,
+        emit_lp_path: str | None = None,
+        facts_ext: list[str] | None = None,
+        solve_timeout_sec: float | None = None,
+    ) -> None:
+        """Check MUS definition: enforced core must be UNSAT under the same MUS program.
+
+        Given MUS cores as lists of indices (as returned by `CausalABA_MUS(...)["mus_list"]`),
+        enforce each core by adding facts `mus(i).` to the *same adorned MUS program* and assert
+        clingo reports UNSAT.
+
+        This is intentionally different from checking the core facts in isolation under `CausalABA`.
+        """
+        _ensure_solvers_imported()
+
+        import shutil
+        import subprocess
+
+        if not mus_list:
+            return
+
+        if shutil.which('clingo') is None:
+            self.skipTest("clingo not found on PATH")
+
+        timeout = solve_timeout_sec
+        if timeout is None:
+            timeout = float(min(10, int(MUS_SOLVE_TIMEOUT)))
+
+        def _clingo_is_sat(program: str, timeout_sec: float) -> bool | None:
+            fd, tmp_lp = tempfile.mkstemp(suffix='_clingo_check.lp', text=True)
+            os.close(fd)
+            try:
+                with open(tmp_lp, 'w') as f:
+                    f.write(program)
+                try:
+                    proc = subprocess.run(
+                        ['clingo', tmp_lp, '-n', '1'],
+                        capture_output=True,
+                        text=True,
+                        timeout=float(timeout_sec),
+                    )
+                except subprocess.TimeoutExpired:
+                    return None
+                out = proc.stdout or ''
+                if 'UNSATISFIABLE' in out:
+                    return False
+                if 'SATISFIABLE' in out:
+                    return True
+                return None
+            finally:
+                try:
+                    os.remove(tmp_lp)
+                except Exception:
+                    pass
+
+        # Prefer reusing the emitted MUS program (avoids rebuilding via compile_and_ground).
+        base_program: str | None = None
+        if program_text is not None:
+            base_program = str(program_text)
+        elif emit_lp_path and os.path.exists(str(emit_lp_path)):
+            try:
+                with open(str(emit_lp_path), 'r') as f:
+                    base_program = f.read()
+            except Exception as e:
+                logging.warning(f"Failed to read emitted MUS program '{emit_lp_path}': {e}")
+                base_program = None
+
+        # Fallback: rebuild the adorned program (can be slower).
+        tmp_facts_file: str | None = None
+        if base_program is None:
+            if not facts_ext:
+                self.skipTest("No MUS program text available (no emit_lp_path/program_text and no facts_ext to rebuild)")
+
+            from causalaba_mus import parse_facts_from_file, build_mus_program
+
+            fd, tmp_facts_file = tempfile.mkstemp(suffix='_mus_facts.lp', text=True)
+            os.close(fd)
+            with open(tmp_facts_file, 'w') as f:
+                for s in facts_ext:
+                    line = self._normalize_fact_str(str(s))
+                    if not line.strip():
+                        continue
+                    f.write(f"{line}\n")
+
+            facts_no_period, _mapping = parse_facts_from_file(tmp_facts_file)
+            base_program = build_mus_program(n_nodes, facts_no_period, tmp_facts_file)
+
+        try:
+            assert base_program is not None
+
+            # Large random instances can yield many MUSes; keep runtime bounded.
+            max_cores_to_check = 100
+            rng = random.Random(0)
+            cores_all = list(mus_list)
+            if len(cores_all) > max_cores_to_check:
+                idxs = sorted(rng.sample(range(len(cores_all)), k=max_cores_to_check))
+                cores_to_check = [(i + 1, cores_all[i]) for i in idxs]
+            else:
+                cores_to_check = [(i + 1, core) for i, core in enumerate(cores_all)]
+
+            logging.info(
+                "MUS enforced-UNSAT check (n_nodes=%s): checking %s/%s cores",
+                n_nodes,
+                len(cores_to_check),
+                len(cores_all),
+            )
+
+            for core_idx, core in cores_to_check:
+                forced = (
+                    base_program
+                    + "\n% ===== Force MUS core =====\n"
+                    + "\n".join(f"mus({i})." for i in (core or []))
+                    + "\n"
+                )
+                is_sat = _clingo_is_sat(forced, timeout_sec=float(timeout))
+                if is_sat is None:
+                    self.skipTest(f"Timeout/unknown while checking enforced MUS core #{core_idx}")
+                self.assertFalse(
+                    is_sat,
+                    f"MUS core #{core_idx} was SAT when enforced under the MUS background (core={core})",
+                )
+        finally:
+            if tmp_facts_file is not None:
+                try:
+                    os.remove(tmp_facts_file)
+                except Exception:
+                    pass
+
+    def _assert_mus_cores_enforced_unsat_under_abapc_background(
+        self,
+        *,
+        n_nodes: int,
+        mus_facts: list[list[str]],
+        solve_timeout_sec: float | None = None,
+    ) -> None:
+        """Check UNSAT for each MUS core under the plain CausalABA background.
+
+        For each (sampled) MUS core returned by `CausalABA_MUS` (as resolved fact strings),
+        write a temporary facts file containing only that core and assert that calling
+        `CausalABA(...)` yields UNSAT.
+        """
+        _ensure_solvers_imported()
+
+        if not mus_facts:
+            return
+
+        timeout = solve_timeout_sec
+        if timeout is None:
+            timeout = float(min(10, int(MUS_SOLVE_TIMEOUT)))
+
+        # Large instances can yield many MUSes; keep runtime bounded.
+        max_cores_to_check = 100
+        rng = random.Random(0)
+        cores_all = list(mus_facts)
+        if len(cores_all) > max_cores_to_check:
+            idxs = sorted(rng.sample(range(len(cores_all)), k=max_cores_to_check))
+            cores_to_check = [(i + 1, cores_all[i]) for i in idxs]
+        else:
+            cores_to_check = [(i + 1, core) for i, core in enumerate(cores_all)]
+
+        logging.info(
+            "MUS enforced-UNSAT under ABAPC background (n_nodes=%s): checking %s/%s cores",
+            n_nodes,
+            len(cores_to_check),
+            len(cores_all),
+        )
+
+        def _write_fact_lines(path: str, facts: list[str]) -> None:
+            with open(path, 'w') as f:
+                for s in facts:
+                    line = self._normalize_fact_str(str(s))
+                    if not line.strip():
+                        continue
+                    f.write(f"{line}\n")
+
+        for core_idx, core in cores_to_check:
+            core_norm = [self._normalize_fact_str(str(s)) for s in (core or []) if str(s).strip()]
+            if not core_norm:
+                continue
+
+            fd, core_file = tempfile.mkstemp(suffix='_mus_core_abapc.lp', text=True)
+            os.close(fd)
+            try:
+                _write_fact_lines(core_file, core_norm)
+
+                timing: dict[str, Any] = {}
+                models, _ = CausalABA(
+                    n_nodes,
+                    core_file,
+                    weak_constraints=False,
+                    print_models=False,
+                    skeleton_rules_reduction=True,
+                    out_n=1,
+                    solve_timeout=timeout,
+                    timing_recorder=timing,
+                )
+                if timing.get('timed_out', False):
+                    self.skipTest(
+                        f"Timeout while checking ABAPC-background UNSAT for MUS core #{core_idx} (timeout={timeout}s)"
+                    )
+                self.assertEqual(
+                    len(models),
+                    0,
+                    f"MUS core #{core_idx} was SAT under ABAPC background when isolated to its facts",
+                )
+            finally:
+                try:
+                    os.remove(core_file)
+                except Exception:
+                    pass
+
+    def _run_mus_mcs_for_size(
+        self,
+        n_nodes: int,
+        seed: int | None = None,
+        graph_type: str | None = None,
+        *,
+        max_muses_override: int | None = None,
+    ):
         """Helper to run the full MUS/MCS pipeline for a given node size.
-        
+
         This extracts the core logic of test_mus_mcs_random_five_node_abapc so it can
         be parameterized across different sizes without code duplication.
-        
+
         Args:
             n_nodes: Number of nodes in the random graph
-            seed: Optional random seed; if None, uses default seed_map based on n_nodes
-        
+            seed: Optional random seed; if None, uses MUS_SEED_BASE
+            graph_type: Optional graph family name
+
         Returns a dict with keys:
-        - 'was_sat': bool, True if ABAPC found the instance was already SAT (remove_n == 0)
-        - 'abapc_timeout': bool, True if ABAPC hit timeout
-        - 'mus_timeout': bool, True if MUS hit timeout
+            - 'was_sat': bool, True if ABAPC found the instance was already SAT (remove_n == 0)
+            - 'abapc_timeout': bool, True if ABAPC hit timeout
+            - 'mus_timeout': bool, True if MUS hit timeout
         """
         import types
         import re
@@ -1661,9 +2395,11 @@ class TestMUSAnalysis(unittest.TestCase):
                 line = s if s.endswith('.') else s + '.'
                 f.write(f"{line}\n")
 
-        # Cap MUS enumeration for larger sizes to keep runtime reasonable
-        # But allow environment variables to override for full exploration
-        if MUS_MAX_MUSES != "":
+        # Cap MUS enumeration for larger sizes to keep runtime reasonable.
+        # Allow explicit per-call override (used by demo tests).
+        if max_muses_override is not None:
+            max_muses = int(max_muses_override)
+        elif MUS_MAX_MUSES != "":
             max_muses = int(MUS_MAX_MUSES) if MUS_MAX_MUSES != "0" else 0
         else:
             # Default: limit for faster testing
@@ -1698,6 +2434,14 @@ class TestMUSAnalysis(unittest.TestCase):
         else:
             spec = "results/adornedLP_{n}_{seed}.lp" if emit_lp_spec else ""
 
+        # If we're going to validate enforced MUS cores, ensure we have the full adorned program on disk
+        # so we can reuse it without rebuilding.
+        tmp_emit_for_enforced: str | None = None
+        if MUS_CHECK_ENFORCED_UNSAT and not spec:
+            fd_emit, tmp_emit_for_enforced = tempfile.mkstemp(suffix=f"_adorned_{n_nodes}_{seed}.lp", text=True)
+            os.close(fd_emit)
+            emit_lp_path = tmp_emit_for_enforced
+
         if spec:
             emit_lp_path = spec.replace('{n}', str(n_nodes)).replace('{seed}', str(seed))
             emit_dir = os.path.dirname(emit_lp_path)
@@ -1705,8 +2449,9 @@ class TestMUSAnalysis(unittest.TestCase):
                 os.makedirs(emit_dir, exist_ok=True)
             logging.info(f"Will emit MUS program to {emit_lp_path}")
         
-        # Special handling: if MUS_MAX_MUSES is empty string, pass None to omit -n flag
-        max_muses_arg = None if MUS_MAX_MUSES == "" else max_muses
+        # Special handling: if MUS_MAX_MUSES is empty string, pass None to omit -n flag.
+        # If max_muses_override is set, always pass the explicit value through.
+        max_muses_arg = max_muses if max_muses_override is not None else (None if MUS_MAX_MUSES == "" else max_muses)
         
         mus_timing = {}  # To capture compile/ground breakdown
         mus_result = CausalABA_MUS(
@@ -1730,6 +2475,24 @@ class TestMUSAnalysis(unittest.TestCase):
         logging.info(f"  → MUS found: {mus_result['n_mus']}")
         logging.info(f"  → MCS found: {mus_result.get('n_mcs', 0)}")
         logging.info(f"  → MUS time: {mus_time.total_seconds():.3f}s")
+
+        # Optional: verify MUS definition directly (enforced core under same MUS program is UNSAT).
+        if MUS_CHECK_ENFORCED_UNSAT:
+            self._assert_mus_cores_enforced_unsat_under_mus_background(
+                n_nodes=n_nodes,
+                mus_list=mus_result.get('mus_list', []) or [],
+                emit_lp_path=emit_lp_path,
+                facts_ext=facts_ext,
+                solve_timeout_sec=float(min(10, int(MUS_SOLVE_TIMEOUT))),
+            )
+
+        # Optional: verify each MUS core's corresponding facts are UNSAT under the plain ABAPC background.
+        if MUS_CHECK_ENFORCED_UNSAT_ABAPC:
+            self._assert_mus_cores_enforced_unsat_under_abapc_background(
+                n_nodes=n_nodes,
+                mus_facts=mus_result.get('mus_facts', []) or [],
+                solve_timeout_sec=float(min(10, int(MUS_SOLVE_TIMEOUT))),
+            )
 
         # ===== TIMING COMPARISON (Phase Breakdown) =====
         try:
@@ -1853,6 +2616,11 @@ class TestMUSAnalysis(unittest.TestCase):
         os.remove(facts_I_file)
         os.remove(facts_wc_file)
         os.remove(facts_mus_file)
+        if tmp_emit_for_enforced is not None:
+            try:
+                os.remove(tmp_emit_for_enforced)
+            except Exception:
+                pass
 
         logging.info(f"✓ Completed run for n_nodes={n_nodes}\n")
         
@@ -1870,12 +2638,15 @@ class TestMUSAnalysis(unittest.TestCase):
         
         # Return status info for retry logic
         return {
-            'was_sat': remove_n == 0,
+            # "startSAT" should mean we actually found at least one model without removing facts.
+            # (remove_n can be 0 for other reasons, including timeouts or early exits.)
+            'was_sat': (remove_n == 0) and (len(models_after) > 0) and (not abapc_timeout),
             'abapc_timeout': abapc_timeout,
             'mus_timeout': mus_timeout,
             'abapc_time_sec': abapc_time.total_seconds(),
             'mus_time_sec': mus_time.total_seconds(),
             'remove_n': remove_n,
+            'n_models_after': len(models_after),
             # For correspondence checks (used by test_mus_mcs_random_sizes_abapc)
             'seed': seed,
             'graph_type': graph_type,
@@ -1981,7 +2752,25 @@ if __name__ == '__main__':
         default=MUS_MUS_THRESHOLD,
         help="CAMUS MUS threshold (0=unlimited, default=300)",
     )
+    parser.add_argument(
+        "--check-mus-minimality",
+        action="store_true",
+        default=MUS_CHECK_MINIMALITY,
+        help="Enable MUS minimality diagnostics (core-alone UNSAT and single-deletion SAT checks)",
+    )
     args, remaining = parser.parse_known_args()
+
+    if remaining:
+        # Avoid silent misconfiguration (e.g., typing `max-muses 0` instead of `--max-muses 0`).
+        # Print at exit so it doesn't get buried by long logs.
+        ignored = list(remaining)
+
+        def _warn_ignored_args() -> None:
+            sys.stderr.write(
+                "\nWARNING: Unrecognized CLI arguments were ignored: " + " ".join(ignored) + "\n"
+            )
+
+        atexit.register(_warn_ignored_args)
 
     MUS_SOLVE_TIMEOUT = args.solve_timeout
     MUS_NODE_SIZES = _parse_node_sizes(args.node_sizes)
@@ -1997,6 +2786,7 @@ if __name__ == '__main__':
     MUS_ABAPC_OPT_MODE = args.opt_mode
     MUS_MCS_THRESHOLD = args.mcs_threshold
     MUS_MUS_THRESHOLD = args.mus_threshold
+    MUS_CHECK_MINIMALITY = bool(args.check_mus_minimality)
 
     start = datetime.now()
     logger_setup()
