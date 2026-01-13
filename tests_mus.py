@@ -107,6 +107,14 @@ MUS_CHECK_ENFORCED_UNSAT = os.environ.get("MUS_CHECK_ENFORCED_UNSAT", "1").strip
 # running CausalABA on *only those facts* yields UNSAT (ABAPC background).
 MUS_CHECK_ENFORCED_UNSAT_ABAPC = os.environ.get("MUS_CHECK_ENFORCED_UNSAT_ABAPC", "1").strip() not in ("", "0", "false", "False", "no", "NO")
 
+# Optional diagnostic: check MCS semantics (repairs).
+# For each returned MCS, if we enable all facts *except* those in the MCS, the program should be SAT.
+MUS_CHECK_MCS_REMOVED_SAT = os.environ.get("MUS_CHECK_MCS_REMOVED_SAT", "1").strip() not in ("", "0", "false", "False", "no", "NO")
+
+# Same as MUS_CHECK_MCS_REMOVED_SAT, but checked under the plain CausalABA (ABAPC) background:
+# run CausalABA on all facts with the MCS facts removed and assert SAT.
+MUS_CHECK_MCS_REMOVED_SAT_ABAPC = os.environ.get("MUS_CHECK_MCS_REMOVED_SAT_ABAPC", "1").strip() not in ("", "0", "false", "False", "no", "NO")
+
 # Whether to require at least one MUS to intersect wrong facts. Empirically this can be false
 # on some random instances; default is to warn rather than fail.
 MUS_REQUIRE_MUS_HIT_WRONG = os.environ.get("MUS_REQUIRE_MUS_HIT_WRONG", "0").strip() not in ("", "0", "false", "False", "no", "NO")
@@ -2192,6 +2200,228 @@ class TestMUSAnalysis(unittest.TestCase):
                 except Exception:
                     pass
 
+    def _assert_mcs_cores_removed_sat_under_mus_background(
+        self,
+        *,
+        n_nodes: int,
+        mcs_list: list[list[int]],
+        n_facts_total: int,
+        program_text: str | None = None,
+        emit_lp_path: str | None = None,
+        facts_ext: list[str] | None = None,
+        solve_timeout_sec: float | None = None,
+    ) -> None:
+        """Check MCS semantics under the MUS (adorned) background.
+
+        For each returned MCS cut C (a set of mus(i) assumptions to disable), enforce:
+        - mus(i). for all i not in C
+        - :- mus(i). for all i in C
+        and check the adorned program is SAT.
+        """
+        _ensure_solvers_imported()
+
+        import shutil
+        import subprocess
+
+        if not mcs_list:
+            return
+
+        if shutil.which('clingo') is None:
+            self.skipTest("clingo not found on PATH")
+
+        timeout = solve_timeout_sec
+        if timeout is None:
+            timeout = float(min(10, int(MUS_SOLVE_TIMEOUT)))
+
+        def _clingo_is_sat(program: str, timeout_sec: float) -> bool | None:
+            fd, tmp_lp = tempfile.mkstemp(suffix='_clingo_check.lp', text=True)
+            os.close(fd)
+            try:
+                with open(tmp_lp, 'w') as f:
+                    f.write(program)
+                try:
+                    proc = subprocess.run(
+                        ['clingo', tmp_lp, '-n', '1'],
+                        capture_output=True,
+                        text=True,
+                        timeout=float(timeout_sec),
+                    )
+                except subprocess.TimeoutExpired:
+                    return None
+                out = proc.stdout or ''
+                if 'UNSATISFIABLE' in out:
+                    return False
+                if 'SATISFIABLE' in out:
+                    return True
+                return None
+            finally:
+                try:
+                    os.remove(tmp_lp)
+                except Exception:
+                    pass
+
+        # Prefer reusing the emitted MUS program (avoids rebuilding via compile_and_ground).
+        base_program: str | None = None
+        if program_text is not None:
+            base_program = str(program_text)
+        elif emit_lp_path and os.path.exists(str(emit_lp_path)):
+            try:
+                with open(str(emit_lp_path), 'r') as f:
+                    base_program = f.read()
+            except Exception as e:
+                logging.warning(f"Failed to read emitted MUS program '{emit_lp_path}': {e}")
+                base_program = None
+
+        # Fallback: rebuild the adorned program (can be slower).
+        tmp_facts_file: str | None = None
+        if base_program is None:
+            if not facts_ext:
+                self.skipTest("No MUS program text available for MCS MUS-background check")
+
+            from causalaba_mus import parse_facts_from_file, build_mus_program
+
+            fd, tmp_facts_file = tempfile.mkstemp(suffix='_mus_facts.lp', text=True)
+            os.close(fd)
+            with open(tmp_facts_file, 'w') as f:
+                for s in facts_ext:
+                    line = self._normalize_fact_str(str(s))
+                    if not line.strip():
+                        continue
+                    f.write(f"{line}\n")
+
+            facts_no_period, _mapping = parse_facts_from_file(tmp_facts_file)
+            base_program = build_mus_program(n_nodes, facts_no_period, tmp_facts_file)
+
+        try:
+            assert base_program is not None
+
+            max_cores_to_check = 100
+            rng = random.Random(0)
+            cuts_all = list(mcs_list)
+            if len(cuts_all) > max_cores_to_check:
+                idxs = sorted(rng.sample(range(len(cuts_all)), k=max_cores_to_check))
+                cuts_to_check = [(i + 1, cuts_all[i]) for i in idxs]
+            else:
+                cuts_to_check = [(i + 1, cut) for i, cut in enumerate(cuts_all)]
+
+            logging.info(
+                "MCS removed->SAT check (MUS background, n_nodes=%s): checking %s/%s cuts",
+                n_nodes,
+                len(cuts_to_check),
+                len(cuts_all),
+            )
+
+            all_idxs = list(range(1, int(n_facts_total) + 1))
+            for cut_idx, cut in cuts_to_check:
+                cut_set = set(int(x) for x in (cut or []))
+                keep = [i for i in all_idxs if i not in cut_set]
+                forced = (
+                    base_program
+                    + "\n% ===== Force ALL but this MCS =====\n"
+                    + "\n".join(f"mus({i})." for i in keep)
+                    + ("\n" if keep else "")
+                    + "\n".join(f":- mus({i})." for i in sorted(cut_set))
+                    + "\n"
+                )
+                is_sat = _clingo_is_sat(forced, timeout_sec=float(timeout))
+                if is_sat is None:
+                    self.skipTest(f"Timeout/unknown while checking MCS removed->SAT (MUS background) cut #{cut_idx}")
+                self.assertTrue(
+                    is_sat,
+                    f"MCS cut #{cut_idx} did NOT restore SAT under MUS background (cut={sorted(cut_set)})",
+                )
+        finally:
+            if tmp_facts_file is not None:
+                try:
+                    os.remove(tmp_facts_file)
+                except Exception:
+                    pass
+
+    def _assert_mcs_cores_removed_sat_under_abapc_background(
+        self,
+        *,
+        n_nodes: int,
+        facts_ext: list[str],
+        mcs_facts: list[list[str]],
+        solve_timeout_sec: float | None = None,
+    ) -> None:
+        """Check MCS semantics under the plain CausalABA (ABAPC) background.
+
+        For each returned MCS cut C (as resolved fact strings), remove those facts from the
+        instance fact set and check CausalABA is SAT.
+        """
+        _ensure_solvers_imported()
+
+        if not facts_ext or not mcs_facts:
+            return
+
+        timeout = solve_timeout_sec
+        if timeout is None:
+            timeout = float(min(10, int(MUS_SOLVE_TIMEOUT)))
+
+        max_cores_to_check = 100
+        rng = random.Random(0)
+        cuts_all = list(mcs_facts)
+        if len(cuts_all) > max_cores_to_check:
+            idxs = sorted(rng.sample(range(len(cuts_all)), k=max_cores_to_check))
+            cuts_to_check = [(i + 1, cuts_all[i]) for i in idxs]
+        else:
+            cuts_to_check = [(i + 1, cut) for i, cut in enumerate(cuts_all)]
+
+        all_facts_norm = [self._normalize_fact_str(str(s)) for s in (facts_ext or []) if str(s).strip()]
+        seen_all: set[str] = set()
+        all_facts_norm = [s for s in all_facts_norm if not (s in seen_all or seen_all.add(s))]
+        if not all_facts_norm:
+            return
+
+        def _write_fact_lines(path: str, facts: list[str]) -> None:
+            with open(path, 'w') as f:
+                for s in facts:
+                    line = self._normalize_fact_str(str(s))
+                    if not line.strip():
+                        continue
+                    f.write(f"{line}\n")
+
+        logging.info(
+            "MCS removed->SAT check (ABAPC background, n_nodes=%s): checking %s/%s cuts",
+            n_nodes,
+            len(cuts_to_check),
+            len(cuts_all),
+        )
+
+        for cut_idx, cut in cuts_to_check:
+            cut_norm = {self._normalize_fact_str(str(s)) for s in (cut or []) if str(s).strip()}
+            remaining = [s for s in all_facts_norm if s not in cut_norm]
+            fd, tmp_file = tempfile.mkstemp(suffix='_mcs_removed_abapc.lp', text=True)
+            os.close(fd)
+            try:
+                _write_fact_lines(tmp_file, remaining)
+                timing: dict[str, Any] = {}
+                models, _ = CausalABA(
+                    n_nodes,
+                    tmp_file,
+                    weak_constraints=False,
+                    print_models=False,
+                    skeleton_rules_reduction=True,
+                    out_n=1,
+                    solve_timeout=timeout,
+                    timing_recorder=timing,
+                )
+                if timing.get('timed_out', False):
+                    self.skipTest(
+                        f"Timeout while checking MCS removed->SAT under ABAPC background (cut #{cut_idx}, timeout={timeout}s)"
+                    )
+                self.assertGreater(
+                    len(models),
+                    0,
+                    f"MCS cut #{cut_idx} did NOT restore SAT under ABAPC background",
+                )
+            finally:
+                try:
+                    os.remove(tmp_file)
+                except Exception:
+                    pass
+
     def _run_mus_mcs_for_size(
         self,
         n_nodes: int,
@@ -2434,10 +2664,10 @@ class TestMUSAnalysis(unittest.TestCase):
         else:
             spec = "results/adornedLP_{n}_{seed}.lp" if emit_lp_spec else ""
 
-        # If we're going to validate enforced MUS cores, ensure we have the full adorned program on disk
-        # so we can reuse it without rebuilding.
+        # If we're going to validate MUS/MCS semantics under the MUS (adorned) background,
+        # ensure we have the full adorned program on disk so we can reuse it without rebuilding.
         tmp_emit_for_enforced: str | None = None
-        if MUS_CHECK_ENFORCED_UNSAT and not spec:
+        if (MUS_CHECK_ENFORCED_UNSAT or MUS_CHECK_MCS_REMOVED_SAT) and not spec:
             fd_emit, tmp_emit_for_enforced = tempfile.mkstemp(suffix=f"_adorned_{n_nodes}_{seed}.lp", text=True)
             os.close(fd_emit)
             emit_lp_path = tmp_emit_for_enforced
@@ -2491,6 +2721,25 @@ class TestMUSAnalysis(unittest.TestCase):
             self._assert_mus_cores_enforced_unsat_under_abapc_background(
                 n_nodes=n_nodes,
                 mus_facts=mus_result.get('mus_facts', []) or [],
+                solve_timeout_sec=float(min(10, int(MUS_SOLVE_TIMEOUT))),
+            )
+
+        # Optional: verify MCS semantics (removing an MCS restores SAT).
+        if MUS_CHECK_MCS_REMOVED_SAT:
+            self._assert_mcs_cores_removed_sat_under_mus_background(
+                n_nodes=n_nodes,
+                mcs_list=mus_result.get('mcs_list', []) or [],
+                n_facts_total=len(facts_ext or []),
+                emit_lp_path=emit_lp_path,
+                facts_ext=facts_ext,
+                solve_timeout_sec=float(min(10, int(MUS_SOLVE_TIMEOUT))),
+            )
+
+        if MUS_CHECK_MCS_REMOVED_SAT_ABAPC:
+            self._assert_mcs_cores_removed_sat_under_abapc_background(
+                n_nodes=n_nodes,
+                facts_ext=facts_ext,
+                mcs_facts=mus_result.get('mcs_facts', []) or [],
                 solve_timeout_sec=float(min(10, int(MUS_SOLVE_TIMEOUT))),
             )
 
