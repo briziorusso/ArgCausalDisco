@@ -470,7 +470,7 @@ def build_mus_program(
             # so loading a facts file that contains `#external ext_*...` would create a conflict
             # (atom both external and defined) and can change semantics.
             facts_location="",
-            skeleton_rules_reduction=True,  # Enable skeleton-rules optimization for MUS
+            skeleton_rules_reduction=False,
             weak_constraints=False,
             indep_facts=indep_facts,
             dep_facts=dep_facts,
