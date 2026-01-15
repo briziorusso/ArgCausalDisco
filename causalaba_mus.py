@@ -70,8 +70,17 @@ def parse_facts_from_file(facts_location: str) -> tuple[list[str], dict[int, str
             line = line.strip()
             if not line or line.startswith('%'):
                 continue
+
+            # Accept facts declared as externals (CausalABA-compatible):
+            #   #external ext_indep(...).
+            #   #external ext_dep(...).
+            if line.startswith('#external'):
+                line = line[len('#external'):].strip()
+
+            # Skip other directives.
             if line.startswith('#'):
                 continue
+
             if 'ext_indep' in line or 'ext_dep' in line:
                 if line.endswith('.'):
                     fact_counter += 1
@@ -347,6 +356,64 @@ def build_mus_program(
         TimeoutError: If `deadline` is exceeded during program construction.
     """
     logging.debug("Building MUS program using compile_and_ground...")
+
+    def _parse_ext_fact_line(line: str) -> tuple[str, int, int, tuple[int, ...]] | None:
+        """Parse an ext fact like `ext_indep(0,1,s1y2)` (optionally with trailing '.')"""
+        raw = (line or "").strip()
+        if not raw:
+            return None
+        if raw.startswith('#external'):
+            raw = raw[len('#external'):].strip()
+        if raw.startswith('#') or raw.startswith('%'):
+            return None
+        if raw.endswith('.'):
+            raw = raw[:-1]
+
+        m = re.fullmatch(r'(ext_indep|ext_dep)\((\d+)\s*,\s*(\d+)\s*,\s*([^\)\s]+)\)', raw)
+        if not m:
+            return None
+        fact_type, x_str, y_str, s_sym = m.groups()
+        x, y = int(x_str), int(y_str)
+
+        # Convert s-sym (e.g., empty, s3, s1y2y4) to a tuple[int,...]
+        if s_sym == 'empty':
+            s_tuple: tuple[int, ...] = ()
+        elif s_sym.startswith('s'):
+            tail = s_sym[1:]
+            if not tail:
+                s_tuple = ()
+            else:
+                parts = [p for p in tail.split('y') if p]
+                try:
+                    s_tuple = tuple(int(p) for p in parts)
+                except Exception:
+                    return None
+        else:
+            return None
+
+        return fact_type, x, y, s_tuple
+
+    def _required_in_atoms_from_facts(facts_list: list[str]) -> set[str]:
+        req: set[str] = set()
+        for fact in facts_list or []:
+            parsed = _parse_ext_fact_line(fact)
+            if not parsed:
+                continue
+            _fact_type, _x, _y, s_tuple = parsed
+            if not s_tuple:
+                continue
+            s_sym = 's' + 'y'.join(str(i) for i in s_tuple)
+            for i in s_tuple:
+                req.add(f"in({i},{s_sym}).")
+        return req
+
+    def _specific_rules_missing_required_in(specific_text: str, facts_list: list[str]) -> list[str]:
+        required = _required_in_atoms_from_facts(facts_list)
+        if not required:
+            return []
+        present = set(re.findall(r"\bin\(\d+,[a-zA-Z0-9y_]+\)\.", specific_text or ""))
+        missing = sorted(required - present)
+        return missing
     
     # Determine specific rules file location
     if facts_location:
@@ -365,7 +432,15 @@ def build_mus_program(
             logging.debug(f"Found existing specific rules at {specific_rules_file}")
             with open(specific_rules_file, 'r') as f:
                 specific_rules_text = f.read()
-            logging.info(f"Loaded existing specific rules ({len(specific_rules_text)} chars)")
+            # Validate cached specific rules against the current fact set.
+            missing_in = _specific_rules_missing_required_in(specific_rules_text, facts)
+            if missing_in:
+                logging.warning(
+                    f"Cached specific rules file is missing {len(missing_in)} required in(...) atoms; regenerating: {specific_rules_file}"
+                )
+                specific_rules_text = None
+            else:
+                logging.info(f"Loaded existing specific rules ({len(specific_rules_text)} chars)")
         except Exception as e:
             logging.warning(f"Failed to load existing specific rules: {e}")
             specific_rules_text = None
@@ -375,71 +450,58 @@ def build_mus_program(
         # Parse facts to get indep_facts and dep_facts dicts
         indep_facts = {}
         dep_facts = {}
-        
-        if facts_location:
-            with open(facts_location, 'r') as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith('%') or line.startswith('#'):
-                        continue
-                    
-                    # Parse ext_indep or ext_dep
-                    match = re.match(r'(ext_indep|ext_dep)\((\d+),(\d+),([^\)]+)\)', line)
-                    if not match:
-                        continue
-                    
-                    fact_type, x, y, s = match.groups()
-                    x, y = int(x), int(y)
-                    
-                    # Convert s to tuple format
-                    if s == 'empty':
-                        s_tuple = ()
-                    else:
-                        # Parse s0, sy1y2, etc. to extract indices
-                        match_indices = re.match(r's((?:0|[1-9]\d*)*)', s)
-                        if match_indices:
-                            indices_str = match_indices.group(1)
-                            if indices_str:
-                                s_tuple = tuple(int(indices_str[i]) for i in range(len(indices_str)))
-                            else:
-                                s_tuple = ()
-                        else:
-                            s_tuple = ()
-                    
-                    facts_dict = indep_facts if fact_type == 'ext_indep' else dep_facts
-                    if (x, y) not in facts_dict:
-                        facts_dict[(x, y)] = set()
-                    facts_dict[(x, y)].add(s_tuple)
-        
-            # Call compile_and_ground with dump_specific
-            logging.debug(f"Calling compile_and_ground to dump specific rules to {specific_rules_file}")
-            ctl = compile_and_ground(
-                n_nodes,
-                facts_location=facts_location,
-                skeleton_rules_reduction=True,  # Enable skeleton-rules optimization for MUS
-                weak_constraints=False,
-                indep_facts=indep_facts,
-                dep_facts=dep_facts,
-                opt_mode='optN',
-                out_n=0,
-                show=['arrow'],
-                pre_grounding=False,
-                ext_flag=False,
-                prior_knowledge=None,
-                max_path_length=None,
-                max_conditioning_size=None,
-                collider_tree_depth=None,
-                cycle_length=None,
-                dump_specific=specific_rules_file,
-                deadline=deadline,
-                timing_recorder=timing_recorder,
+
+        # Build conditioning-set dictionaries from the already-parsed facts list.
+        # This is more robust than re-parsing a file (which may contain directives, spacing, or be moved).
+        for fact in facts or []:
+            parsed = _parse_ext_fact_line(fact)
+            if not parsed:
+                continue
+            fact_type, x, y, s_tuple = parsed
+            facts_dict = indep_facts if fact_type == 'ext_indep' else dep_facts
+            facts_dict.setdefault((x, y), set()).add(s_tuple)
+
+        # Call compile_and_ground with dump_specific (once, after collecting all facts)
+        logging.debug(f"Calling compile_and_ground to dump specific rules to {specific_rules_file}")
+        compile_and_ground(
+            n_nodes,
+            # IMPORTANT: For MUS/MCS enumeration we do not want ext_* atoms to be externals
+            # (declared via the facts file). The adorned program defines them via `fact :- mus(i).`
+            # so loading a facts file that contains `#external ext_*...` would create a conflict
+            # (atom both external and defined) and can change semantics.
+            facts_location="",
+            skeleton_rules_reduction=True,  # Enable skeleton-rules optimization for MUS
+            weak_constraints=False,
+            indep_facts=indep_facts,
+            dep_facts=dep_facts,
+            opt_mode='optN',
+            out_n=1,
+            show=['arrow'],
+            pre_grounding=False,
+            ext_flag=False,
+            prior_knowledge=None,
+            max_path_length=None,
+            max_conditioning_size=None,
+            collider_tree_depth=None,
+            cycle_length=None,
+            dump_specific=specific_rules_file,
+            deadline=deadline,
+            timing_recorder=timing_recorder,
+        )
+
+        # Load the dumped specific rules
+        with open(specific_rules_file, 'r') as f:
+            specific_rules_text = f.read()
+
+        # Defensive: ensure we emitted all required in(...) atoms for the fact set.
+        missing_in = _specific_rules_missing_required_in(specific_rules_text, facts)
+        if missing_in:
+            preview = " ".join(missing_in[:5])
+            raise RuntimeError(
+                f"Generated specific rules missing {len(missing_in)} required in(...) atoms; preview: {preview}"
             )
-            
-            # Load the dumped specific rules
-            with open(specific_rules_file, 'r') as f:
-                specific_rules_text = f.read()
-            
-            logging.debug(f"Generated and loaded {len(specific_rules_text)} chars of specific rules")
+
+        logging.debug(f"Generated and loaded {len(specific_rules_text)} chars of specific rules")
     
     # Load base causalaba.lp (skip #program directive)
     causalaba_lp = Path(__file__).resolve().parent / 'encodings' / 'causalaba.lp'

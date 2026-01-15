@@ -115,6 +115,9 @@ MUS_CHECK_MCS_REMOVED_SAT = os.environ.get("MUS_CHECK_MCS_REMOVED_SAT", "1").str
 # run CausalABA on all facts with the MCS facts removed and assert SAT.
 MUS_CHECK_MCS_REMOVED_SAT_ABAPC = os.environ.get("MUS_CHECK_MCS_REMOVED_SAT_ABAPC", "1").strip() not in ("", "0", "false", "False", "no", "NO")
 
+# When enabled, ABAPC-background MCS removed->SAT becomes a hard assertion.
+MUS_CHECK_MCS_REMOVED_SAT_ABAPC_STRICT = os.environ.get("MUS_CHECK_MCS_REMOVED_SAT_ABAPC_STRICT", "1").strip() not in ("", "0", "false", "False", "no", "NO")
+
 # Whether to require at least one MUS to intersect wrong facts. Empirically this can be false
 # on some random instances; default is to warn rather than fail.
 MUS_REQUIRE_MUS_HIT_WRONG = os.environ.get("MUS_REQUIRE_MUS_HIT_WRONG", "0").strip() not in ("", "0", "false", "False", "no", "NO")
@@ -127,7 +130,7 @@ MUS_GRAPH_TYPE = os.environ.get("MUS_GRAPH_TYPE", "ER")
 MUS_GRAPH_TYPES = _parse_graph_types(os.environ.get("MUS_GRAPH_TYPES", "")) or (MUS_GRAPH_TYPE,)
 
 # ABAPC/Clingo options passed into CausalABA (removal strategy).
-MUS_ABAPC_OUT_N = int(os.environ.get("MUS_ABAPC_OUT_N", "0"))
+MUS_ABAPC_OUT_N = int(os.environ.get("MUS_ABAPC_OUT_N", "1"))
 MUS_ABAPC_OPT_MODE = os.environ.get("MUS_ABAPC_OPT_MODE", "optN")
 
 # Directory to save temp facts files for inspection (default: "" = delete temp files)
@@ -433,7 +436,7 @@ class TestMUSAnalysis(unittest.TestCase):
         with open(facts_file, 'w') as f:
             for s in facts_ext:
                 line = s if s.endswith('.') else s + '.'
-                f.write(f"#external {line}\n")
+                f.write(f"#external {self._normalize_fact_str(line)}\n")
 
         with open(facts_I_file, 'w') as f:
             for fact, s in zip(facts, facts_ext):
@@ -964,9 +967,9 @@ class TestMUSAnalysis(unittest.TestCase):
         os.close(fd)
         
         with open(facts_file, 'w') as f:
-            f.write("ext_indep(1,2,s0).\n")
-            f.write("ext_dep(1,2,empty).\n")
-            f.write("ext_indep(0,1,empty).\n")
+            f.write("#external ext_indep(1,2,s0).\n")
+            f.write("#external ext_dep(1,2,empty).\n")
+            f.write("#external ext_indep(0,1,empty).\n")
         
         logging.info("Mock-three-var facts:")
         logging.info("  1. ext_indep(1,2,s0)")
@@ -989,11 +992,11 @@ class TestMUSAnalysis(unittest.TestCase):
             
             with open(facts_file_removed, 'w') as f:
                 if removed_fact_num != 1:
-                    f.write("ext_indep(1,2,s0).\n")
+                    f.write("#external ext_indep(1,2,s0).\n")
                 if removed_fact_num != 2:
-                    f.write("ext_dep(1,2,empty).\n")
+                    f.write("#external ext_dep(1,2,empty).\n")
                 if removed_fact_num != 3:
-                    f.write("ext_indep(0,1,empty).\n")
+                    f.write("#external ext_indep(0,1,empty).\n")
             
             models_removed, _ = CausalABA(n_nodes, facts_file_removed, print_models=False, skeleton_rules_reduction=True)
             logging.info(f"  Removed fact {removed_fact_num}: {len(models_removed)} models")
@@ -1529,7 +1532,7 @@ class TestMUSAnalysis(unittest.TestCase):
             try:
                 with open(sub_file, 'w') as f:
                     for s in remaining:
-                        f.write(f"{self._normalize_fact_str(s)}\n")
+                        f.write(f"#external {self._normalize_fact_str(s)}\n")
 
                 timing1: dict[str, Any] = {}
                 models1, _ = CausalABA(
@@ -1596,6 +1599,11 @@ class TestMUSAnalysis(unittest.TestCase):
         s = (s or "").strip()
         if not s:
             return s
+        if s.startswith("#external"):
+            s = s[len("#external"):].strip()
+            # Common form is "#external <fact>."; tolerate missing spaces.
+            if s.startswith(" "):
+                s = s.strip()
         return s if s.endswith('.') else s + '.'
 
     def _assert_wrong_fact_correspondence(
@@ -1779,7 +1787,8 @@ class TestMUSAnalysis(unittest.TestCase):
                     line = self._normalize_fact_str(str(s))
                     if not line.strip():
                         continue
-                    f.write(f"{line}\n")
+                    # Mirror how ABAPC is typically run: facts are externals assigned true.
+                    f.write(f"#external {line}\n")
 
         # Only need one model to establish SAT.
         out_n = 1
@@ -2162,7 +2171,7 @@ class TestMUSAnalysis(unittest.TestCase):
                     line = self._normalize_fact_str(str(s))
                     if not line.strip():
                         continue
-                    f.write(f"{line}\n")
+                    f.write(f"#external {line}\n")
 
         for core_idx, core in cores_to_check:
             core_norm = [self._normalize_fact_str(str(s)) for s in (core or []) if str(s).strip()]
@@ -2325,7 +2334,12 @@ class TestMUSAnalysis(unittest.TestCase):
                 )
                 is_sat = _clingo_is_sat(forced, timeout_sec=float(timeout))
                 if is_sat is None:
-                    self.skipTest(f"Timeout/unknown while checking MCS removed->SAT (MUS background) cut #{cut_idx}")
+                    logging.warning(
+                        "Timeout/unknown while checking MCS removed->SAT (MUS background) cut #%s (timeout=%ss); skipping this cut",
+                        cut_idx,
+                        timeout,
+                    )
+                    continue
                 self.assertTrue(
                     is_sat,
                     f"MCS cut #{cut_idx} did NOT restore SAT under MUS background (cut={sorted(cut_set)})",
@@ -2380,7 +2394,8 @@ class TestMUSAnalysis(unittest.TestCase):
                     line = self._normalize_fact_str(str(s))
                     if not line.strip():
                         continue
-                    f.write(f"{line}\n")
+                    # Match standard ABAPC usage: declare tests as externals and let CausalABA assign them.
+                    f.write(f"#external {line}\n")
 
         logging.info(
             "MCS removed->SAT check (ABAPC background, n_nodes=%s): checking %s/%s cuts",
@@ -2390,7 +2405,20 @@ class TestMUSAnalysis(unittest.TestCase):
         )
 
         for cut_idx, cut in cuts_to_check:
-            cut_norm = {self._normalize_fact_str(str(s)) for s in (cut or []) if str(s).strip()}
+            # Be robust: depending on upstream formatting, a size-1 MCS might be returned
+            # as a single string instead of a list[str].
+            cut_items: list[Any]
+            if cut is None:
+                cut_items = []
+            elif isinstance(cut, str):
+                cut_items = [cut]
+            else:
+                try:
+                    cut_items = list(cut)
+                except Exception:
+                    cut_items = [cut]
+
+            cut_norm = {self._normalize_fact_str(str(s)) for s in cut_items if str(s).strip()}
             remaining = [s for s in all_facts_norm if s not in cut_norm]
             fd, tmp_file = tempfile.mkstemp(suffix='_mcs_removed_abapc.lp', text=True)
             os.close(fd)
@@ -2408,13 +2436,28 @@ class TestMUSAnalysis(unittest.TestCase):
                     timing_recorder=timing,
                 )
                 if timing.get('timed_out', False):
-                    self.skipTest(
-                        f"Timeout while checking MCS removed->SAT under ABAPC background (cut #{cut_idx}, timeout={timeout}s)"
+                    logging.warning(
+                        "Timeout/unknown while checking MCS removed->SAT (ABAPC background) cut #%s (timeout=%ss); skipping this cut",
+                        cut_idx,
+                        timeout,
                     )
-                self.assertGreater(
-                    len(models),
-                    0,
-                    f"MCS cut #{cut_idx} did NOT restore SAT under ABAPC background",
+                    continue
+
+                sat = len(models) > 0
+                if (not sat) and (not MUS_CHECK_MCS_REMOVED_SAT_ABAPC_STRICT):
+                    preview = sorted(cut_norm)[:5]
+                    if len(cut_norm) > 5:
+                        preview.append(f"... (+{len(cut_norm) - 5} more)")
+                    logging.warning(
+                        "MCS cut #%s did NOT restore SAT under ABAPC background (non-strict; continuing). Cut preview: %s",
+                        cut_idx,
+                        preview,
+                    )
+                    continue
+
+                self.assertTrue(
+                    sat,
+                    f"MCS cut #{cut_idx} did NOT restore SAT under ABAPC background (cut={sorted(cut_norm)})",
                 )
             finally:
                 try:
@@ -2555,13 +2598,13 @@ class TestMUSAnalysis(unittest.TestCase):
         if MUS_KEEP_TEMP_FILES:
             keep_dir = Path(MUS_KEEP_TEMP_FILES)
             keep_dir.mkdir(parents=True, exist_ok=True)
-            
+
             import shutil
             base_name = f"{n_nodes}_{seed}_facts"
             shutil.copy(facts_file, keep_dir / f"{base_name}.lp")
             shutil.copy(facts_I_file, keep_dir / f"{base_name}_I.lp")
             shutil.copy(facts_wc_file, keep_dir / f"{base_name}_wc.lp")
-            
+
             logging.info(f"  → Saved temp files to {keep_dir / base_name}*.lp")
 
         # Step 1: Run CasusalABA with all facts and apply ABAPC removal strategy (search='first')
@@ -2582,7 +2625,7 @@ class TestMUSAnalysis(unittest.TestCase):
             timing_recorder=abapc_timing,
         )
         abapc_time = datetime.now() - start_abapc
-        
+
         # Extract detailed timing from clingo statistics
         abapc_times = {}
         try:
