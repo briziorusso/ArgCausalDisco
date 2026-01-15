@@ -186,8 +186,25 @@ def run_mus_solver(
                 wasp_output, wasp_error = wasp_process.communicate(timeout=solve_timeout)
             else:
                 wasp_output, wasp_error = wasp_process.communicate()
-        except subprocess.TimeoutExpired:
-            logging.error(f"Wasp MUS solve timed out after {solve_timeout} seconds. Cancelling processes.")
+        except subprocess.TimeoutExpired as e:
+            # WASP may have already produced partial output (some MUS/MCS) before the timeout.
+            # Preserve and parse what we have instead of discarding it.
+            logging.error(
+                f"Wasp MUS solve timed out after {solve_timeout} seconds. Cancelling processes."
+            )
+
+            partial_out = ""
+            partial_err = ""
+            # In Python 3.12, TimeoutExpired can include partial stdout/stderr.
+            try:
+                partial_out = e.output or ""
+            except Exception:
+                partial_out = ""
+            try:
+                partial_err = e.stderr or ""
+            except Exception:
+                partial_err = ""
+
             try:
                 wasp_process.kill()
             except Exception:
@@ -196,17 +213,23 @@ def run_mus_solver(
                 clingo_process.kill()
             except Exception:
                 pass
-            # Attempt to collect any partial outputs (likely none)
+
+            # Attempt to collect any remaining buffered output after killing.
+            tail_out = ""
+            tail_err = ""
             try:
-                wasp_output, wasp_error = wasp_process.communicate(timeout=1)
+                tail_out, tail_err = wasp_process.communicate(timeout=1)
             except Exception:
-                wasp_output, wasp_error = "", ""
+                tail_out, tail_err = "", ""
             try:
                 clingo_process.wait(timeout=1)
             except Exception:
                 pass
-            # Return empty results to indicate timeout
-            return [] if not return_mcses else ([], [])
+
+            wasp_output = f"{partial_out}{tail_out}"
+            wasp_error = f"{partial_err}{tail_err}"
+
+            # Continue below to parse any partial MUS/MCS from wasp_output.
         
         # Wait for clingo to complete and get its stderr
         clingo_process.wait()
@@ -216,19 +239,30 @@ def run_mus_solver(
             clingo_process.stderr.close()
         
         if clingo_process.returncode != 0:
-            logging.error(f"Clingo failed with return code {clingo_process.returncode}: {clingo_error}")
-            return []
+            # If WASP terminates early, clingo can receive SIGPIPE while writing to the pipe.
+            # Treat that case as non-fatal if WASP succeeded and produced output.
+            if clingo_process.returncode == -13 and wasp_process.returncode == 0:
+                logging.debug("Clingo exited with SIGPIPE (-13) after WASP finished; ignoring.")
+            else:
+                logging.error(f"Clingo failed with return code {clingo_process.returncode}: {clingo_error}")
+                return []
         elif clingo_error.strip():
             # Clingo succeeded but had warnings/info messages
             logging.debug(f"Clingo stderr (informational): {clingo_error}")
         
         if wasp_process.returncode != 0:
-            logging.error(f"Wasp failed with return code {wasp_process.returncode}: {wasp_error}")
-            return []
+            # If we timed out and killed WASP, returncode will typically be non-zero.
+            # We still try to parse any partial output it produced.
+            if solve_timeout is None:
+                logging.error(f"Wasp failed with return code {wasp_process.returncode}: {wasp_error}")
+                return []
+            logging.debug(
+                f"Wasp exited non-zero (likely due to timeout/kill). Stderr: {wasp_error}"
+            )
         
         logging.debug(f"Wasp output:\n{wasp_output}")
         
-        # Parse MUS/MCS from output
+        # Parse MUS/MCS from output (may be partial if timed out)
         mus_list: List[List[int]] = []
         mcs_list: List[List[int]] = []
         for line in wasp_output.split('\n'):
@@ -255,6 +289,12 @@ def run_mus_solver(
                         mcs = [int(n) for n in mcs_predicates]
                         mcs_list.append(mcs)
                         logging.debug(f"Found MCS: {mcs}")
+
+        if solve_timeout is not None and (wasp_process.returncode != 0):
+            # This is the timeout path: surface partial progress if any.
+            logging.warning(
+                f"WASP timed out; returning partial results: {len(mus_list)} MUS, {len(mcs_list)} MCS"
+            )
         
         # Cleanup
         try:
@@ -295,7 +335,7 @@ def build_mus_program(
     
     Args:
         n_nodes: Number of variables/nodes for the instance.
-        facts: Wrong-test facts/constraints (typically derived from PC output).
+        facts: Facts/constraints (typically derived from PC output).
         facts_location: Optional path used to derive a "specific rules" file.
         deadline: Optional absolute perf_counter deadline for the build phase.
         timing_recorder: Optional dict to accumulate build/compile timings.
