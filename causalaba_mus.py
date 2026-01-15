@@ -44,6 +44,50 @@ from typing import Optional, Tuple, List, Union
 from causalaba import compile_and_ground
 
 
+def _normalize_ext_fact_key(s: str) -> str:
+    s = (s or "").strip()
+    if not s:
+        return s
+    if s.startswith('#external'):
+        s = s[len('#external'):].strip()
+    if s.endswith('.'):
+        s = s[:-1]
+    return s.strip()
+
+
+def parse_weights_from_wc_file(facts_wc_location: str) -> dict[str, int]:
+    """Parse weights from a weak-constraint file.
+
+    Expected formats include (with or without trailing '.' after the bracket):
+
+      :~ ext_indep(...). [-123]
+      :~ ext_dep(...). [-123].
+
+    Returns a dict mapping normalized fact strings (without trailing '.') to positive weights.
+    """
+    weights: dict[str, int] = {}
+    if not facts_wc_location:
+        return weights
+
+    with open(facts_wc_location, 'r') as f:
+        for raw in f:
+            line = (raw or "").strip()
+            if not line or line.startswith('%'):
+                continue
+            # Capture the body before the bracket and the first integer inside the bracket.
+            m = re.match(r"^:~\s*(.*?)\s*\[\s*([-+]?\d+)", line)
+            if not m:
+                continue
+            fact_part = _normalize_ext_fact_key(m.group(1))
+            try:
+                w = abs(int(m.group(2)))
+            except Exception:
+                continue
+            if fact_part:
+                weights[fact_part] = w
+    return weights
+
+
 def parse_facts_from_file(facts_location: str) -> tuple[list[str], dict[int, str]]:
     """Parse `ext_indep` / `ext_dep` facts from a `.lp` / `.asp` text file.
     
@@ -101,6 +145,7 @@ def run_mus_solver(
     print_mcses: bool = False,
     camus_mcs_threshold: Optional[int] = None,
     camus_mus_threshold: Optional[int] = None,
+    optimum_mcs_algorithm: Optional[str] = None,
     return_mcses: bool = False,
     solve_timeout: Optional[float] = None,
 ) -> Union[List[List[int]], Tuple[List[List[int]], List[List[int]]]]:
@@ -125,7 +170,9 @@ def run_mus_solver(
         Either `mus_list` (list of MUSes, each a list of ints), or `(mus_list, mcs_list)` when
         `return_mcses=True`.
     """
-    if print_mcses:
+    if optimum_mcs_algorithm:
+        logging.info("   Solving for MUS and optimum MCS...")
+    elif print_mcses:
         logging.info("   Solving for MUS and MCS...")
     else:
         logging.info("   Solving for MUS...")
@@ -150,7 +197,7 @@ def run_mus_solver(
             wasp_cmd.extend(['-n', str(max_muses)])
 
         # Optional: select MUS algorithm / print MCSes (CAMUS)
-        if print_mcses and mus_algorithm is None:
+        if (print_mcses or optimum_mcs_algorithm) and mus_algorithm is None:
             mus_algorithm = 'camus'
 
         if mus_algorithm:
@@ -163,7 +210,13 @@ def run_mus_solver(
                         alg = f"{alg},{camus_mus_threshold}"
             wasp_cmd.extend(['--mus-algorithm', alg])
 
-        if print_mcses:
+        # MCS modes:
+        # - Standard enumeration: --print-mcses (requires CAMUS)
+        # - Optimum MCS enumeration: --optimum-mcs-algorithm=<camus|emax>
+        #   (requires objective-literal facts in the program).
+        if optimum_mcs_algorithm:
+            wasp_cmd.append(f"--optimum-mcs-algorithm={optimum_mcs_algorithm}")
+        elif print_mcses:
             wasp_cmd.append('--print-mcses')
         
         logging.debug(f"Clingo command: {' '.join(clingo_cmd)}")
@@ -190,6 +243,7 @@ def run_mus_solver(
             clingo_process.stdout.close()
         
         # Wait for wasp to complete (with optional timeout)
+        timed_out = False
         try:
             if solve_timeout is not None:
                 wasp_output, wasp_error = wasp_process.communicate(timeout=solve_timeout)
@@ -201,6 +255,7 @@ def run_mus_solver(
             logging.error(
                 f"Wasp MUS solve timed out after {solve_timeout} seconds. Cancelling processes."
             )
+            timed_out = True
 
             partial_out = ""
             partial_err = ""
@@ -247,11 +302,11 @@ def run_mus_solver(
             clingo_error = clingo_process.stderr.read()
             clingo_process.stderr.close()
         
-        if clingo_process.returncode != 0:
-            # If WASP terminates early, clingo can receive SIGPIPE while writing to the pipe.
-            # Treat that case as non-fatal if WASP succeeded and produced output.
-            if clingo_process.returncode == -13 and wasp_process.returncode == 0:
-                logging.debug("Clingo exited with SIGPIPE (-13) after WASP finished; ignoring.")
+        if (not timed_out) and clingo_process.returncode != 0:
+            # If WASP terminates early (successfully or with an error), clingo can receive SIGPIPE
+            # while writing to the pipe. Treat SIGPIPE as non-fatal and rely on WASP's return code.
+            if clingo_process.returncode == -13:
+                logging.debug("Clingo exited with SIGPIPE (-13) after WASP closed stdin; ignoring.")
             else:
                 logging.error(f"Clingo failed with return code {clingo_process.returncode}: {clingo_error}")
                 return []
@@ -274,10 +329,11 @@ def run_mus_solver(
         # Parse MUS/MCS from output (may be partial if timed out)
         mus_list: List[List[int]] = []
         mcs_list: List[List[int]] = []
-        for line in wasp_output.split('\n'):
-            if line.startswith('[MUS #'):
+        for line in (wasp_output or "").split('\n'):
+            s = line.strip()
+            if s.startswith('[MUS #'):
                 # Format: [MUS #1]: mus(1) mus(3) mus(2)
-                match = re.search(r'\[MUS #\d+\]:\s*(.*)', line)
+                match = re.search(r'\[MUS #\d+\]:\s*(.*)', s)
                 if match:
                     mus_content = match.group(1).strip()
                     if mus_content:  # Non-empty MUS
@@ -288,15 +344,22 @@ def run_mus_solver(
                         logging.debug(f"Found MUS: {mus}")
                     else:
                         logging.debug("Found empty MUS (program is satisfiable)")
-            elif line.startswith('[MCS #'):
-                # Format: [MCS #1]: mus(1) mus(3)
-                match = re.search(r'\[MCS #\d+\]:\s*(.*)', line)
+            elif s.startswith('[MCS #'):
+                # Formats:
+                # - Standard: [MCS #1]: mus(1) mus(3)
+                # - Optimum:  [MCS #1, Cost 123]: mus(1) mus(3)
+                match = re.search(r'\[MCS #\d+(?:,\s*Cost\s+[^\]]+)?\]:\s*(.*)', s)
                 if match:
                     mcs_content = match.group(1).strip()
                     if mcs_content:
                         mcs_predicates = re.findall(r'mus\((\d+)\)', mcs_content)
                         mcs = [int(n) for n in mcs_predicates]
-                        mcs_list.append(mcs)
+                        # In optimum-MCS mode, WASP prints a sequence of improving cuts.
+                        # The last printed MCS corresponds to the optimum; keep only that.
+                        if optimum_mcs_algorithm:
+                            mcs_list = [mcs]
+                        else:
+                            mcs_list.append(mcs)
                         logging.debug(f"Found MCS: {mcs}")
 
         if solve_timeout is not None and (wasp_process.returncode != 0):
@@ -332,6 +395,7 @@ def build_mus_program(
     *,
     deadline: Optional[float] = None,
     timing_recorder: dict | None = None,
+    weights: Optional[list[int]] = None,
 ) -> str:
     """Build the full adorned program used for MUS/MCS enumeration.
     
@@ -534,6 +598,19 @@ def build_mus_program(
     # Add adorned facts: fact:- mus(i) (no spaces around :- for WASP compatibility)
     for i, fact in enumerate(facts, 1):
         program_lines.append(f"{fact}:-mus({i}).")
+
+    if weights is not None:
+        if len(weights) != len(facts):
+            raise ValueError(
+                f"weights length mismatch: got {len(weights)} weights for {len(facts)} facts"
+            )
+        program_lines.append("")
+        program_lines.append("% ===== Objective Literals for Optimum MCS =====")
+        program_lines.append("% __optimum_mcs_objective_literal__(W, mus(I)).")
+        for i, w in enumerate(weights, 1):
+            # WASP expects an integer weight.
+            wi = int(w)
+            program_lines.append(f"__optimum_mcs_objective_literal__({wi}, mus({i})).")
     
     program = '\n'.join(program_lines)
     logging.debug(f"Built complete MUS program: {len(program)} chars")
@@ -550,6 +627,8 @@ def CausalABA_MUS(
     max_muses: Optional[int] = None,
     mus_algorithm: Optional[str] = None,
     print_mcses: bool = False,
+    optimum_mcs_algorithm: Optional[str] = None,
+    facts_wc_location: str = "",
     camus_mcs_threshold: Optional[int] = None,
     camus_mus_threshold: Optional[int] = None,
     solve_timeout: Optional[float] = None,
@@ -574,6 +653,26 @@ def CausalABA_MUS(
         `mcs_list`, `mcs_facts`, `n_mcs`, plus timing fields.
     """
     logging.info("Running CausalABA MUS...")
+
+    if optimum_mcs_algorithm:
+        # Fail fast if the selected WASP build does not support optimum-MCS.
+        try:
+            proc = subprocess.run(
+                [wasp_path, '--help'],
+                capture_output=True,
+                text=True,
+                timeout=2.0,
+            )
+            help_text = (proc.stdout or "") + "\n" + (proc.stderr or "")
+        except Exception as e:
+            raise RuntimeError(
+                f"optimum_mcs_algorithm requested but failed to probe WASP help for '{wasp_path}': {e}"
+            )
+        if '--optimum-mcs-algorithm' not in help_text:
+            raise RuntimeError(
+                "optimum_mcs_algorithm requested but this WASP build does not support --optimum-mcs-algorithm. "
+                "Upgrade/rebuild WASP with optimum-MCS support, or disable optimum_mcs_algorithm."
+            )
     
     if not facts_location:
         logging.error("facts_location is required for MUS analysis")
@@ -599,7 +698,38 @@ def CausalABA_MUS(
     deadline = (time.perf_counter() + float(solve_timeout)) if solve_timeout is not None else None
     build_start = time.perf_counter()
     try:
-        program = build_mus_program(n_nodes, facts, facts_location, deadline=deadline, timing_recorder=timing_recorder)
+        weights: Optional[list[int]] = None
+        if optimum_mcs_algorithm:
+            if not facts_wc_location:
+                raise ValueError(
+                    "facts_wc_location is required when optimum_mcs_algorithm is enabled"
+                )
+            wmap = parse_weights_from_wc_file(facts_wc_location)
+            missing: list[str] = []
+            weights = []
+            for fact in facts:
+                key = _normalize_ext_fact_key(fact)
+                w = wmap.get(key)
+                if w is None:
+                    missing.append(key)
+                    weights.append(1)
+                else:
+                    # WASP optimum-MCS requires strictly positive weights.
+                    weights.append(max(1, int(w)))
+            if missing:
+                preview = ", ".join(missing[:5])
+                raise RuntimeError(
+                    f"Missing weights for {len(missing)} facts in {facts_wc_location}; preview: {preview}"
+                )
+
+        program = build_mus_program(
+            n_nodes,
+            facts,
+            facts_location,
+            deadline=deadline,
+            timing_recorder=timing_recorder,
+            weights=weights,
+        )
         build_time = time.perf_counter() - build_start
         logging.info(f"   MUS Build time: {build_time:.3f}s (nodes={n_nodes})")
         
@@ -642,12 +772,12 @@ def CausalABA_MUS(
                 'n_mcs': 0,
             }
     
-    # Step 3: Run MUS solver (optionally with CAMUS/MCS printing)
+    # Step 3: Run MUS solver (optionally with CAMUS/MCS printing or optimum MCS)
     mus_list: List[List[int]] = []
     mcs_list: List[List[int]] = []
 
     solve_start = time.perf_counter()
-    if print_mcses or mus_algorithm:
+    if print_mcses or mus_algorithm or optimum_mcs_algorithm:
         mus_mcs = run_mus_solver(
             program,
             gringo_path,
@@ -657,6 +787,7 @@ def CausalABA_MUS(
             print_mcses=print_mcses,
             camus_mcs_threshold=camus_mcs_threshold,
             camus_mus_threshold=camus_mus_threshold,
+            optimum_mcs_algorithm=optimum_mcs_algorithm,
             return_mcses=True,
             solve_timeout=remaining_timeout,
         )
