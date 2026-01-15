@@ -463,17 +463,29 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         logging.info(f"Times: {times}")
 
     elif search_for_models == 'first':
+        def _configure_first_witness(_ctl: Control) -> None:
+            """Configure clingo to return a quick SAT witness (no enumeration/optimization)."""
+            try:
+                cfg: Any = _ctl.configuration
+                cfg.solve.models = 1
+                # Weak constraints do not affect satisfiability; ignore optimization to get a quick witness.
+                cfg.solve.opt_mode = 'ignore'
+            except Exception:
+                pass
+
         for fact in facts:
             ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
             logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+
+        # Ensure the initial solve does not enumerate.
+        _configure_first_witness(ctl)
         models = []
         logging.info("   Solving...")
         i_counter = {"i": 0}
 
         def _on_model_first(model):
             i_counter["i"] += 1
-            if model.optimality_proven:
-                models.append(model.symbols(shown=True))
+            models.append(model.symbols(shown=True))
             if print_models:
                 logging.info(f"Answer {i_counter['i']}: {model}")
 
@@ -587,6 +599,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     deadline=reground_deadline,
                     timing_recorder=reground_timing,
                 )
+
+                # Ensure post-reground solve does not enumerate.
+                _configure_first_witness(ctl)
                 iter_ground_sec = float(reground_timing.get('ground_sec_total', 0.0))
                 for fact in facts[:-remove_n]:
                     ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
@@ -600,10 +615,12 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
 
             def _on_model2(model):
                 i_counter["i"] += 1
-                if model.optimality_proven:
-                    models.append(model.symbols(shown=True))
+                models.append(model.symbols(shown=True))
                 if print_models:
                     logging.info(f"Answer {i_counter['i']}: {model}")
+
+            # Ensure each removal-iteration solve does not enumerate.
+            _configure_first_witness(ctl)
 
             # If we already hit the timeout in the initial solve, stop trying
             # additional removal iterations.
