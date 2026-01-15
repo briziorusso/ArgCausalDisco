@@ -139,6 +139,14 @@ MUS_GRAPH_TYPES = _parse_graph_types(os.environ.get("MUS_GRAPH_TYPES", "")) or (
 MUS_ABAPC_OUT_N = int(os.environ.get("MUS_ABAPC_OUT_N", "1"))
 MUS_ABAPC_OPT_MODE = os.environ.get("MUS_ABAPC_OPT_MODE", "optN")
 
+# When enumerating compatible DAGs for the graph-eval summaries, it's often useful to
+# use a different model bound than the ABAPC removal run (which uses search='first').
+# Set to 0 to ask clingo for all models (can be very expensive).
+MUS_GRAPH_EVAL_OUT_N = int(os.environ.get("MUS_GRAPH_EVAL_OUT_N", str(MUS_ABAPC_OUT_N)))
+
+# SID is computed via cdt.metrics (R-backed) and can be very slow when many DAGs are enumerated.
+MUS_GRAPH_EVAL_SID = os.environ.get("MUS_GRAPH_EVAL_SID", "0").strip() not in ("", "0", "false", "False", "no", "NO")
+
 # Directory to save temp facts files for inspection (default: "" = delete temp files)
 MUS_KEEP_TEMP_FILES = os.environ.get("MUS_KEEP_TEMP_FILES", "")
 
@@ -1358,6 +1366,7 @@ class TestMUSAnalysis(unittest.TestCase):
                                 'n_facts': int(len(selected_run.get('facts_ext', []) or [])),
                                 'n_wrong': int(selected_run.get('count_wrong', 0) or 0),
                                 'overlap': overlap or {},
+                                'graph_eval': selected_run.get('graph_eval', {}) or {},
                             }
                         )
                         rep_outcomes[key]['completed'] += 1
@@ -1472,6 +1481,79 @@ class TestMUSAnalysis(unittest.TestCase):
 
                             for metric in ('hit_rate', 'jaccard', 'precision', 'recall', 'f1'):
                                 t = _metric_triplet_over_reps(group, metric)
+                                if not t:
+                                    logging.info(f"    {metric:<10}: none")
+                                    continue
+                                mn, av, mx = t
+                                logging.info(f"    {metric:<10}: {_fmt_triple(mn, av, mx)}")
+
+                        # ----- Graph eval summary over reps (Removal + OptMCS) -----
+                        def _graph_metric_vals(group_key: str, metric: str, stat: str) -> list[float]:
+                            out: list[float] = []
+                            for r in rows:
+                                g = (r.get('graph_eval') or {}).get(group_key) or {}
+                                md = (g.get(metric) or {})
+                                v = md.get(stat)
+                                if v is None:
+                                    continue
+                                try:
+                                    fv = float(v)
+                                except Exception:
+                                    continue
+                                # Drop NaN/inf so averages stay numeric.
+                                if fv != fv or fv in (float('inf'), float('-inf')):
+                                    continue
+                                out.append(fv)
+                            return out
+
+                        def _graph_count_vals(group_key: str) -> list[float]:
+                            out: list[float] = []
+                            for r in rows:
+                                g = (r.get('graph_eval') or {}).get(group_key) or {}
+                                c = g.get('count')
+                                if c is None:
+                                    continue
+                                out.append(float(c))
+                            return out
+
+                        def _graph_metric_triplet_over_reps(group_key: str, metric: str) -> tuple[float, float, float] | None:
+                            mins = _graph_metric_vals(group_key, metric, 'min')
+                            avgs = _graph_metric_vals(group_key, metric, 'avg')
+                            maxs = _graph_metric_vals(group_key, metric, 'max')
+                            if not mins and not avgs and not maxs:
+                                return None
+                            min_v = min(mins) if mins else 0.0
+                            avg_v = (sum(avgs) / len(avgs)) if avgs else 0.0
+                            max_v = max(maxs) if maxs else 0.0
+                            return (min_v, avg_v, max_v)
+
+                        ge_groups: list[tuple[str, str]] = [('Removal', 'Removal')]
+                        if any(('OptMCS' in (r.get('graph_eval') or {})) for r in rows):
+                            label = None
+                            for r in rows:
+                                gg = (r.get('graph_eval') or {}).get('OptMCS') or {}
+                                if gg.get('label'):
+                                    label = str(gg.get('label'))
+                                    break
+                            ge_groups.append(('OptMCS', label or 'OptMCS'))
+
+                        logging.info("\n" + 29*" " + "GRAPH EVAL OVER REPS")
+                        logging.info("  [min/avg/max]  (for SHD/SID: lower is better)")
+
+                        for group_key, group_label in ge_groups:
+                            logging.info(f"\n{29*' '}  {group_label}:")
+                            ndags_vals = _graph_count_vals(group_key)
+                            if ndags_vals:
+                                d_avg, d_min, d_max = _avg_min_max(ndags_vals)
+                                logging.info(f"    {'n_dags':<10}: {_fmt_count_triple(d_min, d_avg, d_max)}")
+                            else:
+                                logging.info(f"    {'n_dags':<10}: none")
+
+                            metrics = ['precision', 'recall', 'F1', 'shd']
+                            if MUS_GRAPH_EVAL_SID:
+                                metrics.append('sid')
+                            for metric in metrics:
+                                t = _graph_metric_triplet_over_reps(group_key, metric)
                                 if not t:
                                     logging.info(f"    {metric:<10}: none")
                                     continue
@@ -2976,6 +3058,198 @@ class TestMUSAnalysis(unittest.TestCase):
                 opt_mcs_facts = opt_result.get('mcs_facts', None)
                 opt_mcs_label = f"OptMCS({opt_alg})"
 
+        # ===== GRAPH EVAL SUMMARY (Removal + OptMCS) =====
+        # Evaluate the *set* of DAGs compatible with the remaining facts after applying:
+        # - Removal (ABAPC-derived removed_facts), and
+        # - OptMCS (WASP optimum-MCS cut; usually a single set)
+        # We compute precision/recall/F1/SHD/SID for each distinct DAG and report min/avg/max,
+        # plus the number of distinct DAGs.
+        graph_eval: dict[str, Any] = {}
+        try:
+            import numpy as np
+            import networkx as nx
+            import math
+            from utils.graph_utils import DAGMetrics, model_to_set_of_arrows
+
+            # True graph adjacency (nodes are already relabeled to 0..n-1 in G_true1)
+            B_true = nx.to_numpy_array(G_true1, nodelist=list(range(n_nodes)), dtype=int)
+
+            def _as_finite_float(v: Any, default: float = 0.0) -> float:
+                try:
+                    x = float(v)
+                except Exception:
+                    return float(default)
+                return x if math.isfinite(x) else float(default)
+
+            def _mmx(xs: list[float]) -> dict[str, float | None]:
+                ys = [float(x) for x in xs if math.isfinite(float(x))]
+                if not ys:
+                    return {'min': None, 'avg': None, 'max': None}
+                return {'min': float(min(ys)), 'avg': float(sum(ys) / len(ys)), 'max': float(max(ys))}
+
+            def _fmt_triple(d: dict[str, float | None]) -> str:
+                if d.get('avg', None) is None:
+                    return "   none"
+                return f"{float(d['min']):7.3f} / {float(d['avg']):7.3f} / {float(d['max']):7.3f}"
+
+            def _evaluate_models(models: list[list[Any]]) -> dict[str, Any]:
+                # Deduplicate by arrow set (distinct DAGs)
+                seen: set[frozenset[tuple[int, int]]] = set()
+                vals: dict[str, list[float]] = {k: [] for k in ('precision', 'recall', 'F1', 'shd')}
+                if MUS_GRAPH_EVAL_SID:
+                    vals['sid'] = []
+                for m in (models or []):
+                    arrows = model_to_set_of_arrows(m)
+                    key = frozenset((int(a), int(b)) for (a, b) in arrows)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    B_est = np.zeros((n_nodes, n_nodes), dtype=int)
+                    for (a, b) in key:
+                        if 0 <= a < n_nodes and 0 <= b < n_nodes:
+                            B_est[a, b] = 1
+                    try:
+                        mt = DAGMetrics(B_est, B_true, sid=bool(MUS_GRAPH_EVAL_SID)).metrics
+                    except Exception:
+                        continue
+
+                    # Some metric backends can return NaN; treat as 0 for summary stability.
+                    p = _as_finite_float(mt.get('precision'), default=0.0)
+                    r = _as_finite_float(mt.get('recall'), default=0.0)
+                    f1 = (2.0 * p * r / (p + r)) if (p + r) > 0 else 0.0
+                    vals['precision'].append(p)
+                    vals['recall'].append(r)
+                    vals['F1'].append(float(f1))
+                    vals['shd'].append(_as_finite_float(mt.get('shd'), default=0.0))
+                    if MUS_GRAPH_EVAL_SID:
+                        vals['sid'].append(_as_finite_float(mt.get('sid'), default=0.0))
+
+                out = {
+                    'count': int(len(seen)),
+                    'precision': _mmx(vals['precision']),
+                    'recall': _mmx(vals['recall']),
+                    'F1': _mmx(vals['F1']),
+                    'shd': _mmx(vals['shd']),
+                }
+                if MUS_GRAPH_EVAL_SID:
+                    out['sid'] = _mmx(vals.get('sid', []))
+                return out
+
+            def _solve_for_remaining_facts(label: str, removed_set: set[str]) -> tuple[dict[str, Any], bool]:
+                # Build a facts file containing ONLY the remaining externals.
+                remaining = [
+                    self._normalize_fact_str(s)
+                    for s in (facts_ext or [])
+                    if self._normalize_fact_str(s) and (self._normalize_fact_str(s) not in removed_set)
+                ]
+                fd_eval, eval_facts_file = tempfile.mkstemp(suffix=f"_{label}_remaining.lp", text=True)
+                os.close(fd_eval)
+                try:
+                    with open(eval_facts_file, 'w') as f:
+                        for s in remaining:
+                            f.write(f"#external {s}\n")
+
+                    eval_timing: dict[str, Any] = {}
+                    models_eval, _ = CausalABA(
+                        n_nodes,
+                        eval_facts_file,
+                        weak_constraints=False,
+                        print_models=False,
+                        skeleton_rules_reduction=True,
+                        search_for_models='No',
+                        # For graph enumeration we want *compatibility* models, not optimal models.
+                        opt_mode='ignore',
+                        out_n=MUS_GRAPH_EVAL_OUT_N,
+                        solve_timeout=MUS_SOLVE_TIMEOUT,
+                        timing_recorder=eval_timing,
+                    )
+                    timed_out = bool(eval_timing.get('timed_out', False))
+                    return _evaluate_models(models_eval), timed_out
+                finally:
+                    try:
+                        os.remove(eval_facts_file)
+                    except Exception:
+                        pass
+
+            removed_set_norm = {self._normalize_fact_str(s) for s in (removed_facts or []) if str(s).strip()}
+            n_total_facts = int(len([s for s in (facts_ext or []) if str(s).strip()]))
+            removal_eval, removal_eval_timed_out = _solve_for_remaining_facts('Removal', removed_set_norm)
+            graph_eval['Removal'] = {
+                **removal_eval,
+                'n_total_facts': n_total_facts,
+                'n_removed_facts': int(len(removed_set_norm)),
+                'n_remaining_facts': int(max(0, n_total_facts - len(removed_set_norm))),
+                'timed_out': bool(removal_eval_timed_out),
+            }
+
+            # OptMCS: use only the (usually single) optimum cut.
+            if opt_mcs_facts is not None:
+                opt_sets = [
+                    {self._normalize_fact_str(x) for x in (cut or []) if str(x).strip()}
+                    for cut in (opt_mcs_facts or [])
+                ]
+                opt_cut = next((s for s in opt_sets if s), None)
+                if opt_cut:
+                    opt_eval, opt_eval_timed_out = _solve_for_remaining_facts(opt_mcs_label or 'OptMCS', opt_cut)
+                    graph_eval['OptMCS'] = {
+                        **opt_eval,
+                        'label': opt_mcs_label or 'OptMCS',
+                        'n_total_facts': n_total_facts,
+                        'n_removed_facts': int(len(opt_cut)),
+                        'n_remaining_facts': int(max(0, n_total_facts - len(opt_cut))),
+                        'timed_out': bool(opt_eval_timed_out),
+                    }
+
+            # Print per-run summary (mirrors OVERLAP summary shape).
+            logging.info("\n")
+            logging.info("=" * 60)
+            logging.info(f" GRAPH EVAL SUMMARY (n_nodes={n_nodes}, out_n={MUS_GRAPH_EVAL_OUT_N})")
+            logging.info("=" * 60)
+            logging.info("  [min/avg/max]  (for SHD/SID: lower is better)")
+
+            def _print_group(name: str, d: dict[str, Any]) -> None:
+                if not d:
+                    logging.info(f"  {name}: none")
+                    return
+                suffix = " (timed out)" if d.get('timed_out', False) else ""
+                logging.info(f"  {name}{suffix}:")
+                logging.info(
+                    f"    {'facts(rem/keep)':<14}: {int(d.get('n_removed_facts', 0) or 0)}/{int(d.get('n_remaining_facts', 0) or 0)} (of {int(d.get('n_total_facts', 0) or 0)})"
+                )
+                logging.info(f"    {'n_dags':<10}: {int(d.get('count', 0) or 0):7d}")
+                logging.info(f"    {'precision':<10}: {_fmt_triple(d.get('precision', {}))}")
+                logging.info(f"    {'recall':<10}: {_fmt_triple(d.get('recall', {}))}")
+                logging.info(f"    {'F1':<10}: {_fmt_triple(d.get('F1', {}))}")
+                logging.info(f"    {'shd':<10}: {_fmt_triple(d.get('shd', {}))}")
+                if MUS_GRAPH_EVAL_SID:
+                    logging.info(f"    {'sid':<10}: {_fmt_triple(d.get('sid', {}))}")
+
+            _print_group('Removal', graph_eval.get('Removal', {}))
+            if 'OptMCS' in graph_eval:
+                label = (graph_eval.get('OptMCS', {}) or {}).get('label') or 'OptMCS'
+                _print_group(label, graph_eval.get('OptMCS', {}))
+
+            # Diagnostic: removing MORE constraints should weakly increase the model count.
+            # This is only meaningful if we asked clingo for all models (out_n=0) and did not time out.
+            if int(MUS_GRAPH_EVAL_OUT_N) == 0:
+                r = graph_eval.get('Removal', {}) or {}
+                o = graph_eval.get('OptMCS', {}) or {}
+                if r and o and (not r.get('timed_out', False)) and (not o.get('timed_out', False)):
+                    n_r = int(r.get('count', 0) or 0)
+                    n_o = int(o.get('count', 0) or 0)
+                    if n_r < n_o:
+                        logging.warning(
+                            "Monotonicity check: expected #DAGs(Removal) >= #DAGs(OptMCS) when Removal removes more facts. "
+                            "Observed: Removal=%s, OptMCS=%s (n_nodes=%s).",
+                            n_r,
+                            n_o,
+                            n_nodes,
+                        )
+            logging.info("=" * 60)
+
+        except Exception as e:
+            logging.warning(f"Graph eval summary failed (n_nodes={n_nodes}): {e}")
+
         if MUS_PRINT_DETAILS:
             weights_by_fact = None
             if facts_wc_file:
@@ -3232,6 +3506,7 @@ class TestMUSAnalysis(unittest.TestCase):
             else False,
             'opt_timing': opt_timing or {},
             'opt_result': opt_result or {},
+            'graph_eval': graph_eval,
         }
 
 
@@ -3309,6 +3584,25 @@ if __name__ == '__main__':
         help="Clingo -n model bound for ABAPC removal (0=all; default: 0)",
     )
     parser.add_argument(
+        "--graph-eval-out-n",
+        type=int,
+        default=MUS_GRAPH_EVAL_OUT_N,
+        help="Clingo -n model bound for graph-eval DAG enumeration (0=all; default: matches --out-n)",
+    )
+    parser.add_argument(
+        "--graph-eval-sid",
+        dest="graph_eval_sid",
+        action="store_true",
+        default=MUS_GRAPH_EVAL_SID,
+        help="Compute SID in graph-eval summaries (slow; default: enabled).",
+    )
+    parser.add_argument(
+        "--no-graph-eval-sid",
+        dest="graph_eval_sid",
+        action="store_false",
+        help="Disable SID in graph-eval summaries (much faster).",
+    )
+    parser.add_argument(
         "--opt-mode",
         type=str,
         default=MUS_ABAPC_OPT_MODE,
@@ -3357,6 +3651,8 @@ if __name__ == '__main__':
     MUS_GRAPH_TYPE = args.graph_type
     MUS_GRAPH_TYPES = _parse_graph_types(args.graph_types) or (MUS_GRAPH_TYPE,)
     MUS_ABAPC_OUT_N = args.out_n
+    MUS_GRAPH_EVAL_OUT_N = args.graph_eval_out_n
+    MUS_GRAPH_EVAL_SID = bool(args.graph_eval_sid)
     MUS_ABAPC_OPT_MODE = args.opt_mode
     MUS_MCS_THRESHOLD = args.mcs_threshold
     MUS_MUS_THRESHOLD = args.mus_threshold
