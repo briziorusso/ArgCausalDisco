@@ -46,7 +46,10 @@ import tempfile
 import unittest
 import atexit
 import random
-from datetime import datetime
+import re
+import multiprocessing
+import traceback
+from datetime import datetime, timedelta
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -59,17 +62,202 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, 'src'))
 
 CausalABA: Any = None
 CausalABA_MUS: Any = None
+CausalABA_WC: Any = None
+CausalABA_INC: Any = None
 
 
 def _ensure_solvers_imported() -> None:
     """Import solver modules lazily so `--help` works without clingo/wasp installed."""
-    global CausalABA, CausalABA_MUS
-    if CausalABA is None or CausalABA_MUS is None:
+    global CausalABA, CausalABA_MUS, CausalABA_WC
+    if CausalABA is None or CausalABA_MUS is None or CausalABA_WC is None:
         from causalaba import CausalABA as _CausalABA
         from causalaba_mus import CausalABA_MUS as _CausalABA_MUS
+        from causalaba_mus import CausalABA_WC as _CausalABA_WC
 
         CausalABA = _CausalABA
         CausalABA_MUS = _CausalABA_MUS
+        CausalABA_WC = _CausalABA_WC
+
+
+def _ensure_abapc_inc_imported() -> None:
+    """Import incremental ABAPC lazily so `--help` works without clingo installed."""
+    global CausalABA_INC
+    if CausalABA_INC is not None:
+        return
+
+    first_exc: Exception | None = None
+    try:
+        # When ArgCausalDisco is importable as a (namespace) package.
+        from ArgCausalDisco.causalaba_increm import CausalABA as _CausalABA_INC  # type: ignore
+
+        CausalABA_INC = _CausalABA_INC
+        return
+    except Exception as e:
+        first_exc = e
+
+    # Fallback 1: add the ArgCausalDisco folder itself to sys.path and try a direct module import.
+    try:
+        candidate_dir = os.path.join(os.path.dirname(PROJECT_ROOT), "ArgCausalDisco")
+        if os.path.isdir(candidate_dir) and candidate_dir not in sys.path:
+            sys.path.insert(0, candidate_dir)
+        from causalaba_increm import CausalABA as _CausalABA_INC  # type: ignore
+
+        CausalABA_INC = _CausalABA_INC
+        return
+    except Exception as second_exc:
+        # Fallback 2: import by absolute file path.
+        try:
+            import importlib.util
+
+            module_path = os.path.join(os.path.dirname(PROJECT_ROOT), "ArgCausalDisco", "causalaba_increm.py")
+            spec = importlib.util.spec_from_file_location("abapc_inc_causalaba_increm", module_path)
+            if spec is None or spec.loader is None:
+                raise ImportError(f"Unable to load spec for {module_path}")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            CausalABA_INC = getattr(module, "CausalABA")
+            return
+        except Exception as third_exc:
+            raise ImportError(
+                "Failed to import ABAPC_INC incremental encoding. "
+                f"package import error={first_exc!r}; direct import error={second_exc!r}; file import error={third_exc!r}"
+            )
+
+
+def _abapc_inc_worker(result_queue: "multiprocessing.Queue[tuple[str, Any]]", args: tuple[Any, ...], kwargs: dict[str, Any]) -> None:
+    try:
+        _ensure_abapc_inc_imported()
+        if CausalABA_INC is None:
+            raise ImportError("ABAPC_INC is not available after import")
+
+        def _stringify_models(obj: Any) -> Any:
+            # CausalABA returns clingo.Symbol objects which are not reliably picklable.
+            # Convert to plain strings so results can cross process boundaries.
+            if obj is None:
+                return None
+            if isinstance(obj, (str, int, float, bool)):
+                return obj
+            if isinstance(obj, list):
+                return [_stringify_models(x) for x in obj]
+            if isinstance(obj, tuple):
+                return tuple(_stringify_models(x) for x in obj)
+            try:
+                return str(obj)
+            except Exception:
+                return repr(obj)
+
+        raw = CausalABA_INC(*args, **kwargs)
+        # Expected shape when return_statistics=True: [models_out, multiple, stats, remove_n, profile]
+        models_out, multiple, stats, remove_n, profile = raw
+        safe_payload = {
+            "models_out": _stringify_models(models_out),
+            "multiple": bool(multiple),
+            # clingo statistics can contain non-picklable objects; omit.
+            "stats": None,
+            "remove_n": int(remove_n or 0),
+            "profile": profile if isinstance(profile, dict) else {},
+        }
+        result_queue.put(("ok", safe_payload))
+    except BaseException as e:
+        result_queue.put(("err", (repr(e), traceback.format_exc())))
+
+
+def _run_abapc_inc_with_wall_timeout(
+    *args: Any,
+    wall_timeout: float | None,
+    **kwargs: Any,
+) -> tuple[Any, Any, Any, Any, dict[str, Any]]:
+    """Run ABAPC_INC with a hard wall-clock timeout.
+
+    Motivation: clingo's Python API doesn't provide a reliable timeout for grounding.
+    For large instances, grounding can dominate runtime; this wrapper ensures the
+    overall ABAPC_INC call respects the user-provided `--solve-timeout` budget.
+    """
+
+    _ensure_abapc_inc_imported()
+    if CausalABA_INC is None:
+        raise ImportError("ABAPC_INC is not available after import")
+
+    if wall_timeout is None:
+        result = CausalABA_INC(*args, **kwargs)
+        # CausalABA_INC returns (models_after, multiple, stats, remove_n, profile)
+        if isinstance(result, tuple) and len(result) == 5 and isinstance(result[4], dict):
+            return result  # type: ignore[return-value]
+        # Be defensive if upstream signature changes
+        models_after, multiple, stats, remove_n, profile = result
+        if not isinstance(profile, dict):
+            profile = {}
+        return models_after, multiple, stats, remove_n, profile
+
+    if wall_timeout <= 0:
+        # Treat non-positive as "no timeout" for safety.
+        result = CausalABA_INC(*args, **kwargs)
+        models_after, multiple, stats, remove_n, profile = result
+        if not isinstance(profile, dict):
+            profile = {}
+        return models_after, multiple, stats, remove_n, profile
+
+    try:
+        ctx = multiprocessing.get_context("fork")
+    except Exception:
+        ctx = multiprocessing.get_context()
+
+    result_queue: multiprocessing.Queue[tuple[str, Any]] = ctx.Queue(maxsize=1)
+    proc = ctx.Process(target=_abapc_inc_worker, args=(result_queue, args, kwargs))
+    proc.daemon = True
+    proc.start()
+    proc.join(timeout=float(wall_timeout))
+
+    if proc.is_alive():
+        logging.warning(f"⚠ ABAPC_INC exceeded wall timeout ({wall_timeout}s); terminating.")
+        proc.terminate()
+        proc.join(timeout=5.0)
+        if proc.is_alive():
+            # Python 3.7+ supports kill(); best-effort.
+            try:
+                proc.kill()  # type: ignore[attr-defined]
+            except Exception:
+                pass
+
+        timed_profile = {
+            "timed_out": True,
+            "timeout_phase": "wall",
+            "timeout_s": float(wall_timeout),
+        }
+        return [], False, None, 0, timed_profile
+
+    try:
+        status, payload = result_queue.get_nowait()
+    except Exception:
+        # Child exited without returning a result.
+        logging.warning("⚠ ABAPC_INC subprocess exited without returning a result (possible pickling failure).")
+        timed_profile = {
+            "timed_out": True,
+            "timeout_phase": "aborted",
+            "timeout_s": float(wall_timeout),
+        }
+        return [], False, None, 0, timed_profile
+
+    if status == "ok":
+        if isinstance(payload, dict) and {"models_out", "multiple", "remove_n", "profile"}.issubset(payload.keys()):
+            models_after = payload.get("models_out", [])
+            multiple = bool(payload.get("multiple", False))
+            stats = payload.get("stats", None)
+            remove_n = int(payload.get("remove_n", 0) or 0)
+            profile = payload.get("profile", {})
+            if not isinstance(profile, dict):
+                profile = {}
+            return models_after, multiple, stats, remove_n, profile
+
+        # Backward/defensive fallback if worker returns raw tuple/list.
+        result = payload
+        models_after, multiple, stats, remove_n, profile = result
+        if not isinstance(profile, dict):
+            profile = {}
+        return models_after, multiple, stats, remove_n, profile
+
+    err_repr, err_tb = payload
+    raise RuntimeError(f"ABAPC_INC subprocess failed: {err_repr}\n{err_tb}")
 
 
 def _parse_node_sizes(raw: str) -> tuple[int, ...]:
@@ -84,6 +272,20 @@ def _parse_graph_types(raw: str) -> tuple[str, ...]:
     return tuple(items)
 
 
+def _as_solver_timeout(timeout_s: Any) -> float | None:
+    """Convert CLI/env timeout (seconds) to a solver timeout.
+
+    Convention: 0 or negative means "no timeout".
+    """
+    if timeout_s is None:
+        return None
+    try:
+        t = float(timeout_s)
+    except Exception:
+        return None
+    return None if t <= 0 else t
+
+
 MUS_SOLVE_TIMEOUT = int(os.environ.get("MUS_SOLVE_TIMEOUT", "30"))
 MUS_NODE_SIZES = _parse_node_sizes(os.environ.get("MUS_NODE_SIZES", "5,7"))
 MUS_EDGE_PER_NODE = int(os.environ.get("MUS_EDGE_PER_NODE", "2"))
@@ -91,6 +293,8 @@ MUS_SEED_BASE = int(os.environ.get("MUS_SEED_BASE", "2004"))
 MUS_REP_UNSAT = int(os.environ.get("MUS_REP_UNSAT", "2"))
 MUS_RANDOM_REPS = int(os.environ.get("MUS_RANDOM_REPS", "1"))
 MUS_EMIT_LP = os.environ.get("MUS_EMIT_LP", "")
+MUS_EMIT_ABAPC_INC_LP = os.environ.get("MUS_EMIT_ABAPC_INC_LP", "")
+MUS_USE_INCREM_ONLY = os.environ.get("MUS_USE_INCREM_ONLY", "0").strip() not in ("", "0", "false", "False", "no", "NO")
 MUS_MAX_MUSES = os.environ.get("MUS_MAX_MUSES", "")  # "" = omit -n flag (WASP default: 1 MUS output), "0" = unlimited, ">0" = limit
 MUS_MCS_THRESHOLD = int(os.environ.get("MUS_MCS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
 MUS_MUS_THRESHOLD = int(os.environ.get("MUS_MUS_THRESHOLD", "0"))  # 0 = no limit (unlimited enumeration)
@@ -160,6 +364,35 @@ MUS_PRINT_DETAILS_MAX_SETS = int(os.environ.get("MUS_PRINT_DETAILS_MAX_SETS", "1
 # Optional: enable WASP optimum-MCS mode (requires wc weights file).
 # Valid values (per WASP): "camus" or "emax" (case-insensitive). Empty disables.
 MUS_OPTIMUM_MCS_ALGORITHM = os.environ.get("MUS_OPTIMUM_MCS_ALGORITHM", "camus").strip()
+
+# Which analyses to run in the random-size harness.
+# Supported atoms: mus, optmcs, wc
+# Backwards-compatible shorthands:
+# - both: mus + optmcs
+# - all: mus + optmcs + wc
+def _parse_analysis_modes(raw: str) -> set[str]:
+    s = str(raw or "").strip().lower()
+    if not s:
+        s = "both"
+    if s == 'both':
+        s = 'mus,optmcs'
+    if s == 'all':
+        s = 'mus,optmcs,wc'
+    parts = [p.strip() for p in re.split(r"[,+]", s) if p.strip()]
+    allowed = {'mus', 'optmcs', 'wc'}
+    out = {p for p in parts if p in allowed}
+    return out or {'mus', 'optmcs'}
+
+
+MUS_ANALYSIS = os.environ.get("MUS_ANALYSIS", "both").strip().lower()
+MUS_ANALYSIS_MODES = _parse_analysis_modes(MUS_ANALYSIS)
+MUS_RUN_MUS_MCS = 'mus' in MUS_ANALYSIS_MODES
+MUS_RUN_OPTMCS = 'optmcs' in MUS_ANALYSIS_MODES
+MUS_RUN_WC = 'wc' in MUS_ANALYSIS_MODES
+
+# Optional: compare the pure-WC optimum cut to WASP's OptMCS cut.
+MUS_CHECK_WC_VS_OPTMCS = os.environ.get("MUS_CHECK_WC_VS_OPTMCS", "0").strip() not in ("", "0", "false", "False", "no", "NO")
+MUS_CHECK_WC_VS_OPTMCS_STRICT_SET = os.environ.get("MUS_CHECK_WC_VS_OPTMCS_STRICT_SET", "1").strip() not in ("", "0", "false", "False", "no", "NO")
 
 
 @dataclass(frozen=True)
@@ -266,12 +499,39 @@ def build_random_pc_case(config: RandomPCSimConfig):
     }
 
 
-def logger_setup(scenario="test_mus"):
-    """Setup logging for tests."""
+def logger_setup(scenario: str = "test_mus", *, log_file: str | None = None) -> None:
+    """Setup logging for tests.
+
+    If `log_file` is provided, logs are written to both stdout and the file.
+    """
+    handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout)]
+
+    # If a log file is already configured (e.g., via CLI), many unit tests call
+    # logger_setup() again without passing log_file. Preserve the existing file
+    # handler instead of dropping it.
+    if not log_file:
+        try:
+            for h in logging.getLogger().handlers:
+                if isinstance(h, logging.FileHandler):
+                    handlers.append(logging.FileHandler(str(h.baseFilename), mode='a'))
+                    break
+        except Exception:
+            pass
+
+    if log_file:
+        try:
+            parent = os.path.dirname(str(log_file))
+            if parent:
+                os.makedirs(parent, exist_ok=True)
+        except Exception:
+            # Best-effort; if directory creation fails, FileHandler will raise below.
+            pass
+        handlers.append(logging.FileHandler(str(log_file), mode='a'))
+
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s %(levelname)s %(message)s',
-        stream=sys.stdout,
+        handlers=handlers,
         force=True,
     )
 
@@ -310,6 +570,17 @@ class TestMUSAnalysis(unittest.TestCase):
                 return fact
             return f"{fact} (w={w})"
 
+        def _sum_weights(facts_set: set[str]) -> tuple[int, int]:
+            total_w = 0
+            missing_w = 0
+            for fact in (facts_set or set()):
+                w = weights_norm.get(fact)
+                if w is None:
+                    missing_w += 1
+                else:
+                    total_w += int(w)
+            return total_w, missing_w
+
         logging.info("\n" + "=" * 60)
         logging.info(f"DETAILS (n_nodes={n_nodes}, seed={seed})")
         logging.info("=" * 60)
@@ -323,11 +594,19 @@ class TestMUSAnalysis(unittest.TestCase):
         logging.info(f"Wrong facts ({len(wrong_set)}):")
         for i, fact in enumerate(sorted(wrong_set), start=1):
             logging.info(f"  W{i:03d}: {_fmt_fact(fact)}")
+        if wrong_set:
+            total_w, missing_w = _sum_weights(wrong_set)
+            extra = f" (missing {missing_w})" if missing_w else ""
+            logging.info(f"  sum_w = {total_w}{extra}")
 
         logging.info(f"ABAPC removed facts ({len(removed_set)}):")
         for i, fact in enumerate(sorted(removed_set), start=1):
             label = "WRONG" if fact in wrong_set else "CORRECT"
             logging.info(f"  R{i:03d} {label}: {_fmt_fact(fact)}")
+        if removed_set:
+            total_w, missing_w = _sum_weights(removed_set)
+            extra = f" (missing {missing_w})" if missing_w else ""
+            logging.info(f"  sum_w = {total_w}{extra}")
 
         def _dump_sets(title: str, sets: list[list[str]] | None) -> None:
             sets = sets or []
@@ -1157,6 +1436,106 @@ class TestMUSAnalysis(unittest.TestCase):
         
         os.remove(facts_file)
 
+    def test_wc_matches_optmcs_on_mock_three_var(self):
+        """Pure-WC (clingo) optimum cut should match WASP OptMCS on the same adorned objective.
+
+        We use the same 3-fact mock instance as `test_mock_three_var_manual_vs_mus` and assign
+        distinct weights so the optimum is unique.
+        """
+        logger_setup()
+        _ensure_solvers_imported()
+
+        import subprocess
+
+        # Require clingo.
+        try:
+            subprocess.run(["clingo", "--version"], capture_output=True, text=True, timeout=2.0)
+        except Exception:
+            self.skipTest("clingo not available; skipping WC-vs-OptMCS equivalence test")
+
+        # Require WASP optimum-mcs support.
+        try:
+            help_out = subprocess.run(["wasp", "--help"], capture_output=True, text=True, timeout=2.0)
+            supported = "--optimum-mcs-algorithm" in ((help_out.stdout or "") + (help_out.stderr or ""))
+        except Exception:
+            supported = False
+        if not supported:
+            self.skipTest("wasp --optimum-mcs-algorithm not supported; skipping equivalence test")
+
+        n_nodes = 3
+        fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd)
+        facts_wc_file = facts_file.replace('.lp', '_wc.lp')
+
+        facts = [
+            "ext_indep(1,2,s0).",
+            "ext_dep(1,2,empty).",
+            "ext_indep(0,1,empty).",
+        ]
+        weights = [1_000_000, 2_000_000, 3_000_000]
+
+        try:
+            with open(facts_file, 'w') as f:
+                for s in facts:
+                    f.write(f"#external {s}\n")
+
+            with open(facts_wc_file, 'w') as f:
+                for s, w in zip(facts, weights):
+                    f.write(f":~ {s} [-{int(w)}]\n")
+
+            opt_result = CausalABA_MUS(
+                n_nodes=n_nodes,
+                facts_location=facts_file,
+                gringo_path="clingo",
+                wasp_path="wasp",
+                mus_algorithm="camus",
+                print_mcses=False,
+                optimum_mcs_algorithm="camus",
+                facts_wc_location=facts_wc_file,
+            )
+            wc_result = CausalABA_WC(
+                n_nodes=n_nodes,
+                facts_location=facts_file,
+                gringo_path="clingo",
+                facts_wc_location=facts_wc_file,
+            )
+
+            self.assertFalse(bool((opt_result or {}).get('timed_out', False)), "OptMCS unexpectedly timed out")
+            self.assertFalse(bool((wc_result or {}).get('timed_out', False)), "WC unexpectedly timed out")
+
+            def _first_cut_set(obj: Any) -> set[str]:
+                if obj is None:
+                    return set()
+                if isinstance(obj, list) and obj and all(isinstance(x, (list, tuple, set)) for x in obj):
+                    for cut in obj:
+                        s = {self._normalize_fact_str(str(x)) for x in (cut or []) if str(x).strip()}
+                        s = {x for x in s if x}
+                        if s:
+                            return s
+                    return set()
+                s = {self._normalize_fact_str(str(x)) for x in (obj or []) if str(x).strip()}
+                return {x for x in s if x}
+
+            opt_cut = _first_cut_set((opt_result or {}).get('mcs_facts', None))
+            wc_cut = _first_cut_set((wc_result or {}).get('cut_facts', None))
+
+            self.assertTrue(opt_cut, "Expected a non-empty OptMCS cut")
+            self.assertTrue(wc_cut, "Expected a non-empty WC cut")
+            self.assertEqual(wc_cut, opt_cut, f"WC cut {wc_cut} != OptMCS cut {opt_cut}")
+
+            # With strictly increasing weights, optimum should remove the cheapest single fact.
+            expected = {self._normalize_fact_str(facts[0])}
+            self.assertEqual(wc_cut, expected, f"Expected optimum cut {expected} with weights {weights}")
+        finally:
+            try:
+                os.remove(facts_file)
+            except Exception:
+                pass
+            try:
+                os.remove(facts_wc_file)
+            except Exception:
+                pass
+
     def test_mus_catches_wrong_facts_on_four_nodes(self):
         """Link wrong tests to MUSes on a larger 4-node case.
 
@@ -1270,17 +1649,29 @@ class TestMUSAnalysis(unittest.TestCase):
                 rep_outcomes.setdefault(
                     key,
                     {
-                        'completed': 0,
+                        # "usable" means we found a run (may still have solver timeouts).
+                        'usable': 0,
                         'timed_out': 0,
                         'startSAT': 0,
                         'no_wrong': 0,
                         'mus_min_skipped': 0,
+                        # Per-category completion counts (usable runs only)
+                        'abapc_finished': 0,
+                        'abapc_timed_out': 0,
+                        'mus_finished': 0,
+                        'mus_timed_out': 0,
+                        'mus_skipped': 0,
+                        'opt_finished': 0,
+                        'opt_timed_out': 0,
+                        'opt_skipped': 0,
+                        'abapc_inc_finished': 0,
+                        'abapc_inc_timed_out': 0,
+                        'abapc_inc_skipped': 0,
                     },
                 )
 
                 for rep_idx in range(max(1, MUS_RANDOM_REPS)):
                     with self.subTest(n_nodes=n_nodes, graph_type=graph_type, rep=rep_idx):
-                        logging.info(f"\n--- Running n_nodes={n_nodes} graph_type={graph_type} rep={rep_idx} ---")
                         run_info = None
                         selected_run: dict[str, Any] | None = None
                         saw_timeout = False
@@ -1347,13 +1738,20 @@ class TestMUSAnalysis(unittest.TestCase):
                             mcs_facts=selected_run.get('mcs_facts', []),
                             opt_mcs_facts=selected_run.get('opt_mcs_facts', None),
                             opt_mcs_label=selected_run.get('opt_mcs_label', None),
+                            wc_cut_facts=selected_run.get('wc_cut_facts', None),
+                            wc_label="WC",
+                            include_mus_mcs=bool(selected_run.get('mus_ran', True)),
                             allow_incomplete=bool(
                                 selected_run.get('mus_timeout')
                                 or selected_run.get('abapc_timeout')
                                 or selected_run.get('opt_timeout')
+                                or selected_run.get('wc_timeout')
+                                or (not bool(selected_run.get('mus_ran', True)))
+                                or (not bool(selected_run.get('opt_ran', True)))
+                                or (not bool(selected_run.get('wc_ran', True)))
                             ),
-                            mus_timed_out=bool(selected_run.get('mus_timeout')),
-                            opt_timed_out=bool(selected_run.get('opt_timeout')),
+                            mus_timed_out=bool(selected_run.get('mus_timeout')) if bool(selected_run.get('mus_ran', True)) else False,
+                            opt_timed_out=bool(selected_run.get('opt_timeout')) if bool(selected_run.get('opt_ran', True)) else False,
                         )
 
                         # Record run summary *before* optional minimality diagnostics, so
@@ -1369,7 +1767,40 @@ class TestMUSAnalysis(unittest.TestCase):
                                 'graph_eval': selected_run.get('graph_eval', {}) or {},
                             }
                         )
-                        rep_outcomes[key]['completed'] += 1
+                        rep_outcomes[key]['usable'] += 1
+                        # Track per-category completion for this usable run.
+                        if bool(selected_run.get('abapc_timeout', False)):
+                            rep_outcomes[key]['abapc_timed_out'] += 1
+                        else:
+                            rep_outcomes[key]['abapc_finished'] += 1
+
+                        mus_attempted = bool(selected_run.get('mus_ran', True))
+                        if not mus_attempted:
+                            rep_outcomes[key]['mus_skipped'] += 1
+                        else:
+                            if bool(selected_run.get('mus_timeout', False)):
+                                rep_outcomes[key]['mus_timed_out'] += 1
+                            else:
+                                rep_outcomes[key]['mus_finished'] += 1
+
+                        opt_attempted = bool(selected_run.get('opt_ran', False))
+                        if not opt_attempted:
+                            rep_outcomes[key]['opt_skipped'] += 1
+                        else:
+                            if bool(selected_run.get('opt_timeout', False)):
+                                rep_outcomes[key]['opt_timed_out'] += 1
+                            else:
+                                rep_outcomes[key]['opt_finished'] += 1
+
+                        # ABAPC_INC comparison run (when not running increm-only baseline)
+                        inc_attempted = selected_run.get('abapc_inc_ran', False)
+                        if not inc_attempted:
+                            rep_outcomes[key]['abapc_inc_skipped'] += 1
+                        else:
+                            if bool(selected_run.get('abapc_inc_timeout', False)):
+                                rep_outcomes[key]['abapc_inc_timed_out'] += 1
+                            else:
+                                rep_outcomes[key]['abapc_inc_finished'] += 1
 
                         # Optional diagnostic: MUS minimality in isolation.
                         if MUS_CHECK_MINIMALITY and int(selected_run.get('remove_n', 0) or 0) > 0:
@@ -1406,17 +1837,37 @@ class TestMUSAnalysis(unittest.TestCase):
 
                         logging.info("\n" + 29*" "+"=" * 60)
                         logging.info(
-                            f"SUMMARY OVER REPS (n_nodes={n_nodes}, graph_type={graph_type}, reps={MUS_RANDOM_REPS}, completed={len(rows)})"
+                            f"SUMMARY OVER REPS (n_nodes={n_nodes}, graph_type={graph_type}, reps={MUS_RANDOM_REPS}, usable={len(rows)})"
                         )
                         logging.info("=" * 60)
                         logging.info("  [min/avg/max]")
-                        logging.info(f"  {'completed runs':<18}: {outs.get('completed', len(rows))}/{MUS_RANDOM_REPS}")
-                        logging.info(f"  {'timed out':<18}: {outs.get('timed_out', 0)}")
+                        usable = int(outs.get('usable', len(rows)) or 0)
+                        logging.info(f"  {'usable runs':<18}: {usable}/{MUS_RANDOM_REPS}")
+                        logging.info(f"  {'timed out (no run)':<18}: {outs.get('timed_out', 0)}")
                         logging.info(f"  {'startSAT':<18}: {outs.get('startSAT', 0)}")
                         if outs.get('mus_min_skipped', 0):
                             logging.info(f"  {'mus_min_skipped':<18}: {outs.get('mus_min_skipped', 0)}")
                         if outs.get('no_wrong', 0):
                             logging.info(f"  {'no_wrong':<18}: {outs.get('no_wrong', 0)}")
+                        # Per-category completion: these exclude timeouts within a usable run.
+                        logging.info(f"  {'ABAPC finished':<18}: {outs.get('abapc_finished', 0)}/{usable} (timeouts={outs.get('abapc_timed_out', 0)})")
+                        logging.info(f"  {'MUS finished':<18}: {outs.get('mus_finished', 0)}/{usable} (timeouts={outs.get('mus_timed_out', 0)})")
+                        if outs.get('opt_skipped', 0) < usable:
+                            logging.info(
+                                f"  {'OptMCS finished':<18}: {outs.get('opt_finished', 0)}/{usable - outs.get('opt_skipped', 0)} "
+                                f"(timeouts={outs.get('opt_timed_out', 0)}, skipped={outs.get('opt_skipped', 0)})"
+                            )
+                        else:
+                            logging.info(f"  {'OptMCS finished':<18}: skipped ({outs.get('opt_skipped', 0)})")
+
+                        if outs.get('abapc_inc_skipped', 0) < usable:
+                            logging.info(
+                                f"  {'ABAPC_INC finished':<18}: {outs.get('abapc_inc_finished', 0)}/{usable - outs.get('abapc_inc_skipped', 0)} "
+                                f"(timeouts={outs.get('abapc_inc_timed_out', 0)}, skipped={outs.get('abapc_inc_skipped', 0)})"
+                            )
+                        else:
+                            logging.info(f"  {'ABAPC_INC finished':<18}: skipped ({outs.get('abapc_inc_skipped', 0)})")
+
                         logging.info(f"  {'ABAPC total (s)':<18}: {_fmt_triple(abapc_min, abapc_avg, abapc_max)}")
                         logging.info(f"  {'MUS total (s)':<18}: {_fmt_triple(mus_min, mus_avg, mus_max)}")
 
@@ -1632,8 +2083,8 @@ class TestMUSAnalysis(unittest.TestCase):
                 max_muses=0,
                 mus_algorithm='camus',
                 print_mcses=True,
-                camus_mcs_threshold=0,
-                camus_mus_threshold=0,
+                camus_mcs_threshold=None,
+                camus_mus_threshold=None,
                 solve_timeout=timeout,
             )
 
@@ -1706,8 +2157,8 @@ class TestMUSAnalysis(unittest.TestCase):
                 max_muses=0,
                 mus_algorithm="camus",
                 print_mcses=True,
-                camus_mcs_threshold=0,
-                camus_mus_threshold=0,
+                camus_mcs_threshold=None,
+                camus_mus_threshold=None,
             )
 
             logging.info(f"DEMO contradiction instance: n_mus={mus_result.get('n_mus', 0)}, n_mcs={mus_result.get('n_mcs', 0)}")
@@ -1817,6 +2268,9 @@ class TestMUSAnalysis(unittest.TestCase):
         mcs_facts,
         opt_mcs_facts=None,
         opt_mcs_label: str | None = None,
+        wc_cut_facts=None,
+        wc_label: str | None = None,
+        include_mus_mcs: bool = True,
         allow_incomplete: bool = False,
         mus_timed_out: bool = False,
         opt_timed_out: bool = False,
@@ -1830,6 +2284,13 @@ class TestMUSAnalysis(unittest.TestCase):
                     So we do not require every MCS to include a wrong fact; instead we report a hit-rate.
                 - Returned MUS/MCS facts should be drawn from the provided fact universe.
         """
+        # If MUS/MCS was not requested, suppress MUS/MCS overlap output regardless of caller.
+        try:
+            if 'mus' not in (MUS_ANALYSIS_MODES or set()):
+                include_mus_mcs = False
+        except Exception:
+            pass
+
         all_facts = {self._normalize_fact_str(s) for s in (facts_ext or []) if str(s).strip()}
         wrong_set = {self._normalize_fact_str(s) for s in (wrong_ext or []) if str(s).strip()}
         removed_set = {self._normalize_fact_str(s) for s in (removed_facts or []) if str(s).strip()}
@@ -1912,6 +2373,17 @@ class TestMUSAnalysis(unittest.TestCase):
 
             return out
 
+        def empty_overlap_summary() -> dict[str, Any]:
+            return {
+                'count': 0,
+                'set_size': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                'hit_rate': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                'jaccard': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                'precision': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                'recall': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+                'f1': {'min': 0.0, 'avg': 0.0, 'max': 0.0},
+            }
+
         # Removal (ABAPC): removed facts should align with wrong facts.
         removal_groups: list[set[str]] = [removed_set] if removed_set else []
 
@@ -1922,51 +2394,62 @@ class TestMUSAnalysis(unittest.TestCase):
         logging.info("  [min/avg/max]")
         removal_summary = summarize_overlap("Removal", removal_groups)
 
+        # Pure-WC cut (clingo optimization) summary, if provided.
+        wc_summary = None
+        if wc_cut_facts is not None:
+            wc_sets = to_sets([wc_cut_facts])
+            wc_name = wc_label or "WC"
+            wc_summary = summarize_overlap(wc_name, wc_sets)
+
         # MUS correspondence: in many cases MUS cores implicate wrong facts, but for some
         # random instances a core can be composed entirely of (ground-truth) correct facts.
         # We therefore require that *at least one* MUS hits a wrong fact and report hit-rate.
-        mus_label = "MUS"
-        if mus_timed_out:
-            mus_label = "MUS (timed out)"
+        mus_summary = empty_overlap_summary()
+        mcs_summary = empty_overlap_summary()
 
-        if not mus_sets:
-            if allow_incomplete:
-                mus_summary = summarize_overlap(mus_label, [])
+        if include_mus_mcs:
+            mus_label = "MUS"
+            if mus_timed_out:
+                mus_label = "MUS (timed out)"
+
+            if not mus_sets:
+                if allow_incomplete:
+                    mus_summary = summarize_overlap(mus_label, [])
+                else:
+                    self.assertGreater(
+                        len(mus_sets),
+                        0,
+                        f"Expected at least one MUS set for correspondence check (n_nodes={n_nodes})",
+                    )
+                    mus_summary = summarize_overlap(mus_label, mus_sets)
             else:
-                self.assertGreater(
-                    len(mus_sets),
-                    0,
-                    f"Expected at least one MUS set for correspondence check (n_nodes={n_nodes})",
-                )
+                for i, core in enumerate(mus_sets, start=1):
+                    self.assertTrue(
+                        core.issubset(all_facts),
+                        f"MUS #{i} contains facts not in instance fact set (n_nodes={n_nodes})",
+                    )
+
+                any_wrong_mus = any(len(core.intersection(wrong_set)) >= 1 for core in mus_sets)
+                if not any_wrong_mus:
+                    msg = f"No MUS contains a wrong fact (n_nodes={n_nodes})"
+                    if MUS_REQUIRE_MUS_HIT_WRONG:
+                        self.fail(msg)
+                    logging.warning(msg)
+
                 mus_summary = summarize_overlap(mus_label, mus_sets)
-        else:
-            for i, core in enumerate(mus_sets, start=1):
+
+            # MCS correspondence: do not require every MCS to include wrong facts.
+            # (A minimal correction set can disable some correct assumptions too.)
+            for i, cut in enumerate(mcs_sets, start=1):
                 self.assertTrue(
-                    core.issubset(all_facts),
-                    f"MUS #{i} contains facts not in instance fact set (n_nodes={n_nodes})",
+                    cut.issubset(all_facts),
+                    f"MCS #{i} contains facts not in instance fact set (n_nodes={n_nodes})",
                 )
 
-            any_wrong_mus = any(len(core.intersection(wrong_set)) >= 1 for core in mus_sets)
-            if not any_wrong_mus:
-                msg = f"No MUS contains a wrong fact (n_nodes={n_nodes})"
-                if MUS_REQUIRE_MUS_HIT_WRONG:
-                    self.fail(msg)
-                logging.warning(msg)
-
-            mus_summary = summarize_overlap(mus_label, mus_sets)
-
-        # MCS correspondence: do not require every MCS to include wrong facts.
-        # (A minimal correction set can disable some correct assumptions too.)
-        for i, cut in enumerate(mcs_sets, start=1):
-            self.assertTrue(
-                cut.issubset(all_facts),
-                f"MCS #{i} contains facts not in instance fact set (n_nodes={n_nodes})",
-            )
-
-        mcs_label = "MCS"
-        if mus_timed_out:
-            mcs_label = "MCS (timed out)"
-        mcs_summary = summarize_overlap(mcs_label, mcs_sets)
+            mcs_label = "MCS"
+            if mus_timed_out:
+                mcs_label = "MCS (timed out)"
+            mcs_summary = summarize_overlap(mcs_label, mcs_sets)
 
         opt_mcs_summary = None
         if opt_mcs_facts is not None:
@@ -1979,7 +2462,7 @@ class TestMUSAnalysis(unittest.TestCase):
 
         logging.info("=" * 60)
 
-        if mcs_sets:
+        if include_mus_mcs and mcs_sets:
             any_wrong = any(len(cut.intersection(wrong_set)) >= 1 for cut in mcs_sets)
             if not any_wrong:
                 msg = f"No MCS intersects wrong facts (n_nodes={n_nodes})"
@@ -2007,6 +2490,7 @@ class TestMUSAnalysis(unittest.TestCase):
             'Removal': removal_summary,
             'MUS': mus_summary,
             'MCS': mcs_summary,
+            **({'WC': wc_summary} if wc_summary is not None else {}),
             **({'OptMCS': opt_mcs_summary} if opt_mcs_summary is not None else {}),
         }
 
@@ -2731,9 +3215,9 @@ class TestMUSAnalysis(unittest.TestCase):
         be parameterized across different sizes without code duplication.
 
         Args:
-            n_nodes: Number of nodes in the random graph
-            seed: Optional random seed; if None, uses MUS_SEED_BASE
-            graph_type: Optional graph family name
+            n_nodes: Number of nodes in the random graph.
+            seed: Optional random seed; if None, uses MUS_SEED_BASE.
+            graph_type: Optional graph family name.
 
         Returns a dict with keys:
             - 'was_sat': bool, True if ABAPC found the instance was already SAT (remove_n == 0)
@@ -2744,6 +3228,16 @@ class TestMUSAnalysis(unittest.TestCase):
         import re
 
         _ensure_solvers_imported()
+        use_increm_only = bool(MUS_USE_INCREM_ONLY)
+        if use_increm_only:
+            _ensure_abapc_inc_imported()
+
+        solve_timeout = _as_solver_timeout(MUS_SOLVE_TIMEOUT)
+
+        run_mus_mcs = bool(MUS_RUN_MUS_MCS)
+        run_optmcs = bool(MUS_RUN_OPTMCS)
+        run_wc = bool(MUS_RUN_WC)
+        wc_only = bool(run_wc and (not run_mus_mcs) and (not run_optmcs))
 
         # Stub notears again for this sub-run (if needed)
         if 'notears.nonlinear' not in sys.modules:
@@ -2764,18 +3258,15 @@ class TestMUSAnalysis(unittest.TestCase):
         # Use a deterministic seed
         if seed is None:
             seed = MUS_SEED_BASE
-
         if graph_type is None:
             graph_type = MUS_GRAPH_TYPE
 
         assert graph_type is not None
         graph_type = str(graph_type)
 
-        # Help static type-checkers: from here on, seed is always an int.
         assert seed is not None
         seed = int(seed)
 
-        # Deterministic configuration
         case = self.randomG_PC_case(
             n_nodes=n_nodes,
             edge_per_node=MUS_EDGE_PER_NODE,
@@ -2795,13 +3286,25 @@ class TestMUSAnalysis(unittest.TestCase):
         cg = case["cg"]
         G_true1 = case["G_true1"]
 
-        logging.info(f"Config: n_nodes={n_nodes}, seed={seed}")
+        # `cg` comes from different causal discovery backends; not all expose `number_of_edges()`.
+        edges_count: Any = "NA"
+        try:
+            edges_count = cg.number_of_edges()  # type: ignore[attr-defined]
+        except Exception:
+            try:
+                g_obj = getattr(cg, "G", None)
+                edges_attr = getattr(g_obj, "edges", None)
+                edges_count = len(edges_attr) if edges_attr is not None else "NA"
+            except Exception:
+                edges_count = "NA"
+
+        logging.info(f"Config: n_nodes={n_nodes}, seed={seed}, graph_type={graph_type}, edges={edges_count}")
         logging.info(f"True DAG: {G_true1.edges}")
         logging.info(f"Number of total independence statements: {len(true_seplist)}")
         logging.info(f"Number of facts from PC: {len(facts)} ({len(facts)/len(true_seplist)*100:.2f}%)")
         logging.info(f"Number of wrong facts: {count_wrong} ({(count_wrong/len(facts))*100 if facts else 0:.2f}%)")
-        logging.info(f"Fully directed edges from PC: {cg.find_fully_directed()}")
-        logging.info(f"Undirected edges from PC: {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
+        logging.info(f"Fully directed edges from PC ({len(cg.find_fully_directed())}): {cg.find_fully_directed()}")
+        logging.info(f"Undirected edges from PC ({len(cg.find_undirected())}): {[(x,y) for (x,y) in cg.find_undirected() if x < y]}")
 
         # Basic assertions
         self.assertGreater(len(facts_ext), 0, f"Expected at least one PC-derived fact for n_nodes={n_nodes}")
@@ -2859,23 +3362,78 @@ class TestMUSAnalysis(unittest.TestCase):
 
             logging.info(f"  → Saved temp files to {keep_dir / base_name}*.lp")
 
-        # Step 1: Run CasusalABA with all facts and apply ABAPC removal strategy (search='first')
-        logging.info("Step 1: Run CasusalABA with all facts and apply removal strategy (search_for_models='first') if UNSAT")
+        # Step 1: Optional ABAPC removal strategy.
+        abapc_timing: dict[str, Any] = {}  # baseline: timing_recorder; increm: profile dict
+        stats = None
+        abapc_base_program_path: str | None = None
+        models_after: list[Any] = []
+        multiple = False
+        remove_n = 0
         start_abapc = datetime.now()
-        abapc_timing = {}  # To capture compile/ground breakdown
-        models_after, multiple, stats, remove_n = CausalABA(
-            n_nodes,
-            facts_file,
-            weak_constraints=True,
-            search_for_models='first',
-            opt_mode=MUS_ABAPC_OPT_MODE,
-            out_n=MUS_ABAPC_OUT_N,
-            skeleton_rules_reduction=True,
-            print_models=False,
-            return_statistics=True,
-            solve_timeout=MUS_SOLVE_TIMEOUT,
-            timing_recorder=abapc_timing,
-        )
+        if wc_only:
+            logging.info(f"Step 1: Skipping ABAPC removal strategy (--analysis={MUS_ANALYSIS})")
+        else:
+            logging.info("Step 1: Run ABAPC removal strategy (baseline or incremental)")
+            if use_increm_only:
+                logging.info("Step 1: Run ABAPC_INC (incremental encoding) removal strategy")
+            else:
+                logging.info("Step 1: Run CasusalABA with all facts and apply removal strategy (search_for_models='first') if UNSAT")
+
+        if (not wc_only) and use_increm_only:
+            # We need a concrete base program file to feed into MUS when using increm-only.
+            # Prefer user path if provided; otherwise use a temp file.
+            if MUS_EMIT_ABAPC_INC_LP:
+                try:
+                    abapc_base_program_path = (
+                        MUS_EMIT_ABAPC_INC_LP.replace("{n}", str(n_nodes)).replace("{seed}", str(seed))
+                    )
+                except Exception:
+                    abapc_base_program_path = MUS_EMIT_ABAPC_INC_LP
+            else:
+                fd_dump, tmp_dump = tempfile.mkstemp(suffix=f"_abapc_inc_{n_nodes}_{seed}.lp", text=True)
+                os.close(fd_dump)
+                abapc_base_program_path = tmp_dump
+
+            # Ensure output directory exists (for user-provided relative/absolute paths).
+            try:
+                dump_dir = os.path.dirname(str(abapc_base_program_path))
+                if dump_dir:
+                    os.makedirs(dump_dir, exist_ok=True)
+            except Exception:
+                pass
+
+            models_after, multiple, stats, remove_n, profile_inc = _run_abapc_inc_with_wall_timeout(
+                n_nodes,
+                facts_file,
+                weak_constraints=True,
+                search_for_models='first',
+                opt_mode=MUS_ABAPC_OPT_MODE,
+                out_n=MUS_ABAPC_OUT_N,
+                skeleton_rules_reduction=True,
+                print_models=False,
+                return_statistics=True,
+                solve_timeout=solve_timeout,
+                debug_dump_path=abapc_base_program_path,
+                debug_dump_always=True,
+                debug_dump_include_facts=False,
+                debug_dump_materialize_block_edges=True,
+                wall_timeout=solve_timeout,
+            )
+            abapc_timing = profile_inc if isinstance(profile_inc, dict) else {}
+        elif not wc_only:
+            models_after, multiple, stats, remove_n = CausalABA(
+                n_nodes,
+                facts_file,
+                weak_constraints=True,
+                search_for_models='first',
+                opt_mode=MUS_ABAPC_OPT_MODE,
+                out_n=MUS_ABAPC_OUT_N,
+                skeleton_rules_reduction=True,
+                print_models=False,
+                return_statistics=True,
+                solve_timeout=solve_timeout,
+                timing_recorder=abapc_timing,
+            )
         abapc_time = datetime.now() - start_abapc
 
         # Extract detailed timing from clingo statistics
@@ -2885,14 +3443,30 @@ class TestMUSAnalysis(unittest.TestCase):
         except (KeyError, TypeError):
             abapc_times = {'total': abapc_time.total_seconds(), 'cpu': 0, 'solve': 0}
         
-        logging.info(f"  → Total facts: {len(facts)}")
-        logging.info(f"  → Wrong facts: {count_wrong}")
-        logging.info(f"  → Facts removed: {remove_n}")
-        logging.info(f"  → Models found after removal: {len(models_after)}")
-        logging.info(f"  → ABAPC time: {abapc_time.total_seconds():.3f}s")
+        if not wc_only:
+            logging.info(f"  → Total facts: {len(facts)}")
+            logging.info(f"  → Wrong facts: {count_wrong}")
+            logging.info(f"  → Facts removed: {remove_n}")
+            logging.info(f"  → Models found after removal: {len(models_after)}")
+            logging.info(f"  → ABAPC time: {abapc_time.total_seconds():.3f}s")
+
+        # When using increm-only mode, we emitted a concrete base program to disk.
+        # Log a short hash so we can verify it's the same base text later injected
+        # into the MUS/OptMCS adorned program.
+        if (not wc_only) and use_increm_only and abapc_base_program_path:
+            try:
+                import hashlib
+
+                with open(str(abapc_base_program_path), 'rb') as bf:
+                    base_sha = hashlib.sha256(bf.read()).hexdigest()
+                logging.info(f"  → ABAPC_INC base dump sha256: {base_sha[:12]} (file={abapc_base_program_path})")
+            except Exception:
+                pass
 
         # Derive which facts were removed by ABAPC 'first'.
-        # CausalABA sorts facts by descending I and then removes from the tail until SAT.
+        # Baseline ABAPC removes the lowest-I facts (tail after sorting by descending I).
+        # ABAPC_INC mirrors this ordering internally, but can also report the removed fact keys
+        # directly via its profile; prefer that when available for accurate reporting.
         facts_with_I: list[tuple[float, str]] = []
         for (fact_str, I, _is_correct), ext_line in zip(facts, facts_ext):
             stmt = self._normalize_fact_str(ext_line)
@@ -2900,19 +3474,117 @@ class TestMUSAnalysis(unittest.TestCase):
         facts_sorted_by_I = sorted(facts_with_I, key=lambda t: t[0], reverse=True)
         removed_facts = [stmt for _I, stmt in facts_sorted_by_I[-remove_n:]] if remove_n else []
 
+        try:
+            if use_increm_only:
+                removed_from_inc = (abapc_timing or {}).get('removed_fact_keys', None)
+                if isinstance(removed_from_inc, list) and removed_from_inc:
+                    removed_facts = [self._normalize_fact_str(s) for s in removed_from_inc if str(s).strip()]
+                    remove_n = len(removed_facts)
+        except Exception:
+            pass
+
         # For larger sizes, we may not enforce UNSAT for all seeds; just assert we can reach SAT
         # If we hit the timeout before reaching SAT, skip the assertion (timeout is the real limit)
         abapc_timeout = bool(abapc_timing.get('timed_out', False))
         # Fallback heuristic (older CausalABA versions may not set timing_recorder flags).
-        if (not abapc_timeout) and (len(models_after) == 0):
-            abapc_timeout = abapc_time.total_seconds() >= (MUS_SOLVE_TIMEOUT - 0.5)
-        if remove_n > 0 and not abapc_timeout:
+        if (not abapc_timeout) and (len(models_after) == 0) and (solve_timeout is not None):
+            abapc_timeout = abapc_time.total_seconds() >= (float(solve_timeout) - 0.5)
+        if (not wc_only) and remove_n > 0 and not abapc_timeout:
             self.assertGreater(len(models_after), 0, f"Expected SAT after removing {remove_n} tests for n_nodes={n_nodes}")
-        elif remove_n > 0 and abapc_timeout and len(models_after) == 0:
+        elif (not wc_only) and remove_n > 0 and abapc_timeout and len(models_after) == 0:
             logging.warning(f"⚠ Timeout hit after {abapc_time.total_seconds():.1f}s before reaching SAT (removed {remove_n} tests, n_nodes={n_nodes})")
 
+        # Step 2: Run ABAPC_INC (incremental encoding) for comparison
+        abapc_inc_time = None
+        abapc_inc_profile: dict[str, Any] | None = None
+        abapc_inc_remove_n: int | None = None
+        n_models_after_inc: int | None = None
+        abapc_inc_timeout = False
+        abapc_inc_ran = False
+        try:
+            if (not wc_only) and (not use_increm_only):
+                _ensure_abapc_inc_imported()
+                if CausalABA_INC is None:
+                    raise ImportError("ABAPC_INC is not available after import")
+                logging.info("Step 2: Running ABAPC_INC (incremental encoding)")
+                start_abapc_inc = datetime.now()
+
+                debug_dump_path = None
+                if MUS_EMIT_ABAPC_INC_LP:
+                    try:
+                        debug_dump_path = (
+                            MUS_EMIT_ABAPC_INC_LP
+                            .replace("{n}", str(n_nodes))
+                            .replace("{seed}", str(seed))
+                        )
+                    except Exception:
+                        debug_dump_path = MUS_EMIT_ABAPC_INC_LP
+                    try:
+                        dd = os.path.dirname(str(debug_dump_path))
+                        if dd:
+                            os.makedirs(dd, exist_ok=True)
+                    except Exception:
+                        pass
+                    logging.info(f"Will emit ABAPC_INC grounded dump to {debug_dump_path}")
+
+                models_after_inc, _multiple_inc, _stats_inc, remove_n_inc, profile_inc = _run_abapc_inc_with_wall_timeout(
+                    n_nodes,
+                    facts_file,
+                    weak_constraints=True,
+                    search_for_models='first',
+                    opt_mode=MUS_ABAPC_OPT_MODE,
+                    out_n=MUS_ABAPC_OUT_N,
+                    skeleton_rules_reduction=True,
+                    print_models=False,
+                    return_statistics=True,
+                    solve_timeout=solve_timeout,
+                    debug_dump_path=debug_dump_path,
+                    debug_dump_always=bool(debug_dump_path),
+                    wall_timeout=solve_timeout,
+                )
+
+                abapc_inc_ran = True
+
+                abapc_inc_time = datetime.now() - start_abapc_inc
+                abapc_inc_profile = profile_inc if isinstance(profile_inc, dict) else None
+                removed_from_inc = None
+                try:
+                    removed_from_inc = (abapc_inc_profile or {}).get('removed_fact_keys', None)
+                except Exception:
+                    removed_from_inc = None
+
+                if isinstance(removed_from_inc, list) and removed_from_inc:
+                    abapc_inc_remove_n = len([x for x in removed_from_inc if str(x).strip()])
+                else:
+                    abapc_inc_remove_n = int(remove_n_inc or 0)
+
+                n_models_after_inc = len(models_after_inc or [])
+                abapc_inc_timeout = bool((abapc_inc_profile or {}).get('timed_out', False))
+                if (
+                    (not abapc_inc_timeout)
+                    and n_models_after_inc == 0
+                    and (solve_timeout is not None)
+                    and (abapc_inc_time.total_seconds() >= (float(solve_timeout) - 0.5))
+                ):
+                    abapc_inc_timeout = True
+
+                logging.info(f"  → ABAPC_INC facts removed: {abapc_inc_remove_n}")
+                logging.info(f"  → ABAPC_INC models found after removal: {n_models_after_inc}")
+                logging.info(f"  → ABAPC_INC time: {abapc_inc_time.total_seconds():.3f}s")
+                if isinstance(removed_from_inc, list) and removed_from_inc:
+                    prev = [self._normalize_fact_str(s) for s in removed_from_inc if str(s).strip()]
+                    preview = sorted(prev)[:10]
+                    if len(prev) > 10:
+                        preview.append(f"... (+{len(prev) - 10} more)")
+                    logging.info(f"  → ABAPC_INC removed fact keys (preview): {preview}")
+        except Exception as e:
+            logging.warning(f"ABAPC_INC comparison skipped (import/run failed): {e}")
+
         # Step 3: Run MUS/MCS on PC facts only
-        logging.info("Step 3: Running MUS/MCS analysis")
+        if run_mus_mcs:
+            logging.info("Step 3: Running MUS/MCS analysis")
+        else:
+            logging.info(f"Step 3: Skipping MUS/MCS analysis (--analysis={MUS_ANALYSIS})")
         fd_mus, facts_mus_file = tempfile.mkstemp(suffix='.lp', text=True)
         os.close(fd_mus)
         with open(facts_mus_file, 'w') as f:
@@ -2977,23 +3649,38 @@ class TestMUSAnalysis(unittest.TestCase):
         # Special handling: if MUS_MAX_MUSES is empty string, pass None to omit -n flag.
         # If max_muses_override is set, always pass the explicit value through.
         max_muses_arg = max_muses if max_muses_override is not None else (None if MUS_MAX_MUSES == "" else max_muses)
-        
-        mus_timing = {}  # To capture compile/ground breakdown
-        mus_result = CausalABA_MUS(
-            n_nodes=n_nodes,
-            facts_location=facts_mus_file,
-            gringo_path="clingo",
-            wasp_path="wasp",
-            max_muses=max_muses_arg,
-            mus_algorithm="camus",
-            print_mcses=True,
-            camus_mcs_threshold=mcs_threshold,
-            camus_mus_threshold=mus_threshold,
-            solve_timeout=MUS_SOLVE_TIMEOUT,
-            emit_lp=emit_lp_path,
-            timing_recorder=mus_timing,
-        )
-        mus_time = datetime.now() - start_mus
+
+        mus_timing: dict[str, Any] = {}  # To capture compile/ground breakdown
+        if run_mus_mcs:
+            mus_result = CausalABA_MUS(
+                n_nodes=n_nodes,
+                facts_location=facts_mus_file,
+                gringo_path="clingo",
+                wasp_path="wasp",
+                max_muses=max_muses_arg,
+                mus_algorithm="camus",
+                print_mcses=True,
+                camus_mcs_threshold=mcs_threshold,
+                camus_mus_threshold=mus_threshold,
+                solve_timeout=solve_timeout,
+                emit_lp=emit_lp_path,
+                timing_recorder=mus_timing,
+                base_program_path=(abapc_base_program_path if use_increm_only else None),
+            )
+            mus_time = datetime.now() - start_mus
+        else:
+            # Stable placeholders so later summary/return logic doesn't special-case.
+            mus_result = {
+                'n_mus': 0,
+                'n_mcs': 0,
+                'mus_facts': [],
+                'mcs_facts': [],
+                'mus_list': [],
+                'mcs_list': [],
+                'mus_solve_time': 0.0,
+                'timed_out': False,
+            }
+            mus_time = timedelta(0)
 
         # Optional: also compute optimum-MCS using WASP's dedicated algorithm.
         opt_mcs_facts = None
@@ -3001,62 +3688,191 @@ class TestMUSAnalysis(unittest.TestCase):
         opt_time = None
         opt_timing: dict[str, Any] | None = None
         opt_result: dict[str, Any] | None = None
-        if MUS_OPTIMUM_MCS_ALGORITHM:
-            opt_alg = MUS_OPTIMUM_MCS_ALGORITHM.strip().lower()
-            if opt_alg not in ("camus", "emax"):
+        if run_optmcs:
+            if not MUS_OPTIMUM_MCS_ALGORITHM:
                 raise ValueError(
-                    f"Invalid MUS_OPTIMUM_MCS_ALGORITHM={MUS_OPTIMUM_MCS_ALGORITHM!r}; expected 'camus' or 'emax'"
-                )
-
-            # Only run if this WASP build supports the option.
-            try:
-                import subprocess
-
-                help_out = subprocess.run(
-                    ["wasp", "--help"],
-                    capture_output=True,
-                    text=True,
-                    timeout=2.0,
-                )
-                supported = "--optimum-mcs-algorithm" in ((help_out.stdout or "") + (help_out.stderr or ""))
-            except Exception:
-                supported = False
-
-            if not supported:
-                logging.warning(
-                    "Skipping optimum-MCS run: current WASP build does not support --optimum-mcs-algorithm. "
-                    "Rebuild/upgrade WASP to enable this feature."
+                    "OptMCS was requested but MUS_OPTIMUM_MCS_ALGORITHM is empty (set env var MUS_OPTIMUM_MCS_ALGORITHM to 'camus' or 'emax')."
                 )
             else:
-                # If the user requested --emit-lp for the standard MUS/MCS run, also emit
-                # an additional program that contains the optimum-MCS objective literals.
-                emit_lp_opt = None
-                if emit_lp_path:
-                    root, ext = os.path.splitext(str(emit_lp_path))
-                    emit_lp_opt = f"{root}_optmcs_{opt_alg}{ext or '.lp'}"
+                opt_alg = MUS_OPTIMUM_MCS_ALGORITHM.strip().lower()
+                if opt_alg not in ("camus", "emax"):
+                    raise ValueError(
+                        f"Invalid MUS_OPTIMUM_MCS_ALGORITHM={MUS_OPTIMUM_MCS_ALGORITHM!r}; expected 'camus' or 'emax'"
+                    )
 
-                logging.info(f"Step 3b: Running optimum-MCS analysis (algorithm={opt_alg})")
-                opt_timing = {}
-                start_opt = datetime.now()
-                opt_result = CausalABA_MUS(
-                    n_nodes=n_nodes,
-                    facts_location=facts_mus_file,
-                    gringo_path="clingo",
-                    wasp_path="wasp",
-                    max_muses=max_muses_arg,
-                    mus_algorithm="camus",
-                    print_mcses=False,
-                    optimum_mcs_algorithm=opt_alg,
-                    facts_wc_location=facts_wc_file,
-                    camus_mcs_threshold=mcs_threshold,
-                    camus_mus_threshold=mus_threshold,
-                    solve_timeout=MUS_SOLVE_TIMEOUT,
-                    emit_lp=emit_lp_opt,
-                    timing_recorder=opt_timing,
+                # Only run if this WASP build supports the option.
+                try:
+                    import subprocess
+
+                    help_out = subprocess.run(
+                        ["wasp", "--help"],
+                        capture_output=True,
+                        text=True,
+                        timeout=2.0,
+                    )
+                    supported = "--optimum-mcs-algorithm" in ((help_out.stdout or "") + (help_out.stderr or ""))
+                except Exception:
+                    supported = False
+
+                if not supported:
+                    logging.warning(
+                        "Skipping optimum-MCS run: current WASP build does not support --optimum-mcs-algorithm. "
+                        "Rebuild/upgrade WASP to enable this feature."
+                    )
+                else:
+                    # If the user requested --emit-lp for the standard MUS/MCS run, also emit
+                    # an additional program that contains the optimum-MCS objective literals.
+                    emit_lp_opt = None
+                    if emit_lp_path:
+                        root, ext = os.path.splitext(str(emit_lp_path))
+                        emit_lp_opt = f"{root}_optmcs_{opt_alg}{ext or '.lp'}"
+
+                    logging.info(f"Step 3b: Running optimum-MCS analysis (algorithm={opt_alg})")
+                    opt_timing = {}
+                    start_opt = datetime.now()
+                    opt_result = CausalABA_MUS(
+                        n_nodes=n_nodes,
+                        facts_location=facts_mus_file,
+                        gringo_path="clingo",
+                        wasp_path="wasp",
+                        max_muses=max_muses_arg,
+                        mus_algorithm="camus",
+                        print_mcses=False,
+                        optimum_mcs_algorithm=opt_alg,
+                        facts_wc_location=facts_wc_file,
+                        camus_mcs_threshold=mcs_threshold,
+                        camus_mus_threshold=mus_threshold,
+                        solve_timeout=solve_timeout,
+                        emit_lp=emit_lp_opt,
+                        timing_recorder=opt_timing,
+                        base_program_path=(abapc_base_program_path if use_increm_only else None),
+                    )
+                    opt_time = datetime.now() - start_opt
+                    opt_mcs_facts = opt_result.get('mcs_facts', None) if opt_result is not None else None
+                    opt_mcs_label = f"OptMCS({opt_alg})"
+
+        # Optional: compute pure clingo optimum cut using weak constraints only.
+        wc_cut_facts: list[str] | None = None
+        wc_cut_weight: int | None = None
+        wc_time = None
+        wc_result: dict[str, Any] | None = None
+        wc_timing: dict[str, Any] | None = None
+        if run_wc:
+            logging.info("Step 3c: Running clingo-only weak-constraint optimization (WC)")
+            # Emit a standalone WC program if we are already emitting an adorned program.
+            emit_lp_wc = None
+            if emit_lp_path:
+                root, ext = os.path.splitext(str(emit_lp_path))
+                emit_lp_wc = f"{root}_wc{ext or '.lp'}"
+
+            wc_timing = {}
+            start_wc = datetime.now()
+            wc_result = CausalABA_WC(
+                n_nodes=n_nodes,
+                facts_location=facts_mus_file,
+                gringo_path="clingo",
+                facts_wc_location=facts_wc_file,
+                solve_timeout=solve_timeout,
+                emit_lp=emit_lp_wc,
+                timing_recorder=wc_timing,
+                base_program_path=(abapc_base_program_path if (use_increm_only and abapc_base_program_path) else None),
+            )
+            wc_time = datetime.now() - start_wc
+            wc_cut_facts = wc_result.get('cut_facts', None) if wc_result is not None else None
+            wc_cut_weight = int(wc_result.get('cut_weight', 0) or 0) if wc_result is not None else None
+
+        # Optional: compare pure-WC optimum against WASP OptMCS optimum.
+        if MUS_CHECK_WC_VS_OPTMCS:
+            if not (run_wc and run_optmcs):
+                logging.warning(
+                    "WC-vs-OptMCS check requested, but required modes not enabled (run_wc=%s, run_optmcs=%s).",
+                    bool(run_wc),
+                    bool(run_optmcs),
                 )
-                opt_time = datetime.now() - start_opt
-                opt_mcs_facts = opt_result.get('mcs_facts', None)
-                opt_mcs_label = f"OptMCS({opt_alg})"
+            elif wc_result is None or opt_result is None:
+                logging.warning(
+                    "WC-vs-OptMCS check requested, but a result is missing (wc_result=%s, opt_result=%s).",
+                    bool(wc_result is not None),
+                    bool(opt_result is not None),
+                )
+            else:
+                wc_timed_out = bool(wc_result.get('timed_out', False))
+                opt_timed_out = bool(opt_result.get('timed_out', False))
+                if wc_timed_out or opt_timed_out:
+                    logging.warning(
+                        "Skipping WC-vs-OptMCS comparison due to timeout (wc_timed_out=%s, opt_timed_out=%s).",
+                        wc_timed_out,
+                        opt_timed_out,
+                    )
+                else:
+                    # Normalize to a single cut set for comparison.
+                    def _first_cut_set(obj: Any) -> set[str]:
+                        if obj is None:
+                            return set()
+                        # OptMCS can be a list of cuts; pick the first non-empty.
+                        if isinstance(obj, list) and obj and all(isinstance(x, (list, tuple, set)) for x in obj):
+                            for cut in obj:
+                                s = {self._normalize_fact_str(str(x)) for x in (cut or []) if str(x).strip()}
+                                s = {x for x in s if x}
+                                if s:
+                                    return s
+                            return set()
+                        # Otherwise treat as a single cut list.
+                        s = {self._normalize_fact_str(str(x)) for x in (obj or []) if str(x).strip()}
+                        return {x for x in s if x}
+
+                    wc_cut_set = _first_cut_set(wc_cut_facts)
+                    opt_cut_set = _first_cut_set(opt_mcs_facts)
+
+                    # Compare objective weights under the shared weights map.
+                    try:
+                        from causalaba_mus import parse_weights_from_wc_file, _normalize_ext_fact_key
+
+                        weights_map = parse_weights_from_wc_file(facts_wc_file)
+                    except Exception as e:
+                        raise AssertionError(f"WC-vs-OptMCS check failed: cannot parse weights from {facts_wc_file!r}: {e}")
+
+                    def _sum_cut_weight(cut: set[str]) -> int:
+                        total = 0
+                        missing = 0
+                        for fact in (cut or set()):
+                            # parse_weights_from_wc_file keys are normalized without trailing '.'
+                            key = _normalize_ext_fact_key(str(fact))
+                            w = weights_map.get(key)
+                            if w is None:
+                                missing += 1
+                            else:
+                                total += int(w)
+                        if missing:
+                            raise AssertionError(f"WC-vs-OptMCS check failed: missing weights for {missing} facts")
+                        return int(total)
+
+                    wc_w = int(wc_cut_weight if wc_cut_weight is not None else _sum_cut_weight(wc_cut_set))
+                    opt_w = int(_sum_cut_weight(opt_cut_set))
+
+                    if wc_w != opt_w:
+                        raise AssertionError(
+                            f"WC optimum weight {wc_w} != OptMCS optimum weight {opt_w} (n_nodes={n_nodes}, seed={seed})"
+                        )
+
+                    if MUS_CHECK_WC_VS_OPTMCS_STRICT_SET and (wc_cut_set != opt_cut_set):
+                        raise AssertionError(
+                            f"WC optimum cut set != OptMCS optimum cut set (same weight={wc_w}); "
+                            f"|WC|={len(wc_cut_set)}, |OptMCS|={len(opt_cut_set)} (n_nodes={n_nodes}, seed={seed})"
+                        )
+                    elif wc_cut_set != opt_cut_set:
+                        logging.warning(
+                            "WC and OptMCS produced different optimum cuts with same weight=%s; likely multiple optima. |WC|=%s |OptMCS|=%s",
+                            wc_w,
+                            len(wc_cut_set),
+                            len(opt_cut_set),
+                        )
+                    elif wc_cut_set == opt_cut_set:
+                        logging.info(
+                            "   WC and OptMCS produced identical optimum cuts with weight=%s; |Cut|=%s",
+                            wc_w,
+                            len(wc_cut_set),
+                        )
 
         # ===== GRAPH EVAL SUMMARY (Removal + OptMCS) =====
         # Evaluate the *set* of DAGs compatible with the remaining facts after applying:
@@ -3088,9 +3904,12 @@ class TestMUSAnalysis(unittest.TestCase):
                 return {'min': float(min(ys)), 'avg': float(sum(ys) / len(ys)), 'max': float(max(ys))}
 
             def _fmt_triple(d: dict[str, float | None]) -> str:
-                if d.get('avg', None) is None:
+                mn = d.get('min', None)
+                av = d.get('avg', None)
+                mx = d.get('max', None)
+                if mn is None or av is None or mx is None:
                     return "   none"
-                return f"{float(d['min']):7.3f} / {float(d['avg']):7.3f} / {float(d['max']):7.3f}"
+                return f"{mn:7.3f} / {av:7.3f} / {mx:7.3f}"
 
             def _evaluate_models(models: list[list[Any]]) -> dict[str, Any]:
                 # Deduplicate by arrow set (distinct DAGs)
@@ -3160,7 +3979,7 @@ class TestMUSAnalysis(unittest.TestCase):
                         # For graph enumeration we want *compatibility* models, not optimal models.
                         opt_mode='ignore',
                         out_n=MUS_GRAPH_EVAL_OUT_N,
-                        solve_timeout=MUS_SOLVE_TIMEOUT,
+                        solve_timeout=solve_timeout,
                         timing_recorder=eval_timing,
                     )
                     timed_out = bool(eval_timing.get('timed_out', False))
@@ -3273,14 +4092,17 @@ class TestMUSAnalysis(unittest.TestCase):
                 opt_mcs_label=opt_mcs_label,
             )
 
-        mus_timeout = mus_time.total_seconds() >= (MUS_SOLVE_TIMEOUT - 0.5)
+        mus_timeout = bool(mus_result.get('timed_out', False)) if run_mus_mcs else False
+        if (not mus_timeout) and (solve_timeout is not None):
+            mus_timeout = mus_time.total_seconds() >= (float(solve_timeout) - 0.5)
 
-        logging.info(f"  → MUS found: {mus_result['n_mus']}")
-        logging.info(f"  → MCS found: {mus_result.get('n_mcs', 0)}")
-        logging.info(f"  → MUS time: {mus_time.total_seconds():.3f}s")
+        if run_mus_mcs:
+            logging.info(f"  → MUS found: {mus_result['n_mus']}")
+            logging.info(f"  → MCS found: {mus_result.get('n_mcs', 0)}")
+            logging.info(f"  → MUS time: {mus_time.total_seconds():.3f}s")
 
         # Optional: verify MUS definition directly (enforced core under same MUS program is UNSAT).
-        if MUS_CHECK_ENFORCED_UNSAT:
+        if run_mus_mcs and MUS_CHECK_ENFORCED_UNSAT:
             self._assert_mus_cores_enforced_unsat_under_mus_background(
                 n_nodes=n_nodes,
                 mus_list=mus_result.get('mus_list', []) or [],
@@ -3290,7 +4112,7 @@ class TestMUSAnalysis(unittest.TestCase):
             )
 
         # Optional: verify each MUS core's corresponding facts are UNSAT under the plain ABAPC background.
-        if MUS_CHECK_ENFORCED_UNSAT_ABAPC:
+        if run_mus_mcs and MUS_CHECK_ENFORCED_UNSAT_ABAPC:
             self._assert_mus_cores_enforced_unsat_under_abapc_background(
                 n_nodes=n_nodes,
                 mus_facts=mus_result.get('mus_facts', []) or [],
@@ -3298,7 +4120,7 @@ class TestMUSAnalysis(unittest.TestCase):
             )
 
         # Optional: verify MCS semantics (removing an MCS restores SAT).
-        if MUS_CHECK_MCS_REMOVED_SAT:
+        if run_mus_mcs and MUS_CHECK_MCS_REMOVED_SAT:
             self._assert_mcs_cores_removed_sat_under_mus_background(
                 n_nodes=n_nodes,
                 mcs_list=mus_result.get('mcs_list', []) or [],
@@ -3308,7 +4130,7 @@ class TestMUSAnalysis(unittest.TestCase):
                 solve_timeout_sec=float(min(10, int(MUS_SOLVE_TIMEOUT))),
             )
 
-        if MUS_CHECK_MCS_REMOVED_SAT_ABAPC:
+        if run_mus_mcs and MUS_CHECK_MCS_REMOVED_SAT_ABAPC:
             self._assert_mcs_cores_removed_sat_under_abapc_background(
                 n_nodes=n_nodes,
                 facts_ext=facts_ext,
@@ -3325,11 +4147,14 @@ class TestMUSAnalysis(unittest.TestCase):
             logging.info("=" * 60)
             
             # Extract ABAPC timing breakdown
-            abapc_compile = abapc_timing.get('compile_sec_total', 0.0)
-            abapc_ground = abapc_timing.get('ground_sec_total', 0.0)
-            abapc_unsat_ground = abapc_timing.get('unsat_ground_sec_total', 0.0)
-            abapc_unsat_solve = abapc_timing.get('unsat_solve_sec_total', 0.0)
-            abapc_solve = stats.get('summary', {}).get('times', {}).get('solve', 0.0) if stats else 0.0
+            abapc_compile = float(abapc_timing.get('compile_sec_total', 0.0) or 0.0)
+            abapc_ground = float(abapc_timing.get('ground_sec_total', 0.0) or 0.0)
+            abapc_unsat_ground = float(abapc_timing.get('unsat_ground_sec_total', 0.0) or 0.0)
+            abapc_unsat_solve = float(abapc_timing.get('unsat_solve_sec_total', 0.0) or 0.0)
+            if use_increm_only:
+                abapc_solve = float(abapc_timing.get('solve_sec_total', 0.0) or 0.0)
+            else:
+                abapc_solve = stats.get('summary', {}).get('times', {}).get('solve', 0.0) if stats else 0.0
             abapc_total = abapc_time.total_seconds()
             # Sys (residual) time captures everything not covered by the measured phases.
             # For ABAPC removal, this includes Python overhead + reground/solve work not
@@ -3393,16 +4218,20 @@ class TestMUSAnalysis(unittest.TestCase):
             # Format timing displays with timeout indicators
             def format_time(val, timeout_phase, phase_name):
                 if timeout_phase == phase_name:
-                    # Keep the measured value (often partial) and annotate the timeout,
-                    # instead of replacing it with the budget (which is misleading).
-                    return f"{val:.3f}s (timeout @{MUS_SOLVE_TIMEOUT}s)"
+                    # Keep the measured value (often partial) and annotate the timeout.
+                    if solve_timeout is None:
+                        return f"{val:.3f}s (timeout)"
+                    return f"{val:.3f}s (timeout @{int(solve_timeout)}s)"
                 return f"{val:.3f}s"
 
             def fmt_cell(val, timeout_phase, phase_name, width: int = 16) -> str:
                 return f"{format_time(val, timeout_phase, phase_name):>{width}}"
             
             logging.info("")
-            logging.info(f"{prefix}+-- ABAPC removal strategy:")
+            abapc_label = "ABAPC_INC removal strategy" if use_increm_only else "ABAPC removal strategy"
+            abapc_engine = "causalaba_increm.CausalABA" if use_increm_only else "causalaba.CausalABA"
+            logging.info(f"{prefix}+-- {abapc_label}:")
+            logging.info(f"{prefix}|   Engine:          {abapc_engine:>16}")
             logging.info(f"{prefix}|   Compiling:       {fmt_cell(abapc_compile, abapc_timeout_phase, 'compile')}")
             logging.info(f"{prefix}|   UNSAT grounding: {abapc_unsat_ground:>15.3f}s")
             logging.info(f"{prefix}|   UNSAT solving:   {abapc_unsat_solve:>15.3f}s")
@@ -3411,12 +4240,33 @@ class TestMUSAnalysis(unittest.TestCase):
             logging.info(f"{prefix}|   Sys (residual):  {fmt_cell(abapc_sys, abapc_timeout_phase, 'sys')}")
             logging.info(f"{prefix}|   Total:           {abapc_total:>15.3f}s")
             logging.info(f"{prefix}|")
-            logging.info(f"{prefix}+-- ABAPC MUS/MCS analysis:")
-            logging.info(f"{prefix}|   Compiling:       {fmt_cell(mus_compile, mus_timeout_phase, 'compile')}")
-            logging.info(f"{prefix}|   Grounding:       {fmt_cell(mus_ground, mus_timeout_phase, 'ground')}")
-            logging.info(f"{prefix}|   Solving:         {fmt_cell(mus_solve, mus_timeout_phase, 'solve')}")
-            logging.info(f"{prefix}|   Sys (residual):  {fmt_cell(mus_sys, mus_timeout_phase, 'sys')}")
-            logging.info(f"{prefix}|   Total:           {mus_total:>15.3f}s")
+
+            # ABAPC_INC timing breakdown (incremental encoding)
+            if abapc_inc_time is not None and abapc_inc_profile is not None:
+                inc_compile = float(abapc_inc_profile.get('compile_sec_total', 0.0) or 0.0)
+                inc_ground = float(abapc_inc_profile.get('ground_sec_total', 0.0) or 0.0)
+                inc_solve = float(abapc_inc_profile.get('solve_sec_total', 0.0) or 0.0)
+                inc_total = float(abapc_inc_time.total_seconds())
+                inc_sys = max(0.0, inc_total - inc_compile - inc_ground - inc_solve)
+                inc_timeout_phase = 'solve' if abapc_inc_timeout else None
+
+                logging.info(f"{prefix}+-- ABAPC_INC (incremental encoding):")
+                logging.info(f"{prefix}|   Compiling:       {fmt_cell(inc_compile, inc_timeout_phase, 'compile')}")
+                logging.info(f"{prefix}|   Grounding:       {fmt_cell(inc_ground, inc_timeout_phase, 'ground')}")
+                logging.info(f"{prefix}|   Solving:         {fmt_cell(inc_solve, inc_timeout_phase, 'solve')}")
+                logging.info(f"{prefix}|   Sys (residual):  {fmt_cell(inc_sys, inc_timeout_phase, 'sys')}")
+                logging.info(f"{prefix}|   Total:           {inc_total:>15.3f}s")
+                logging.info(f"{prefix}|")
+
+            if run_mus_mcs:
+                logging.info(f"{prefix}+-- ABAPC MUS/MCS analysis:")
+                logging.info(f"{prefix}|   Compiling:       {fmt_cell(mus_compile, mus_timeout_phase, 'compile')}")
+                logging.info(f"{prefix}|   Grounding:       {fmt_cell(mus_ground, mus_timeout_phase, 'ground')}")
+                logging.info(f"{prefix}|   Solving:         {fmt_cell(mus_solve, mus_timeout_phase, 'solve')}")
+                logging.info(f"{prefix}|   Sys (residual):  {fmt_cell(mus_sys, mus_timeout_phase, 'sys')}")
+                logging.info(f"{prefix}|   Total:           {mus_total:>15.3f}s")
+            else:
+                logging.info(f"{prefix}+-- ABAPC MUS/MCS analysis: (skipped; --analysis={MUS_ANALYSIS})")
 
             # Optional: add optimum-MCS timing as a separate line item.
             if opt_time is not None and opt_result is not None:
@@ -3425,7 +4275,7 @@ class TestMUSAnalysis(unittest.TestCase):
                 opt_ground = float((opt_timing or {}).get('ground_sec_total', 0.0) or 0.0)
                 opt_solve = float((opt_result or {}).get('mus_solve_time', 0.0) or 0.0)
                 opt_sys = max(0.0, opt_total - opt_compile - opt_ground - opt_solve)
-                opt_timeout = opt_total >= (MUS_SOLVE_TIMEOUT - 0.5)
+                opt_timeout = (solve_timeout is not None) and (opt_total >= (float(solve_timeout) - 0.5))
                 opt_timeout_phase = 'solve' if opt_timeout else None
 
                 label = opt_mcs_label or 'OptMCS'
@@ -3438,7 +4288,7 @@ class TestMUSAnalysis(unittest.TestCase):
                 logging.info(f"{prefix}|   Total:           {opt_total:>15.3f}s")
             logging.info("")
             
-            if not (abapc_timeout or mus_timeout):
+            if run_mus_mcs and (not (abapc_timeout or mus_timeout)):
                 ratio_total = mus_total / abapc_total if abapc_total > 0 else 0
                 ratio_solve = mus_solve / abapc_solve if abapc_solve > 0 else 0
                 
@@ -3467,7 +4317,7 @@ class TestMUSAnalysis(unittest.TestCase):
         
         # Assertions after timing comparison so it always displays
         # Basic assertion: we expect at least some MUSes for contradiction cases
-        if remove_n > 0:
+        if run_mus_mcs and remove_n > 0:
             if not mus_timeout:
                 self.assertGreater(mus_result.get('n_mus', 0), 0, f"Expected at least one MUS for UNSAT case (n_nodes={n_nodes})")
         
@@ -3480,6 +4330,7 @@ class TestMUSAnalysis(unittest.TestCase):
             'was_sat': (remove_n == 0) and (len(models_after) > 0) and (not abapc_timeout),
             'abapc_timeout': abapc_timeout,
             'mus_timeout': mus_timeout,
+            'mus_ran': bool(run_mus_mcs),
             'abapc_time_sec': abapc_time.total_seconds(),
             'mus_time_sec': mus_time.total_seconds(),
             'remove_n': remove_n,
@@ -3497,16 +4348,29 @@ class TestMUSAnalysis(unittest.TestCase):
             'mcs_facts': mus_result.get('mcs_facts', []),
             'opt_mcs_facts': opt_mcs_facts,
             'opt_mcs_label': opt_mcs_label,
+            'opt_ran': bool(opt_result is not None),
             'opt_time_sec': opt_time.total_seconds() if opt_time is not None else 0.0,
             'opt_timeout': (
                 bool((opt_result or {}).get('timed_out', False))
-                or (opt_time is not None and (opt_time.total_seconds() >= (MUS_SOLVE_TIMEOUT - 0.5)))
+                or (
+                    (opt_time is not None)
+                    and (solve_timeout is not None)
+                    and (opt_time.total_seconds() >= (float(solve_timeout) - 0.5))
+                )
             )
             if opt_result is not None
             else False,
+            'abapc_inc_ran': bool(abapc_inc_ran),
+            'abapc_inc_timeout': bool(abapc_inc_timeout) if abapc_inc_ran else False,
+            'abapc_inc_time_sec': abapc_inc_time.total_seconds() if abapc_inc_time is not None else 0.0,
             'opt_timing': opt_timing or {},
             'opt_result': opt_result or {},
             'graph_eval': graph_eval,
+            'wc_ran': bool(wc_result is not None),
+            'wc_time_sec': wc_time.total_seconds() if wc_time is not None else 0.0,
+            'wc_timeout': bool((wc_result or {}).get('timed_out', False)) if wc_result is not None else False,
+            'wc_cut_facts': wc_cut_facts,
+            'wc_cut_weight': wc_cut_weight,
         }
 
 
@@ -3536,10 +4400,25 @@ if __name__ == '__main__':
         help="Number of random repetitions per (node_size, graph_type) case (default: 1)",
     )
     parser.add_argument(
+        "--analysis",
+        type=str,
+        default=MUS_ANALYSIS,
+        help=(
+            "Which analyses to run. Supported: both, all, mus, optmcs, wc, or a comma/plus-separated list e.g. optmcs,wc. "
+            "(mus = MUS/MCS enumeration; optmcs = WASP optimum-MCS; wc = clingo-only weak-constraint optimization)"
+        ),
+    )
+    parser.add_argument(
+        "--check-wc-vs-optmcs",
+        action="store_true",
+        default=False,
+        help="Enable WC vs OptMCS solution comparison (objective weight; optionally set MUS_CHECK_WC_VS_OPTMCS_STRICT_SET=1 for exact set match).",
+    )
+    parser.add_argument(
         "--solve-timeout",
         type=int,
         default=MUS_SOLVE_TIMEOUT,
-        help="Per-instance wall-clock timeout (seconds) for both ABAPC removal and MUS solving",
+        help="Per-instance wall-clock timeout (seconds) for both ABAPC removal and MUS solving (0 = no timeout)",
     )
     parser.add_argument(
         "--node-sizes",
@@ -3558,6 +4437,25 @@ if __name__ == '__main__':
         type=str,
         default=MUS_EMIT_LP,
         help="Path to emit complete MUS program (use {n} for node count placeholder, e.g., /tmp/test_{n}node.lp)",
+    )
+    parser.add_argument(
+        "--emit-abapc-inc-lp",
+        type=str,
+        default=MUS_EMIT_ABAPC_INC_LP,
+        help=(
+            "Path to emit the grounded ABAPC_INC program dump (use {n} and {seed} placeholders, e.g. "
+            "results/abapc_inc_{n}_{seed}.lp). This dump is suitable for offline inspection and later reuse."
+        ),
+    )
+    parser.add_argument(
+        "--use-increm-only",
+        "--increm-only",
+        action="store_true",
+        default=MUS_USE_INCREM_ONLY,
+        help=(
+            "Use ABAPC_INC (incremental encoding) as the *baseline* ABAPC engine, and feed its emitted LP dump "
+            "as the base program for MUS/MCS analysis."
+        ),
     )
     parser.add_argument(
         "--max-muses",
@@ -3626,6 +4524,12 @@ if __name__ == '__main__':
         default=MUS_CHECK_MINIMALITY,
         help="Enable MUS minimality diagnostics (core-alone UNSAT and single-deletion SAT checks)",
     )
+    parser.add_argument(
+        "--log-file",
+        type=str,
+        default="",
+        help="Append logs to this file (also prints to stdout).",
+    )
     args, remaining = parser.parse_known_args()
 
     if remaining:
@@ -3646,7 +4550,15 @@ if __name__ == '__main__':
     MUS_SEED_BASE = args.seed_base
     MUS_REP_UNSAT = args.rep_unsat
     MUS_RANDOM_REPS = args.random_reps
+    MUS_ANALYSIS = str(args.analysis).strip().lower()
+    MUS_ANALYSIS_MODES = _parse_analysis_modes(MUS_ANALYSIS)
+    MUS_RUN_MUS_MCS = 'mus' in MUS_ANALYSIS_MODES
+    MUS_RUN_OPTMCS = 'optmcs' in MUS_ANALYSIS_MODES
+    MUS_RUN_WC = 'wc' in MUS_ANALYSIS_MODES
+    MUS_CHECK_WC_VS_OPTMCS = bool(args.check_wc_vs_optmcs) or bool(MUS_CHECK_WC_VS_OPTMCS)
     MUS_EMIT_LP = args.emit_lp
+    MUS_EMIT_ABAPC_INC_LP = args.emit_abapc_inc_lp
+    MUS_USE_INCREM_ONLY = bool(args.use_increm_only)
     MUS_MAX_MUSES = args.max_muses
     MUS_GRAPH_TYPE = args.graph_type
     MUS_GRAPH_TYPES = _parse_graph_types(args.graph_types) or (MUS_GRAPH_TYPE,)
@@ -3659,11 +4571,36 @@ if __name__ == '__main__':
     MUS_CHECK_MINIMALITY = bool(args.check_mus_minimality)
 
     start = datetime.now()
-    logger_setup()
+    log_file = args.log_file.strip() if isinstance(args.log_file, str) else ""
+    if log_file:
+        # Expand common placeholders when unambiguous.
+        try:
+            if '{n}' in log_file:
+                if len(MUS_NODE_SIZES) == 1:
+                    log_file = log_file.replace('{n}', str(MUS_NODE_SIZES[0]))
+                else:
+                    log_file = log_file.replace('{n}', 'multi')
+            if '{seed}' in log_file:
+                log_file = log_file.replace('{seed}', str(MUS_SEED_BASE))
+        except Exception:
+            pass
+
+    logger_setup(log_file=(log_file or None))
+    try:
+        logging.info(
+            "Runner: pid=%s cwd=%s python=%s",
+            str(os.getpid()),
+            str(os.getcwd()),
+            str(sys.executable),
+        )
+    except Exception:
+        pass
     logging.info(
         f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}, seed_base={MUS_SEED_BASE}, "
         f"rep_unsat={MUS_REP_UNSAT}, random_reps={MUS_RANDOM_REPS}, graph_types={MUS_GRAPH_TYPES}, opt_mode={MUS_ABAPC_OPT_MODE}, out_n={MUS_ABAPC_OUT_N}, "
-        f"emit_lp={MUS_EMIT_LP or '(none)'}, max_muses={MUS_MAX_MUSES}, mcs_threshold={MUS_MCS_THRESHOLD}, mus_threshold={MUS_MUS_THRESHOLD}"
+        f"analysis={MUS_ANALYSIS}, "
+        f"emit_lp={MUS_EMIT_LP or '(none)'}, emit_abapc_inc_lp={MUS_EMIT_ABAPC_INC_LP or '(none)'}, use_increm_only={MUS_USE_INCREM_ONLY}, "
+        f"max_muses={MUS_MAX_MUSES}, mcs_threshold={MUS_MCS_THRESHOLD}, mus_threshold={MUS_MUS_THRESHOLD}, log_file={log_file or '(none)'}"
     )
 
     if args.random_only:

@@ -38,6 +38,8 @@ import tempfile
 import subprocess
 import time
 import re
+import hashlib
+import json
 from pathlib import Path
 from itertools import combinations
 from typing import Optional, Tuple, List, Union
@@ -204,9 +206,11 @@ def run_mus_solver(
             alg = mus_algorithm
             if mus_algorithm == 'camus':
                 # WASP syntax: camus,[mcs_th,[mus_th]]
-                if camus_mcs_threshold is not None:
+                # Note: thresholds are optional; passing 0 can disable MUS enumeration
+                # (e.g., camus,0,0 => compute 0 MUS). Treat non-positive values as "unset".
+                if camus_mcs_threshold is not None and camus_mcs_threshold > 0:
                     alg = f"camus,{camus_mcs_threshold}"
-                    if camus_mus_threshold is not None:
+                    if camus_mus_threshold is not None and camus_mus_threshold > 0:
                         alg = f"{alg},{camus_mus_threshold}"
             wasp_cmd.extend(['--mus-algorithm', alg])
 
@@ -393,6 +397,7 @@ def build_mus_program(
     facts: list[str],
     facts_location: str = "",
     *,
+    base_program_path: Optional[str] = None,
     deadline: Optional[float] = None,
     timing_recorder: dict | None = None,
     weights: Optional[list[int]] = None,
@@ -419,7 +424,41 @@ def build_mus_program(
     Raises:
         TimeoutError: If `deadline` is exceeded during program construction.
     """
-    logging.debug("Building MUS program using compile_and_ground...")
+    logging.debug("Building MUS program...")
+
+    def _strip_show_directives(text: str) -> str:
+        # IMPORTANT: If the program contains any `#show` directive, clingo's symbol table
+        # for `--output=smodels` can omit non-shown symbols. WASP relies on those symbols
+        # to identify atoms over the predicate passed to `--mus=...` (e.g., mus/1).
+        # Incremental/base dumps often include `#show arrow/2.`; strip all `#show` lines
+        # so mus/1 and other internal symbols remain visible to WASP.
+        lines: list[str] = []
+        for raw in (text or "").splitlines():
+            if raw.lstrip().startswith('#show'):
+                continue
+            lines.append(raw)
+        return "\n".join(lines)
+
+    def _strip_block_edge_skeleton_reduction(text: str) -> str:
+        # ABAPC_INC debug dumps may include skeleton-reduction artifacts in the form of
+        # `block_edge/2` facts and constraints mentioning `block_edge(...)`.
+        # Baseline MUS programs are built with skeleton_rules_reduction=False; to keep
+        # MUS/MCS/OptMCS analysis comparable, strip these restrictions from the loaded
+        # base program.
+        lines: list[str] = []
+        for raw in (text or "").splitlines():
+            s = raw.lstrip()
+            if not s or s.startswith('%'):
+                lines.append(raw)
+                continue
+            # Drop materialized block_edge facts.
+            if s.startswith('block_edge('):
+                continue
+            # Drop any constraint/rule that mentions block_edge/2.
+            if 'block_edge(' in raw:
+                continue
+            lines.append(raw)
+        return "\n".join(lines)
 
     def _parse_ext_fact_line(line: str) -> tuple[str, int, int, tuple[int, ...]] | None:
         """Parse an ext fact like `ext_indep(0,1,s1y2)` (optionally with trailing '.')"""
@@ -479,114 +518,163 @@ def build_mus_program(
         missing = sorted(required - present)
         return missing
     
-    # Determine specific rules file location
-    if facts_location:
-        # Default: same directory as facts file
-        facts_path = Path(facts_location)
-        specific_rules_file = str(facts_path.parent / f"{facts_path.stem}_specific.lp")
-    else:
-        # Fallback to temporary file
-        fd, specific_rules_file = tempfile.mkstemp(suffix='_specific.lp', text=True)
-        os.close(fd)
-    
-    # Try to load existing specific rules
-    specific_rules_text = None
-    if os.path.exists(specific_rules_file):
-        try:
-            logging.debug(f"Found existing specific rules at {specific_rules_file}")
-            with open(specific_rules_file, 'r') as f:
-                specific_rules_text = f.read()
-            # Validate cached specific rules against the current fact set.
-            missing_in = _specific_rules_missing_required_in(specific_rules_text, facts)
-            if missing_in:
-                logging.warning(
-                    f"Cached specific rules file is missing {len(missing_in)} required in(...) atoms; regenerating: {specific_rules_file}"
-                )
-                specific_rules_text = None
-            else:
-                logging.info(f"Loaded existing specific rules ({len(specific_rules_text)} chars)")
-        except Exception as e:
-            logging.warning(f"Failed to load existing specific rules: {e}")
-            specific_rules_text = None
-    
-    # Generate specific rules if not loaded
-    if specific_rules_text is None:
-        # Parse facts to get indep_facts and dep_facts dicts
-        indep_facts = {}
-        dep_facts = {}
+    # Base program selection:
+    # - default: causalaba.lp + specific rules via compile_and_ground
+    # - override: a pre-emitted base program (e.g., a grounded dump from ABAPC_INC)
+    if base_program_path:
+        with open(str(base_program_path), 'r') as f:
+            raw_base_program = f.read()
 
-        # Build conditioning-set dictionaries from the already-parsed facts list.
-        # This is more robust than re-parsing a file (which may contain directives, spacing, or be moved).
-        for fact in facts or []:
-            parsed = _parse_ext_fact_line(fact)
-            if not parsed:
-                continue
-            fact_type, x, y, s_tuple = parsed
-            facts_dict = indep_facts if fact_type == 'ext_indep' else dep_facts
-            facts_dict.setdefault((x, y), set()).add(s_tuple)
+        def _sha256_text(s: str) -> str:
+            try:
+                return hashlib.sha256((s or "").encode("utf-8", errors="replace")).hexdigest()
+            except Exception:
+                return ""
 
-        # Call compile_and_ground with dump_specific (once, after collecting all facts)
-        logging.debug(f"Calling compile_and_ground to dump specific rules to {specific_rules_file}")
-        compile_and_ground(
-            n_nodes,
-            # IMPORTANT: For MUS/MCS enumeration we do not want ext_* atoms to be externals
-            # (declared via the facts file). The adorned program defines them via `fact :- mus(i).`
-            # so loading a facts file that contains `#external ext_*...` would create a conflict
-            # (atom both external and defined) and can change semantics.
-            facts_location="",
-            skeleton_rules_reduction=False,
-            weak_constraints=False,
-            indep_facts=indep_facts,
-            dep_facts=dep_facts,
-            opt_mode='optN',
-            out_n=1,
-            show=['arrow'],
-            pre_grounding=False,
-            ext_flag=False,
-            prior_knowledge=None,
-            max_path_length=None,
-            max_conditioning_size=None,
-            collider_tree_depth=None,
-            cycle_length=None,
-            dump_specific=specific_rules_file,
-            deadline=deadline,
-            timing_recorder=timing_recorder,
-        )
-
-        # Load the dumped specific rules
-        with open(specific_rules_file, 'r') as f:
-            specific_rules_text = f.read()
-
-        # Defensive: ensure we emitted all required in(...) atoms for the fact set.
-        missing_in = _specific_rules_missing_required_in(specific_rules_text, facts)
-        if missing_in:
-            preview = " ".join(missing_in[:5])
-            raise RuntimeError(
-                f"Generated specific rules missing {len(missing_in)} required in(...) atoms; preview: {preview}"
-            )
-
-        logging.debug(f"Generated and loaded {len(specific_rules_text)} chars of specific rules")
-    
-    # Load base causalaba.lp (skip #program directive)
-    causalaba_lp = Path(__file__).resolve().parent / 'encodings' / 'causalaba.lp'
-    base_program = ""
-    with open(causalaba_lp, 'r') as f:
-        for line in f:
+        # Normalize base program dumps so they can be used as clingo CLI input.
+        # In particular, ABAPC_INC may emit a *source* dump that still contains
+        # `#program main(...)` blocks and uses the symbolic token `n_vars`.
+        # The default path (non-override) strips '#program main' and replaces
+        # `n_vars` with (n_nodes-1); do the same here for compatibility.
+        base_lines: list[str] = []
+        for line in (raw_base_program or "").splitlines():
             if line.strip().startswith('#program main'):
                 continue
-            # Replace n_vars with actual value
-            line = line.replace('n_vars', str(n_nodes - 1))
-            base_program += line
-    
-    # Build the complete program
-    program_lines = [
-        base_program,
-        "",
-        "% ===== Specific Rules Generated by compile_and_ground =====",
-        specific_rules_text,
-        "",
-        "% ===== Assumption Layer for MUS =====",
-    ]
+            base_lines.append(line.replace('n_vars', str(n_nodes - 1)))
+        base_program = _strip_show_directives("\n".join(base_lines))
+        base_program = _strip_block_edge_skeleton_reduction(base_program)
+
+        raw_hash = _sha256_text(raw_base_program)
+        norm_hash = _sha256_text(base_program)
+        try:
+            logging.info(
+                "Loaded base program from %s (raw_sha256=%s, normalized_sha256=%s, raw_chars=%d, normalized_chars=%d)",
+                str(base_program_path),
+                raw_hash[:12],
+                norm_hash[:12],
+                len(raw_base_program or ""),
+                len(base_program or ""),
+            )
+        except Exception:
+            pass
+        program_lines = [
+            base_program,
+            "",
+            f"% ===== Base program loaded from: {base_program_path} =====",
+            f"% ===== Base program sha256 (raw): {raw_hash} =====",
+            f"% ===== Base program sha256 (normalized): {norm_hash} =====",
+            "% ===== Assumption Layer for MUS =====",
+        ]
+    else:
+        # Determine specific rules file location
+        if facts_location:
+            # Default: same directory as facts file
+            facts_path = Path(facts_location)
+            specific_rules_file = str(facts_path.parent / f"{facts_path.stem}_specific.lp")
+        else:
+            # Fallback to temporary file
+            fd, specific_rules_file = tempfile.mkstemp(suffix='_specific.lp', text=True)
+            os.close(fd)
+
+        # Try to load existing specific rules
+        specific_rules_text = None
+        if os.path.exists(specific_rules_file):
+            try:
+                logging.debug(f"Found existing specific rules at {specific_rules_file}")
+                with open(specific_rules_file, 'r') as f:
+                    specific_rules_text = f.read()
+                # Validate cached specific rules against the current fact set.
+                missing_in = _specific_rules_missing_required_in(specific_rules_text, facts)
+                if missing_in:
+                    logging.warning(
+                        f"Cached specific rules file is missing {len(missing_in)} required in(...) atoms; regenerating: {specific_rules_file}"
+                    )
+                    specific_rules_text = None
+                else:
+                    logging.info(f"   Loaded existing specific rules ({len(specific_rules_text)} chars)")
+            except Exception as e:
+                logging.warning(f"Failed to load existing specific rules: {e}")
+                specific_rules_text = None
+
+        # Generate specific rules if not loaded
+        if specific_rules_text is None:
+            # Parse facts to get indep_facts and dep_facts dicts
+            indep_facts = {}
+            dep_facts = {}
+
+            # Build conditioning-set dictionaries from the already-parsed facts list.
+            # This is more robust than re-parsing a file (which may contain directives, spacing, or be moved).
+            for fact in facts or []:
+                parsed = _parse_ext_fact_line(fact)
+                if not parsed:
+                    continue
+                fact_type, x, y, s_tuple = parsed
+                facts_dict = indep_facts if fact_type == 'ext_indep' else dep_facts
+                facts_dict.setdefault((x, y), set()).add(s_tuple)
+
+            # Call compile_and_ground with dump_specific (once, after collecting all facts)
+            logging.debug(f"Calling compile_and_ground to dump specific rules to {specific_rules_file}")
+            compile_and_ground(
+                n_nodes,
+                # IMPORTANT: For MUS/MCS enumeration we do not want ext_* atoms to be externals
+                # (declared via the facts file). The adorned program defines them via `fact :- mus(i).`
+                # so loading a facts file that contains `#external ext_*...` would create a conflict
+                # (atom both external and defined) and can change semantics.
+                facts_location="",
+                skeleton_rules_reduction=False,
+                weak_constraints=False,
+                indep_facts=indep_facts,
+                dep_facts=dep_facts,
+                opt_mode='optN',
+                out_n=1,
+                show=['arrow'],
+                pre_grounding=False,
+                ext_flag=False,
+                prior_knowledge=None,
+                max_path_length=None,
+                max_conditioning_size=None,
+                collider_tree_depth=None,
+                cycle_length=None,
+                dump_specific=specific_rules_file,
+                deadline=deadline,
+                timing_recorder=timing_recorder,
+            )
+
+            # Load the dumped specific rules
+            with open(specific_rules_file, 'r') as f:
+                specific_rules_text = _strip_show_directives(f.read())
+
+            # Defensive: ensure we emitted all required in(...) atoms for the fact set.
+            missing_in = _specific_rules_missing_required_in(specific_rules_text, facts)
+            if missing_in:
+                preview = " ".join(missing_in[:5])
+                raise RuntimeError(
+                    f"Generated specific rules missing {len(missing_in)} required in(...) atoms; preview: {preview}"
+                )
+
+            logging.debug(f"Generated and loaded {len(specific_rules_text)} chars of specific rules")
+
+        # Load base causalaba.lp (skip #program directive)
+        causalaba_lp = Path(__file__).resolve().parent / 'encodings' / 'causalaba.lp'
+        base_program = ""
+        with open(causalaba_lp, 'r') as f:
+            for line in f:
+                if line.strip().startswith('#program main'):
+                    continue
+                # Replace n_vars with actual value
+                line = line.replace('n_vars', str(n_nodes - 1))
+                base_program += line
+        base_program = _strip_show_directives(base_program)
+
+        # Build the complete program
+        program_lines = [
+            base_program,
+            "",
+            "% ===== Specific Rules Generated by compile_and_ground =====",
+            specific_rules_text,
+            "",
+            "% ===== Assumption Layer for MUS =====",
+        ]
     
     # Add choice rules for mus/1 assumptions
     for i in range(1, len(facts) + 1):
@@ -634,6 +722,7 @@ def CausalABA_MUS(
     solve_timeout: Optional[float] = None,
     emit_lp: Optional[str] = None,
     timing_recorder: dict | None = None,
+    base_program_path: Optional[str] = None,
 ) -> dict:
     """High-level MUS/MCS analysis over `ext_indep`/`ext_dep` wrong-test facts.
     
@@ -726,6 +815,7 @@ def CausalABA_MUS(
             n_nodes,
             facts,
             facts_location,
+            base_program_path=base_program_path,
             deadline=deadline,
             timing_recorder=timing_recorder,
             weights=weights,
@@ -842,3 +932,239 @@ def CausalABA_MUS(
     }
     
     return result
+
+
+def _append_clingo_optimum_mcs_objective(program: str) -> str:
+    """Append a weak-constraint objective usable by clingo.
+
+    The program is expected to contain:
+      __optimum_mcs_objective_literal__(W, mus(I)).
+
+    We add the weak constraint that penalizes disabling assumptions:
+      :~ not mus(X), __optimum_mcs_objective_literal__(C, mus(X)). [C@1,X]
+    """
+    lines = [program.rstrip(), ""]
+    lines.append(":~ not mus(X), __optimum_mcs_objective_literal__(C, mus(X)). [C@1,X]")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _append_show_mus(program: str) -> str:
+    # For JSON parsing, keep output small and stable.
+    lines = [program.rstrip(), "", "#show mus/1.", ""]
+    return "\n".join(lines)
+
+
+def _run_clingo_optimize_mus(
+    program_str: str,
+    *,
+    n_facts: int,
+    gringo_path: str = "clingo",
+    solve_timeout: Optional[float] = None,
+) -> dict:
+    """Run clingo optimization on a program that shows mus/1.
+
+    Returns a dict with:
+      - selected_mus: sorted list[int]
+      - costs: list[int] (clingo cost vector)
+      - timed_out: bool
+      - status: str (SATISFIABLE/UNSATISFIABLE/UNKNOWN)
+    """
+    fd, program_file = tempfile.mkstemp(suffix='_wc.lp', text=True)
+    os.close(fd)
+    try:
+        with open(program_file, 'w') as f:
+            f.write(program_str)
+
+        cmd = [
+            gringo_path,
+            program_file,
+            '--opt-mode=optN',
+            '--outf=2',
+            '-n',
+            '1',
+        ]
+
+        timed_out = False
+        try:
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=solve_timeout,
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                'selected_mus': [],
+                'costs': [],
+                'timed_out': True,
+                'status': 'UNKNOWN',
+            }
+
+        stdout = proc.stdout or ""
+        # clingo JSON output is a single JSON object.
+        try:
+            data = json.loads(stdout)
+        except Exception:
+            # Fall back to UNKNOWN.
+            return {
+                'selected_mus': [],
+                'costs': [],
+                'timed_out': False,
+                'status': 'UNKNOWN',
+            }
+
+        status = str(data.get('Result', 'UNKNOWN'))
+        calls = data.get('Call', []) or []
+        witnesses = []
+        costs: list[int] = []
+        if calls:
+            witnesses = (calls[-1].get('Witnesses', []) or [])
+        if witnesses:
+            w = witnesses[-1]
+            vals = w.get('Value', []) or []
+            costs = [int(x) for x in (w.get('Costs', []) or []) if isinstance(x, (int, float, str))]
+            selected = []
+            for atom in vals:
+                m = re.match(r"^mus\((\d+)\)$", str(atom).strip())
+                if m:
+                    try:
+                        idx = int(m.group(1))
+                    except Exception:
+                        continue
+                    if 1 <= idx <= int(n_facts):
+                        selected.append(idx)
+            selected = sorted(set(selected))
+            return {
+                'selected_mus': selected,
+                'costs': costs,
+                'timed_out': timed_out,
+                'status': status,
+            }
+
+        return {
+            'selected_mus': [],
+            'costs': [],
+            'timed_out': False,
+            'status': status,
+        }
+    finally:
+        try:
+            os.remove(program_file)
+        except Exception:
+            pass
+
+
+def CausalABA_WC(
+    n_nodes: int,
+    facts_location: str,
+    *,
+    gringo_path: str = "clingo",
+    facts_wc_location: str,
+    solve_timeout: Optional[float] = None,
+    emit_lp: Optional[str] = None,
+    timing_recorder: dict | None = None,
+    base_program_path: Optional[str] = None,
+) -> dict:
+    """Compute an optimum cut using clingo weak constraints only.
+
+    This is the "pure clingo" equivalent of the emitted `*_optmcs_*_wc.lp` program:
+    - Assumption layer `{mus(i)}.`
+    - Facts guarded by `:-mus(i).`
+    - Objective literals + weak constraint minimizing the weight of disabled mus(i)
+
+    Returns a dict containing:
+      - cut_facts: list[str] (facts removed; each includes trailing '.')
+      - cut_indices: list[int]
+      - cut_weight: int
+      - selected_mus: list[int]
+      - timed_out: bool
+      - solve_time: float
+    """
+    if not facts_location:
+        raise ValueError("facts_location is required")
+    if not facts_wc_location:
+        raise ValueError("facts_wc_location is required")
+
+    facts, fact_mapping = parse_facts_from_file(facts_location)
+    if not facts:
+        return {
+            'cut_indices': [],
+            'cut_facts': [],
+            'cut_weight': 0,
+            'selected_mus': [],
+            'timed_out': False,
+            'solve_time': 0.0,
+            'fact_mapping': fact_mapping,
+        }
+
+    wmap = parse_weights_from_wc_file(facts_wc_location)
+    weights: list[int] = []
+    missing: list[str] = []
+    for fact in facts:
+        key = _normalize_ext_fact_key(fact)
+        w = wmap.get(key)
+        if w is None:
+            missing.append(key)
+            weights.append(1)
+        else:
+            weights.append(max(1, int(w)))
+    if missing:
+        preview = ", ".join(missing[:5])
+        raise RuntimeError(
+            f"Missing weights for {len(missing)} facts in {facts_wc_location}; preview: {preview}"
+        )
+
+    # Treat solve_timeout as an end-to-end budget (build + solve)
+    deadline = (time.perf_counter() + float(solve_timeout)) if solve_timeout is not None else None
+    build_start = time.perf_counter()
+    program = build_mus_program(
+        n_nodes,
+        facts,
+        facts_location,
+        base_program_path=base_program_path,
+        deadline=deadline,
+        timing_recorder=timing_recorder,
+        weights=weights,
+    )
+    program = _append_clingo_optimum_mcs_objective(program)
+    program = _append_show_mus(program)
+
+    if emit_lp:
+        with open(emit_lp, 'w') as f:
+            f.write(program)
+        logging.info(f"Emitted complete WC optimization program to {emit_lp}")
+
+    build_time = time.perf_counter() - build_start
+    remaining_timeout: Optional[float] = None
+    if deadline is not None:
+        remaining_timeout = max(0.0, deadline - time.perf_counter())
+
+    solve_start = time.perf_counter()
+    out = _run_clingo_optimize_mus(
+        program,
+        n_facts=len(facts),
+        gringo_path=gringo_path,
+        solve_timeout=remaining_timeout,
+    )
+    solve_time = time.perf_counter() - solve_start
+
+    selected_mus = out.get('selected_mus', []) or []
+    selected_set = set(int(x) for x in selected_mus)
+    cut_indices = [i for i in range(1, len(facts) + 1) if i not in selected_set]
+    cut_facts = [fact_mapping.get(i, f"mus({i}).") for i in cut_indices]
+    cut_weight = int(sum(weights[i - 1] for i in cut_indices)) if cut_indices else 0
+
+    return {
+        'cut_indices': cut_indices,
+        'cut_facts': cut_facts,
+        'cut_weight': cut_weight,
+        'selected_mus': selected_mus,
+        'timed_out': bool(out.get('timed_out', False)),
+        'status': out.get('status', 'UNKNOWN'),
+        'costs': out.get('costs', []),
+        'wc_build_time': float(build_time),
+        'solve_time': float(solve_time),
+        'total_time': float(build_time + solve_time),
+        'fact_mapping': fact_mapping,
+    }
