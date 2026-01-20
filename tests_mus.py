@@ -66,6 +66,52 @@ CausalABA_WC: Any = None
 CausalABA_INC: Any = None
 
 
+# Accumulates total wall-clock times across the randomG harness so we can
+# print a final summary at process exit (useful when logs are very long).
+_METHOD_TIME_TOTALS: dict[str, dict[str, float]] = {}
+_METHOD_TIME_TOTALS_PRINTED: bool = False
+
+
+def _accumulate_method_time(method: str, seconds: float) -> None:
+    try:
+        s = float(seconds)
+    except Exception:
+        return
+    if s <= 0.0:
+        return
+    entry = _METHOD_TIME_TOTALS.setdefault(str(method), {'total_sec': 0.0, 'runs': 0.0})
+    entry['total_sec'] = float(entry.get('total_sec', 0.0) or 0.0) + s
+    entry['runs'] = float(entry.get('runs', 0.0) or 0.0) + 1.0
+
+
+def _log_total_time_per_method() -> None:
+    global _METHOD_TIME_TOTALS_PRINTED
+    if _METHOD_TIME_TOTALS_PRINTED:
+        return
+    if not _METHOD_TIME_TOTALS:
+        return
+    _METHOD_TIME_TOTALS_PRINTED = True
+
+    try:
+        rows = []
+        for method, d in _METHOD_TIME_TOTALS.items():
+            total = float(d.get('total_sec', 0.0) or 0.0)
+            runs = int(float(d.get('runs', 0.0) or 0.0))
+            rows.append((method, total, runs))
+        rows.sort(key=lambda t: (-t[1], t[0]))
+
+        logging.info("\n" + "=" * 60)
+        logging.info(" TOTAL TIME PER METHOD (sum over usable runs)")
+        logging.info("=" * 60)
+        for method, total, runs in rows:
+            avg = (total / runs) if runs > 0 else 0.0
+            logging.info(f"  {method:<28}: {total:10.3f}s  (runs={runs:3d}, avg={avg:7.3f}s)")
+        logging.info("=" * 60 + "\n")
+    except Exception:
+        # Avoid failing the test runner due to logging issues.
+        pass
+
+
 def _ensure_solvers_imported() -> None:
     """Import solver modules lazily so `--help` works without clingo/wasp installed."""
     global CausalABA, CausalABA_MUS, CausalABA_WC
@@ -292,6 +338,7 @@ MUS_EDGE_PER_NODE = int(os.environ.get("MUS_EDGE_PER_NODE", "2"))
 MUS_SEED_BASE = int(os.environ.get("MUS_SEED_BASE", "2004"))
 MUS_REP_UNSAT = int(os.environ.get("MUS_REP_UNSAT", "2"))
 MUS_RANDOM_REPS = int(os.environ.get("MUS_RANDOM_REPS", "1"))
+MUS_VERSION = os.environ.get("MUS_VERSION", "").strip()
 MUS_EMIT_LP = os.environ.get("MUS_EMIT_LP", "")
 MUS_EMIT_ABAPC_INC_LP = os.environ.get("MUS_EMIT_ABAPC_INC_LP", "")
 MUS_USE_INCREM_ONLY = os.environ.get("MUS_USE_INCREM_ONLY", "0").strip() not in ("", "0", "false", "False", "no", "NO")
@@ -1761,12 +1808,40 @@ class TestMUSAnalysis(unittest.TestCase):
                                 'seed': selected_run.get('seed'),
                                 'abapc_time_sec': float(selected_run.get('abapc_time_sec', 0.0) or 0.0),
                                 'mus_time_sec': float(selected_run.get('mus_time_sec', 0.0) or 0.0),
+                                'opt_time_sec': float(selected_run.get('opt_time_sec', 0.0) or 0.0),
+                                'wc_time_sec': float(selected_run.get('wc_time_sec', 0.0) or 0.0),
+                                'abapc_inc_time_sec': float(selected_run.get('abapc_inc_time_sec', 0.0) or 0.0),
+                                'opt_mcs_label': selected_run.get('opt_mcs_label', None),
                                 'n_facts': int(len(selected_run.get('facts_ext', []) or [])),
                                 'n_wrong': int(selected_run.get('count_wrong', 0) or 0),
                                 'overlap': overlap or {},
                                 'graph_eval': selected_run.get('graph_eval', {}) or {},
                             }
                         )
+
+                        # Accumulate totals for a final end-of-log summary.
+                        baseline_label = "ABAPC_INC removal" if bool(MUS_USE_INCREM_ONLY) else "ABAPC removal"
+                        _accumulate_method_time(baseline_label, float(selected_run.get('abapc_time_sec', 0.0) or 0.0))
+                        if bool(selected_run.get('abapc_inc_ran', False)):
+                            _accumulate_method_time(
+                                "ABAPC_INC (incremental encoding)",
+                                float(selected_run.get('abapc_inc_time_sec', 0.0) or 0.0),
+                            )
+                        if bool(selected_run.get('mus_ran', True)):
+                            _accumulate_method_time(
+                                "MUS/MCS",
+                                float(selected_run.get('mus_time_sec', 0.0) or 0.0),
+                            )
+                        if bool(selected_run.get('opt_ran', False)):
+                            _accumulate_method_time(
+                                str(selected_run.get('opt_mcs_label', None) or 'OptMCS'),
+                                float(selected_run.get('opt_time_sec', 0.0) or 0.0),
+                            )
+                        if bool(selected_run.get('wc_ran', False)):
+                            _accumulate_method_time(
+                                "WC",
+                                float(selected_run.get('wc_time_sec', 0.0) or 0.0),
+                            )
                         rep_outcomes[key]['usable'] += 1
                         # Track per-category completion for this usable run.
                         if bool(selected_run.get('abapc_timeout', False)):
@@ -3370,22 +3445,26 @@ class TestMUSAnalysis(unittest.TestCase):
         multiple = False
         remove_n = 0
         start_abapc = datetime.now()
+        # For --analysis=wc we still want the baseline comparison (same as optmcs):
+        # run ABAPC (or ABAPC_INC under --increm-only) and then compute WC.
         if wc_only:
-            logging.info(f"Step 1: Skipping ABAPC removal strategy (--analysis={MUS_ANALYSIS})")
+            logging.info(f"Step 1: Run ABAPC removal strategy for baseline comparison (--analysis={MUS_ANALYSIS})")
         else:
             logging.info("Step 1: Run ABAPC removal strategy (baseline or incremental)")
-            if use_increm_only:
-                logging.info("Step 1: Run ABAPC_INC (incremental encoding) removal strategy")
-            else:
-                logging.info("Step 1: Run CasusalABA with all facts and apply removal strategy (search_for_models='first') if UNSAT")
+        if use_increm_only:
+            logging.info("Step 1: Run ABAPC_INC (incremental encoding) removal strategy")
+        else:
+            logging.info("Step 1: Run CasusalABA with all facts and apply removal strategy (search_for_models='first') if UNSAT")
 
-        if (not wc_only) and use_increm_only:
+        if use_increm_only:
             # We need a concrete base program file to feed into MUS when using increm-only.
             # Prefer user path if provided; otherwise use a temp file.
             if MUS_EMIT_ABAPC_INC_LP:
                 try:
                     abapc_base_program_path = (
-                        MUS_EMIT_ABAPC_INC_LP.replace("{n}", str(n_nodes)).replace("{seed}", str(seed))
+                        MUS_EMIT_ABAPC_INC_LP.replace("{version}", str(MUS_VERSION or ""))
+                        .replace("{n}", str(n_nodes))
+                        .replace("{seed}", str(seed))
                     )
                 except Exception:
                     abapc_base_program_path = MUS_EMIT_ABAPC_INC_LP
@@ -3420,7 +3499,7 @@ class TestMUSAnalysis(unittest.TestCase):
                 wall_timeout=solve_timeout,
             )
             abapc_timing = profile_inc if isinstance(profile_inc, dict) else {}
-        elif not wc_only:
+        else:
             models_after, multiple, stats, remove_n = CausalABA(
                 n_nodes,
                 facts_file,
@@ -3443,17 +3522,16 @@ class TestMUSAnalysis(unittest.TestCase):
         except (KeyError, TypeError):
             abapc_times = {'total': abapc_time.total_seconds(), 'cpu': 0, 'solve': 0}
         
-        if not wc_only:
-            logging.info(f"  → Total facts: {len(facts)}")
-            logging.info(f"  → Wrong facts: {count_wrong}")
-            logging.info(f"  → Facts removed: {remove_n}")
-            logging.info(f"  → Models found after removal: {len(models_after)}")
-            logging.info(f"  → ABAPC time: {abapc_time.total_seconds():.3f}s")
+        logging.info(f"  → Total facts: {len(facts)}")
+        logging.info(f"  → Wrong facts: {count_wrong}")
+        logging.info(f"  → Facts removed: {remove_n}")
+        logging.info(f"  → Models found after removal: {len(models_after)}")
+        logging.info(f"  → ABAPC time: {abapc_time.total_seconds():.3f}s")
 
         # When using increm-only mode, we emitted a concrete base program to disk.
         # Log a short hash so we can verify it's the same base text later injected
         # into the MUS/OptMCS adorned program.
-        if (not wc_only) and use_increm_only and abapc_base_program_path:
+        if use_increm_only and abapc_base_program_path:
             try:
                 import hashlib
 
@@ -3489,9 +3567,9 @@ class TestMUSAnalysis(unittest.TestCase):
         # Fallback heuristic (older CausalABA versions may not set timing_recorder flags).
         if (not abapc_timeout) and (len(models_after) == 0) and (solve_timeout is not None):
             abapc_timeout = abapc_time.total_seconds() >= (float(solve_timeout) - 0.5)
-        if (not wc_only) and remove_n > 0 and not abapc_timeout:
+        if remove_n > 0 and not abapc_timeout:
             self.assertGreater(len(models_after), 0, f"Expected SAT after removing {remove_n} tests for n_nodes={n_nodes}")
-        elif (not wc_only) and remove_n > 0 and abapc_timeout and len(models_after) == 0:
+        elif remove_n > 0 and abapc_timeout and len(models_after) == 0:
             logging.warning(f"⚠ Timeout hit after {abapc_time.total_seconds():.1f}s before reaching SAT (removed {remove_n} tests, n_nodes={n_nodes})")
 
         # Step 2: Run ABAPC_INC (incremental encoding) for comparison
@@ -3502,7 +3580,7 @@ class TestMUSAnalysis(unittest.TestCase):
         abapc_inc_timeout = False
         abapc_inc_ran = False
         try:
-            if (not wc_only) and (not use_increm_only):
+            if not use_increm_only:
                 _ensure_abapc_inc_imported()
                 if CausalABA_INC is None:
                     raise ImportError("ABAPC_INC is not available after import")
@@ -3514,6 +3592,7 @@ class TestMUSAnalysis(unittest.TestCase):
                     try:
                         debug_dump_path = (
                             MUS_EMIT_ABAPC_INC_LP
+                            .replace("{version}", str(MUS_VERSION or ""))
                             .replace("{n}", str(n_nodes))
                             .replace("{seed}", str(seed))
                         )
@@ -3640,7 +3719,11 @@ class TestMUSAnalysis(unittest.TestCase):
             emit_lp_path = tmp_emit_for_enforced
 
         if spec:
-            emit_lp_path = spec.replace('{n}', str(n_nodes)).replace('{seed}', str(seed))
+            emit_lp_path = (
+                spec.replace('{version}', str(MUS_VERSION or ''))
+                .replace('{n}', str(n_nodes))
+                .replace('{seed}', str(seed))
+            )
             emit_dir = os.path.dirname(emit_lp_path)
             if emit_dir:
                 os.makedirs(emit_dir, exist_ok=True)
@@ -3874,7 +3957,7 @@ class TestMUSAnalysis(unittest.TestCase):
                             len(wc_cut_set),
                         )
 
-        # ===== GRAPH EVAL SUMMARY (Removal + OptMCS) =====
+        # ===== GRAPH EVAL SUMMARY (Removal + OptMCS + WC) =====
         # Evaluate the *set* of DAGs compatible with the remaining facts after applying:
         # - Removal (ABAPC-derived removed_facts), and
         # - OptMCS (WASP optimum-MCS cut; usually a single set)
@@ -4019,6 +4102,20 @@ class TestMUSAnalysis(unittest.TestCase):
                         'timed_out': bool(opt_eval_timed_out),
                     }
 
+            # WC: clingo-only weak-constraint optimum cut.
+            if wc_cut_facts is not None:
+                wc_cut = {self._normalize_fact_str(x) for x in (wc_cut_facts or []) if str(x).strip()}
+                if wc_cut:
+                    wc_eval, wc_eval_timed_out = _solve_for_remaining_facts('WC', wc_cut)
+                    graph_eval['WC'] = {
+                        **wc_eval,
+                        'label': 'WC',
+                        'n_total_facts': n_total_facts,
+                        'n_removed_facts': int(len(wc_cut)),
+                        'n_remaining_facts': int(max(0, n_total_facts - len(wc_cut))),
+                        'timed_out': bool(wc_eval_timed_out),
+                    }
+
             # Print per-run summary (mirrors OVERLAP summary shape).
             logging.info("\n")
             logging.info("=" * 60)
@@ -4047,6 +4144,9 @@ class TestMUSAnalysis(unittest.TestCase):
             if 'OptMCS' in graph_eval:
                 label = (graph_eval.get('OptMCS', {}) or {}).get('label') or 'OptMCS'
                 _print_group(label, graph_eval.get('OptMCS', {}))
+            if 'WC' in graph_eval:
+                label = (graph_eval.get('WC', {}) or {}).get('label') or 'WC'
+                _print_group(label, graph_eval.get('WC', {}))
 
             # Diagnostic: removing MORE constraints should weakly increase the model count.
             # This is only meaningful if we asked clingo for all models (out_n=0) and did not time out.
@@ -4286,6 +4386,27 @@ class TestMUSAnalysis(unittest.TestCase):
                 logging.info(f"{prefix}|   Solving:         {fmt_cell(opt_solve, opt_timeout_phase, 'solve')}")
                 logging.info(f"{prefix}|   Sys (residual):  {fmt_cell(opt_sys, opt_timeout_phase, 'sys')}")
                 logging.info(f"{prefix}|   Total:           {opt_total:>15.3f}s")
+
+            # Optional: add pure WC (clingo-only) timing as a separate line item.
+            if wc_time is not None and wc_result is not None:
+                wc_total = wc_time.total_seconds()
+                wc_compile = float((wc_timing or {}).get('compile_sec_total', 0.0) or 0.0)
+                wc_ground = float((wc_timing or {}).get('ground_sec_total', 0.0) or 0.0)
+                wc_solve = float((wc_result or {}).get('solve_time', 0.0) or 0.0)
+                wc_sys = max(0.0, wc_total - wc_compile - wc_ground - wc_solve)
+                wc_timeout = bool((wc_result or {}).get('timed_out', False)) or (
+                    (solve_timeout is not None)
+                    and (wc_total >= (float(solve_timeout) - 0.5))
+                )
+                wc_timeout_phase = 'solve' if wc_timeout else None
+
+                logging.info(f"{prefix}|")
+                logging.info(f"{prefix}+-- WC analysis:")
+                logging.info(f"{prefix}|   Compiling:       {fmt_cell(wc_compile, wc_timeout_phase, 'compile')}")
+                logging.info(f"{prefix}|   Grounding:       {fmt_cell(wc_ground, wc_timeout_phase, 'ground')}")
+                logging.info(f"{prefix}|   Solving:         {fmt_cell(wc_solve, wc_timeout_phase, 'solve')}")
+                logging.info(f"{prefix}|   Sys (residual):  {fmt_cell(wc_sys, wc_timeout_phase, 'sys')}")
+                logging.info(f"{prefix}|   Total:           {wc_total:>15.3f}s")
             logging.info("")
             
             if run_mus_mcs and (not (abapc_timeout or mus_timeout)):
@@ -4376,6 +4497,25 @@ class TestMUSAnalysis(unittest.TestCase):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run MUS/ABAPC random-size tests with optional overrides")
+    parser.add_argument(
+        "--version",
+        type=str,
+        default=MUS_VERSION,
+        help=(
+            "Version tag used for output folder naming and template expansion. "
+            "When used with --emit-all, outputs go under results/<version>/. "
+            "Also available as {version} in --emit-lp/--emit-abapc-inc-lp/--log-file templates."
+        ),
+    )
+    parser.add_argument(
+        "--emit-all",
+        action="store_true",
+        default=True,
+        help=(
+            "Emit all generated LPs and logs using canonical names under results/<version>/. "
+            "Sets --emit-lp, --emit-abapc-inc-lp and --log-file automatically."
+        ),
+    )
     parser.add_argument(
         "--random-only",
         action="store_true",
@@ -4544,6 +4684,17 @@ if __name__ == '__main__':
 
         atexit.register(_warn_ignored_args)
 
+    MUS_VERSION = (args.version or "").strip()
+    if args.emit_all:
+        if not MUS_VERSION:
+            MUS_VERSION = datetime.now().strftime("run_%Y%m%d_%H%M%S")
+        out_dir = Path("results") / MUS_VERSION
+        out_dir.mkdir(parents=True, exist_ok=True)
+        # Canonical names (templated per instance).
+        args.emit_lp = str(out_dir / "adorned_{n}_{seed}.lp")
+        args.emit_abapc_inc_lp = str(out_dir / "abapc_inc_{n}_{seed}.lp")
+        args.log_file = str(out_dir / "log_{n}_{seed}.log")
+
     MUS_SOLVE_TIMEOUT = args.solve_timeout
     MUS_NODE_SIZES = _parse_node_sizes(args.node_sizes)
     MUS_EDGE_PER_NODE = args.edge_per_node
@@ -4575,6 +4726,8 @@ if __name__ == '__main__':
     if log_file:
         # Expand common placeholders when unambiguous.
         try:
+            if '{version}' in log_file:
+                log_file = log_file.replace('{version}', str(MUS_VERSION or ''))
             if '{n}' in log_file:
                 if len(MUS_NODE_SIZES) == 1:
                     log_file = log_file.replace('{n}', str(MUS_NODE_SIZES[0]))
@@ -4586,6 +4739,8 @@ if __name__ == '__main__':
             pass
 
     logger_setup(log_file=(log_file or None))
+    # Print a final total-time summary after unittest output (including random-only runs).
+    atexit.register(_log_total_time_per_method)
     try:
         logging.info(
             "Runner: pid=%s cwd=%s python=%s",
@@ -4599,6 +4754,7 @@ if __name__ == '__main__':
         f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}, seed_base={MUS_SEED_BASE}, "
         f"rep_unsat={MUS_REP_UNSAT}, random_reps={MUS_RANDOM_REPS}, graph_types={MUS_GRAPH_TYPES}, opt_mode={MUS_ABAPC_OPT_MODE}, out_n={MUS_ABAPC_OUT_N}, "
         f"analysis={MUS_ANALYSIS}, "
+        f"version={MUS_VERSION or '(none)'}, emit_all={bool(args.emit_all)}, "
         f"emit_lp={MUS_EMIT_LP or '(none)'}, emit_abapc_inc_lp={MUS_EMIT_ABAPC_INC_LP or '(none)'}, use_increm_only={MUS_USE_INCREM_ONLY}, "
         f"max_muses={MUS_MAX_MUSES}, mcs_threshold={MUS_MCS_THRESHOLD}, mus_threshold={MUS_MUS_THRESHOLD}, log_file={log_file or '(none)'}"
     )
