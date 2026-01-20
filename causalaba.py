@@ -30,8 +30,12 @@ from itertools import combinations
 from datetime import datetime
 from pathlib import Path
 # sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
-from utils.graph_utils import powerset, extract_test_elements_from_symbol
-from utils.prior_knowledge import PriorKnowledge
+try:
+    from .utils.graph_utils import powerset, extract_test_elements_from_symbol
+    from .utils.prior_knowledge import PriorKnowledge
+except ImportError:  # pragma: no cover
+    from utils.graph_utils import powerset, extract_test_elements_from_symbol
+    from utils.prior_knowledge import PriorKnowledge
 
 def _solve_with_timeout(
     ctl: Control,
@@ -301,10 +305,44 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     ### Ground
     logging.info("   Grounding...")
     start_ground_dt = datetime.now()
+
+    peak_before_ground = None
+    try:
+        import tracemalloc as _tracemalloc  # local import to avoid overhead
+
+        if _tracemalloc.is_tracing():
+            _cur, _peak = _tracemalloc.get_traced_memory()
+            peak_before_ground = int(_peak)
+    except Exception:
+        peak_before_ground = None
+
     _tg0 = time.perf_counter()
     ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
     _tg1 = time.perf_counter()
     logging.info(f"   Grounding time: {str(datetime.now()-start_ground_dt)}")
+
+    peak_after_ground = None
+    try:
+        import tracemalloc as _tracemalloc  # local import
+
+        if _tracemalloc.is_tracing():
+            _cur, _peak = _tracemalloc.get_traced_memory()
+            peak_after_ground = int(_peak)
+    except Exception:
+        peak_after_ground = None
+
+    # Optional: attach a compact profile to the Control for downstream tooling.
+    try:
+        ctl._causalaba_profile = {
+            "compile_sec": max(0.0, _tg0 - _t0),
+            "ground_sec": max(0.0, _tg1 - _tg0),
+            "paths_added": int(n_p),
+            "pairs_considered": int(len(node_pairs)),
+            "peak_after_compile_bytes": peak_before_ground,
+            "peak_after_ground_bytes": peak_after_ground,
+        }
+    except Exception:
+        pass
 
     # Record timing breakdown if requested
     if timing_recorder is not None:
@@ -596,6 +634,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     max_conditioning_size=max_conditioning_size,
                     collider_tree_depth=collider_tree_depth,
                     cycle_length=cycle_length,
+                    threads=threads,
                     deadline=reground_deadline,
                     timing_recorder=reground_timing,
                 )
