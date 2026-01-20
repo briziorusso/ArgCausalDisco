@@ -29,7 +29,10 @@ except:
     from causallearn.utils.PCUtils import Helper, Meek, UCSepset
     from causallearn.utils.PCUtils.BackgroundKnowledgeOrientUtils import \
         orient_by_background_knowledge
-import cd_algorithms.spc as spc
+try:
+    from . import spc
+except ImportError:  # pragma: no cover
+    import cd_algorithms.spc as spc
 
 #This function overrides causal-learn/causallearn/search/ConstraintBased/PC.py
 #It is the same as the original pc function, but with the uc_rule parameter allowing value of 3 for spc

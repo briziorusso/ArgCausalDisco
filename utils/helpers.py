@@ -2,23 +2,38 @@
 import logging
 import os
 from datetime import datetime
+from pathlib import Path
 import numpy as np
 
 
 def logger_setup(output_file:str="", continue_logging=False):
-    if not os.path.exists('.temp'):
-        os.makedirs('.temp')
+    results_root = Path(__file__).resolve().parent.parent / "results"
     if output_file == "":
-        output_file = f'.temp/{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
-    elif ".log" not in output_file: ## when one passes only the name of the file
-        output_file = f'.temp/{output_file}.log'
+        temp_dir = Path(".temp")
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        output_path = temp_dir / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    else:
+        output_path = Path(output_file)
+        if output_path.parent == Path("") or output_path.parent == Path("."):
+            output_dir = results_root / output_path.stem
+        else:
+            output_dir = output_path.parent
+        output_dir.mkdir(parents=True, exist_ok=True)
+        if output_path.suffix:
+            output_path = output_dir / output_path.name
+        else:
+            output_path = output_dir / f"{output_path.name}.log"
 
     file_mode = 'a' if continue_logging else 'w'
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(message)s',
-                        datefmt='%m-%d %H:%M',
-                        filename= output_file,
-                        filemode=file_mode, force=True)
+    # File logs should include timestamps so long-running jobs can be reconstructed.
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(name)-8s %(module)-12s - %(levelname)-8s %(message)s',
+        datefmt='%m-%d %H:%M:%S',
+        filename=str(output_path),
+        filemode=file_mode,
+        force=True,
+    )
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)

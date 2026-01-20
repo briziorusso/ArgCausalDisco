@@ -26,9 +26,18 @@ import pydot
 import logging
 import gc
 gc.set_threshold(0,0,0)
-from abapc import ABAPC
-from cd_algorithms.PC import pc
-from utils.helpers import random_stability, get_freer_gpu
+try:
+    from ..abapc import ABAPC
+except ImportError:  # pragma: no cover
+    from abapc import ABAPC
+try:
+    from .PC import pc
+except ImportError:  # pragma: no cover
+    from cd_algorithms.PC import pc
+try:
+    from ..utils.helpers import random_stability, get_freer_gpu
+except ImportError:  # pragma: no cover
+    from utils.helpers import random_stability, get_freer_gpu
 from math import floor
 
 try:
@@ -87,6 +96,8 @@ def run_method(X,
                sz_ratio:float|None=None,
                lb_ratio:float|None=None,
                lcyc_ratio:float|None=None,
+               threads:int|None=None,
+               abapc_solver:str='incremental',
                ):
     """
     Runs the causal discovery method specified by method on the data X
@@ -257,11 +268,14 @@ def run_method(X,
                       skeleton_rules_reduction=skeleton_rules_reduction,
                       disable_reground=disable_reground,
                       return_statistics=return_statistics, out_n=out_n,
+                      use_incremental=(abapc_solver == 'incremental'),
                       # Bounds
                       max_path_length=max_path_length,
                       max_conditioning_size=max_conditioning_size,
                       collider_tree_depth=collider_tree_depth,
                       cycle_length=cycle_length,
+                      # Solver threads
+                      threads=threads,
                       )
         elapsed = time.time() - start
         logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')

@@ -7,9 +7,16 @@ import igraph as ig
 from pgmpy.readwrite import BIFReader
 from PIL import Image
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from cd_algorithms.models import pc
-from utils.helpers import random_stability
-from utils.graph_utils import is_dag
+try:
+    # Import the lightweight PC wrapper directly to avoid pulling in
+    # cd_algorithms.models (which imports many optional heavy dependencies).
+    from ..cd_algorithms.PC import pc
+    from .helpers import random_stability
+    from .graph_utils import is_dag
+except ImportError:  # pragma: no cover
+    from cd_algorithms.PC import pc
+    from utils.helpers import random_stability
+    from utils.graph_utils import is_dag
 
 BIF_FOLDER_MAP = {
     'cancer': 'small',
