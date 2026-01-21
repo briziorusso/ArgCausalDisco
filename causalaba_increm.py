@@ -2,8 +2,10 @@ import logging
 import rustworkx as rx
 from clingo import Function, Number, Symbol
 import os
+import re
 import tracemalloc
 import time
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -50,18 +52,18 @@ except ImportError:  # pragma: no cover
     )
 
 
-def _solve_with_timeout(ctl, *, solve_timeout: float | None, on_model, assumptions=None) -> bool:
+def _solve_with_timeout(ctl, *, solve_timeout: float | None, on_model, assumptions: Any = None) -> bool:
     """Run clingo solve with an optional hard wall-time limit.
 
     Returns True if finished normally, False if cancelled due to timeout.
     """
     if solve_timeout is None:
-        with ctl.solve(yield_=True, assumptions=assumptions or []) as handle:
+        with ctl.solve(yield_=True, assumptions=cast(Any, assumptions or [])) as handle:
             for model in handle:
                 on_model(model)
         return True
 
-    handle = ctl.solve(async_=True, on_model=on_model, assumptions=assumptions or [])
+    handle = ctl.solve(async_=True, on_model=on_model, assumptions=cast(Any, assumptions or []))
     finished = handle.wait(solve_timeout)
     if not finished:
         handle.cancel()
@@ -133,7 +135,7 @@ def _pair_key(x: int, y: int) -> tuple[int, int]:
     return (x, y) if x <= y else (y, x)
 
 
-def _block_sym(x: int, y: int) -> Function:
+def _block_sym(x: int, y: int) -> Symbol:
     """Symbol for the edge-blocking external."""
     a, b = _pair_key(x, y)
     return Function("block_edge", [Number(a), Number(b)])
@@ -163,6 +165,105 @@ class _DebugObserver:
         self.externals: list[str] = []
         self._lit_map: dict[int, str] = {}
 
+    def set_ctl(self, ctl):
+        self.ctl = ctl
+        self._lit_map = {}
+
+    def _ensure_map(self):
+        if self.ctl is None:
+            return
+        # IMPORTANT: `output_atom(...)` only provides mappings for *shown* atoms.
+        # We still need a full literal->symbol map for all symbolic atoms so the
+        # dumped program is valid ASP (i.e., no bare numeric atoms like `2.`).
+        try:
+            for atom in self.ctl.symbolic_atoms:
+                try:
+                    lit = int(atom.literal)
+                except Exception:
+                    continue
+                # Preserve any pre-existing mapping set by output_atom().
+                self._lit_map.setdefault(lit, str(atom.symbol))
+        except Exception:
+            pass
+
+    def output_atom(self, symbol, atom):
+        """Capture literal-to-symbol mapping from #show atoms."""
+        try:
+            self._lit_map[atom] = str(symbol)
+        except Exception:
+            pass
+
+    def _lit(self, lit: int) -> str:
+        self._ensure_map()
+        if lit == 0 or self.ctl is None:
+            return str(lit)
+        sign = "" if lit > 0 else "not "
+        sym = self._lit_map.get(abs(lit))
+        # If a literal is not part of `symbolic_atoms`, clingo has no symbolic name for it.
+        # Emit a fresh, safe predicate so the dump remains valid ASP.
+        atom = sym if sym is not None else f"__lit__({abs(lit)})"
+        return f"{sign}{atom}"
+
+    def rule(self, choice, head, body) -> None:
+        h_str = ("; " if choice else " | ").join(self._lit(h) for h in head)
+        b_str = ", ".join(self._lit(b) for b in body)
+        if h_str and b_str:
+            self.rules.append(f"{h_str} :- {b_str}.")
+        elif h_str:
+            self.rules.append(f"{h_str}.")
+        elif b_str:
+            self.rules.append(f":- {b_str}.")
+
+    def weight_rule(self, choice, head, lower_bound, body) -> None:
+        hb = "; ".join(self._lit(h) for h in head) if choice else " | ".join(self._lit(h) for h in head)
+        body_terms = "; ".join(f"{self._lit(l)}={w}" for l, w in body)
+        self.rules.append(f"{hb} :- {lower_bound}{{{body_terms}}}.")
+
+    def minimize(self, priority, literals) -> None:
+        self.minimize_rules.append(
+            f":~ {', '.join(f'{self._lit(l)}={w}' for l, w in literals)}. [{priority}]"
+        )
+
+    def external(self, atom, value) -> None:
+        self.externals.append(f"#external {self._lit(atom)}.")
+
+    def dump_to(self, path: str, ext_values: dict[Symbol, bool | None], note: str = ""):
+        try:
+            # Build literal map before dumping so we can print symbolic names.
+            self._ensure_map()
+            try:
+                from pathlib import Path
+
+                p = Path(path)
+                if p.parent and str(p.parent) not in (".", ""):
+                    p.parent.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
+            with open(path, "w") as f:
+                if note:
+                    f.write(f"% {note}\n")
+                if self._lit_map:
+                    f.write("% literal mapping\n")
+                    for lit, sym in sorted(self._lit_map.items()):
+                        f.write(f"% {lit} -> {sym}\n")
+                if self.ctl is not None:
+                    try:
+                        f.write("% symbolic atoms\n")
+                        for atom in self.ctl.symbolic_atoms:
+                            f.write(f"% {atom.literal}: {atom.symbol}\n")
+                    except Exception:
+                        pass
+                for r in self.rules:
+                    f.write(r + "\n")
+                for m in self.minimize_rules:
+                    f.write(m + "\n")
+                if ext_values:
+                    f.write("% external assignments\n")
+                    for sym, val in ext_values.items():
+                        f.write(f"% {sym} = {val}\n")
+        except Exception:
+            logger.exception("Failed to write debug dump to %s", path)
+
 
 def _set_opt_mode_for_first(ctl, opt_mode: str):
     """Prepare clingo config for `search_for_models='first'`.
@@ -190,89 +291,9 @@ def _restore_opt_mode(ctl, prev_opt_mode):
     if prev_opt_mode is None:
         return
     try:
-        ctl.configuration.solve.opt_mode = prev_opt_mode
+        cast(Any, ctl.configuration).solve.opt_mode = prev_opt_mode
     except Exception:
         return
-
-    def set_ctl(self, ctl):
-        self.ctl = ctl
-        self._lit_map = {}
-
-    def _ensure_map(self):
-        if self.ctl is None or self._lit_map:
-            return
-        try:
-            for atom in self.ctl.symbolic_atoms:
-                self._lit_map[atom.literal] = str(atom.symbol)
-        except Exception:
-            pass
-
-    def output_atom(self, symbol, atom):
-        """
-        Capture literal-to-symbol mapping from #show atoms.
-        """
-        try:
-            self._lit_map[atom] = str(symbol)
-        except Exception:
-            pass
-
-    def _lit(self, lit: int) -> str:
-        self._ensure_map()
-        if lit == 0 or self.ctl is None:
-            return str(lit)
-        sign = "" if lit > 0 else "not "
-        sym = self._lit_map.get(abs(lit))
-        return f"{sign}{sym if sym is not None else abs(lit)}"
-
-    def rule(self, choice, head, body) -> None:
-        h_str = ("; " if choice else " | ").join(self._lit(h) for h in head)
-        b_str = ", ".join(self._lit(b) for b in body)
-        if h_str and b_str:
-            self.rules.append(f"{h_str} :- {b_str}.")
-        elif h_str:
-            self.rules.append(f"{h_str}.")
-        elif b_str:
-            self.rules.append(f":- {b_str}.")
-
-    def weight_rule(self, choice, head, lower_bound, body) -> None:
-        hb = "; ".join(self._lit(h) for h in head) if choice else " | ".join(self._lit(h) for h in head)
-        body_terms = "; ".join(f"{self._lit(l)}={w}" for l, w in body)
-        self.rules.append(f"{hb} :- {lower_bound}{{{body_terms}}}.")
-
-    def minimize(self, priority, literals) -> None:
-        self.minimize_rules.append(f":~ {', '.join(f'{self._lit(l)}={w}' for l, w in literals)}. [{priority}]")
-
-    def external(self, atom, value) -> None:
-        self.externals.append(f"#external {self._lit(atom)}.")
-
-    def dump_to(self, path: str, ext_values: dict[Function, bool | None], note: str = ""):
-        try:
-            # Build literal map before dumping so we can print symbolic names.
-            self._ensure_map()
-            with open(path, "w") as f:
-                if note:
-                    f.write(f"% {note}\n")
-                if self._lit_map:
-                    f.write("% literal mapping\n")
-                    for lit, sym in sorted(self._lit_map.items()):
-                        f.write(f"% {lit} -> {sym}\n")
-                if self.ctl is not None:
-                    try:
-                        f.write("% symbolic atoms\n")
-                        for atom in self.ctl.symbolic_atoms:
-                            f.write(f"% {atom.literal}: {atom.symbol}\n")
-                    except Exception:
-                        pass
-                for r in self.rules:
-                    f.write(r + "\n")
-                for m in self.minimize_rules:
-                    f.write(m + "\n")
-                if ext_values:
-                    f.write("% external assignments\n")
-                    for sym, val in ext_values.items():
-                        f.write(f"% {sym} = {val}\n")
-        except Exception:
-            logger.exception("Failed to write debug dump to %s", path)
 
 
 def _add_pair_rules_incremental(
@@ -289,7 +310,7 @@ def _add_pair_rules_incremental(
     max_conditioning_size: int | None,
     collider_tree_depth: int | None,
     pre_grounding: bool,
-    ext_values: dict[Function, bool | None] | None = None,
+    ext_values: dict[Symbol, bool | None] | None = None,
     debug_traces: bool = False,
 ):
     # Option A uses a Bayes-ball ASP encoding to derive ap3/3 for all required
@@ -363,6 +384,9 @@ def CausalABA(
     cycle_length: int | None = None,
     threads: int | None = None,
     debug_dump_path: str | None = None,
+    debug_dump_always: bool = False,
+    debug_dump_include_facts: bool = True,
+    debug_dump_materialize_block_edges: bool = False,
     debug_traces: bool = False,
     solve_timeout: float | None = None,
     verbosity: int = 0,
@@ -423,9 +447,10 @@ def CausalABA(
         "peak_after_ground_bytes": None,
         "peak_after_solve_bytes_last": None,
         "peak_after_solve_bytes_max": None,
+        "timed_out": False,
     }
 
-    def _record_solve(duration_sec: float, *, kind: str | None = None) -> None:
+    def _record_solve(duration_sec: float, *, kind: str | None = None, timed_out: bool = False) -> None:
         try:
             d = float(duration_sec)
         except Exception:
@@ -440,6 +465,9 @@ def CausalABA(
             profile["sat_check_sec_total"] += d
         elif kind == "final":
             profile["final_opt_sec"] = d
+
+        if timed_out:
+            profile["timed_out"] = True
 
         try:
             import tracemalloc as _tracemalloc
@@ -466,12 +494,165 @@ def CausalABA(
     facts = []
     ext_flag = False
     block_pairs: set[tuple[int, int]] = set()
-    ap_guard_syms: list[Function] = []
+    ap_guard_syms: list[Symbol] = []
     debug_dump_path = debug_dump_path or os.environ.get("CAUSALABA_DUMP")
-    ext_values: dict[Function, bool | None] = {}
-    enable_observer = debug_traces or bool(debug_dump_path)
+    ext_values: dict[Symbol, bool | None] = {}
+    # IMPORTANT: registering a clingo observer that records *all grounded rules*
+    # is extremely expensive and can dominate runtime (especially grounding).
+    # For normal runs that only want an emitted LP for reuse, we dump the *source*
+    # program instead and do NOT enable the observer.
+    want_source_dump = bool(debug_dump_path) and not bool(debug_traces)
+    want_grounded_dump = bool(debug_dump_path) and bool(debug_traces)
+    enable_observer = bool(debug_traces)
     observer = _DebugObserver() if enable_observer else None
     debug_enabled = _should_debug(debug_traces)
+
+    def _maybe_dump_grounded(*, note: str) -> None:
+        if observer is None or not debug_dump_path:
+            return
+        if not want_grounded_dump:
+            return
+        # Allow callers to request a reusable grounded dump regardless of SAT/UNSAT.
+        if not debug_dump_always:
+            return
+        if _verb >= 1 or debug_enabled:
+            logger.info("[debug] dumping GROUNDED program to %s", debug_dump_path)
+        try:
+            observer.dump_to(debug_dump_path, ext_values, note=note)
+        except Exception:
+            logger.exception("Failed to dump grounded program")
+
+    def _write_source_dump(*, encoding_path: str, facts_path: str | None, include_facts: bool, gen_facts_text: str | None, extra_specific: list[str], extra_base: list[str], materialize_block_edges: bool) -> None:
+        if not debug_dump_path or not want_source_dump:
+            return
+        if not debug_dump_always:
+            return
+        try:
+            from pathlib import Path
+
+            p = Path(debug_dump_path)
+            if p.parent and str(p.parent) not in (".", ""):
+                p.parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+        try:
+            with open(encoding_path, "r") as f:
+                enc_text = f.read()
+        except Exception as e:
+            logger.warning("Failed to read encoding for source dump: %s", e)
+            enc_text = "% (failed to read encoding)\n"
+
+        facts_text = ""
+        wc_text = ""
+        if include_facts and facts_path:
+            try:
+                with open(facts_path, "r") as f:
+                    facts_text = f.read()
+            except Exception as e:
+                logger.warning("Failed to read facts for source dump: %s", e)
+            # If weak_constraints are enabled, the caller convention is facts_path.replace('.lp','_wc.lp')
+            try:
+                wc_path = facts_path.replace(".lp", "_wc.lp")
+                if os.path.exists(wc_path):
+                    with open(wc_path, "r") as f:
+                        wc_text = f.read()
+            except Exception:
+                wc_text = ""
+
+        try:
+            materialized_block_edge_facts: list[str] = []
+            if materialize_block_edges:
+                for sym, val in (ext_values or {}).items():
+                    if val is not True:
+                        continue
+                    try:
+                        if getattr(sym, 'name', None) != 'block_edge':
+                            continue
+                        args = getattr(sym, 'arguments', None) or []
+                        if len(args) != 2:
+                            continue
+                        a = int(getattr(args[0], 'number', str(args[0])))
+                        b = int(getattr(args[1], 'number', str(args[1])))
+                        materialized_block_edge_facts.append(f"block_edge({a},{b}).")
+                    except Exception:
+                        continue
+
+                # Source dumps are written before the first solve, so `ext_values` may not yet
+                # contain any block_edge assignments. For the initial UNSAT check in ABAPC_INC,
+                # all ext_indep facts are active; block_edge(a,b) is True iff the pair (a,b)
+                # appears in any independence fact. This is exactly what `block_pairs` tracks.
+                if not materialized_block_edge_facts and block_pairs:
+                    for (a, b) in sorted(block_pairs):
+                        materialized_block_edge_facts.append(f"block_edge({a},{b}).")
+
+            # When materializing block edges for offline reuse, also flatten program parts.
+            # clingo's CLI grounds `base` by default; custom parts like `specific` are only
+            # grounded in the Python API via explicit `ctl.ground([...])` calls.
+            # Flattening makes the dump one-shot executable.
+            flat_one_shot = bool(materialize_block_edges)
+
+            if flat_one_shot and enc_text:
+                enc_text = "\n".join(
+                    [ln for ln in enc_text.splitlines() if not (ln or "").strip().startswith("#program ")]
+                ) + "\n"
+            if flat_one_shot and gen_facts_text:
+                gen_facts_text = "\n".join(
+                    [ln for ln in gen_facts_text.splitlines() if not (ln or "").strip().startswith("#program ")]
+                ) + "\n"
+
+            with open(debug_dump_path, "w") as out:
+                out.write(f"% source dump (pre-ground) from causalaba_increm.CausalABA\n")
+                out.write(f"% note: this is NOT a grounded observer dump\n")
+                if not include_facts:
+                    out.write("% note: facts are intentionally omitted (base-only dump).\n")
+                    out.write("%       Load facts separately (e.g. add your facts .lp on the clingo command line).\n")
+                if flat_one_shot:
+                    out.write("% note: flattened one-shot dump (no #program parts).\n")
+                out.write(enc_text)
+                out.write("\n")
+                if facts_text:
+                    out.write("% facts (as loaded)\n")
+                    out.write(facts_text)
+                    out.write("\n")
+                if wc_text:
+                    out.write("% weak constraints (as loaded)\n")
+                    out.write(wc_text)
+                    out.write("\n")
+                if gen_facts_text:
+                    out.write("% generated facts (in/2, qpair/3, etc)\n")
+                    out.write(gen_facts_text)
+                    out.write("\n")
+                if extra_specific:
+                    if not flat_one_shot:
+                        out.write("#program specific.\n")
+                    if materialize_block_edges:
+                        filtered: list[str] = []
+                        for ln in extra_specific:
+                            s = (ln or "").strip()
+                            if s.startswith("#external block_edge("):
+                                m = re.match(r"^#external\s+block_edge\((\d+)\s*,\s*(\d+)\)\.?$", s)
+                                if m:
+                                    materialized_block_edge_facts.append(
+                                        f"block_edge({int(m.group(1))},{int(m.group(2))})."
+                                    )
+                                continue
+                            filtered.append(ln)
+                        out.write("\n".join(filtered))
+                    else:
+                        out.write("\n".join(extra_specific))
+                    if materialized_block_edge_facts:
+                        out.write("\n% materialized external assignments (block_edge/2)\n")
+                        out.write("\n".join(sorted(set(materialized_block_edge_facts))))
+                    out.write("\n\n")
+                if extra_base:
+                    if not flat_one_shot:
+                        out.write("#program base.\n")
+                    out.write("\n".join(extra_base))
+                    out.write("\n")
+            if _verb >= 1 or debug_enabled:
+                logger.info("[debug] wrote SOURCE program dump to %s", debug_dump_path)
+        except Exception:
+            logger.exception("Failed to write source dump to %s", debug_dump_path)
     
     _t_facts_read_start = time.perf_counter()
     if facts_location:
@@ -576,14 +757,17 @@ def CausalABA(
     ctl = Control(control_args)
     if observer is not None:
         try:
-            ctl.register_observer(observer)
+            ctl.register_observer(cast(Any, observer))
             observer.set_ctl(ctl)
         except Exception:
             logger.exception("Failed to register debug observer")
-    ctl.configuration.solve.parallel_mode = threads
-    ctl.configuration.solve.models = out_n
-    ctl.configuration.solver.seed = "2024"
-    ctl.configuration.solve.opt_mode = opt_mode
+
+    # clingo's configuration object is dynamically-typed; cast to Any to satisfy type-checkers.
+    cfg = cast(Any, ctl.configuration)
+    cfg.solve.parallel_mode = threads
+    cfg.solve.models = out_n
+    cfg.solver.seed = "2024"
+    cfg.solve.opt_mode = opt_mode
 
     # Add set membership facts (bounded by max_conditioning_size)
     try:
@@ -647,8 +831,11 @@ def CausalABA(
         collider_tree_depth is not None and collider_tree_depth > 0
     )
     encoding_file = 'causalaba_bounded.lp' if bounded_encoding_active else 'causalaba.lp'
+    encoding_path = str(Path(__file__).resolve().parent / 'encodings' / encoding_file)
+    extra_specific_src: list[str] = []
+    extra_base_src: list[str] = []
     _t_load_enc0 = time.perf_counter()
-    ctl.load(str(Path(__file__).resolve().parent / 'encodings' / encoding_file))
+    ctl.load(encoding_path)
     try:
         profile["load_encoding_sec"] = max(0.0, time.perf_counter() - _t_load_enc0)
         logger.info("[load] encoding (%s) in %.3fs", encoding_file, profile["load_encoding_sec"])
@@ -672,11 +859,21 @@ def CausalABA(
                 pass
 
     if ext_flag:
-        ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
-        ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+        line1 = "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y."
+        line2 = "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y."
+        ctl.add("specific", [], line1)
+        ctl.add("specific", [], line2)
+        extra_specific_src.extend([line1, line2])
 
+    gen_facts_text: str | None = None
     if gen_facts_path is not None:
         try:
+            try:
+                if want_source_dump:
+                    with open(gen_facts_path, "r") as gf:
+                        gen_facts_text = gf.read()
+            except Exception:
+                gen_facts_text = None
             ctl.load(str(gen_facts_path))
         finally:
             try:
@@ -702,11 +899,15 @@ def CausalABA(
         [],
         ":- indep(X,Y,S), ap3(X,Y,S), set(S), var(X), var(Y), X<Y, not in(X,S), not in(Y,S).",
     )
+    extra_specific_src.append(":- dep(X,Y,S), not ap3(X,Y,S), set(S), var(X), var(Y), X<Y, not in(X,S), not in(Y,S).")
+    extra_specific_src.append(":- indep(X,Y,S), ap3(X,Y,S), set(S), var(X), var(Y), X<Y, not in(X,S), not in(Y,S).")
 
     # Provide explicit var/1 facts up-front (redundant with the encoding) so that
     # guard rules that quantify over all variable pairs can be grounded safely.
     # We keep these in a dedicated program part that we can ground early.
     for i in range(n_nodes):
+        # Keep for source dump even though encoding already provides var/1.
+        extra_base_src.append(f"var({i}).")
         ctl.add("guards_use", [], f"var({i}).")
 
     # Compute d-connection (active trails) using a Bayes-ball style encoding.
@@ -806,6 +1007,7 @@ def CausalABA(
 
     _t_bb0 = time.perf_counter()
     ctl.add("specific", [], "\n".join(bb_lines))
+    extra_specific_src.extend(bb_lines)
     try:
         profile["add_bayesball_sec"] = max(0.0, time.perf_counter() - _t_bb0)
         logger.info("[bayes-ball] added %d rule lines in %.3fs", len(bb_lines), profile["add_bayesball_sec"])
@@ -818,9 +1020,13 @@ def CausalABA(
     # the earlier ap_guard_set/1 machinery is not needed.
     # Dynamic skeleton blocking is only needed/valid when using externals.
     if skeleton_rules_reduction and ext_flag and block_pairs:
-        ctl.add("specific", [], ":- block_edge(X,Y), edge(X,Y), X<Y, var(X), var(Y).")
+        sk_line = ":- block_edge(X,Y), edge(X,Y), X<Y, var(X), var(Y)."
+        ctl.add("specific", [], sk_line)
+        extra_specific_src.append(sk_line)
         for (a, b) in sorted(block_pairs):
-            ctl.add("specific", [], f"#external block_edge({a},{b}).")
+            ext_line = f"#external block_edge({a},{b})."
+            ctl.add("specific", [], ext_line)
+            extra_specific_src.append(ext_line)
 
     def _assign_block_edges():
         if not skeleton_rules_reduction or not ext_flag:
@@ -877,13 +1083,13 @@ def CausalABA(
 
 
 
-    def _assumptions_from_exts() -> list[tuple[int, bool]]:
+    def _assumptions_from_exts() -> list[tuple[Symbol, bool]]:
         """
         Build solver assumptions from the current external assignments so that
         they are enforced even if assign_external was a no-op (e.g., on
         simplified programs).
         """
-        assumptions: list[tuple[int, bool]] = []
+        assumptions: list[tuple[Symbol, bool]] = []
         for sym, val in ext_values.items():
             if val is None:
                 continue
@@ -897,26 +1103,48 @@ def CausalABA(
     if prior_knowledge is not None:
         # Enforce prior knowledge on arrows as in original compile_and_ground
         for (Xf, Yf) in prior_knowledge.forbidden:
-            ctl.add("specific", [], f":- arrow({Xf},{Yf}).")
+            line = f":- arrow({Xf},{Yf})."
+            ctl.add("specific", [], line)
+            extra_specific_src.append(line)
         for (Xr, Yr) in prior_knowledge.required:
-            ctl.add("specific", [], f"arrow({Xr},{Yr}).")
+            line = f"arrow({Xr},{Yr})."
+            ctl.add("specific", [], line)
+            extra_specific_src.append(line)
 
 
 
     # Show directives
     if 'arrow' in show:
-        ctl.add("base", [], "#show arrow/2.")
+        line = "#show arrow/2."
+        ctl.add("base", [], line)
+        extra_base_src.append(line)
     if 'indep' in show:
-        ctl.add("base", [], "#show indep/3.")
+        line = "#show indep/3."
+        ctl.add("base", [], line)
+        extra_base_src.append(line)
     if 'dep' in show:
-        ctl.add("base", [], "#show dep/3.")
+        line = "#show dep/3."
+        ctl.add("base", [], line)
+        extra_base_src.append(line)
     if 'ap' in show:
-        ctl.add("base", [], "#show ap/4.")
+        line = "#show ap/4."
+        ctl.add("base", [], line)
+        extra_base_src.append(line)
     if 'ext' in show:
-        ctl.add("base", [], "#show ext_indep/3.")
-        ctl.add("base", [], "#show ext_dep/3.")
-        ctl.add("base", [], "#show block_edge/2.")
-        ctl.add("base", [], "#show active_pair/2.")
+        for line in ("#show ext_indep/3.", "#show ext_dep/3.", "#show block_edge/2.", "#show active_pair/2."):
+            ctl.add("base", [], line)
+            extra_base_src.append(line)
+
+    # If requested, dump the *source* program without enabling the expensive grounded observer.
+    _write_source_dump(
+        encoding_path=encoding_path,
+        facts_path=facts_location if facts_location else None,
+        include_facts=bool(debug_dump_include_facts),
+        gen_facts_text=gen_facts_text,
+        extra_specific=extra_specific_src,
+        extra_base=extra_base_src,
+        materialize_block_edges=bool(debug_dump_materialize_block_edges),
+    )
 
     # Ground the full base
     logger.info("   Grounding full base program...")
@@ -1060,6 +1288,9 @@ def CausalABA(
         if debug_enabled:
             logger.debug("[first] models: %s", models)
         if n_models > 0 and models:
+            # In increm-only mode, downstream MUS/OptMCS expects a base program file.
+            # If the instance is already SAT (remove_n=0), still emit the dump when requested.
+            _maybe_dump_grounded(note=f"remove_n=0 models={n_models} timed_out={bool(profile.get('timed_out', False))}")
             return _ret(models, False, 0)
         
     elif 'subsets' in search_for_models:
@@ -1075,10 +1306,11 @@ def CausalABA(
                 ctl.assign_external(ext_sym, True)
             # Then disable the chosen subset (unless ext_indep with set_indep_facts flag)
             for fact in f_to_remove:
-                if fact[3] == "ext_indep" and set_indep_facts:
+                fact_t = cast(tuple[Any, Any, Any, Any], fact)
+                if fact_t[3] == "ext_indep" and set_indep_facts:
                     continue
                 # subsets mode is inherently exponential; keep this simple and correct.
-                ext_sym = Function(fact[3], [Number(fact[0]), Number(fact[2]), _cond_to_symbol(fact[1])])
+                ext_sym = Function(fact_t[3], [Number(fact_t[0]), Number(fact_t[2]), _cond_to_symbol(fact_t[1])])
                 ctl.assign_external(ext_sym, False)
             # Avoid extra per-iteration overhead: block-edge assignment is not
             # required for correctness in subsets enumeration and adds
@@ -1105,9 +1337,11 @@ def CausalABA(
                 set_of_models.append(curr)
 
         if len(set_of_models) > 0:
+            _maybe_dump_grounded(note=f"remove_n=0 models={len(set_of_models)} timed_out={bool(profile.get('timed_out', False))}")
             return _ret(set_of_models, True, 0)
 
     if (search_for_models != 'first') or n_models > 0:
+        _maybe_dump_grounded(note=f"remove_n=0 models={n_models} timed_out={bool(profile.get('timed_out', False))}")
         return _ret(models, False, 0)
 
     # --- Remove-until-SAT (monotonic search) ---
@@ -1134,7 +1368,7 @@ def CausalABA(
         """
         satcheck_stats["calls"] += 1
         _t_satcheck0 = time.perf_counter()
-        cfg_solve = None
+        cfg_solve: Any = None
         prev_opt_mode = None
         prev_models = None
         try:
@@ -1168,7 +1402,7 @@ def CausalABA(
                 assumptions=_assumptions_from_exts(),
             )
             t1 = time.perf_counter()
-            _record_solve(t1 - t0, kind="satcheck")
+            _record_solve(t1 - t0, kind="satcheck", timed_out=(not finished))
             if found["sat"]:
                 satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
                 return True
@@ -1178,7 +1412,7 @@ def CausalABA(
                 return False
             try:
                 t2 = time.perf_counter()
-                res = ctl.solve(assumptions=_assumptions_from_exts())
+                res = ctl.solve(assumptions=cast(Any, _assumptions_from_exts()))
                 t3 = time.perf_counter()
                 _record_solve(t3 - t2, kind="satcheck")
                 satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
@@ -1221,6 +1455,17 @@ def CausalABA(
             lo = mid + 1
 
     remove_n = lo
+    # Record exactly which facts are considered removed under our ordering.
+    # Facts are sorted in descending I; removals correspond to releasing the tail
+    # (lowest-I) facts to mirror baseline behavior.
+    try:
+        profile["remove_n"] = int(remove_n or 0)
+        if remove_n > 0:
+            profile["removed_fact_keys"] = [str(f[4]).strip() for f in facts[-int(remove_n):] if str(f[4]).strip()]
+        else:
+            profile["removed_fact_keys"] = []
+    except Exception:
+        pass
     try:
         _t_binsearch_end = time.perf_counter()
         logger.info("[remove-search] completed in %.3fs, minimal removal=%s facts", _t_binsearch_end - _t_binsearch_start, remove_n)
@@ -1252,14 +1497,14 @@ def CausalABA(
                 models.append(syms)
 
         t_f0 = time.perf_counter()
-        _solve_with_timeout(
+        finished = _solve_with_timeout(
             ctl,
             solve_timeout=solve_timeout,
             on_model=_on_model_post,
             assumptions=_assumptions_from_exts(),
         )
         t_f1 = time.perf_counter()
-        _record_solve(t_f1 - t_f0, kind="final")
+        _record_solve(t_f1 - t_f0, kind="final", timed_out=(not finished))
         try:
             logger.info("[timing] final-solve=%.3fs since-ground=%.3fs", t_f1 - t_f0, t_f1 - t_post_ground)
         except Exception:
@@ -1275,12 +1520,15 @@ def CausalABA(
     except Exception:
         pass
 
-    # Optional debug dump when even the fully relaxed instance is UNSAT.
-    if observer is not None and n_models == 0 and debug_dump_path and remove_n >= len(facts):
+    # Optional debug dump of the grounded program.
+    # Historically this only dumped when the fully relaxed instance was UNSAT; we now allow
+    # opting into an always-dump mode so callers can reuse the exact grounded program offline.
+    if observer is not None and debug_dump_path and (debug_dump_always or (n_models == 0 and remove_n >= len(facts))):
         if _verb >= 1 or debug_enabled:
             logger.info("[debug] dumping grounded program to %s", debug_dump_path)
         try:
-            observer.dump_to(debug_dump_path, ext_values, note="unsat after releasing all facts")
+            note = f"remove_n={remove_n} models={n_models} timed_out={bool(profile.get('timed_out', False))}"
+            observer.dump_to(debug_dump_path, ext_values, note=note)
         except Exception:
             logger.exception("Failed to dump grounded program")
 
