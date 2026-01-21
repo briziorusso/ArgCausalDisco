@@ -1,2 +1,2 @@
-:~ ext_indep(2,4,empty). [-5455991]
-:~ ext_dep(0,1,empty). [-8121355]
+:~ ext_indep(1,4,empty). [-118259390192760]
+:~ ext_indep(3,4,empty). [-169486258251736]
