@@ -605,7 +605,10 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
         for impl_name, results in [("org", impl2_return), ("new", impl1_return)]:
             for run in results:
                 models = run["models"]
+                n_dag_models = len(models)
+                n_models_enumerated = int(run["statistics"]["summary"]["models"]["enumerated"])
                 cd_metrics = []
+                cpdag_hashes = set()
                 for model in models:
                     B_est = np.zeros((bn.size(), bn.size()))
                     for edge in model:
@@ -617,7 +620,9 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
 
                     # CPDAG metrics
                     B_est_cpdag = (model != 0).astype(int)
-                    mt_cpdag = DAGMetrics(dag2cpdag(B_est_cpdag), B_true).metrics
+                    cpdag = dag2cpdag(B_est_cpdag)
+                    cpdag_hashes.add(cpdag.tobytes())
+                    mt_cpdag = DAGMetrics(cpdag, B_true).metrics
                     cpdag_sid = mt_cpdag.pop("sid")
                     if not isinstance(cpdag_sid, tuple):
                         cpdag_sid = (cpdag_sid, cpdag_sid)
@@ -627,6 +632,7 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
                         **{f"cpdag_{k}": v for k, v in mt_cpdag.items()},
                     })
                 cd_metrics_df = pd.DataFrame(cd_metrics)
+                n_cpdag_models = len(cpdag_hashes)
                 if len(cd_metrics_df) > 10:
                     cd_metrics_df.to_csv("logs/example.csv", index=False)
 
@@ -640,6 +646,9 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
                         "seed": run["seed"],
                         "time": run["time"],
                         "remove_n": run["remove_n"],
+                        "n_models_enumerated": n_models_enumerated,
+                        "n_dag_models": n_dag_models,
+                        "n_cpdag_models": n_cpdag_models,
                         # **{f"dag_{k}": v for k, v in mt_dag.items()},
                         # **{f"cpdag_{k}": v for k, v in mt_cpdag.items()},
                         **cd_metrics_df.mean().to_dict(),
