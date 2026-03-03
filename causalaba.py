@@ -48,10 +48,22 @@ def _solve_with_timeout(
 
     Returns True if finished normally, False if cancelled due to timeout.
     """
+    # Always record the last solve result on the Control for downstream logic.
+    # This is particularly important for async solves: clingo statistics (e.g.
+    # models.enumerated) can be unreliable/stale across async boundaries on some
+    # versions/builds.
+    try:
+        ctl._causalaba_last_result = None  # type: ignore[attr-defined]
+    except Exception:
+        pass
+
     if solve_timeout is None:
-        with ctl.solve(yield_=True, assumptions=assumptions or []) as handle:
-            for model in handle:
-                on_model(model)
+        # Prefer synchronous solve so we can reliably inspect satisfiable/unsatisfiable.
+        res = ctl.solve(on_model=on_model, assumptions=assumptions or [])
+        try:
+            ctl._causalaba_last_result = res  # type: ignore[attr-defined]
+        except Exception:
+            pass
         return True
 
     # Async solve allows us to enforce a wall-time timeout without SIGALRM or
@@ -59,16 +71,32 @@ def _solve_with_timeout(
     handle = ctl.solve(async_=True, on_model=on_model, assumptions=assumptions or [])
     finished = handle.wait(solve_timeout)
     if not finished:
-        handle.cancel()
-        # Ensure clingo releases resources.
-        handle.wait()
         try:
-            handle.get()
+            handle.cancel()
         except Exception:
             pass
+        # Avoid hanging indefinitely if clingo is slow to acknowledge cancel.
+        cancelled_finished = False
+        try:
+            cancelled_finished = bool(handle.wait(1.0))
+        except TypeError:
+            # Older clingo bindings may not accept a timeout argument.
+            pass
+        if cancelled_finished:
+            try:
+                handle.get()
+            except Exception:
+                pass
         return False
     # Force completion.
-    handle.get()
+    try:
+        res = handle.get()
+    except Exception:
+        res = None
+    try:
+        ctl._causalaba_last_result = res  # type: ignore[attr-defined]
+    except Exception:
+        pass
     return True
 
 def compile_and_ground(n_nodes:int, facts_location:str="",
@@ -100,7 +128,7 @@ def compile_and_ground(n_nodes:int, facts_location:str="",
     cpu_count = min(os.cpu_count() or 1, 64)
     if threads is None:
         threads = cpu_count
-    control_args = ['-t %d' % threads]
+    control_args = ['-t %d' % threads, '--warn=none']
     # Provide constants for bounded acyclicity and collider-tree depth
     if cycle_length is not None:
         control_args += [f"-c l_cyc={int(cycle_length)}"]
@@ -385,6 +413,25 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
     """
     logging.info(f"Running CausalABA")
 
+    t_method0 = time.perf_counter()
+    last_solve_end: float | None = None
+
+    if timing_recorder is not None:
+        timing_recorder.setdefault('solve_sec_total', 0.0)
+        timing_recorder.setdefault('post_solve_sec_total', 0.0)
+
+    def _record_solve_wall(*, started: float, ended: float, did_call_solve: bool) -> None:
+        nonlocal last_solve_end
+        if not did_call_solve:
+            return
+        dt = max(0.0, float(ended) - float(started))
+        last_solve_end = float(ended)
+        if timing_recorder is not None:
+            try:
+                timing_recorder['solve_sec_total'] = float(timing_recorder.get('solve_sec_total', 0.0) or 0.0) + dt
+            except Exception:
+                pass
+
     # Treat solve_timeout as a wall-clock budget for the whole run (ground+solve).
     deadline = (time.perf_counter() + float(solve_timeout)) if solve_timeout is not None else None
 
@@ -421,7 +468,9 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     facts.append((X,S,Y, dep_type, line_clean, np.nan, "unknown"))
 
                 assert (X not in S) and (Y not in S), f"X or Y in S: {line_clean}"
-                condition_set = tuple(S)
+                # Canonicalize conditioning sets so their string symbols match
+                # the facts files (which use sorted order like s0y2, not s2y0).
+                condition_set = tuple(sorted(S))
 
                 facts_group = indep_facts if "indep" in line_clean else dep_facts
                 if (X,Y) not in facts_group:
@@ -472,12 +521,14 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         finished = False
         remaining_timeout = None
         solve_started = time.perf_counter()
+        did_call_solve = False
         if deadline is not None:
             remaining_timeout = max(0.0, deadline - solve_started)
             logging.info(f"Initial solve budget (wall clock): {remaining_timeout:.3f}s")
             if remaining_timeout == 0:
                 logging.error("Timeout: no time remaining for initial solve.")
             else:
+                did_call_solve = True
                 finished = _solve_with_timeout(
                     ctl,
                     solve_timeout=remaining_timeout,
@@ -485,8 +536,10 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 )
         else:
             logging.info(f"Initial solve budget (solve_timeout arg): {solve_timeout}")
+            did_call_solve = True
             finished = _solve_with_timeout(ctl, solve_timeout=solve_timeout, on_model=_on_model)
         solve_ended = time.perf_counter()
+        _record_solve_wall(started=solve_started, ended=solve_ended, did_call_solve=did_call_solve)
         if not finished:
             elapsed = solve_ended - solve_started
             budget = remaining_timeout if remaining_timeout is not None else solve_timeout
@@ -501,22 +554,58 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         logging.info(f"Times: {times}")
 
     elif search_for_models == 'first':
-        def _configure_first_witness(_ctl: Control) -> None:
-            """Configure clingo to return a quick SAT witness (no enumeration/optimization)."""
+        def _n_models_first_witness(_ctl: Control, _models: list) -> int:
+            """Return 1 if satisfiable else 0 for the 'first' mode.
+
+            We avoid relying on clingo statistics under async solves.
+            """
+            try:
+                res = getattr(_ctl, "_causalaba_last_result", None)
+                if res is not None:
+                    if bool(getattr(res, "satisfiable", False)):
+                        return 1
+                    if bool(getattr(res, "unsatisfiable", False)):
+                        return 0
+            except Exception:
+                pass
+            # Fallback: use models we observed.
+            try:
+                return 1 if len(_models) > 0 else 0
+            except Exception:
+                return 0
+
+        def _configure_first_witness(_ctl: Control) -> tuple[Any, Any] | None:
+            """Configure clingo to return a quick SAT witness (no optimization)."""
             try:
                 cfg: Any = _ctl.configuration
+                prev_opt_mode = getattr(cfg.solve, "opt_mode", None)
+                prev_models = getattr(cfg.solve, "models", None)
                 cfg.solve.models = 1
                 # Weak constraints do not affect satisfiability; ignore optimization to get a quick witness.
                 cfg.solve.opt_mode = 'ignore'
+                return (prev_opt_mode, prev_models)
             except Exception:
-                pass
+                return None
+
+        def _restore_first_witness(_ctl: Control, prev_state: tuple[Any, Any] | None) -> None:
+            if prev_state is None:
+                return
+            prev_opt_mode, prev_models = prev_state
+            try:
+                cfg: Any = _ctl.configuration
+                if prev_opt_mode is not None:
+                    cfg.solve.opt_mode = prev_opt_mode
+                if prev_models is not None:
+                    cfg.solve.models = prev_models
+            except Exception:
+                return
 
         for fact in facts:
             ctl.assign_external(Function(fact[3], [Number(fact[0]), Number(fact[2]), Function(fact[4].replace(').','').split(",")[-1])]), True)
             logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
 
         # Ensure the initial solve does not enumerate.
-        _configure_first_witness(ctl)
+        _prev_state = _configure_first_witness(ctl)
         models = []
         logging.info("   Solving...")
         i_counter = {"i": 0}
@@ -530,12 +619,14 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         finished = False
         remaining_timeout = None
         solve_started = time.perf_counter()
+        did_call_solve = False
         if deadline is not None:
             remaining_timeout = max(0.0, deadline - solve_started)
             logging.info(f"Initial solve budget (wall clock): {remaining_timeout:.3f}s")
             if remaining_timeout == 0:
                 logging.error("Timeout: no time remaining for initial solve.")
             else:
+                did_call_solve = True
                 finished = _solve_with_timeout(
                     ctl,
                     solve_timeout=remaining_timeout,
@@ -543,8 +634,11 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 )
         else:
             logging.info(f"Initial solve budget (solve_timeout arg): {solve_timeout}")
+            did_call_solve = True
             finished = _solve_with_timeout(ctl, solve_timeout=solve_timeout, on_model=_on_model_first)
+        _restore_first_witness(ctl, _prev_state)
         solve_ended = time.perf_counter()
+        _record_solve_wall(started=solve_started, ended=solve_ended, did_call_solve=did_call_solve)
         if not finished:
             elapsed = solve_ended - solve_started
             budget = remaining_timeout if remaining_timeout is not None else solve_timeout
@@ -553,10 +647,13 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             if timing_recorder is not None:
                 timing_recorder['timed_out'] = True
                 timing_recorder['timeout_phase'] = 'solve'
-        n_models = int(ctl.statistics['summary']['models']['enumerated'])
+        n_models = _n_models_first_witness(ctl, models)
         logging.info(f"Number of models: {n_models}")
-        times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
-        logging.info(f"Times: {times}")
+        try:
+            times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
+            logging.info(f"Times: {times}")
+        except Exception:
+            pass
 
         if timing_recorder is not None and n_models == 0:
             try:
@@ -588,7 +685,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             logging.debug(f"Removing fact {fact_str}")
 
             facts_group = indep_facts if dep_type == "ext_indep" else dep_facts
-            facts_group[(X, Y)].remove(tuple(S))
+            facts_group[(X, Y)].remove(tuple(sorted(S)))
             if not facts_group[(X, Y)]:
                 del facts_group[(X, Y)]
                 ## regrground only if disable_reground is False, skeleton_rules_reduction is True, and either ext_flag is False or dep_type is "ext_indep"
@@ -659,7 +756,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     logging.info(f"Answer {i_counter['i']}: {model}")
 
             # Ensure each removal-iteration solve does not enumerate.
-            _configure_first_witness(ctl)
+            _prev_state_iter = _configure_first_witness(ctl)
 
             # If we already hit the timeout in the initial solve, stop trying
             # additional removal iterations.
@@ -679,12 +776,15 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             else:
                 logging.debug(f"Removal iteration {remove_n} solve budget: {solve_timeout}s")
             t_s0 = time.perf_counter()
+            did_call_solve = True
             finished = _solve_with_timeout(
                 ctl,
                 solve_timeout=remaining_timeout if deadline is not None else solve_timeout,
                 on_model=_on_model2,
             )
             t_s1 = time.perf_counter()
+            _record_solve_wall(started=t_s0, ended=t_s1, did_call_solve=did_call_solve)
+            _restore_first_witness(ctl, _prev_state_iter)
             if not finished:
                 elapsed = t_s1 - t_s0
                 budget = remaining_timeout if remaining_timeout is not None else solve_timeout
@@ -693,15 +793,13 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 if timing_recorder is not None:
                     timing_recorder['timed_out'] = True
                     timing_recorder['timeout_phase'] = 'solve'
+            n_models = _n_models_first_witness(ctl, models)
+            logging.debug(f"Number of models: {n_models}")
             try:
-                n_models = int(ctl.statistics['summary']['models']['enumerated'])
-                logging.debug(f"Number of models: {n_models}")
                 times={key: ctl.statistics['summary']['times'][key] for key in ['total','cpu','solve']}
                 logging.debug(f"Times: {times}")
-            except (KeyError, TypeError, AttributeError) as e:
-                logging.warning(f"Could not access solver statistics: {e}")
-                n_models = len(models)
-                logging.info(f"Number of models: {n_models}")
+            except Exception:
+                pass
 
             if timing_recorder is not None and n_models == 0:
                 try:
@@ -745,6 +843,46 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
 
         if len(set_of_models) > 0:
             return [set_of_models, True]
+
+    # Final optimization pass (opt/optN) after removal point determined.
+    if search_for_models == 'first' and opt_mode in ('opt', 'optN'):
+        models_opt: list[Any] = []
+        last_syms = None
+
+        def _on_model_opt(model):
+            nonlocal last_syms
+            syms = model.symbols(shown=True)
+            last_syms = syms
+            if getattr(model, 'optimality_proven', False):
+                models_opt.append(syms)
+
+        opt_timeout = None
+        if deadline is not None:
+            opt_timeout = max(0.0, deadline - time.perf_counter())
+            if opt_timeout <= 0:
+                opt_timeout = 0.0
+        else:
+            opt_timeout = solve_timeout
+
+        t_opt0 = time.perf_counter()
+        did_call_solve = True
+        _solve_with_timeout(ctl, solve_timeout=opt_timeout, on_model=_on_model_opt)
+        t_opt1 = time.perf_counter()
+        _record_solve_wall(started=t_opt0, ended=t_opt1, did_call_solve=did_call_solve)
+        if models_opt:
+            models = models_opt
+        elif last_syms is not None:
+            models = [last_syms]
+
+    # Record post-solve time (time after the last clingo solve call until return).
+    if timing_recorder is not None:
+        try:
+            if last_solve_end is not None:
+                timing_recorder['post_solve_sec_total'] = max(0.0, time.perf_counter() - float(last_solve_end))
+            else:
+                timing_recorder['post_solve_sec_total'] = 0.0
+        except Exception:
+            pass
 
     if return_statistics:
         return [models, False, ctl.statistics, remove_n if 'remove_n' in locals() else 0]
