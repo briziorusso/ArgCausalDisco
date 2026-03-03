@@ -1,0 +1,17 @@
+\begin{table*}[!ht]
+\centering
+\scriptsize
+\begin{tabular}{lcccccc}
+\toprule
+Dataset (nodes) & $\Delta n_{\mathrm{acc}}^{T}\uparrow$ & $\Delta \mathrm{FactF1}\uparrow$ & $\Delta \#\mathrm{CPDAG}\downarrow$ & $\Delta \mathrm{SHD}\downarrow$ & $\Delta \mathrm{SHD}_{w}\downarrow$ & $\Delta t\downarrow$\\
+\midrule
+Cancer (5) & \ensuremath{+3.9\,(+10.7\%)} & \ensuremath{+0.048\,(+5.2\%)} & \ensuremath{-7.4\,(-88.1\%)} & \ensuremath{-1.707\,(-56.8\%)} & \ensuremath{-2.600\,(-66.7\%)} & \ensuremath{+0.010\,(\times 1.65)}\\
+Survey (6) & \ensuremath{+7.1\,(+16.0\%)} & \ensuremath{-0.019\,(-2.3\%)} & \ensuremath{-168.7\,(-99.4\%)} & \ensuremath{-2.039\,(-32.2\%)} & \ensuremath{-4.600\,(-51.7\%)} & \ensuremath{+4.109\,(\times 88.69)}\\
+Asia (8) & \ensuremath{+31.7\,(+29.2\%)} & \ensuremath{+0.124\,(+14.4\%)} & \ensuremath{-63.0\,(-97.7\%)} & \ensuremath{-5.403\,(-59.0\%)} & \ensuremath{-7.500\,(-65.2\%)} & \ensuremath{+15.072\,(\times 5.37)}\\
+ER (5) & \ensuremath{+47.7\,(+486.7\%)} & \ensuremath{+0.693\,(+263.3\%)} & \ensuremath{-69.8\,(-98.6\%)} & \ensuremath{-0.266\,(-3.7\%)} & \ensuremath{-1.600\,(-18.8\%)} & \ensuremath{+0.105\,(\times 5.50)}\\
+ER (8) & \ensuremath{+329.0\,(+1455.8\%)} & \ensuremath{+0.839\,(+655.7\%)} & \ensuremath{-14691.8\,(-99.5\%)} & \ensuremath{-3.304\,(-17.9\%)} & \ensuremath{-7.667\,(-31.7\%)} & \ensuremath{+127.933\,(\times 1.69)}\\
+\bottomrule
+\end{tabular}
+\caption{Results on bnlearn and synthetic benchmarks (10 repetitions). Entries report OptABA-PC -- ABA-PC as $\Delta$ (relative change in parentheses). $\Delta n_{\mathrm{acc}}^{T}$ is the change in the number of accepted true constraints and $\Delta \mathrm{FactF1}$ is the change in the F1 of fact classification. All graphical metrics ($\#\mathrm{CPDAG}$, SHD, and worst-case $\mathrm{SHD}_w$) are computed on the returned CPDAG solution sets. Runtime $\Delta t$ is the absolute increase in seconds (OptABA-PC time divided by ABA-PC time in parentheses).}
+\label{tab:main-results}
+\end{table*}

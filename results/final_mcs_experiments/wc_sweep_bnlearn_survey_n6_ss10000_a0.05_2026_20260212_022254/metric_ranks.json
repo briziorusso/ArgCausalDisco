@@ -1,0 +1,193 @@
+{
+  "generated_at": "2026-02-12T02:26:12",
+  "methods": [
+    {
+      "enc": "base",
+      "id": "base|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "base",
+      "id": "base|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    }
+  ],
+  "metric_defs": [
+    {
+      "higher_is_better": false,
+      "name": "timeR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "timeBSR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "solveR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "toR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "nATR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "wATR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "nDR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "shdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "F1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "adjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "ahR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "factR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "cshdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cF1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cadjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cahR"
+    }
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "ranks_avg": {
+    "base|-|baseline|optN|-": {
+      "F1R": 2.4,
+      "adjR": 2.4,
+      "ahR": 2.4,
+      "cF1R": 2.3,
+      "cadjR": 2.4,
+      "cahR": 2.3,
+      "cshdR": 2.3,
+      "factR": 2.0,
+      "nATR": 3.5,
+      "nDR": 3.5,
+      "shdR": 2.6,
+      "solveR": 2.0,
+      "timeBSR": 2.0,
+      "timeR": 2.3,
+      "toR": 2.5,
+      "wATR": 3.4
+    },
+    "base|lex|bb|optN|mus": {
+      "F1R": 3.65,
+      "adjR": 3.45,
+      "ahR": 3.65,
+      "cF1R": 3.65,
+      "cadjR": 3.45,
+      "cahR": 3.65,
+      "cshdR": 3.65,
+      "factR": 3.05,
+      "nATR": 1.45,
+      "nDR": 1.15,
+      "shdR": 3.45,
+      "solveR": 3.9,
+      "timeBSR": 4.0,
+      "timeR": 3.7,
+      "toR": 2.5,
+      "wATR": 1.65
+    },
+    "inc|-|baseline|optN|-": {
+      "F1R": 2.4,
+      "adjR": 2.4,
+      "ahR": 2.4,
+      "cF1R": 2.3,
+      "cadjR": 2.4,
+      "cahR": 2.3,
+      "cshdR": 2.3,
+      "factR": 2.0,
+      "nATR": 3.5,
+      "nDR": 3.5,
+      "shdR": 2.6,
+      "solveR": 1.0,
+      "timeBSR": 1.0,
+      "timeR": 1.3,
+      "toR": 2.5,
+      "wATR": 3.4
+    },
+    "inc|lex|bb|optN|mus": {
+      "F1R": 1.55,
+      "adjR": 1.75,
+      "ahR": 1.55,
+      "cF1R": 1.75,
+      "cadjR": 1.75,
+      "cahR": 1.75,
+      "cshdR": 1.75,
+      "factR": 2.95,
+      "nATR": 1.55,
+      "nDR": 1.85,
+      "shdR": 1.35,
+      "solveR": 3.1,
+      "timeBSR": 3.0,
+      "timeR": 2.7,
+      "toR": 2.5,
+      "wATR": 1.55
+    }
+  },
+  "reps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "results_dir": "results/wc_sweep_bnlearn_survey_n6_ss10000_a0.05_2026_20260212_022254"
+}

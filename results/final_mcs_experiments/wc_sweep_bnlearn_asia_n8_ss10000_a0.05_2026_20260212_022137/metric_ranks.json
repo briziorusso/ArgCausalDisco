@@ -1,0 +1,193 @@
+{
+  "generated_at": "2026-02-12T03:24:32",
+  "methods": [
+    {
+      "enc": "base",
+      "id": "base|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "base",
+      "id": "base|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    }
+  ],
+  "metric_defs": [
+    {
+      "higher_is_better": false,
+      "name": "timeR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "timeBSR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "solveR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "toR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "nATR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "wATR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "nDR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "shdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "F1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "adjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "ahR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "factR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "cshdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cF1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cadjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cahR"
+    }
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "ranks_avg": {
+    "base|-|baseline|optN|-": {
+      "F1R": 3.8,
+      "adjR": 3.9,
+      "ahR": 3.8,
+      "cF1R": 3.8,
+      "cadjR": 3.9,
+      "cahR": 3.8,
+      "cshdR": 3.8,
+      "factR": 3.4,
+      "nATR": 3.4,
+      "nDR": 3.9,
+      "shdR": 3.8,
+      "solveR": 2.6,
+      "timeBSR": 2.7,
+      "timeR": 3.4,
+      "toR": 1.95,
+      "wATR": 3.4
+    },
+    "base|lex|bb|optN|mus": {
+      "F1R": 1.9,
+      "adjR": 1.7,
+      "ahR": 1.9,
+      "cF1R": 2.0,
+      "cadjR": 1.7,
+      "cahR": 1.9,
+      "cshdR": 2.0,
+      "factR": 2.1,
+      "nATR": 2.15,
+      "nDR": 1.55,
+      "shdR": 1.85,
+      "solveR": 4.0,
+      "timeBSR": 4.0,
+      "timeR": 3.6,
+      "toR": 3.95,
+      "wATR": 2.1
+    },
+    "inc|-|baseline|optN|-": {
+      "F1R": 3.8,
+      "adjR": 3.9,
+      "ahR": 3.8,
+      "cF1R": 3.8,
+      "cadjR": 3.9,
+      "cahR": 3.8,
+      "cshdR": 3.8,
+      "factR": 3.4,
+      "nATR": 3.4,
+      "nDR": 3.9,
+      "shdR": 3.8,
+      "solveR": 1.2,
+      "timeBSR": 1.3,
+      "timeR": 1.9,
+      "toR": 1.95,
+      "wATR": 3.4
+    },
+    "inc|lex|bb|optN|mus": {
+      "F1R": 1.5,
+      "adjR": 1.5,
+      "ahR": 1.5,
+      "cF1R": 1.4,
+      "cadjR": 1.5,
+      "cahR": 1.5,
+      "cshdR": 1.4,
+      "factR": 1.1,
+      "nATR": 1.05,
+      "nDR": 1.45,
+      "shdR": 1.55,
+      "solveR": 2.3,
+      "timeBSR": 2.1,
+      "timeR": 1.1,
+      "toR": 2.15,
+      "wATR": 1.1
+    }
+  },
+  "reps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "results_dir": "results/wc_sweep_bnlearn_asia_n8_ss10000_a0.05_2026_20260212_022137"
+}

@@ -1,0 +1,167 @@
+{
+  "generated_at": "2026-02-12T10:51:33",
+  "methods": [
+    {
+      "enc": "base",
+      "id": "base|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    }
+  ],
+  "metric_defs": [
+    {
+      "higher_is_better": false,
+      "name": "timeR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "timeBSR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "solveR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "toR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "nATR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "wATR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "nDR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "shdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "F1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "adjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "ahR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "factR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "cshdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cF1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cadjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cahR"
+    }
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "ranks_avg": {
+    "base|-|baseline|optN|-": {
+      "F1R": 2.7,
+      "adjR": 2.7,
+      "ahR": 2.7,
+      "cF1R": 2.7,
+      "cadjR": 2.7,
+      "cahR": 2.6,
+      "cshdR": 2.7,
+      "factR": 2.4,
+      "nATR": 2.2,
+      "nDR": 2.4,
+      "shdR": 2.7,
+      "solveR": 1.7,
+      "timeBSR": 2.0,
+      "timeR": 2.2,
+      "toR": 1.7,
+      "wATR": 2.2
+    },
+    "inc|-|baseline|optN|-": {
+      "F1R": 2.4,
+      "adjR": 2.5,
+      "ahR": 2.4,
+      "cF1R": 2.4,
+      "cadjR": 2.5,
+      "cahR": 2.3,
+      "cshdR": 2.3,
+      "factR": 2.6,
+      "nATR": 2.6,
+      "nDR": 2.8,
+      "shdR": 2.5,
+      "solveR": 1.3,
+      "timeBSR": 1.0,
+      "timeR": 1.1,
+      "toR": 1.4,
+      "wATR": 2.6
+    },
+    "inc|lex|bb|optN|mus": {
+      "F1R": 1.3,
+      "adjR": 1.2,
+      "ahR": 1.3,
+      "cF1R": 1.3,
+      "cadjR": 1.2,
+      "cahR": 1.5,
+      "cshdR": 1.4,
+      "factR": 1.0,
+      "nATR": 1.2,
+      "nDR": 1.2,
+      "shdR": 1.2,
+      "solveR": 3.0,
+      "timeBSR": 3.0,
+      "timeR": 2.7,
+      "toR": 2.9,
+      "wATR": 1.2
+    }
+  },
+  "reps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "results_dir": "results/wc_sweep_8_2026_20260212_085659"
+}

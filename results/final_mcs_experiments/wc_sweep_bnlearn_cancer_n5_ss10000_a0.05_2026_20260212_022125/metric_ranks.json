@@ -1,0 +1,193 @@
+{
+  "generated_at": "2026-02-12T02:22:01",
+  "methods": [
+    {
+      "enc": "base",
+      "id": "base|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "base",
+      "id": "base|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    }
+  ],
+  "metric_defs": [
+    {
+      "higher_is_better": false,
+      "name": "timeR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "timeBSR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "solveR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "toR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "nATR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "wATR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "nDR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "shdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "F1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "adjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "ahR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "factR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "cshdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cF1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cadjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cahR"
+    }
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "ranks_avg": {
+    "base|-|baseline|optN|-": {
+      "F1R": 3.2,
+      "adjR": 3.4,
+      "ahR": 3.2,
+      "cF1R": 3.2,
+      "cadjR": 3.4,
+      "cahR": 3.0,
+      "cshdR": 3.2,
+      "factR": 3.5,
+      "nATR": 3.5,
+      "nDR": 3.4,
+      "shdR": 3.2,
+      "solveR": 1.3,
+      "timeBSR": 3.8,
+      "timeR": 3.8,
+      "toR": 2.5,
+      "wATR": 3.5
+    },
+    "base|lex|bb|optN|mus": {
+      "F1R": 1.8,
+      "adjR": 1.6,
+      "ahR": 1.8,
+      "cF1R": 1.85,
+      "cadjR": 1.6,
+      "cahR": 2.0,
+      "cshdR": 1.8,
+      "factR": 1.5,
+      "nATR": 1.5,
+      "nDR": 1.6,
+      "shdR": 1.8,
+      "solveR": 4.0,
+      "timeBSR": 2.7,
+      "timeR": 2.3,
+      "toR": 2.5,
+      "wATR": 1.5
+    },
+    "inc|-|baseline|optN|-": {
+      "F1R": 3.2,
+      "adjR": 3.4,
+      "ahR": 3.2,
+      "cF1R": 3.2,
+      "cadjR": 3.4,
+      "cahR": 3.0,
+      "cshdR": 3.2,
+      "factR": 3.5,
+      "nATR": 3.5,
+      "nDR": 3.4,
+      "shdR": 3.2,
+      "solveR": 1.7,
+      "timeBSR": 2.5,
+      "timeR": 2.9,
+      "toR": 2.5,
+      "wATR": 3.5
+    },
+    "inc|lex|bb|optN|mus": {
+      "F1R": 1.8,
+      "adjR": 1.6,
+      "ahR": 1.8,
+      "cF1R": 1.85,
+      "cadjR": 1.6,
+      "cahR": 2.0,
+      "cshdR": 1.8,
+      "factR": 1.5,
+      "nATR": 1.5,
+      "nDR": 1.6,
+      "shdR": 1.8,
+      "solveR": 3.0,
+      "timeBSR": 1.0,
+      "timeR": 1.0,
+      "toR": 2.5,
+      "wATR": 1.5
+    }
+  },
+  "reps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "results_dir": "results/wc_sweep_bnlearn_cancer_n5_ss10000_a0.05_2026_20260212_022125"
+}

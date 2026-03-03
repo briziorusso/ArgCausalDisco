@@ -1,0 +1,193 @@
+{
+  "generated_at": "2026-02-12T02:22:42",
+  "methods": [
+    {
+      "enc": "base",
+      "id": "base|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "base",
+      "id": "base|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    }
+  ],
+  "metric_defs": [
+    {
+      "higher_is_better": false,
+      "name": "timeR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "timeBSR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "solveR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "toR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "nATR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "wATR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "nDR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "shdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "F1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "adjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "ahR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "factR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "cshdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cF1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cadjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cahR"
+    }
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "ranks_avg": {
+    "base|-|baseline|optN|-": {
+      "F1R": 2.5,
+      "adjR": 2.5,
+      "ahR": 2.5,
+      "cF1R": 2.5,
+      "cadjR": 2.5,
+      "cahR": 2.5,
+      "cshdR": 2.5,
+      "factR": 2.5,
+      "nATR": 2.5,
+      "nDR": 2.5,
+      "shdR": 2.5,
+      "solveR": 1.0,
+      "timeBSR": 2.0,
+      "timeR": 2.0,
+      "toR": 2.5,
+      "wATR": 2.5
+    },
+    "base|lex|bb|optN|mus": {
+      "F1R": 2.5,
+      "adjR": 2.5,
+      "ahR": 2.5,
+      "cF1R": 2.5,
+      "cadjR": 2.5,
+      "cahR": 2.5,
+      "cshdR": 2.5,
+      "factR": 2.5,
+      "nATR": 2.5,
+      "nDR": 2.5,
+      "shdR": 2.5,
+      "solveR": 4.0,
+      "timeBSR": 3.5,
+      "timeR": 3.3,
+      "toR": 2.5,
+      "wATR": 2.5
+    },
+    "inc|-|baseline|optN|-": {
+      "F1R": 2.5,
+      "adjR": 2.5,
+      "ahR": 2.5,
+      "cF1R": 2.5,
+      "cadjR": 2.5,
+      "cahR": 2.5,
+      "cshdR": 2.5,
+      "factR": 2.5,
+      "nATR": 2.5,
+      "nDR": 2.5,
+      "shdR": 2.5,
+      "solveR": 2.0,
+      "timeBSR": 3.5,
+      "timeR": 3.7,
+      "toR": 2.5,
+      "wATR": 2.5
+    },
+    "inc|lex|bb|optN|mus": {
+      "F1R": 2.5,
+      "adjR": 2.5,
+      "ahR": 2.5,
+      "cF1R": 2.5,
+      "cadjR": 2.5,
+      "cahR": 2.5,
+      "cshdR": 2.5,
+      "factR": 2.5,
+      "nATR": 2.5,
+      "nDR": 2.5,
+      "shdR": 2.5,
+      "solveR": 3.0,
+      "timeBSR": 1.0,
+      "timeR": 1.0,
+      "toR": 2.5,
+      "wATR": 2.5
+    }
+  },
+  "reps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "results_dir": "results/wc_sweep_bnlearn_earthquake_n5_ss10000_a0.05_2026_20260212_022218"
+}

@@ -1,0 +1,420 @@
+in(0,s0).
+in(1,s1).
+in(2,s2).
+in(3,s3).
+in(4,s4).
+in(0,s0y1).
+in(1,s0y1).
+in(0,s0y2).
+in(2,s0y2).
+in(0,s0y3).
+in(3,s0y3).
+in(0,s0y4).
+in(4,s0y4).
+in(1,s1y2).
+in(2,s1y2).
+in(1,s1y3).
+in(3,s1y3).
+in(1,s1y4).
+in(4,s1y4).
+in(2,s2y3).
+in(3,s2y3).
+in(2,s2y4).
+in(4,s2y4).
+in(3,s3y4).
+in(4,s3y4).
+in(0,s0y1y2).
+in(1,s0y1y2).
+in(2,s0y1y2).
+in(0,s0y1y3).
+in(1,s0y1y3).
+in(3,s0y1y3).
+in(0,s0y1y4).
+in(1,s0y1y4).
+in(4,s0y1y4).
+in(0,s0y2y3).
+in(2,s0y2y3).
+in(3,s0y2y3).
+in(0,s0y2y4).
+in(2,s0y2y4).
+in(4,s0y2y4).
+in(0,s0y3y4).
+in(3,s0y3y4).
+in(4,s0y3y4).
+in(1,s1y2y3).
+in(2,s1y2y3).
+in(3,s1y2y3).
+in(1,s1y2y4).
+in(2,s1y2y4).
+in(4,s1y2y4).
+in(1,s1y3y4).
+in(3,s1y3y4).
+in(4,s1y3y4).
+in(2,s2y3y4).
+in(3,s2y3y4).
+in(4,s2y3y4).
+in(0,s0y1y2y3).
+in(1,s0y1y2y3).
+in(2,s0y1y2y3).
+in(3,s0y1y2y3).
+in(0,s0y1y2y4).
+in(1,s0y1y2y4).
+in(2,s0y1y2y4).
+in(4,s0y1y2y4).
+in(0,s0y1y3y4).
+in(1,s0y1y3y4).
+in(3,s0y1y3y4).
+in(4,s0y1y3y4).
+in(0,s0y2y3y4).
+in(2,s0y2y3y4).
+in(3,s0y2y3y4).
+in(4,s0y2y3y4).
+in(1,s1y2y3y4).
+in(2,s1y2y3y4).
+in(3,s1y2y3y4).
+in(4,s1y2y3y4).
+in(0,s0y1y2y3y4).
+in(1,s0y1y2y3y4).
+in(2,s0y1y2y3y4).
+in(3,s0y1y2y3y4).
+in(4,s0y1y2y3y4).
+indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.
+dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.
+p1 :- edge(0,4),edge(4,3),edge(3,2),edge(2,1).
+ap(0,1,p1,S) :- p1, nb(4,0,3,S),nb(3,4,2,S),nb(2,3,1,S), not in(0,S), not in(1,S), set(S).
+p2 :- edge(0,4),edge(4,3),edge(3,1).
+ap(0,1,p2,S) :- p2, nb(4,0,3,S),nb(3,4,1,S), not in(0,S), not in(1,S), set(S).
+p3 :- edge(0,4),edge(4,2),edge(2,3),edge(3,1).
+ap(0,1,p3,S) :- p3, nb(4,0,2,S),nb(2,4,3,S),nb(3,2,1,S), not in(0,S), not in(1,S), set(S).
+p4 :- edge(0,4),edge(4,2),edge(2,1).
+ap(0,1,p4,S) :- p4, nb(4,0,2,S),nb(2,4,1,S), not in(0,S), not in(1,S), set(S).
+p5 :- edge(0,4),edge(4,1).
+ap(0,1,p5,S) :- p5, nb(4,0,1,S), not in(0,S), not in(1,S), set(S).
+p6 :- edge(0,3),edge(3,4),edge(4,2),edge(2,1).
+ap(0,1,p6,S) :- p6, nb(3,0,4,S),nb(4,3,2,S),nb(2,4,1,S), not in(0,S), not in(1,S), set(S).
+p7 :- edge(0,3),edge(3,4),edge(4,1).
+ap(0,1,p7,S) :- p7, nb(3,0,4,S),nb(4,3,1,S), not in(0,S), not in(1,S), set(S).
+p8 :- edge(0,3),edge(3,2),edge(2,4),edge(4,1).
+ap(0,1,p8,S) :- p8, nb(3,0,2,S),nb(2,3,4,S),nb(4,2,1,S), not in(0,S), not in(1,S), set(S).
+p9 :- edge(0,3),edge(3,2),edge(2,1).
+ap(0,1,p9,S) :- p9, nb(3,0,2,S),nb(2,3,1,S), not in(0,S), not in(1,S), set(S).
+p10 :- edge(0,3),edge(3,1).
+ap(0,1,p10,S) :- p10, nb(3,0,1,S), not in(0,S), not in(1,S), set(S).
+p11 :- edge(0,2),edge(2,4),edge(4,3),edge(3,1).
+ap(0,1,p11,S) :- p11, nb(2,0,4,S),nb(4,2,3,S),nb(3,4,1,S), not in(0,S), not in(1,S), set(S).
+p12 :- edge(0,2),edge(2,4),edge(4,1).
+ap(0,1,p12,S) :- p12, nb(2,0,4,S),nb(4,2,1,S), not in(0,S), not in(1,S), set(S).
+p13 :- edge(0,2),edge(2,3),edge(3,4),edge(4,1).
+ap(0,1,p13,S) :- p13, nb(2,0,3,S),nb(3,2,4,S),nb(4,3,1,S), not in(0,S), not in(1,S), set(S).
+p14 :- edge(0,2),edge(2,3),edge(3,1).
+ap(0,1,p14,S) :- p14, nb(2,0,3,S),nb(3,2,1,S), not in(0,S), not in(1,S), set(S).
+p15 :- edge(0,2),edge(2,1).
+ap(0,1,p15,S) :- p15, nb(2,0,1,S), not in(0,S), not in(1,S), set(S).
+p16 :- edge(0,1).
+ap(0,1,p16,S) :- p16,  not in(0,S), not in(1,S), set(S).
+indep(0,1,S) :- ext_dep(0,1,S), not ap(0,1,_,S), set(S).
+dep(0,1,S) :- ext_indep(0,1,S), ap(0,1,_,S), set(S).
+p17 :- edge(0,4),edge(4,3),edge(3,2).
+ap(0,2,p17,S) :- p17, nb(4,0,3,S),nb(3,4,2,S), not in(0,S), not in(2,S), set(S).
+p18 :- edge(0,4),edge(4,3),edge(3,1),edge(1,2).
+ap(0,2,p18,S) :- p18, nb(4,0,3,S),nb(3,4,1,S),nb(1,3,2,S), not in(0,S), not in(2,S), set(S).
+p19 :- edge(0,4),edge(4,2).
+ap(0,2,p19,S) :- p19, nb(4,0,2,S), not in(0,S), not in(2,S), set(S).
+p20 :- edge(0,4),edge(4,1),edge(1,3),edge(3,2).
+ap(0,2,p20,S) :- p20, nb(4,0,1,S),nb(1,4,3,S),nb(3,1,2,S), not in(0,S), not in(2,S), set(S).
+p21 :- edge(0,4),edge(4,1),edge(1,2).
+ap(0,2,p21,S) :- p21, nb(4,0,1,S),nb(1,4,2,S), not in(0,S), not in(2,S), set(S).
+p22 :- edge(0,3),edge(3,4),edge(4,2).
+ap(0,2,p22,S) :- p22, nb(3,0,4,S),nb(4,3,2,S), not in(0,S), not in(2,S), set(S).
+p23 :- edge(0,3),edge(3,4),edge(4,1),edge(1,2).
+ap(0,2,p23,S) :- p23, nb(3,0,4,S),nb(4,3,1,S),nb(1,4,2,S), not in(0,S), not in(2,S), set(S).
+p24 :- edge(0,3),edge(3,2).
+ap(0,2,p24,S) :- p24, nb(3,0,2,S), not in(0,S), not in(2,S), set(S).
+p25 :- edge(0,3),edge(3,1),edge(1,4),edge(4,2).
+ap(0,2,p25,S) :- p25, nb(3,0,1,S),nb(1,3,4,S),nb(4,1,2,S), not in(0,S), not in(2,S), set(S).
+p26 :- edge(0,3),edge(3,1),edge(1,2).
+ap(0,2,p26,S) :- p26, nb(3,0,1,S),nb(1,3,2,S), not in(0,S), not in(2,S), set(S).
+p27 :- edge(0,2).
+ap(0,2,p27,S) :- p27,  not in(0,S), not in(2,S), set(S).
+p28 :- edge(0,1),edge(1,4),edge(4,3),edge(3,2).
+ap(0,2,p28,S) :- p28, nb(1,0,4,S),nb(4,1,3,S),nb(3,4,2,S), not in(0,S), not in(2,S), set(S).
+p29 :- edge(0,1),edge(1,4),edge(4,2).
+ap(0,2,p29,S) :- p29, nb(1,0,4,S),nb(4,1,2,S), not in(0,S), not in(2,S), set(S).
+p30 :- edge(0,1),edge(1,3),edge(3,4),edge(4,2).
+ap(0,2,p30,S) :- p30, nb(1,0,3,S),nb(3,1,4,S),nb(4,3,2,S), not in(0,S), not in(2,S), set(S).
+p31 :- edge(0,1),edge(1,3),edge(3,2).
+ap(0,2,p31,S) :- p31, nb(1,0,3,S),nb(3,1,2,S), not in(0,S), not in(2,S), set(S).
+p32 :- edge(0,1),edge(1,2).
+ap(0,2,p32,S) :- p32, nb(1,0,2,S), not in(0,S), not in(2,S), set(S).
+indep(0,2,S) :- ext_dep(0,2,S), not ap(0,2,_,S), set(S).
+dep(0,2,S) :- ext_indep(0,2,S), ap(0,2,_,S), set(S).
+p33 :- edge(0,4),edge(4,3).
+ap(0,3,p33,S) :- p33, nb(4,0,3,S), not in(0,S), not in(3,S), set(S).
+p34 :- edge(0,4),edge(4,2),edge(2,3).
+ap(0,3,p34,S) :- p34, nb(4,0,2,S),nb(2,4,3,S), not in(0,S), not in(3,S), set(S).
+p35 :- edge(0,4),edge(4,2),edge(2,1),edge(1,3).
+ap(0,3,p35,S) :- p35, nb(4,0,2,S),nb(2,4,1,S),nb(1,2,3,S), not in(0,S), not in(3,S), set(S).
+p36 :- edge(0,4),edge(4,1),edge(1,3).
+ap(0,3,p36,S) :- p36, nb(4,0,1,S),nb(1,4,3,S), not in(0,S), not in(3,S), set(S).
+p37 :- edge(0,4),edge(4,1),edge(1,2),edge(2,3).
+ap(0,3,p37,S) :- p37, nb(4,0,1,S),nb(1,4,2,S),nb(2,1,3,S), not in(0,S), not in(3,S), set(S).
+p38 :- edge(0,3).
+ap(0,3,p38,S) :- p38,  not in(0,S), not in(3,S), set(S).
+p39 :- edge(0,2),edge(2,4),edge(4,3).
+ap(0,3,p39,S) :- p39, nb(2,0,4,S),nb(4,2,3,S), not in(0,S), not in(3,S), set(S).
+p40 :- edge(0,2),edge(2,4),edge(4,1),edge(1,3).
+ap(0,3,p40,S) :- p40, nb(2,0,4,S),nb(4,2,1,S),nb(1,4,3,S), not in(0,S), not in(3,S), set(S).
+p41 :- edge(0,2),edge(2,3).
+ap(0,3,p41,S) :- p41, nb(2,0,3,S), not in(0,S), not in(3,S), set(S).
+p42 :- edge(0,2),edge(2,1),edge(1,4),edge(4,3).
+ap(0,3,p42,S) :- p42, nb(2,0,1,S),nb(1,2,4,S),nb(4,1,3,S), not in(0,S), not in(3,S), set(S).
+p43 :- edge(0,2),edge(2,1),edge(1,3).
+ap(0,3,p43,S) :- p43, nb(2,0,1,S),nb(1,2,3,S), not in(0,S), not in(3,S), set(S).
+p44 :- edge(0,1),edge(1,4),edge(4,3).
+ap(0,3,p44,S) :- p44, nb(1,0,4,S),nb(4,1,3,S), not in(0,S), not in(3,S), set(S).
+p45 :- edge(0,1),edge(1,4),edge(4,2),edge(2,3).
+ap(0,3,p45,S) :- p45, nb(1,0,4,S),nb(4,1,2,S),nb(2,4,3,S), not in(0,S), not in(3,S), set(S).
+p46 :- edge(0,1),edge(1,3).
+ap(0,3,p46,S) :- p46, nb(1,0,3,S), not in(0,S), not in(3,S), set(S).
+p47 :- edge(0,1),edge(1,2),edge(2,4),edge(4,3).
+ap(0,3,p47,S) :- p47, nb(1,0,2,S),nb(2,1,4,S),nb(4,2,3,S), not in(0,S), not in(3,S), set(S).
+p48 :- edge(0,1),edge(1,2),edge(2,3).
+ap(0,3,p48,S) :- p48, nb(1,0,2,S),nb(2,1,3,S), not in(0,S), not in(3,S), set(S).
+indep(0,3,S) :- ext_dep(0,3,S), not ap(0,3,_,S), set(S).
+dep(0,3,S) :- ext_indep(0,3,S), ap(0,3,_,S), set(S).
+p49 :- edge(0,4).
+ap(0,4,p49,S) :- p49,  not in(0,S), not in(4,S), set(S).
+p50 :- edge(0,3),edge(3,4).
+ap(0,4,p50,S) :- p50, nb(3,0,4,S), not in(0,S), not in(4,S), set(S).
+p51 :- edge(0,3),edge(3,2),edge(2,4).
+ap(0,4,p51,S) :- p51, nb(3,0,2,S),nb(2,3,4,S), not in(0,S), not in(4,S), set(S).
+p52 :- edge(0,3),edge(3,2),edge(2,1),edge(1,4).
+ap(0,4,p52,S) :- p52, nb(3,0,2,S),nb(2,3,1,S),nb(1,2,4,S), not in(0,S), not in(4,S), set(S).
+p53 :- edge(0,3),edge(3,1),edge(1,4).
+ap(0,4,p53,S) :- p53, nb(3,0,1,S),nb(1,3,4,S), not in(0,S), not in(4,S), set(S).
+p54 :- edge(0,3),edge(3,1),edge(1,2),edge(2,4).
+ap(0,4,p54,S) :- p54, nb(3,0,1,S),nb(1,3,2,S),nb(2,1,4,S), not in(0,S), not in(4,S), set(S).
+p55 :- edge(0,2),edge(2,4).
+ap(0,4,p55,S) :- p55, nb(2,0,4,S), not in(0,S), not in(4,S), set(S).
+p56 :- edge(0,2),edge(2,3),edge(3,4).
+ap(0,4,p56,S) :- p56, nb(2,0,3,S),nb(3,2,4,S), not in(0,S), not in(4,S), set(S).
+p57 :- edge(0,2),edge(2,3),edge(3,1),edge(1,4).
+ap(0,4,p57,S) :- p57, nb(2,0,3,S),nb(3,2,1,S),nb(1,3,4,S), not in(0,S), not in(4,S), set(S).
+p58 :- edge(0,2),edge(2,1),edge(1,4).
+ap(0,4,p58,S) :- p58, nb(2,0,1,S),nb(1,2,4,S), not in(0,S), not in(4,S), set(S).
+p59 :- edge(0,2),edge(2,1),edge(1,3),edge(3,4).
+ap(0,4,p59,S) :- p59, nb(2,0,1,S),nb(1,2,3,S),nb(3,1,4,S), not in(0,S), not in(4,S), set(S).
+p60 :- edge(0,1),edge(1,4).
+ap(0,4,p60,S) :- p60, nb(1,0,4,S), not in(0,S), not in(4,S), set(S).
+p61 :- edge(0,1),edge(1,3),edge(3,4).
+ap(0,4,p61,S) :- p61, nb(1,0,3,S),nb(3,1,4,S), not in(0,S), not in(4,S), set(S).
+p62 :- edge(0,1),edge(1,3),edge(3,2),edge(2,4).
+ap(0,4,p62,S) :- p62, nb(1,0,3,S),nb(3,1,2,S),nb(2,3,4,S), not in(0,S), not in(4,S), set(S).
+p63 :- edge(0,1),edge(1,2),edge(2,4).
+ap(0,4,p63,S) :- p63, nb(1,0,2,S),nb(2,1,4,S), not in(0,S), not in(4,S), set(S).
+p64 :- edge(0,1),edge(1,2),edge(2,3),edge(3,4).
+ap(0,4,p64,S) :- p64, nb(1,0,2,S),nb(2,1,3,S),nb(3,2,4,S), not in(0,S), not in(4,S), set(S).
+indep(0,4,S) :- ext_dep(0,4,S), not ap(0,4,_,S), set(S).
+dep(0,4,S) :- ext_indep(0,4,S), ap(0,4,_,S), set(S).
+p65 :- edge(1,4),edge(4,3),edge(3,2).
+ap(1,2,p65,S) :- p65, nb(4,1,3,S),nb(3,4,2,S), not in(1,S), not in(2,S), set(S).
+p66 :- edge(1,4),edge(4,3),edge(3,0),edge(0,2).
+ap(1,2,p66,S) :- p66, nb(4,1,3,S),nb(3,4,0,S),nb(0,3,2,S), not in(1,S), not in(2,S), set(S).
+p67 :- edge(1,4),edge(4,2).
+ap(1,2,p67,S) :- p67, nb(4,1,2,S), not in(1,S), not in(2,S), set(S).
+p68 :- edge(1,4),edge(4,0),edge(0,3),edge(3,2).
+ap(1,2,p68,S) :- p68, nb(4,1,0,S),nb(0,4,3,S),nb(3,0,2,S), not in(1,S), not in(2,S), set(S).
+p69 :- edge(1,4),edge(4,0),edge(0,2).
+ap(1,2,p69,S) :- p69, nb(4,1,0,S),nb(0,4,2,S), not in(1,S), not in(2,S), set(S).
+p70 :- edge(1,3),edge(3,4),edge(4,2).
+ap(1,2,p70,S) :- p70, nb(3,1,4,S),nb(4,3,2,S), not in(1,S), not in(2,S), set(S).
+p71 :- edge(1,3),edge(3,4),edge(4,0),edge(0,2).
+ap(1,2,p71,S) :- p71, nb(3,1,4,S),nb(4,3,0,S),nb(0,4,2,S), not in(1,S), not in(2,S), set(S).
+p72 :- edge(1,3),edge(3,2).
+ap(1,2,p72,S) :- p72, nb(3,1,2,S), not in(1,S), not in(2,S), set(S).
+p73 :- edge(1,3),edge(3,0),edge(0,4),edge(4,2).
+ap(1,2,p73,S) :- p73, nb(3,1,0,S),nb(0,3,4,S),nb(4,0,2,S), not in(1,S), not in(2,S), set(S).
+p74 :- edge(1,3),edge(3,0),edge(0,2).
+ap(1,2,p74,S) :- p74, nb(3,1,0,S),nb(0,3,2,S), not in(1,S), not in(2,S), set(S).
+p75 :- edge(1,2).
+ap(1,2,p75,S) :- p75,  not in(1,S), not in(2,S), set(S).
+p76 :- edge(1,0),edge(0,4),edge(4,3),edge(3,2).
+ap(1,2,p76,S) :- p76, nb(0,1,4,S),nb(4,0,3,S),nb(3,4,2,S), not in(1,S), not in(2,S), set(S).
+p77 :- edge(1,0),edge(0,4),edge(4,2).
+ap(1,2,p77,S) :- p77, nb(0,1,4,S),nb(4,0,2,S), not in(1,S), not in(2,S), set(S).
+p78 :- edge(1,0),edge(0,3),edge(3,4),edge(4,2).
+ap(1,2,p78,S) :- p78, nb(0,1,3,S),nb(3,0,4,S),nb(4,3,2,S), not in(1,S), not in(2,S), set(S).
+p79 :- edge(1,0),edge(0,3),edge(3,2).
+ap(1,2,p79,S) :- p79, nb(0,1,3,S),nb(3,0,2,S), not in(1,S), not in(2,S), set(S).
+p80 :- edge(1,0),edge(0,2).
+ap(1,2,p80,S) :- p80, nb(0,1,2,S), not in(1,S), not in(2,S), set(S).
+indep(1,2,S) :- ext_dep(1,2,S), not ap(1,2,_,S), set(S).
+dep(1,2,S) :- ext_indep(1,2,S), ap(1,2,_,S), set(S).
+p81 :- edge(1,4),edge(4,3).
+ap(1,3,p81,S) :- p81, nb(4,1,3,S), not in(1,S), not in(3,S), set(S).
+p82 :- edge(1,4),edge(4,2),edge(2,3).
+ap(1,3,p82,S) :- p82, nb(4,1,2,S),nb(2,4,3,S), not in(1,S), not in(3,S), set(S).
+p83 :- edge(1,4),edge(4,2),edge(2,0),edge(0,3).
+ap(1,3,p83,S) :- p83, nb(4,1,2,S),nb(2,4,0,S),nb(0,2,3,S), not in(1,S), not in(3,S), set(S).
+p84 :- edge(1,4),edge(4,0),edge(0,3).
+ap(1,3,p84,S) :- p84, nb(4,1,0,S),nb(0,4,3,S), not in(1,S), not in(3,S), set(S).
+p85 :- edge(1,4),edge(4,0),edge(0,2),edge(2,3).
+ap(1,3,p85,S) :- p85, nb(4,1,0,S),nb(0,4,2,S),nb(2,0,3,S), not in(1,S), not in(3,S), set(S).
+p86 :- edge(1,3).
+ap(1,3,p86,S) :- p86,  not in(1,S), not in(3,S), set(S).
+p87 :- edge(1,2),edge(2,4),edge(4,3).
+ap(1,3,p87,S) :- p87, nb(2,1,4,S),nb(4,2,3,S), not in(1,S), not in(3,S), set(S).
+p88 :- edge(1,2),edge(2,4),edge(4,0),edge(0,3).
+ap(1,3,p88,S) :- p88, nb(2,1,4,S),nb(4,2,0,S),nb(0,4,3,S), not in(1,S), not in(3,S), set(S).
+p89 :- edge(1,2),edge(2,3).
+ap(1,3,p89,S) :- p89, nb(2,1,3,S), not in(1,S), not in(3,S), set(S).
+p90 :- edge(1,2),edge(2,0),edge(0,4),edge(4,3).
+ap(1,3,p90,S) :- p90, nb(2,1,0,S),nb(0,2,4,S),nb(4,0,3,S), not in(1,S), not in(3,S), set(S).
+p91 :- edge(1,2),edge(2,0),edge(0,3).
+ap(1,3,p91,S) :- p91, nb(2,1,0,S),nb(0,2,3,S), not in(1,S), not in(3,S), set(S).
+p92 :- edge(1,0),edge(0,4),edge(4,3).
+ap(1,3,p92,S) :- p92, nb(0,1,4,S),nb(4,0,3,S), not in(1,S), not in(3,S), set(S).
+p93 :- edge(1,0),edge(0,4),edge(4,2),edge(2,3).
+ap(1,3,p93,S) :- p93, nb(0,1,4,S),nb(4,0,2,S),nb(2,4,3,S), not in(1,S), not in(3,S), set(S).
+p94 :- edge(1,0),edge(0,3).
+ap(1,3,p94,S) :- p94, nb(0,1,3,S), not in(1,S), not in(3,S), set(S).
+p95 :- edge(1,0),edge(0,2),edge(2,4),edge(4,3).
+ap(1,3,p95,S) :- p95, nb(0,1,2,S),nb(2,0,4,S),nb(4,2,3,S), not in(1,S), not in(3,S), set(S).
+p96 :- edge(1,0),edge(0,2),edge(2,3).
+ap(1,3,p96,S) :- p96, nb(0,1,2,S),nb(2,0,3,S), not in(1,S), not in(3,S), set(S).
+indep(1,3,S) :- ext_dep(1,3,S), not ap(1,3,_,S), set(S).
+dep(1,3,S) :- ext_indep(1,3,S), ap(1,3,_,S), set(S).
+p97 :- edge(1,4).
+ap(1,4,p97,S) :- p97,  not in(1,S), not in(4,S), set(S).
+p98 :- edge(1,3),edge(3,4).
+ap(1,4,p98,S) :- p98, nb(3,1,4,S), not in(1,S), not in(4,S), set(S).
+p99 :- edge(1,3),edge(3,2),edge(2,4).
+ap(1,4,p99,S) :- p99, nb(3,1,2,S),nb(2,3,4,S), not in(1,S), not in(4,S), set(S).
+p100 :- edge(1,3),edge(3,2),edge(2,0),edge(0,4).
+ap(1,4,p100,S) :- p100, nb(3,1,2,S),nb(2,3,0,S),nb(0,2,4,S), not in(1,S), not in(4,S), set(S).
+p101 :- edge(1,3),edge(3,0),edge(0,4).
+ap(1,4,p101,S) :- p101, nb(3,1,0,S),nb(0,3,4,S), not in(1,S), not in(4,S), set(S).
+p102 :- edge(1,3),edge(3,0),edge(0,2),edge(2,4).
+ap(1,4,p102,S) :- p102, nb(3,1,0,S),nb(0,3,2,S),nb(2,0,4,S), not in(1,S), not in(4,S), set(S).
+p103 :- edge(1,2),edge(2,4).
+ap(1,4,p103,S) :- p103, nb(2,1,4,S), not in(1,S), not in(4,S), set(S).
+p104 :- edge(1,2),edge(2,3),edge(3,4).
+ap(1,4,p104,S) :- p104, nb(2,1,3,S),nb(3,2,4,S), not in(1,S), not in(4,S), set(S).
+p105 :- edge(1,2),edge(2,3),edge(3,0),edge(0,4).
+ap(1,4,p105,S) :- p105, nb(2,1,3,S),nb(3,2,0,S),nb(0,3,4,S), not in(1,S), not in(4,S), set(S).
+p106 :- edge(1,2),edge(2,0),edge(0,4).
+ap(1,4,p106,S) :- p106, nb(2,1,0,S),nb(0,2,4,S), not in(1,S), not in(4,S), set(S).
+p107 :- edge(1,2),edge(2,0),edge(0,3),edge(3,4).
+ap(1,4,p107,S) :- p107, nb(2,1,0,S),nb(0,2,3,S),nb(3,0,4,S), not in(1,S), not in(4,S), set(S).
+p108 :- edge(1,0),edge(0,4).
+ap(1,4,p108,S) :- p108, nb(0,1,4,S), not in(1,S), not in(4,S), set(S).
+p109 :- edge(1,0),edge(0,3),edge(3,4).
+ap(1,4,p109,S) :- p109, nb(0,1,3,S),nb(3,0,4,S), not in(1,S), not in(4,S), set(S).
+p110 :- edge(1,0),edge(0,3),edge(3,2),edge(2,4).
+ap(1,4,p110,S) :- p110, nb(0,1,3,S),nb(3,0,2,S),nb(2,3,4,S), not in(1,S), not in(4,S), set(S).
+p111 :- edge(1,0),edge(0,2),edge(2,4).
+ap(1,4,p111,S) :- p111, nb(0,1,2,S),nb(2,0,4,S), not in(1,S), not in(4,S), set(S).
+p112 :- edge(1,0),edge(0,2),edge(2,3),edge(3,4).
+ap(1,4,p112,S) :- p112, nb(0,1,2,S),nb(2,0,3,S),nb(3,2,4,S), not in(1,S), not in(4,S), set(S).
+indep(1,4,S) :- ext_dep(1,4,S), not ap(1,4,_,S), set(S).
+p113 :- edge(2,4),edge(4,3).
+ap(2,3,p113,S) :- p113, nb(4,2,3,S), not in(2,S), not in(3,S), set(S).
+p114 :- edge(2,4),edge(4,1),edge(1,3).
+ap(2,3,p114,S) :- p114, nb(4,2,1,S),nb(1,4,3,S), not in(2,S), not in(3,S), set(S).
+p115 :- edge(2,4),edge(4,1),edge(1,0),edge(0,3).
+ap(2,3,p115,S) :- p115, nb(4,2,1,S),nb(1,4,0,S),nb(0,1,3,S), not in(2,S), not in(3,S), set(S).
+p116 :- edge(2,4),edge(4,0),edge(0,3).
+ap(2,3,p116,S) :- p116, nb(4,2,0,S),nb(0,4,3,S), not in(2,S), not in(3,S), set(S).
+p117 :- edge(2,4),edge(4,0),edge(0,1),edge(1,3).
+ap(2,3,p117,S) :- p117, nb(4,2,0,S),nb(0,4,1,S),nb(1,0,3,S), not in(2,S), not in(3,S), set(S).
+p118 :- edge(2,3).
+ap(2,3,p118,S) :- p118,  not in(2,S), not in(3,S), set(S).
+p119 :- edge(2,1),edge(1,4),edge(4,3).
+ap(2,3,p119,S) :- p119, nb(1,2,4,S),nb(4,1,3,S), not in(2,S), not in(3,S), set(S).
+p120 :- edge(2,1),edge(1,4),edge(4,0),edge(0,3).
+ap(2,3,p120,S) :- p120, nb(1,2,4,S),nb(4,1,0,S),nb(0,4,3,S), not in(2,S), not in(3,S), set(S).
+p121 :- edge(2,1),edge(1,3).
+ap(2,3,p121,S) :- p121, nb(1,2,3,S), not in(2,S), not in(3,S), set(S).
+p122 :- edge(2,1),edge(1,0),edge(0,4),edge(4,3).
+ap(2,3,p122,S) :- p122, nb(1,2,0,S),nb(0,1,4,S),nb(4,0,3,S), not in(2,S), not in(3,S), set(S).
+p123 :- edge(2,1),edge(1,0),edge(0,3).
+ap(2,3,p123,S) :- p123, nb(1,2,0,S),nb(0,1,3,S), not in(2,S), not in(3,S), set(S).
+p124 :- edge(2,0),edge(0,4),edge(4,3).
+ap(2,3,p124,S) :- p124, nb(0,2,4,S),nb(4,0,3,S), not in(2,S), not in(3,S), set(S).
+p125 :- edge(2,0),edge(0,4),edge(4,1),edge(1,3).
+ap(2,3,p125,S) :- p125, nb(0,2,4,S),nb(4,0,1,S),nb(1,4,3,S), not in(2,S), not in(3,S), set(S).
+p126 :- edge(2,0),edge(0,3).
+ap(2,3,p126,S) :- p126, nb(0,2,3,S), not in(2,S), not in(3,S), set(S).
+p127 :- edge(2,0),edge(0,1),edge(1,4),edge(4,3).
+ap(2,3,p127,S) :- p127, nb(0,2,1,S),nb(1,0,4,S),nb(4,1,3,S), not in(2,S), not in(3,S), set(S).
+p128 :- edge(2,0),edge(0,1),edge(1,3).
+ap(2,3,p128,S) :- p128, nb(0,2,1,S),nb(1,0,3,S), not in(2,S), not in(3,S), set(S).
+indep(2,3,S) :- ext_dep(2,3,S), not ap(2,3,_,S), set(S).
+dep(2,3,S) :- ext_indep(2,3,S), ap(2,3,_,S), set(S).
+p129 :- edge(2,4).
+ap(2,4,p129,S) :- p129,  not in(2,S), not in(4,S), set(S).
+p130 :- edge(2,3),edge(3,4).
+ap(2,4,p130,S) :- p130, nb(3,2,4,S), not in(2,S), not in(4,S), set(S).
+p131 :- edge(2,3),edge(3,1),edge(1,4).
+ap(2,4,p131,S) :- p131, nb(3,2,1,S),nb(1,3,4,S), not in(2,S), not in(4,S), set(S).
+p132 :- edge(2,3),edge(3,1),edge(1,0),edge(0,4).
+ap(2,4,p132,S) :- p132, nb(3,2,1,S),nb(1,3,0,S),nb(0,1,4,S), not in(2,S), not in(4,S), set(S).
+p133 :- edge(2,3),edge(3,0),edge(0,4).
+ap(2,4,p133,S) :- p133, nb(3,2,0,S),nb(0,3,4,S), not in(2,S), not in(4,S), set(S).
+p134 :- edge(2,3),edge(3,0),edge(0,1),edge(1,4).
+ap(2,4,p134,S) :- p134, nb(3,2,0,S),nb(0,3,1,S),nb(1,0,4,S), not in(2,S), not in(4,S), set(S).
+p135 :- edge(2,1),edge(1,4).
+ap(2,4,p135,S) :- p135, nb(1,2,4,S), not in(2,S), not in(4,S), set(S).
+p136 :- edge(2,1),edge(1,3),edge(3,4).
+ap(2,4,p136,S) :- p136, nb(1,2,3,S),nb(3,1,4,S), not in(2,S), not in(4,S), set(S).
+p137 :- edge(2,1),edge(1,3),edge(3,0),edge(0,4).
+ap(2,4,p137,S) :- p137, nb(1,2,3,S),nb(3,1,0,S),nb(0,3,4,S), not in(2,S), not in(4,S), set(S).
+p138 :- edge(2,1),edge(1,0),edge(0,4).
+ap(2,4,p138,S) :- p138, nb(1,2,0,S),nb(0,1,4,S), not in(2,S), not in(4,S), set(S).
+p139 :- edge(2,1),edge(1,0),edge(0,3),edge(3,4).
+ap(2,4,p139,S) :- p139, nb(1,2,0,S),nb(0,1,3,S),nb(3,0,4,S), not in(2,S), not in(4,S), set(S).
+p140 :- edge(2,0),edge(0,4).
+ap(2,4,p140,S) :- p140, nb(0,2,4,S), not in(2,S), not in(4,S), set(S).
+p141 :- edge(2,0),edge(0,3),edge(3,4).
+ap(2,4,p141,S) :- p141, nb(0,2,3,S),nb(3,0,4,S), not in(2,S), not in(4,S), set(S).
+p142 :- edge(2,0),edge(0,3),edge(3,1),edge(1,4).
+ap(2,4,p142,S) :- p142, nb(0,2,3,S),nb(3,0,1,S),nb(1,3,4,S), not in(2,S), not in(4,S), set(S).
+p143 :- edge(2,0),edge(0,1),edge(1,4).
+ap(2,4,p143,S) :- p143, nb(0,2,1,S),nb(1,0,4,S), not in(2,S), not in(4,S), set(S).
+p144 :- edge(2,0),edge(0,1),edge(1,3),edge(3,4).
+ap(2,4,p144,S) :- p144, nb(0,2,1,S),nb(1,0,3,S),nb(3,1,4,S), not in(2,S), not in(4,S), set(S).
+indep(2,4,S) :- ext_dep(2,4,S), not ap(2,4,_,S), set(S).
+p145 :- edge(3,4).
+ap(3,4,p145,S) :- p145,  not in(3,S), not in(4,S), set(S).
+p146 :- edge(3,2),edge(2,4).
+ap(3,4,p146,S) :- p146, nb(2,3,4,S), not in(3,S), not in(4,S), set(S).
+p147 :- edge(3,2),edge(2,1),edge(1,4).
+ap(3,4,p147,S) :- p147, nb(2,3,1,S),nb(1,2,4,S), not in(3,S), not in(4,S), set(S).
+p148 :- edge(3,2),edge(2,1),edge(1,0),edge(0,4).
+ap(3,4,p148,S) :- p148, nb(2,3,1,S),nb(1,2,0,S),nb(0,1,4,S), not in(3,S), not in(4,S), set(S).
+p149 :- edge(3,2),edge(2,0),edge(0,4).
+ap(3,4,p149,S) :- p149, nb(2,3,0,S),nb(0,2,4,S), not in(3,S), not in(4,S), set(S).
+p150 :- edge(3,2),edge(2,0),edge(0,1),edge(1,4).
+ap(3,4,p150,S) :- p150, nb(2,3,0,S),nb(0,2,1,S),nb(1,0,4,S), not in(3,S), not in(4,S), set(S).
+p151 :- edge(3,1),edge(1,4).
+ap(3,4,p151,S) :- p151, nb(1,3,4,S), not in(3,S), not in(4,S), set(S).
+p152 :- edge(3,1),edge(1,2),edge(2,4).
+ap(3,4,p152,S) :- p152, nb(1,3,2,S),nb(2,1,4,S), not in(3,S), not in(4,S), set(S).
+p153 :- edge(3,1),edge(1,2),edge(2,0),edge(0,4).
+ap(3,4,p153,S) :- p153, nb(1,3,2,S),nb(2,1,0,S),nb(0,2,4,S), not in(3,S), not in(4,S), set(S).
+p154 :- edge(3,1),edge(1,0),edge(0,4).
+ap(3,4,p154,S) :- p154, nb(1,3,0,S),nb(0,1,4,S), not in(3,S), not in(4,S), set(S).
+p155 :- edge(3,1),edge(1,0),edge(0,2),edge(2,4).
+ap(3,4,p155,S) :- p155, nb(1,3,0,S),nb(0,1,2,S),nb(2,0,4,S), not in(3,S), not in(4,S), set(S).
+p156 :- edge(3,0),edge(0,4).
+ap(3,4,p156,S) :- p156, nb(0,3,4,S), not in(3,S), not in(4,S), set(S).
+p157 :- edge(3,0),edge(0,2),edge(2,4).
+ap(3,4,p157,S) :- p157, nb(0,3,2,S),nb(2,0,4,S), not in(3,S), not in(4,S), set(S).
+p158 :- edge(3,0),edge(0,2),edge(2,1),edge(1,4).
+ap(3,4,p158,S) :- p158, nb(0,3,2,S),nb(2,0,1,S),nb(1,2,4,S), not in(3,S), not in(4,S), set(S).
+p159 :- edge(3,0),edge(0,1),edge(1,4).
+ap(3,4,p159,S) :- p159, nb(0,3,1,S),nb(1,0,4,S), not in(3,S), not in(4,S), set(S).
+p160 :- edge(3,0),edge(0,1),edge(1,2),edge(2,4).
+ap(3,4,p160,S) :- p160, nb(0,3,1,S),nb(1,0,2,S),nb(2,1,4,S), not in(3,S), not in(4,S), set(S).
+indep(3,4,S) :- ext_dep(3,4,S), not ap(3,4,_,S), set(S).
+dep(3,4,S) :- ext_indep(3,4,S), ap(3,4,_,S), set(S).
