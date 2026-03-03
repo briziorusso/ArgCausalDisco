@@ -412,6 +412,19 @@ MUS_PRINT_DETAILS_MAX_SETS = int(os.environ.get("MUS_PRINT_DETAILS_MAX_SETS", "1
 # Valid values (per WASP): "camus" or "emax" (case-insensitive). Empty disables.
 MUS_OPTIMUM_MCS_ALGORITHM = os.environ.get("MUS_OPTIMUM_MCS_ALGORITHM", "camus").strip()
 
+# clingo weak-constraint optimization strategy control.
+# clingo --help=3: --opt-strategy={bb|usc}[,<tactics>]
+# - bb: branch-and-bound (supports tactics like lin/hier/inc/dec)
+# - usc: unsat-core based (tactics depend on clingo build)
+# Leave empty to use clingo's default/auto strategy.
+MUS_WC_OPT_STRATEGY = os.environ.get("MUS_WC_OPT_STRATEGY", "").strip()
+MUS_WC_OPT_STRATEGY_ALT = os.environ.get("MUS_WC_OPT_STRATEGY_ALT", "").strip()
+
+# Objective style for clingo-only WC optimization.
+# - sum: [C@1]  (minimize total removed weight)
+# - lex: [C@1,X] (legacy lexicographic-by-index objective; can change solutions and be slower)
+MUS_WC_OBJECTIVE = os.environ.get("MUS_WC_OBJECTIVE", "sum").strip().lower()
+
 # Which analyses to run in the random-size harness.
 # Supported atoms: mus, optmcs, wc
 # Backwards-compatible shorthands:
@@ -453,6 +466,7 @@ class RandomPCSimConfig:
     uc_rule: int = 5
     uc_priority: int = 2
     stable: bool = True
+    strength_S_weight: bool = True
 
 
 def build_random_pc_case(config: RandomPCSimConfig):
@@ -512,7 +526,7 @@ def build_random_pc_case(config: RandomPCSimConfig):
 
         p = test_PC[0][1]
         dep_type_PC = "indep" if p > config.alpha else "dep"
-        I = initial_strength(p, len(S), config.alpha, 0.5, n_nodes)
+        I = initial_strength(p, len(S), config.alpha, 0.5, n_nodes, S_weight=bool(config.strength_S_weight))
 
         if dep_type == dep_type_PC:
             fact_str = test
@@ -1583,6 +1597,148 @@ class TestMUSAnalysis(unittest.TestCase):
             except Exception:
                 pass
 
+    def test_wc_cut_weight_matches_weakc_soft_violations_on_mock_three_var(self):
+        """Empirical check: compare WC cut objective vs weakc soft-constraint violations.
+
+        If weak constraints were just a syntactic rewrite of the same constraints (hard -> soft),
+        then the minimum deletion weight (WC cut) should match the minimum violated weight in a
+        soft-constraints solve.
+
+        In this repo, the implementations differ (e.g., weakc uses Bayes-ball `ap3/3`), so this
+        test helps detect whether they are actually equivalent on a concrete instance.
+        """
+        logger_setup()
+        _ensure_solvers_imported()
+
+        try:
+            from causalaba_weakc import CausalABA as CausalABA_WeakC
+        except Exception:
+            self.skipTest("causalaba_weakc not importable; skipping WC-vs-weakc comparison")
+
+        import subprocess
+
+        # Require clingo.
+        try:
+            subprocess.run(["clingo", "--version"], capture_output=True, text=True, timeout=2.0)
+        except Exception:
+            self.skipTest("clingo not available; skipping WC-vs-weakc comparison")
+
+        n_nodes = 3
+        fd, facts_file = tempfile.mkstemp(suffix='.lp', text=True)
+        os.close(fd)
+        facts_I_file = facts_file.replace('.lp', '_I.lp')
+        facts_wc_file = facts_file.replace('.lp', '_wc.lp')
+
+        # Same core instance as the OptMCS/WC equivalence test.
+        facts = [
+            "ext_indep(1,2,s0).",
+            "ext_dep(1,2,empty).",
+            "ext_indep(0,1,empty).",
+        ]
+        # Use weights with unique subset sums to make the optimum set identifiable.
+        weights = [1000, 2000, 4000]
+        I_values = [1.0, 2.0, 4.0]
+
+        try:
+            with open(facts_file, 'w') as f:
+                for s in facts:
+                    f.write(f"#external {s}\n")
+
+            with open(facts_I_file, 'w') as f:
+                for s, I in zip(facts, I_values):
+                    f.write(f"{s} I={I}, True\n")
+
+            with open(facts_wc_file, 'w') as f:
+                for s, w in zip(facts, weights):
+                    f.write(f":~ {s} [-{int(w)}]\n")
+
+            wc_result = CausalABA_WC(
+                n_nodes=n_nodes,
+                facts_location=facts_file,
+                gringo_path="clingo",
+                facts_wc_location=facts_wc_file,
+            )
+
+            # Run weakc with `ap` shown so we can compute which observations were violated.
+            weakc_res = CausalABA_WeakC(
+                n_nodes=n_nodes,
+                facts_location=facts_file,
+                print_models=False,
+                skeleton_rules_reduction=True,
+                weak_constraints=True,
+                fact_pct=1.0,
+                opt_mode="optN",
+                opt_strategy=None,
+                out_n=1,
+                search_for_models="first",
+                show=["ap"],
+                return_statistics=False,
+                solve_timeout=10.0,
+            )
+
+            # weakc returns [models, multiple] when return_statistics=False
+            weakc_models = weakc_res[0] if isinstance(weakc_res, (list, tuple)) and len(weakc_res) > 0 else []
+            self.assertTrue(weakc_models, "weakc returned no models")
+            model0 = weakc_models[0]
+
+            # Collect shown ap/4 atoms (they encode ap3(X,Y,S) via ap(X,Y,bb,S)).
+            ap_set: set[tuple[int, int, str]] = set()
+            for sym in (model0 or []):
+                s = str(sym).strip()
+                m = re.match(r"^ap\((\d+),(\d+),bb,([a-zA-Z0-9_]+)\)$", s)
+                if not m:
+                    continue
+                a = int(m.group(1))
+                b = int(m.group(2))
+                st = str(m.group(3))
+                if a > b:
+                    a, b = b, a
+                ap_set.add((a, b, st))
+
+            def _parse_fact(s: str) -> tuple[str, int, int, str]:
+                ms = re.match(r"^ext_(indep|dep)\((\d+),(\d+),([a-zA-Z0-9_]+)\)\.$", (s or '').strip())
+                if not ms:
+                    raise AssertionError(f"Unexpected fact syntax: {s!r}")
+                kind = str(ms.group(1))
+                x = int(ms.group(2))
+                y = int(ms.group(3))
+                st = str(ms.group(4))
+                a, b = (x, y) if x < y else (y, x)
+                return kind, a, b, st
+
+            violated: list[str] = []
+            violated_weight = 0
+            for s, w in zip(facts, weights):
+                kind, a, b, st = _parse_fact(s)
+                holds = (a, b, st) in ap_set
+                is_violation = (not holds) if kind == 'dep' else bool(holds)
+                if is_violation:
+                    violated.append(self._normalize_fact_str(s))
+                    violated_weight += int(w)
+
+            wc_cut = [self._normalize_fact_str(x) for x in (wc_result.get('cut_facts', []) or [])]
+            wc_weight = int(wc_result.get('cut_weight', 0) or 0)
+
+            logging.info("WC cut=%s (w=%s)", sorted(wc_cut), wc_weight)
+            logging.info("weakc violated=%s (w=%s)", sorted(violated), violated_weight)
+
+            self.assertEqual(
+                wc_weight,
+                violated_weight,
+                "WC cut weight != weakc violated weight (this indicates different semantics/encodings)",
+            )
+            self.assertEqual(
+                set(wc_cut),
+                set(violated),
+                "WC cut set != weakc violated set (this indicates different semantics/encodings)",
+            )
+        finally:
+            for p in (facts_file, facts_I_file, facts_wc_file):
+                try:
+                    os.remove(p)
+                except Exception:
+                    pass
+
     def test_mus_catches_wrong_facts_on_four_nodes(self):
         """Link wrong tests to MUSes on a larger 4-node case.
 
@@ -1714,6 +1870,12 @@ class TestMUSAnalysis(unittest.TestCase):
                         'abapc_inc_finished': 0,
                         'abapc_inc_timed_out': 0,
                         'abapc_inc_skipped': 0,
+                        'wc_finished': 0,
+                        'wc_timed_out': 0,
+                        'wc_skipped': 0,
+                        'wc_alt_finished': 0,
+                        'wc_alt_timed_out': 0,
+                        'wc_alt_skipped': 0,
                     },
                 )
 
@@ -1786,13 +1948,14 @@ class TestMUSAnalysis(unittest.TestCase):
                             opt_mcs_facts=selected_run.get('opt_mcs_facts', None),
                             opt_mcs_label=selected_run.get('opt_mcs_label', None),
                             wc_cut_facts=selected_run.get('wc_cut_facts', None),
-                            wc_label="WC",
+                            wc_label=str(selected_run.get('wc_label', 'WC') or 'WC'),
                             include_mus_mcs=bool(selected_run.get('mus_ran', True)),
                             allow_incomplete=bool(
                                 selected_run.get('mus_timeout')
                                 or selected_run.get('abapc_timeout')
                                 or selected_run.get('opt_timeout')
                                 or selected_run.get('wc_timeout')
+                                or selected_run.get('wc_alt_timeout')
                                 or (not bool(selected_run.get('mus_ran', True)))
                                 or (not bool(selected_run.get('opt_ran', True)))
                                 or (not bool(selected_run.get('wc_ran', True)))
@@ -1810,6 +1973,9 @@ class TestMUSAnalysis(unittest.TestCase):
                                 'mus_time_sec': float(selected_run.get('mus_time_sec', 0.0) or 0.0),
                                 'opt_time_sec': float(selected_run.get('opt_time_sec', 0.0) or 0.0),
                                 'wc_time_sec': float(selected_run.get('wc_time_sec', 0.0) or 0.0),
+                                'wc_label': str(selected_run.get('wc_label', 'WC') or 'WC'),
+                                'wc_alt_time_sec': float(selected_run.get('wc_alt_time_sec', 0.0) or 0.0),
+                                'wc_alt_label': selected_run.get('wc_alt_label', None),
                                 'abapc_inc_time_sec': float(selected_run.get('abapc_inc_time_sec', 0.0) or 0.0),
                                 'opt_mcs_label': selected_run.get('opt_mcs_label', None),
                                 'n_facts': int(len(selected_run.get('facts_ext', []) or [])),
@@ -1839,8 +2005,13 @@ class TestMUSAnalysis(unittest.TestCase):
                             )
                         if bool(selected_run.get('wc_ran', False)):
                             _accumulate_method_time(
-                                "WC",
+                                str(selected_run.get('wc_label', 'WC') or 'WC'),
                                 float(selected_run.get('wc_time_sec', 0.0) or 0.0),
+                            )
+                        if bool(selected_run.get('wc_alt_ran', False)):
+                            _accumulate_method_time(
+                                str(selected_run.get('wc_alt_label', None) or 'WC(alt)'),
+                                float(selected_run.get('wc_alt_time_sec', 0.0) or 0.0),
                             )
                         rep_outcomes[key]['usable'] += 1
                         # Track per-category completion for this usable run.
@@ -1866,6 +2037,24 @@ class TestMUSAnalysis(unittest.TestCase):
                                 rep_outcomes[key]['opt_timed_out'] += 1
                             else:
                                 rep_outcomes[key]['opt_finished'] += 1
+
+                        wc_attempted = bool(selected_run.get('wc_ran', False))
+                        if not wc_attempted:
+                            rep_outcomes[key]['wc_skipped'] += 1
+                        else:
+                            if bool(selected_run.get('wc_timeout', False)):
+                                rep_outcomes[key]['wc_timed_out'] += 1
+                            else:
+                                rep_outcomes[key]['wc_finished'] += 1
+
+                        wc_alt_attempted = bool(selected_run.get('wc_alt_ran', False))
+                        if not wc_alt_attempted:
+                            rep_outcomes[key]['wc_alt_skipped'] += 1
+                        else:
+                            if bool(selected_run.get('wc_alt_timeout', False)):
+                                rep_outcomes[key]['wc_alt_timed_out'] += 1
+                            else:
+                                rep_outcomes[key]['wc_alt_finished'] += 1
 
                         # ABAPC_INC comparison run (when not running increm-only baseline)
                         inc_attempted = selected_run.get('abapc_inc_ran', False)
@@ -1901,8 +2090,12 @@ class TestMUSAnalysis(unittest.TestCase):
 
                         abapc_vals = [r.get('abapc_time_sec', 0.0) for r in rows if r.get('abapc_time_sec', 0.0) > 0]
                         mus_vals = [r.get('mus_time_sec', 0.0) for r in rows if r.get('mus_time_sec', 0.0) > 0]
+                        wc_vals = [r.get('wc_time_sec', 0.0) for r in rows if r.get('wc_time_sec', 0.0) > 0]
+                        wc_alt_vals = [r.get('wc_alt_time_sec', 0.0) for r in rows if r.get('wc_alt_time_sec', 0.0) > 0]
                         abapc_avg, abapc_min, abapc_max = _avg_min_max(abapc_vals)
                         mus_avg, mus_min, mus_max = _avg_min_max(mus_vals)
+                        wc_avg, wc_min, wc_max = _avg_min_max(wc_vals)
+                        wc_alt_avg, wc_alt_min, wc_alt_max = _avg_min_max(wc_alt_vals)
 
                         def _fmt_triple(min_v: float, avg_v: float, max_v: float) -> str:
                             return f"{min_v:7.3f} / {avg_v:7.3f} / {max_v:7.3f}"
@@ -1935,6 +2128,20 @@ class TestMUSAnalysis(unittest.TestCase):
                         else:
                             logging.info(f"  {'OptMCS finished':<18}: skipped ({outs.get('opt_skipped', 0)})")
 
+                        if outs.get('wc_skipped', 0) < usable:
+                            logging.info(
+                                f"  {'WC finished':<18}: {outs.get('wc_finished', 0)}/{usable - outs.get('wc_skipped', 0)} "
+                                f"(timeouts={outs.get('wc_timed_out', 0)}, skipped={outs.get('wc_skipped', 0)})"
+                            )
+                        else:
+                            logging.info(f"  {'WC finished':<18}: skipped ({outs.get('wc_skipped', 0)})")
+
+                        if outs.get('wc_alt_skipped', 0) < usable:
+                            logging.info(
+                                f"  {'WC_alt finished':<18}: {outs.get('wc_alt_finished', 0)}/{usable - outs.get('wc_alt_skipped', 0)} "
+                                f"(timeouts={outs.get('wc_alt_timed_out', 0)}, skipped={outs.get('wc_alt_skipped', 0)})"
+                            )
+
                         if outs.get('abapc_inc_skipped', 0) < usable:
                             logging.info(
                                 f"  {'ABAPC_INC finished':<18}: {outs.get('abapc_inc_finished', 0)}/{usable - outs.get('abapc_inc_skipped', 0)} "
@@ -1945,6 +2152,10 @@ class TestMUSAnalysis(unittest.TestCase):
 
                         logging.info(f"  {'ABAPC total (s)':<18}: {_fmt_triple(abapc_min, abapc_avg, abapc_max)}")
                         logging.info(f"  {'MUS total (s)':<18}: {_fmt_triple(mus_min, mus_avg, mus_max)}")
+                        if wc_vals:
+                            logging.info(f"  {'WC total (s)':<18}: {_fmt_triple(wc_min, wc_avg, wc_max)}")
+                        if wc_alt_vals:
+                            logging.info(f"  {'WC_alt total (s)':<18}: {_fmt_triple(wc_alt_min, wc_alt_avg, wc_alt_max)}")
 
                         facts_vals = [float(r.get('n_facts', 0) or 0) for r in rows if (r.get('n_facts', 0) or 0) > 0]
                         wrong_vals = [float(r.get('n_wrong', 0) or 0) for r in rows]
@@ -1988,6 +2199,8 @@ class TestMUSAnalysis(unittest.TestCase):
                         groups = ['Removal', 'MUS', 'MCS']
                         if any(('OptMCS' in (r.get('overlap') or {})) for r in rows):
                             groups.append('OptMCS')
+                        if any(('WC' in (r.get('overlap') or {})) for r in rows):
+                            groups.append('WC')
 
                         for group in groups:
                             logging.info(f"\n{29*' '}  {group}:")
@@ -2062,6 +2275,15 @@ class TestMUSAnalysis(unittest.TestCase):
                                     label = str(gg.get('label'))
                                     break
                             ge_groups.append(('OptMCS', label or 'OptMCS'))
+
+                        if any(('WC' in (r.get('graph_eval') or {})) for r in rows):
+                            label = None
+                            for r in rows:
+                                gg = (r.get('graph_eval') or {}).get('WC') or {}
+                                if gg.get('label'):
+                                    label = str(gg.get('label'))
+                                    break
+                            ge_groups.append(('WC', label or 'WC'))
 
                         logging.info("\n" + 29*" " + "GRAPH EVAL OVER REPS")
                         logging.info("  [min/avg/max]  (for SHD/SID: lower is better)")
@@ -3840,13 +4062,42 @@ class TestMUSAnalysis(unittest.TestCase):
         wc_time = None
         wc_result: dict[str, Any] | None = None
         wc_timing: dict[str, Any] | None = None
+        wc_label: str = "WC"
+        wc_alt_time = None
+        wc_alt_result: dict[str, Any] | None = None
+        wc_alt_timing: dict[str, Any] | None = None
+        wc_alt_label: str | None = None
         if run_wc:
-            logging.info("Step 3c: Running clingo-only weak-constraint optimization (WC)")
-            # Emit a standalone WC program if we are already emitting an adorned program.
+            primary_strategy = (MUS_WC_OPT_STRATEGY or "").strip() or None
+            alt_strategy = (MUS_WC_OPT_STRATEGY_ALT or "").strip() or None
+
+            # Respect the user's --out-n for WC enumeration.
+            # - out_n=1: keep legacy behaviour (single optimum cut)
+            # - out_n=0: enumerate all optimal models (can be large)
+            # - out_n>1: enumerate up to that many optimal models
+            wc_out_n = int(MUS_ABAPC_OUT_N)
+
+            if primary_strategy is None:
+                wc_label = "WC"
+            else:
+                wc_label = f"WC({primary_strategy})"
+
+            logging.info(
+                "Step 3c: Running clingo-only weak-constraint optimization (%s) (opt-strategy=%s)",
+                wc_label,
+                primary_strategy or "auto",
+            )
+            # Emit a standalone WC program if we are already emitting an adorned program, OR if
+            # we need to re-run clingo with a custom `-n` model bound (wc_out_n != 1).
             emit_lp_wc = None
+            tmp_emit_wc: str | None = None
             if emit_lp_path:
                 root, ext = os.path.splitext(str(emit_lp_path))
                 emit_lp_wc = f"{root}_wc{ext or '.lp'}"
+            elif wc_out_n != 1:
+                fd_emit_wc, tmp_emit_wc = tempfile.mkstemp(suffix=f"_wc_{n_nodes}_{seed}.lp", text=True)
+                os.close(fd_emit_wc)
+                emit_lp_wc = tmp_emit_wc
 
             wc_timing = {}
             start_wc = datetime.now()
@@ -3856,6 +4107,8 @@ class TestMUSAnalysis(unittest.TestCase):
                 gringo_path="clingo",
                 facts_wc_location=facts_wc_file,
                 solve_timeout=solve_timeout,
+                opt_strategy=primary_strategy,
+                objective=MUS_WC_OBJECTIVE,
                 emit_lp=emit_lp_wc,
                 timing_recorder=wc_timing,
                 base_program_path=(abapc_base_program_path if (use_increm_only and abapc_base_program_path) else None),
@@ -3863,6 +4116,224 @@ class TestMUSAnalysis(unittest.TestCase):
             wc_time = datetime.now() - start_wc
             wc_cut_facts = wc_result.get('cut_facts', None) if wc_result is not None else None
             wc_cut_weight = int(wc_result.get('cut_weight', 0) or 0) if wc_result is not None else None
+
+            # If WC timed out (or returned UNKNOWN), the partial/empty solution is not reliable.
+            # In particular, an empty selected_mus implies "cut everything", which makes downstream
+            # overlap/graph-eval numbers misleading. Skip WC summaries in that case.
+            try:
+                wc_timed_out = bool(wc_result.get('timed_out', False)) if wc_result is not None else False
+                wc_status = str(wc_result.get('status', '') or '') if wc_result is not None else ''
+                if wc_timed_out or wc_status.upper() == 'UNKNOWN':
+                    logging.warning(
+                        "⚠ WC solve did not finish cleanly (timed_out=%s status=%s); skipping overlap/graph-eval for WC",
+                        wc_timed_out,
+                        wc_status or 'UNKNOWN',
+                    )
+                    wc_cut_facts = None
+                    wc_cut_weight = None
+            except Exception:
+                pass
+
+            # If the user requested more than one model, re-run clingo on the emitted WC program
+            # with `-n wc_out_n` and collect multiple optimal cuts.
+            if wc_result is not None and emit_lp_wc and wc_out_n != 1:
+                try:
+                    import json
+                    import subprocess
+
+                    cmd = [
+                        "clingo",
+                        str(emit_lp_wc),
+                        "--opt-mode=optN",
+                    ]
+                    if primary_strategy:
+                        cmd.append(f"--opt-strategy={primary_strategy}")
+                    cmd.extend(["--outf=2", "-n", str(int(wc_out_n))])
+
+                    # Don't exceed the intended WC budget: reuse the remaining time, if any.
+                    enum_timeout = None
+                    if solve_timeout is not None:
+                        spent = wc_time.total_seconds() if wc_time is not None else 0.0
+                        enum_timeout = max(0.0, float(solve_timeout) - float(spent))
+
+                    proc = subprocess.run(
+                        cmd,
+                        capture_output=True,
+                        text=True,
+                        timeout=enum_timeout,
+                    )
+                    data = json.loads(proc.stdout or "{}")
+                    witnesses = ((data.get('Call') or [{}])[-1].get('Witnesses') or [])
+                    opt_costs = None
+                    try:
+                        if witnesses:
+                            opt_costs = witnesses[-1].get('Costs', None)
+                    except Exception:
+                        opt_costs = None
+
+                    fact_mapping = wc_result.get('fact_mapping', {}) or {}
+                    n_facts = int(len(fact_mapping) or 0)
+                    cuts_all: list[list[str]] = []
+                    for w in witnesses:
+                        # Keep only *optimal* models.
+                        if opt_costs is not None and w.get('Costs', None) != opt_costs:
+                            continue
+                        vals = w.get('Value', []) or []
+                        selected: set[int] = set()
+                        for sym in vals:
+                            ms = re.match(r"^mus\((\d+)\)$", str(sym).strip())
+                            if ms:
+                                selected.add(int(ms.group(1)))
+                        cut_indices = [i for i in range(1, n_facts + 1) if i not in selected]
+                        cut_facts = [fact_mapping.get(i, f"mus({i}).") for i in cut_indices]
+                        cuts_all.append(cut_facts)
+
+                        # Respect requested bound for *optimal* models.
+                        if int(wc_out_n) > 0 and len(cuts_all) >= int(wc_out_n):
+                            break
+
+                    if cuts_all:
+                        wc_result['cut_facts_all'] = cuts_all
+                        wc_result['n_opt_models'] = int(len(cuts_all))
+                        # Preserve legacy downstream behaviour: pick the first non-empty cut.
+                        first_non_empty = next((c for c in cuts_all if c), cuts_all[0])
+                        wc_cut_facts = first_non_empty
+                        wc_result['cut_facts'] = first_non_empty
+                        logging.info(f"  → WC enumerated {len(cuts_all)} optimal models under out_n={wc_out_n}")
+                except subprocess.TimeoutExpired:
+                    logging.warning(f"⚠ WC re-enumeration timed out under out_n={wc_out_n}")
+                except Exception as e:
+                    logging.warning(f"⚠ WC re-enumeration failed under out_n={wc_out_n}: {e}")
+
+            try:
+                if wc_result is not None:
+                    used = (wc_result.get('opt_strategy_used', None) or None)
+                    fallback = bool(wc_result.get('opt_strategy_fallback', False))
+                    if primary_strategy is not None:
+                        logging.info(
+                            "  → WC opt-strategy requested=%s used=%s fallback=%s",
+                            primary_strategy,
+                            used or 'auto',
+                            fallback,
+                        )
+            except Exception:
+                pass
+
+            # Optional: also run a second WC solve under an alternate opt-strategy.
+            if alt_strategy and alt_strategy != primary_strategy:
+                wc_alt_label = f"WC({alt_strategy})"
+                logging.info(
+                    "Step 3c-alt: Running clingo-only weak-constraint optimization (%s) (opt-strategy=%s)",
+                    wc_alt_label,
+                    alt_strategy,
+                )
+
+                emit_lp_wc_alt = None
+                if emit_lp_path:
+                    root, ext = os.path.splitext(str(emit_lp_path))
+                    emit_lp_wc_alt = f"{root}_wc_{alt_strategy}{ext or '.lp'}"
+
+                wc_alt_timing = {}
+                start_wc_alt = datetime.now()
+                wc_alt_result = CausalABA_WC(
+                    n_nodes=n_nodes,
+                    facts_location=facts_mus_file,
+                    gringo_path="clingo",
+                    facts_wc_location=facts_wc_file,
+                    solve_timeout=solve_timeout,
+                    opt_strategy=alt_strategy,
+                    objective=MUS_WC_OBJECTIVE,
+                    emit_lp=emit_lp_wc_alt,
+                    timing_recorder=wc_alt_timing,
+                    base_program_path=(abapc_base_program_path if (use_increm_only and abapc_base_program_path) else None),
+                )
+                wc_alt_time = datetime.now() - start_wc_alt
+
+                # Mirror primary: skip summaries if the alternate WC solve timed out/UNKNOWN.
+                try:
+                    wc_alt_timed_out = bool(wc_alt_result.get('timed_out', False)) if wc_alt_result is not None else False
+                    wc_alt_status = str(wc_alt_result.get('status', '') or '') if wc_alt_result is not None else ''
+                    if wc_alt_timed_out or wc_alt_status.upper() == 'UNKNOWN':
+                        logging.warning(
+                            "⚠ %s solve did not finish cleanly (timed_out=%s status=%s); skipping overlap/graph-eval",
+                            wc_alt_label or 'WC-alt',
+                            wc_alt_timed_out,
+                            wc_alt_status or 'UNKNOWN',
+                        )
+                        wc_alt_result['cut_facts'] = None
+                        wc_alt_result['cut_weight'] = None
+                except Exception:
+                    pass
+
+                # Mirror the primary behaviour: respect wc_out_n for the alternate strategy too.
+                if wc_alt_result is not None and emit_lp_wc_alt and wc_out_n != 1:
+                    try:
+                        import json
+                        import subprocess
+
+                        cmd = [
+                            "clingo",
+                            str(emit_lp_wc_alt),
+                            "--opt-mode=optN",
+                            f"--opt-strategy={alt_strategy}",
+                            "--outf=2",
+                            "-n",
+                            str(int(wc_out_n)),
+                        ]
+                        enum_timeout = None
+                        if solve_timeout is not None:
+                            spent = wc_alt_time.total_seconds() if wc_alt_time is not None else 0.0
+                            enum_timeout = max(0.0, float(solve_timeout) - float(spent))
+
+                        proc = subprocess.run(
+                            cmd,
+                            capture_output=True,
+                            text=True,
+                            timeout=enum_timeout,
+                        )
+                        data = json.loads(proc.stdout or "{}")
+                        witnesses = ((data.get('Call') or [{}])[-1].get('Witnesses') or [])
+                        opt_costs = None
+                        try:
+                            if witnesses:
+                                opt_costs = witnesses[-1].get('Costs', None)
+                        except Exception:
+                            opt_costs = None
+                        fact_mapping = wc_alt_result.get('fact_mapping', {}) or {}
+                        n_facts = int(len(fact_mapping) or 0)
+                        cuts_all: list[list[str]] = []
+                        for w in witnesses:
+                            if opt_costs is not None and w.get('Costs', None) != opt_costs:
+                                continue
+                            vals = w.get('Value', []) or []
+                            selected: set[int] = set()
+                            for sym in vals:
+                                ms = re.match(r"^mus\((\d+)\)$", str(sym).strip())
+                                if ms:
+                                    selected.add(int(ms.group(1)))
+                            cut_indices = [i for i in range(1, n_facts + 1) if i not in selected]
+                            cut_facts = [fact_mapping.get(i, f"mus({i}).") for i in cut_indices]
+                            cuts_all.append(cut_facts)
+
+                            if int(wc_out_n) > 0 and len(cuts_all) >= int(wc_out_n):
+                                break
+                        if cuts_all:
+                            wc_alt_result['cut_facts_all'] = cuts_all
+                            wc_alt_result['n_opt_models'] = int(len(cuts_all))
+                            logging.info(
+                                f"  → {wc_alt_label} enumerated {len(cuts_all)} optimal models under out_n={wc_out_n}"
+                            )
+                    except subprocess.TimeoutExpired:
+                        logging.warning(f"⚠ {wc_alt_label} re-enumeration timed out under out_n={wc_out_n}")
+                    except Exception as e:
+                        logging.warning(f"⚠ {wc_alt_label} re-enumeration failed under out_n={wc_out_n}: {e}")
+
+            # Best effort cleanup for temp-emitted WC LP when we created it solely for re-enumeration.
+            try:
+                if tmp_emit_wc:
+                    os.remove(tmp_emit_wc)
+            except Exception:
+                pass
 
         # Optional: compare pure-WC optimum against WASP OptMCS optimum.
         if MUS_CHECK_WC_VS_OPTMCS:
@@ -4038,7 +4509,10 @@ class TestMUSAnalysis(unittest.TestCase):
                 return out
 
             def _solve_for_remaining_facts(label: str, removed_set: set[str]) -> tuple[dict[str, Any], bool]:
-                # Build a facts file containing ONLY the remaining externals.
+                # Build a facts file containing ONLY the remaining facts.
+                # Note: do NOT declare them as `#external` here.
+                # For graph evaluation we need these facts to be *true*; unassigned externals
+                # default to false in clingo, which would effectively drop all constraints.
                 remaining = [
                     self._normalize_fact_str(s)
                     for s in (facts_ext or [])
@@ -4049,7 +4523,8 @@ class TestMUSAnalysis(unittest.TestCase):
                 try:
                     with open(eval_facts_file, 'w') as f:
                         for s in remaining:
-                            f.write(f"#external {s}\n")
+                            # `s` is normalized to include a trailing '.'
+                            f.write(f"{s}\n")
 
                     eval_timing: dict[str, Any] = {}
                     models_eval, _ = CausalABA(
@@ -4401,12 +4876,33 @@ class TestMUSAnalysis(unittest.TestCase):
                 wc_timeout_phase = 'solve' if wc_timeout else None
 
                 logging.info(f"{prefix}|")
-                logging.info(f"{prefix}+-- WC analysis:")
+                logging.info(f"{prefix}+-- {wc_label} analysis:")
                 logging.info(f"{prefix}|   Compiling:       {fmt_cell(wc_compile, wc_timeout_phase, 'compile')}")
                 logging.info(f"{prefix}|   Grounding:       {fmt_cell(wc_ground, wc_timeout_phase, 'ground')}")
                 logging.info(f"{prefix}|   Solving:         {fmt_cell(wc_solve, wc_timeout_phase, 'solve')}")
                 logging.info(f"{prefix}|   Sys (residual):  {fmt_cell(wc_sys, wc_timeout_phase, 'sys')}")
                 logging.info(f"{prefix}|   Total:           {wc_total:>15.3f}s")
+
+            # Optional: print alternate WC timing.
+            if wc_alt_time is not None and wc_alt_result is not None and wc_alt_label is not None:
+                wc_alt_total = wc_alt_time.total_seconds()
+                wc_alt_compile = float((wc_alt_timing or {}).get('compile_sec_total', 0.0) or 0.0)
+                wc_alt_ground = float((wc_alt_timing or {}).get('ground_sec_total', 0.0) or 0.0)
+                wc_alt_solve = float((wc_alt_result or {}).get('solve_time', 0.0) or 0.0)
+                wc_alt_sys = max(0.0, wc_alt_total - wc_alt_compile - wc_alt_ground - wc_alt_solve)
+                wc_alt_timeout = bool((wc_alt_result or {}).get('timed_out', False)) or (
+                    (solve_timeout is not None)
+                    and (wc_alt_total >= (float(solve_timeout) - 0.5))
+                )
+                wc_alt_timeout_phase = 'solve' if wc_alt_timeout else None
+
+                logging.info(f"{prefix}|")
+                logging.info(f"{prefix}+-- {wc_alt_label} analysis:")
+                logging.info(f"{prefix}|   Compiling:       {fmt_cell(wc_alt_compile, wc_alt_timeout_phase, 'compile')}")
+                logging.info(f"{prefix}|   Grounding:       {fmt_cell(wc_alt_ground, wc_alt_timeout_phase, 'ground')}")
+                logging.info(f"{prefix}|   Solving:         {fmt_cell(wc_alt_solve, wc_alt_timeout_phase, 'solve')}")
+                logging.info(f"{prefix}|   Sys (residual):  {fmt_cell(wc_alt_sys, wc_alt_timeout_phase, 'sys')}")
+                logging.info(f"{prefix}|   Total:           {wc_alt_total:>15.3f}s")
             logging.info("")
             
             if run_mus_mcs and (not (abapc_timeout or mus_timeout)):
@@ -4492,6 +4988,11 @@ class TestMUSAnalysis(unittest.TestCase):
             'wc_timeout': bool((wc_result or {}).get('timed_out', False)) if wc_result is not None else False,
             'wc_cut_facts': wc_cut_facts,
             'wc_cut_weight': wc_cut_weight,
+            'wc_label': wc_label,
+            'wc_alt_ran': bool(wc_alt_result is not None),
+            'wc_alt_time_sec': wc_alt_time.total_seconds() if wc_alt_time is not None else 0.0,
+            'wc_alt_timeout': bool((wc_alt_result or {}).get('timed_out', False)) if wc_alt_result is not None else False,
+            'wc_alt_label': wc_alt_label,
         }
 
 
@@ -4546,6 +5047,35 @@ if __name__ == '__main__':
         help=(
             "Which analyses to run. Supported: both, all, mus, optmcs, wc, or a comma/plus-separated list e.g. optmcs,wc. "
             "(mus = MUS/MCS enumeration; optmcs = WASP optimum-MCS; wc = clingo-only weak-constraint optimization)"
+        ),
+    )
+    parser.add_argument(
+        "--wc-opt-strategy",
+        type=str,
+        default=MUS_WC_OPT_STRATEGY,
+        help=(
+            "Clingo --opt-strategy for WC optimization (empty = clingo default/auto). "
+            "Examples: 'bb', 'bb,lin', 'bb,inc', 'usc'."
+        ),
+    )
+    parser.add_argument(
+        "--wc-opt-strategy-alt",
+        type=str,
+        default=MUS_WC_OPT_STRATEGY_ALT,
+        help=(
+            "Optional second clingo --opt-strategy for WC optimization to run for comparison. "
+            "If set and different from --wc-opt-strategy, WC will run twice and print two timing blocks."
+        ),
+    )
+    parser.add_argument(
+        "--wc-objective",
+        type=str,
+        default=os.environ.get("MUS_WC_OBJECTIVE", "sum"),
+        choices=["sum", "lex"],
+        help=(
+            "Objective encoding for WC optimization. "
+            "'sum' uses [C@1] (minimize total weight). "
+            "'lex' uses legacy [C@1,X] (lexicographic-by-index; can change the optimum and be much slower)."
         ),
     )
     parser.add_argument(
@@ -4720,6 +5250,9 @@ if __name__ == '__main__':
     MUS_MCS_THRESHOLD = args.mcs_threshold
     MUS_MUS_THRESHOLD = args.mus_threshold
     MUS_CHECK_MINIMALITY = bool(args.check_mus_minimality)
+    MUS_WC_OPT_STRATEGY = (args.wc_opt_strategy or "").strip()
+    MUS_WC_OPT_STRATEGY_ALT = (args.wc_opt_strategy_alt or "").strip()
+    MUS_WC_OBJECTIVE = (args.wc_objective or "sum").strip().lower()
 
     start = datetime.now()
     log_file = args.log_file.strip() if isinstance(args.log_file, str) else ""
@@ -4753,7 +5286,7 @@ if __name__ == '__main__':
     logging.info(
         f"CLI overrides: solve_timeout={MUS_SOLVE_TIMEOUT}s, node_sizes={MUS_NODE_SIZES}, edge_per_node={MUS_EDGE_PER_NODE}, seed_base={MUS_SEED_BASE}, "
         f"rep_unsat={MUS_REP_UNSAT}, random_reps={MUS_RANDOM_REPS}, graph_types={MUS_GRAPH_TYPES}, opt_mode={MUS_ABAPC_OPT_MODE}, out_n={MUS_ABAPC_OUT_N}, "
-        f"analysis={MUS_ANALYSIS}, "
+        f"analysis={MUS_ANALYSIS}, wc_opt_strategy={MUS_WC_OPT_STRATEGY or '(auto)'}, wc_opt_strategy_alt={MUS_WC_OPT_STRATEGY_ALT or '(none)'}, wc_objective={MUS_WC_OBJECTIVE}, "
         f"version={MUS_VERSION or '(none)'}, emit_all={bool(args.emit_all)}, "
         f"emit_lp={MUS_EMIT_LP or '(none)'}, emit_abapc_inc_lp={MUS_EMIT_ABAPC_INC_LP or '(none)'}, use_increm_only={MUS_USE_INCREM_ONLY}, "
         f"max_muses={MUS_MAX_MUSES}, mcs_threshold={MUS_MCS_THRESHOLD}, mus_threshold={MUS_MUS_THRESHOLD}, log_file={log_file or '(none)'}"
