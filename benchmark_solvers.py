@@ -162,6 +162,7 @@ def run_solver(
     disable_reground: bool,
     timeout: int,
     opt_mode: str = "optN",
+    opt_strategy: str | None = None,
     out_n: int = 0,
     max_path_length: int | None = None,
     max_conditioning_size: int | None = None,
@@ -222,6 +223,8 @@ def run_solver(
             disable_reground,
             timeout,
         )
+        # Try the most featureful call first; some solver variants do not accept
+        # `opt_strategy` and/or `verbosity`.
         try:
             res = solver(
                 n_nodes,
@@ -229,6 +232,7 @@ def run_solver(
                 weak_constraints=weak_constraints,
                 fact_pct=fact_pct,
                 opt_mode=opt_mode,
+                opt_strategy=opt_strategy,
                 out_n=out_n,
                 search_for_models="first",
                 print_models=False,
@@ -242,24 +246,43 @@ def run_solver(
                 verbosity=verbosity,
             )
         except TypeError:
-            # Solver may not support verbosity; call without it.
-            res = solver(
-                n_nodes,
-                str(facts_path),
-                weak_constraints=weak_constraints,
-                fact_pct=fact_pct,
-                opt_mode=opt_mode,
-                out_n=out_n,
-                search_for_models="first",
-                print_models=False,
-                skeleton_rules_reduction=skeleton_rules_reduction,
-                disable_reground=disable_reground,
-                return_statistics=True,
-                solve_timeout=float(timeout) if timeout else None,
-                max_path_length=max_path_length,
-                max_conditioning_size=max_conditioning_size,
-                threads=threads,
-            )
+            try:
+                res = solver(
+                    n_nodes,
+                    str(facts_path),
+                    weak_constraints=weak_constraints,
+                    fact_pct=fact_pct,
+                    opt_mode=opt_mode,
+                    out_n=out_n,
+                    search_for_models="first",
+                    print_models=False,
+                    skeleton_rules_reduction=skeleton_rules_reduction,
+                    disable_reground=disable_reground,
+                    return_statistics=True,
+                    solve_timeout=float(timeout) if timeout else None,
+                    max_path_length=max_path_length,
+                    max_conditioning_size=max_conditioning_size,
+                    threads=threads,
+                    verbosity=verbosity,
+                )
+            except TypeError:
+                res = solver(
+                    n_nodes,
+                    str(facts_path),
+                    weak_constraints=weak_constraints,
+                    fact_pct=fact_pct,
+                    opt_mode=opt_mode,
+                    out_n=out_n,
+                    search_for_models="first",
+                    print_models=False,
+                    skeleton_rules_reduction=skeleton_rules_reduction,
+                    disable_reground=disable_reground,
+                    return_statistics=True,
+                    solve_timeout=float(timeout) if timeout else None,
+                    max_path_length=max_path_length,
+                    max_conditioning_size=max_conditioning_size,
+                    threads=threads,
+                )
         # Normalize solver return shapes.
         # Expected (bench-enhanced): [models, multiple, clingo_stats, remove_n, profile]
         # Legacy: [models, multiple]
@@ -458,6 +481,15 @@ def main() -> None:
         help="clingo optimization mode used by solvers",
     )
     ap.add_argument(
+        "--opt-strategy",
+        type=str,
+        default="",
+        help=(
+            "clingo optimization strategy (passed to solvers that support it). "
+            "Examples: 'bb', 'bb,lin', 'bb,inc', 'usc'. Empty means default/auto."
+        ),
+    )
+    ap.add_argument(
         "--out-n",
         type=int,
         default=1,
@@ -517,7 +549,7 @@ def main() -> None:
             truth_edges = set(zip(*np.where(B_true == 1)))
             data = simulate_discrete_data(num_of_nodes=n, sample_size=args.sample_size, truth_DAG_directed_edges=truth_edges, random_seed=seed)
             cg = pc(data=data, alpha=args.alpha, indep_test="gsq", uc_rule=3, uc_priority=2, stable=True, show_progress=False, verbose=False)
-
+            opt_strategy = (args.opt_strategy or "").strip() or None
             with tempfile.TemporaryDirectory() as tmpdir:
                 facts_path = Path(tmpdir) / "facts.lp"
                 build_facts(n, cg.sepset, args.alpha, facts_path)
@@ -536,6 +568,7 @@ def main() -> None:
                             args.disable_reground,
                             args.timeout,
                             opt_mode=args.opt_mode,
+                            opt_strategy=opt_strategy,
                             out_n=args.out_n,
                             max_path_length=args.max_path_length,
                             max_conditioning_size=args.max_conditioning_size,
@@ -559,6 +592,7 @@ def main() -> None:
                             args.disable_reground,
                             args.timeout,
                             opt_mode=args.opt_mode,
+                            opt_strategy=opt_strategy,
                             out_n=args.out_n,
                             max_path_length=args.max_path_length,
                             max_conditioning_size=args.max_conditioning_size,
@@ -582,6 +616,7 @@ def main() -> None:
                             args.disable_reground,
                             args.timeout,
                             opt_mode=args.opt_mode,
+                            opt_strategy=opt_strategy,
                             out_n=args.out_n,
                             max_path_length=args.max_path_length,
                             max_conditioning_size=args.max_conditioning_size,
@@ -605,6 +640,7 @@ def main() -> None:
                             args.disable_reground,
                             args.timeout,
                             opt_mode=args.opt_mode,
+                            opt_strategy=opt_strategy,
                             out_n=args.out_n,
                             max_path_length=args.max_path_length,
                             max_conditioning_size=args.max_conditioning_size,
@@ -651,6 +687,7 @@ def main() -> None:
                             args.disable_reground,
                             args.timeout,
                             opt_mode=args.opt_mode,
+                            opt_strategy=opt_strategy,
                             out_n=args.out_n,
                             max_path_length=args.max_path_length,
                             max_conditioning_size=args.max_conditioning_size,

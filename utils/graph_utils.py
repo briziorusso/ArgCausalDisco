@@ -9,6 +9,7 @@ from itertools import combinations, chain
 from copy import deepcopy
 import warnings
 from pathlib import Path
+from typing import Any, Callable
 
 warnings.filterwarnings("ignore")
 
@@ -38,13 +39,57 @@ os.environ["LD_LIBRARY_PATH"] = os.pathsep.join(str(p) for p in LD_LIBRARY_PATHS
 ### set the verbose to False in the launch_R_script function in:
 ### CausalDiscoveryToolbox/cdt/utils/R.py#L155
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-try:
-    import cdt
-except:
-    sys.path.append('../CausalDiscoveryToolbox/')
-    import cdt
-from cdt.metrics import SHD, SID, SID_CPDAG
-cdt.SETTINGS.rpath = str(R_BIN_PATH / "Rscript")
+
+# NOTE: `cdt` pulls in heavy deps (e.g., torch) and is only required for
+# evaluation metrics. Make it lazy so core solvers (e.g., CausalABA) can be
+# imported/executed in minimal environments.
+_CDT_LOADED = False
+_CDT_SHD: Callable[..., Any] | None = None
+_CDT_SID: Callable[..., Any] | None = None
+_CDT_SID_CPDAG: Callable[..., Any] | None = None
+
+
+def _ensure_cdt_loaded() -> None:
+    global _CDT_LOADED, _CDT_SHD, _CDT_SID, _CDT_SID_CPDAG
+    if _CDT_LOADED:
+        return
+
+    try:
+        import cdt  # type: ignore
+    except Exception:
+        # Fall back to local vendored CDT if present.
+        sys.path.append(str((Path(__file__).resolve().parents[1] / "CausalDiscoveryToolbox").resolve()))
+        import cdt  # type: ignore
+
+    from cdt.metrics import SHD as _SHD, SID as _SID, SID_CPDAG as _SID_CPDAG  # type: ignore
+
+    try:
+        cdt.SETTINGS.rpath = str(R_BIN_PATH / "Rscript")
+    except Exception:
+        pass
+
+    _CDT_SHD = _SHD
+    _CDT_SID = _SID
+    _CDT_SID_CPDAG = _SID_CPDAG
+    _CDT_LOADED = True
+
+
+def SHD(*args: Any, **kwargs: Any) -> Any:
+    _ensure_cdt_loaded()
+    assert _CDT_SHD is not None
+    return _CDT_SHD(*args, **kwargs)
+
+
+def SID(*args: Any, **kwargs: Any) -> Any:
+    _ensure_cdt_loaded()
+    assert _CDT_SID is not None
+    return _CDT_SID(*args, **kwargs)
+
+
+def SID_CPDAG(*args: Any, **kwargs: Any) -> Any:
+    _ensure_cdt_loaded()
+    assert _CDT_SID_CPDAG is not None
+    return _CDT_SID_CPDAG(*args, **kwargs)
 
 def model_to_adjacency_matrix(model:list, num_of_nodes:int)->np.ndarray:
     adj_mat = np.zeros((num_of_nodes,num_of_nodes))

@@ -291,6 +291,7 @@ def simulate_dag(d, s0, graph_type):
 def simulate_data_and_run_PC(
     G_true: nx.DiGraph,
     alpha: float,
+    indep_test: str = "gsq",
     uc_rule: int = 3,
     uc_priority: int = 2,
     stable: bool = True,
@@ -317,7 +318,17 @@ def simulate_data_and_run_PC(
     logging.info(f"Simulating data with {num_of_nodes} nodes, {sample_size} samples...")
     data = simulate_discrete_data(num_of_nodes, sample_size, truth_DAG_directed_edges, seed)
 
-    logging.info(f"Running PC algorithm...")
-    cg = pc(data=data, alpha=alpha, ikb=True, uc_rule=uc_rule, uc_priority=uc_priority, stable=stable, verbose=False)
+    logging.info(f"Running PC algorithm (indep_test={indep_test})...")
+    cg = pc(
+        data=data,
+        alpha=alpha,
+        indep_test=str(indep_test),
+        ikb=True,
+        uc_rule=uc_rule,
+        uc_priority=uc_priority,
+        stable=stable,
+        verbose=False,
+        show_progress=False,
+    )
     
     return data, cg
