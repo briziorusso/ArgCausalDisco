@@ -36,6 +36,7 @@ import sys
 import logging
 import tempfile
 import subprocess
+import shutil
 import time
 import re
 import hashlib
@@ -517,6 +518,32 @@ def build_mus_program(
         present = set(re.findall(r"\bin\(\d+,[a-zA-Z0-9y_]+\)\.", specific_text or ""))
         missing = sorted(required - present)
         return missing
+
+    def _augment_specific_rules_with_required_in(
+        specific_text: str, facts_list: list[str]
+    ) -> tuple[str, list[str]]:
+        """Ensure `specific_text` contains `in(i,sSym).` atoms required by `facts_list`.
+
+        For larger sweeps we occasionally see conditioning-set symbols whose ordering
+        does not match what `compile_and_ground(..., dump_specific=...)` emitted.
+        The base encoding derives `set(S)` from `in(_,S)` (see causalaba.lp), so
+        safely appending the missing `in/2` facts repairs the program without
+        changing the ext_* facts or weight keys.
+        """
+        missing = _specific_rules_missing_required_in(specific_text, facts_list)
+        if not missing:
+            return specific_text, []
+        lines: list[str] = []
+        if specific_text:
+            lines.append(specific_text.rstrip())
+        lines.extend(
+            [
+                "",
+                "% ===== Augmented in/2 facts (required by ext_* facts) =====",
+            ]
+        )
+        lines.extend(missing)
+        return "\n".join(lines) + "\n", missing
     
     # Base program selection:
     # - default: causalaba.lp + specific rules via compile_and_ground
@@ -538,11 +565,21 @@ def build_mus_program(
         # `n_vars` with (n_nodes-1); do the same here for compatibility.
         base_lines: list[str] = []
         for line in (raw_base_program or "").splitlines():
-            if line.strip().startswith('#program main'):
+            if line.strip().startswith('#program'):
                 continue
             base_lines.append(line.replace('n_vars', str(n_nodes - 1)))
         base_program = _strip_show_directives("\n".join(base_lines))
         base_program = _strip_block_edge_skeleton_reduction(base_program)
+
+        # Apply the same robustness repair used for generated specific rules:
+        # ensure the loaded dump contains all `in(i,sSym).` atoms required by
+        # the conditioning sets mentioned in the provided ext_* facts.
+        base_program, added_in = _augment_specific_rules_with_required_in(base_program, facts)
+        if added_in:
+            logging.info(
+                "Augmented loaded base program with %d missing in(...) atoms required by facts",
+                len(added_in),
+            )
 
         raw_hash = _sha256_text(raw_base_program)
         norm_hash = _sha256_text(base_program)
@@ -587,9 +624,28 @@ def build_mus_program(
                 missing_in = _specific_rules_missing_required_in(specific_rules_text, facts)
                 if missing_in:
                     logging.warning(
-                        f"Cached specific rules file is missing {len(missing_in)} required in(...) atoms; regenerating: {specific_rules_file}"
+                        f"Cached specific rules file is missing {len(missing_in)} required in(...) atoms; attempting to augment: {specific_rules_file}"
                     )
-                    specific_rules_text = None
+                    specific_rules_text, added = _augment_specific_rules_with_required_in(
+                        specific_rules_text, facts
+                    )
+                    still_missing = _specific_rules_missing_required_in(specific_rules_text, facts)
+                    if still_missing:
+                        logging.warning(
+                            f"Augmentation did not fully repair specific rules (still missing {len(still_missing)} in(...) atoms); regenerating: {specific_rules_file}"
+                        )
+                        specific_rules_text = None
+                    else:
+                        try:
+                            with open(specific_rules_file, 'w') as f:
+                                f.write(specific_rules_text)
+                            logging.info(
+                                f"   Augmented cached specific rules with {len(added)} in(...) atoms"
+                            )
+                        except Exception:
+                            logging.info(
+                                f"   Augmented cached specific rules with {len(added)} in(...) atoms"
+                            )
                 else:
                     logging.info(f"   Loaded existing specific rules ({len(specific_rules_text)} chars)")
             except Exception as e:
@@ -629,7 +685,10 @@ def build_mus_program(
                 out_n=1,
                 show=['arrow'],
                 pre_grounding=False,
-                ext_flag=False,
+                # IMPORTANT: MUS programs toggle tests via ext_* atoms (defined by `ext_* :- mus(i).`).
+                # We must therefore guard the generated contradiction rules with ext_* atoms,
+                # otherwise disabled tests still constrain the model (silent semantic mismatch).
+                ext_flag=True,
                 prior_knowledge=None,
                 max_path_length=None,
                 max_conditioning_size=None,
@@ -644,12 +703,25 @@ def build_mus_program(
             with open(specific_rules_file, 'r') as f:
                 specific_rules_text = _strip_show_directives(f.read())
 
-            # Defensive: ensure we emitted all required in(...) atoms for the fact set.
+            # Defensive/repair: ensure we have all required in(...) atoms for the fact set.
+            specific_rules_text, added = _augment_specific_rules_with_required_in(
+                specific_rules_text, facts
+            )
+            if added:
+                logging.info(
+                    f"   Augmented generated specific rules with {len(added)} in(...) atoms"
+                )
+                try:
+                    with open(specific_rules_file, 'w') as f:
+                        f.write(specific_rules_text)
+                except Exception:
+                    pass
+
             missing_in = _specific_rules_missing_required_in(specific_rules_text, facts)
             if missing_in:
                 preview = " ".join(missing_in[:5])
                 raise RuntimeError(
-                    f"Generated specific rules missing {len(missing_in)} required in(...) atoms; preview: {preview}"
+                    f"Generated specific rules still missing {len(missing_in)} required in(...) atoms after augmentation; preview: {preview}"
                 )
 
             logging.debug(f"Generated and loaded {len(specific_rules_text)} chars of specific rules")
@@ -662,7 +734,7 @@ def build_mus_program(
                 if line.strip().startswith('#program main'):
                     continue
                 # Replace n_vars with actual value
-                line = line.replace('n_vars', str(n_nodes - 1))
+                line = line.replace('n_vars', str(n_nodes))
                 base_program += line
         base_program = _strip_show_directives(base_program)
 
@@ -675,6 +747,22 @@ def build_mus_program(
             "",
             "% ===== Assumption Layer for MUS =====",
         ]
+
+    # Defensive: ensure the variable domain includes all nodes.
+    #
+    # Some emitted dumps (notably from causalaba_increm) include explicit `var(i).`
+    # facts, while the base encoding relies on `var(0..n_vars-1).` after textual
+    # substitution. If those drift (e.g. an off-by-one in n_vars replacement),
+    # tests involving the highest-index node can be silently ignored.
+    #
+    # Adding explicit var/1 facts is safe (redundant when already present) and
+    # makes base/inc MUS/WC runs comparable.
+    program_lines.extend([
+        "",
+        "% ===== Explicit var/1 facts =====",
+    ])
+    for i in range(int(n_nodes)):
+        program_lines.append(f"var({i}).")
     
     # Add choice rules for mus/1 assumptions
     for i in range(1, len(facts) + 1):
@@ -934,17 +1022,33 @@ def CausalABA_MUS(
     return result
 
 
-def _append_clingo_optimum_mcs_objective(program: str) -> str:
+def _append_clingo_optimum_mcs_objective(program: str, *, objective: str = "sum") -> str:
     """Append a weak-constraint objective usable by clingo.
 
-    The program is expected to contain:
-      __optimum_mcs_objective_literal__(W, mus(I)).
+    The program is expected to contain facts of the form:
+        __optimum_mcs_objective_literal__(W, mus(I)).
 
-    We add the weak constraint that penalizes disabling assumptions:
-      :~ not mus(X), __optimum_mcs_objective_literal__(C, mus(X)). [C@1,X]
+    We add the weak constraint that penalizes disabling assumptions.
+
+    Supported objective styles:
+      - objective='sum' (default): minimize total weight (single criterion)
+          :~ not mus(X), __optimum_mcs_objective_literal__(C, mus(X)). [C@1]
+      - objective='lex': legacy lexicographic-by-index objective
+          :~ not mus(X), __optimum_mcs_objective_literal__(C, mus(X)). [C@1,X]
+
+    Note:
+        The legacy 'lex' mode can change the selected optimum (it is not equivalent
+        to minimizing the sum of weights) and can also be significantly slower.
     """
+    obj = (objective or "sum").strip().lower()
+    if obj not in {"sum", "lex"}:
+        raise ValueError(f"Unsupported objective={objective!r}; expected 'sum' or 'lex'")
+
     lines = [program.rstrip(), ""]
-    lines.append(":~ not mus(X), __optimum_mcs_objective_literal__(C, mus(X)). [C@1,X]")
+    if obj == "lex":
+        lines.append(":~ not mus(X), __optimum_mcs_objective_literal__(C, mus(X)). [C@1,X]")
+    else:
+        lines.append(":~ not mus(X), __optimum_mcs_objective_literal__(C, mus(X)). [C@1]")
     lines.append("")
     return "\n".join(lines)
 
@@ -961,6 +1065,8 @@ def _run_clingo_optimize_mus(
     n_facts: int,
     gringo_path: str = "clingo",
     solve_timeout: Optional[float] = None,
+    opt_strategy: Optional[str] = None,
+    opt_mode: str = "optN",
 ) -> dict:
     """Run clingo optimization on a program that shows mus/1.
 
@@ -970,49 +1076,296 @@ def _run_clingo_optimize_mus(
       - timed_out: bool
       - status: str (SATISFIABLE/UNSATISFIABLE/UNKNOWN)
     """
+
+    attempted_strategy = (opt_strategy or '').strip() or None
+
+    def _run_with_python_api(strategy: Optional[str], timeout: Optional[float]) -> dict:
+        """Best-effort optimization using clingo Python API.
+
+        Captures the last incumbent model via on_model so we can return a
+        non-empty selected_mus even if the run times out.
+        """
+        try:
+            import clingo  # type: ignore
+        except Exception as e:
+            return {
+                'selected_mus': [],
+                'costs': [],
+                'timed_out': False,
+                'status': 'UNKNOWN',
+                'opt_strategy_requested': attempted_strategy,
+                'opt_strategy_used': strategy,
+                'opt_strategy_fallback': False,
+                'error': f'clingo import failed: {e!r}',
+            }
+
+        opt_mode_norm = (opt_mode or "optN").strip() or "optN"
+        args: list[str] = [
+            f"--opt-mode={opt_mode_norm}",
+            "-n",
+            "1",
+            "--warn=none",
+            "-t",
+            "8",
+        ]
+        if strategy:
+            args.append(f"--opt-strategy={strategy}")
+
+        last_costs: list[int] = []
+        last_selected: list[int] = []
+
+        def _on_model(m: "clingo.Model") -> None:
+            nonlocal last_costs, last_selected
+            try:
+                last_costs = [int(x) for x in (m.cost or [])]
+            except Exception:
+                last_costs = []
+
+            selected: set[int] = set()
+            try:
+                syms = m.symbols(shown=True)
+            except Exception:
+                syms = []
+            for s in syms:
+                try:
+                    if getattr(s, "name", None) != "mus":
+                        continue
+                    args_ = getattr(s, "arguments", None) or []
+                    if len(args_) != 1:
+                        continue
+                    a0 = args_[0]
+                    idx: int | None = None
+                    # clingo Number
+                    try:
+                        if getattr(a0, "type", None) == clingo.SymbolType.Number:  # type: ignore[attr-defined]
+                            idx = int(getattr(a0, "number"))
+                    except Exception:
+                        idx = None
+                    if idx is None:
+                        try:
+                            idx = int(str(a0))
+                        except Exception:
+                            idx = None
+                    if idx is None:
+                        continue
+                    if 1 <= idx <= int(n_facts):
+                        selected.add(int(idx))
+                except Exception:
+                    continue
+            last_selected = sorted(selected)
+
+        ctl = clingo.Control(list(args) + ["--warn=none"])
+        ctl.add("base", [], program_str)
+        ctl.ground([("base", [])])
+
+        status = "UNKNOWN"
+        timed_out = False
+        res = None
+
+        handle = ctl.solve(async_=True, on_model=_on_model)
+        finished = handle.wait(timeout=float(timeout) if timeout is not None else None)
+        if not finished:
+            timed_out = True
+            try:
+                handle.cancel()
+            except Exception:
+                pass
+            # Bounded grace period; never block indefinitely after cancel.
+            try:
+                finished = handle.wait(timeout=1.0)
+            except Exception:
+                finished = False
+
+        if finished:
+            try:
+                res = handle.get()
+            except Exception:
+                res = None
+
+        if timed_out or (res is not None and bool(getattr(res, "interrupted", False))):
+            status = "TIMEOUT"
+            timed_out = True
+        elif res is not None and bool(getattr(res, "unsatisfiable", False)):
+            status = "UNSATISFIABLE"
+        elif res is not None and bool(getattr(res, "satisfiable", False)):
+            status = "OPTIMUM FOUND" if bool(getattr(res, "exhausted", False)) else "SATISFIABLE"
+
+        return {
+            'selected_mus': list(last_selected or []),
+            'costs': list(last_costs or []),
+            'timed_out': bool(timed_out),
+            'status': status,
+            'opt_strategy_requested': attempted_strategy,
+            'opt_strategy_used': strategy,
+            'opt_strategy_fallback': False,
+        }
+
+    # Prefer the Python API (best-effort incumbent capture). Fall back to the
+    # CLI-based path below if clingo isn't importable.
+    try:
+        import clingo as _clingo  # type: ignore
+
+        _have_clingo = True
+    except Exception:
+        _have_clingo = False
+
+    if _have_clingo:
+        start = time.perf_counter()
+        try:
+            out = _run_with_python_api(attempted_strategy, solve_timeout)
+            # If the strategy is unsupported, retry once without opt-strategy.
+            # (Match the CLI behavior which retries on non-JSON output.)
+        except Exception as e:
+            out = {
+                'selected_mus': [],
+                'costs': [],
+                'timed_out': False,
+                'status': 'UNKNOWN',
+                'opt_strategy_requested': attempted_strategy,
+                'opt_strategy_used': attempted_strategy,
+                'opt_strategy_fallback': False,
+                'error': f'python-api solve failed: {e!r}',
+            }
+
+        if attempted_strategy is not None and (out.get('status') == 'UNKNOWN') and (out.get('selected_mus') in (None, [], ())):
+            remaining: Optional[float] = None
+            if solve_timeout is not None:
+                remaining = max(0.0, float(solve_timeout) - (time.perf_counter() - start))
+            try:
+                out2 = _run_with_python_api(None, remaining)
+                out2['opt_strategy_requested'] = attempted_strategy
+                out2['opt_strategy_used'] = None
+                out2['opt_strategy_fallback'] = True
+                return out2
+            except Exception:
+                pass
+
+        out.setdefault('opt_strategy_requested', attempted_strategy)
+        out.setdefault('opt_strategy_used', attempted_strategy)
+        out.setdefault('opt_strategy_fallback', False)
+        return out
+
     fd, program_file = tempfile.mkstemp(suffix='_wc.lp', text=True)
     os.close(fd)
     try:
         with open(program_file, 'w') as f:
             f.write(program_str)
 
-        cmd = [
-            gringo_path,
-            program_file,
-            '--opt-mode=optN',
-            '--outf=2',
-            '-n',
-            '1',
-        ]
+        opt_mode_norm = (opt_mode or "optN").strip() or "optN"
 
-        timed_out = False
-        try:
-            proc = subprocess.run(
+        def _build_cmd(strategy: Optional[str]) -> list[str]:
+            gringo_path_resolved = gringo_path
+            if shutil.which(gringo_path_resolved) is None:
+                # Many environments ship only the Python module `clingo` (no `clingo` binary).
+                # `python -m clingo` provides a CLI-compatible entrypoint.
+                if Path(gringo_path_resolved).name == 'clingo':
+                    cmd = [
+                        sys.executable,
+                        '-m',
+                        'clingo',
+                        program_file,
+                        f'--opt-mode={opt_mode_norm}',
+                    ]
+                else:
+                    cmd = [
+                        gringo_path_resolved,
+                        program_file,
+                        f'--opt-mode={opt_mode_norm}',
+                    ]
+            else:
+                cmd = [
+                    gringo_path_resolved,
+                    program_file,
+                    f'--opt-mode={opt_mode_norm}',
+                ]
+            if strategy:
+                cmd.append(f'--opt-strategy={strategy}')
+            cmd.extend([
+                '--outf=2',
+                '-n',
+                '1',
+            ])
+            return cmd
+
+        def _run(cmd: list[str], timeout: Optional[float]) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=solve_timeout,
+                timeout=timeout,
             )
+
+        cmd = _build_cmd(attempted_strategy)
+
+        timed_out = False
+        start = time.perf_counter()
+        try:
+            proc = _run(cmd, solve_timeout)
         except subprocess.TimeoutExpired:
             return {
                 'selected_mus': [],
                 'costs': [],
                 'timed_out': True,
                 'status': 'UNKNOWN',
+                'opt_strategy_requested': attempted_strategy,
+                'opt_strategy_used': attempted_strategy,
+                'opt_strategy_fallback': False,
             }
 
         stdout = proc.stdout or ""
+        stderr = proc.stderr or ""
         # clingo JSON output is a single JSON object.
+        opt_fallback = False
+        used_strategy = attempted_strategy
         try:
             data = json.loads(stdout)
         except Exception:
-            # Fall back to UNKNOWN.
-            return {
-                'selected_mus': [],
-                'costs': [],
-                'timed_out': False,
-                'status': 'UNKNOWN',
-            }
+            # If the selected strategy is not supported (or clingo printed a non-JSON error),
+            # retry once without --opt-strategy to preserve backwards-compatible behavior.
+            if attempted_strategy is not None:
+                opt_fallback = True
+                used_strategy = None
+                remaining: Optional[float] = None
+                if solve_timeout is not None:
+                    remaining = max(0.0, float(solve_timeout) - (time.perf_counter() - start))
+                try:
+                    proc = _run(_build_cmd(None), remaining)
+                except subprocess.TimeoutExpired:
+                    return {
+                        'selected_mus': [],
+                        'costs': [],
+                        'timed_out': True,
+                        'status': 'UNKNOWN',
+                        'opt_strategy_requested': attempted_strategy,
+                        'opt_strategy_used': None,
+                        'opt_strategy_fallback': True,
+                    }
+                stdout = proc.stdout or ""
+                stderr = proc.stderr or ""
+                try:
+                    data = json.loads(stdout)
+                except Exception:
+                    return {
+                        'selected_mus': [],
+                        'costs': [],
+                        'timed_out': False,
+                        'status': 'UNKNOWN',
+                        'opt_strategy_requested': attempted_strategy,
+                        'opt_strategy_used': None,
+                        'opt_strategy_fallback': True,
+                        'stderr': stderr,
+                    }
+            else:
+                return {
+                    'selected_mus': [],
+                    'costs': [],
+                    'timed_out': False,
+                    'status': 'UNKNOWN',
+                    'opt_strategy_requested': attempted_strategy,
+                    'opt_strategy_used': None,
+                    'opt_strategy_fallback': False,
+                    'stderr': stderr,
+                }
 
         status = str(data.get('Result', 'UNKNOWN'))
         calls = data.get('Call', []) or []
@@ -1040,6 +1393,9 @@ def _run_clingo_optimize_mus(
                 'costs': costs,
                 'timed_out': timed_out,
                 'status': status,
+                'opt_strategy_requested': attempted_strategy,
+                'opt_strategy_used': used_strategy,
+                'opt_strategy_fallback': bool(opt_fallback),
             }
 
         return {
@@ -1047,6 +1403,9 @@ def _run_clingo_optimize_mus(
             'costs': [],
             'timed_out': False,
             'status': status,
+            'opt_strategy_requested': attempted_strategy,
+            'opt_strategy_used': used_strategy,
+            'opt_strategy_fallback': bool(opt_fallback),
         }
     finally:
         try:
@@ -1062,6 +1421,9 @@ def CausalABA_WC(
     gringo_path: str = "clingo",
     facts_wc_location: str,
     solve_timeout: Optional[float] = None,
+    opt_strategy: Optional[str] = None,
+    opt_mode: str = "optN",
+    objective: str = "sum",
     emit_lp: Optional[str] = None,
     timing_recorder: dict | None = None,
     base_program_path: Optional[str] = None,
@@ -1118,16 +1480,53 @@ def CausalABA_WC(
     # Treat solve_timeout as an end-to-end budget (build + solve)
     deadline = (time.perf_counter() + float(solve_timeout)) if solve_timeout is not None else None
     build_start = time.perf_counter()
-    program = build_mus_program(
-        n_nodes,
-        facts,
-        facts_location,
-        base_program_path=base_program_path,
-        deadline=deadline,
-        timing_recorder=timing_recorder,
-        weights=weights,
-    )
-    program = _append_clingo_optimum_mcs_objective(program)
+    try:
+        program = build_mus_program(
+            n_nodes,
+            facts,
+            facts_location,
+            base_program_path=base_program_path,
+            deadline=deadline,
+            timing_recorder=timing_recorder,
+            weights=weights,
+        )
+    except TimeoutError:
+        build_time = time.perf_counter() - build_start
+        # If we were given a budget, report at most that (prevents small overruns
+        # due to coarse-grained deadline checks inside compile_and_ground).
+        if solve_timeout is not None:
+            try:
+                build_time = min(float(build_time), float(solve_timeout))
+            except Exception:
+                pass
+        try:
+            if isinstance(timing_recorder, dict):
+                timing_recorder["timed_out"] = True
+                timing_recorder.setdefault("timeout_phase", "build")
+                if solve_timeout is not None:
+                    timing_recorder.setdefault("timeout_s", float(solve_timeout))
+        except Exception:
+            pass
+        logging.warning(
+            f"[warn] CausalABA_WC build timed out after {build_time:.3f}s (solve_timeout={solve_timeout}); returning timeout result."
+        )
+        return {
+            'cut_indices': [],
+            'cut_facts': [],
+            'cut_weight': 0,
+            'selected_mus': [],
+            'timed_out': True,
+            'status': 'TIMEOUT_BUILD',
+            'costs': [],
+            'opt_strategy_requested': opt_strategy,
+            'opt_strategy_used': None,
+            'opt_strategy_fallback': False,
+            'wc_build_time': float(build_time),
+            'solve_time': 0.0,
+            'total_time': float(build_time),
+            'fact_mapping': fact_mapping,
+        }
+    program = _append_clingo_optimum_mcs_objective(program, objective=objective)
     program = _append_show_mus(program)
 
     if emit_lp:
@@ -1146,6 +1545,8 @@ def CausalABA_WC(
         n_facts=len(facts),
         gringo_path=gringo_path,
         solve_timeout=remaining_timeout,
+        opt_strategy=opt_strategy,
+        opt_mode=opt_mode,
     )
     solve_time = time.perf_counter() - solve_start
 
@@ -1163,6 +1564,9 @@ def CausalABA_WC(
         'timed_out': bool(out.get('timed_out', False)),
         'status': out.get('status', 'UNKNOWN'),
         'costs': out.get('costs', []),
+        'opt_strategy_requested': out.get('opt_strategy_requested', None),
+        'opt_strategy_used': out.get('opt_strategy_used', None),
+        'opt_strategy_fallback': bool(out.get('opt_strategy_fallback', False)),
         'wc_build_time': float(build_time),
         'solve_time': float(solve_time),
         'total_time': float(build_time + solve_time),

@@ -64,12 +64,20 @@ def _solve_with_timeout(ctl, *, solve_timeout: float | None, on_model):
     handle = ctl.solve(async_=True, on_model=on_model)
     finished = handle.wait(solve_timeout)
     if not finished:
-        handle.cancel()
-        handle.wait()
         try:
-            handle.get()
+            handle.cancel()
         except Exception:
             pass
+        cancelled_finished = False
+        try:
+            cancelled_finished = bool(handle.wait(1.0))
+        except TypeError:
+            pass
+        if cancelled_finished:
+            try:
+                handle.get()
+            except Exception:
+                pass
         return False
     handle.get()
     return True
@@ -84,6 +92,7 @@ def CausalABA(
     fact_pct: float = 1.0,
     set_indep_facts: bool = False,
     opt_mode: str = "optN",
+    opt_strategy: str | None = None,
     out_n: int = 0,
     search_for_models: str = "first",
     show: list[str] | None = None,
@@ -167,7 +176,7 @@ def CausalABA(
 
     cpu_count = min(os.cpu_count() or 1, 64)
     threads = threads or cpu_count
-    control_args = [f"-t {threads}"]
+    control_args = [f"-t {threads}", "--warn=none"]
     if cycle_length is not None:
         control_args += [f"-c l_cyc={int(cycle_length)}"]
     if collider_tree_depth is not None:
@@ -177,6 +186,12 @@ def CausalABA(
     ctl.configuration.solve.models = out_n
     ctl.configuration.solver.seed = "2024"
     ctl.configuration.solve.opt_mode = opt_mode
+    if opt_strategy:
+        try:
+            ctl.configuration.solver.opt_strategy = str(opt_strategy)
+        except Exception:
+            # Some clingo builds expose opt_strategy only via CLI; ignore if unavailable.
+            pass
 
     bounded_encoding_active = (cycle_length is not None and cycle_length > 0) or (
         collider_tree_depth is not None and collider_tree_depth > 0
