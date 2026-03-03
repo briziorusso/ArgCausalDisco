@@ -3,17 +3,24 @@
 Compare baseline causalaba vs. incremental causalaba on the same instance.
 
 Usage examples:
-  python compare_solvers.py --n-nodes 5 --facts encodings/test_lps/five_node_sprinkler_PC_facts.lp --weak-constraints --fact-pct 0.27
-  python compare_solvers.py --n-nodes 4 --facts results/test_abapc_four_node_example/facts.lp --weak-constraints --fact-pct 1.0
+  python scripts/compare_solvers.py --n-nodes 5 --facts encodings/test_lps/five_node_sprinkler_PC_facts.lp --weak-constraints --fact-pct 0.27
+  python scripts/compare_solvers.py --n-nodes 4 --facts results/test_abapc_four_node_example/facts.lp --weak-constraints --fact-pct 1.0
 """
 
 from __future__ import annotations
 
 import argparse
+import sys
 import resource
 import time
 import tracemalloc
 from typing import Any, Callable
+from pathlib import Path
+
+# Ensure project root on path so local imports work when running as a script.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 try:
     from .causalaba import CausalABA as CausalABA_Base

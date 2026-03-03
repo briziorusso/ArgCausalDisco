@@ -12,32 +12,32 @@ This script:
 
 Usage examples:
   # Single CSV summary
-  python bench_postprocess.py --in results/benchmarks/bench_baseline.csv
+  python scripts/bench_postprocess.py --in results/benchmarks/bench_baseline.csv
 
   # Merge multiple runs and write combined CSV
-  python bench_postprocess.py \
+  python scripts/bench_postprocess.py \
     --in results/benchmarks/bench_run1.csv results/benchmarks/bench_run2.csv \
     --merge-out results/benchmarks/merged.csv
 
   # Filter by run label tokens (filename stem or CSV 'run' column)
-  python bench_postprocess.py \
+  python scripts/bench_postprocess.py \
     --in results/benchmarks/bench_depfirst.csv results/benchmarks/bench_increm_only.csv \
     --select-runs depfirst increm_only \
     --merge-out results/benchmarks/filtered.csv
 
   # Include only specific solvers
-  python bench_postprocess.py \
+  python scripts/bench_postprocess.py \
     --in results/benchmarks/merged.csv \
     --include-solvers baseline incremental dep_first
 
   # Exclude solvers per source file
-  python bench_postprocess.py \
+  python scripts/bench_postprocess.py \
     --in results/benchmarks/bench_depfirst.csv results/benchmarks/bench_increm_only.csv \
     --exclude-map bench_depfirst:incremental,dep_first \
     --merge-out results/benchmarks/merged_filtered.csv
 
   # Combined: multi-run merge with filtering and summary output
-  python bench_postprocess.py \
+  python scripts/bench_postprocess.py \
     --in results/benchmarks/*.csv \
     --select-runs baseline increm \
     --include-solvers baseline incremental binsearch \

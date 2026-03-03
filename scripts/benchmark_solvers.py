@@ -9,12 +9,13 @@ For each n in --n-nodes-list and each run, we:
   - Run both solvers with the same facts, collecting time, memory, SID, and model count.
 
 Example:
-  python benchmark_solvers.py --n-nodes-list 5 7 10 --runs 3 --fact-pct 0.3
+  python scripts/benchmark_solvers.py --n-nodes-list 5 7 10 --runs 3 --fact-pct 0.3
 """
 
 from __future__ import annotations
 
 import argparse
+import sys
 import tempfile
 import time
 import tracemalloc
@@ -29,6 +30,11 @@ import numpy as np
 import pandas as pd
 
 import json
+
+# Ensure project root on path so local imports work when running as a script.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 # Support running as a package module (preferred) as well as a standalone script.
 try:
