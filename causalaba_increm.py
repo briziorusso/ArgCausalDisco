@@ -66,12 +66,20 @@ def _solve_with_timeout(ctl, *, solve_timeout: float | None, on_model, assumptio
     handle = ctl.solve(async_=True, on_model=on_model, assumptions=cast(Any, assumptions or []))
     finished = handle.wait(solve_timeout)
     if not finished:
-        handle.cancel()
-        handle.wait()
         try:
-            handle.get()
+            handle.cancel()
         except Exception:
             pass
+        cancelled_finished = False
+        try:
+            cancelled_finished = bool(handle.wait(1.0))
+        except TypeError:
+            pass
+        if cancelled_finished:
+            try:
+                handle.get()
+            except Exception:
+                pass
         return False
     handle.get()
     return True
@@ -265,35 +273,52 @@ class _DebugObserver:
             logger.exception("Failed to write debug dump to %s", path)
 
 
-def _set_opt_mode_for_first(ctl, opt_mode: str):
-    """Prepare clingo config for `search_for_models='first'`.
+def _set_opt_mode_for_first(ctl, _opt_mode: str):
+    """Configure clingo for a fast SAT witness (ignore optimization).
 
-    For correctness parity with the baseline (and ABAPC expectations), we must
-    *not* change the requested optimization mode here. In particular, leaving
-    `optN` untouched ensures we enumerate all optimal models when requested.
+    This matches the baseline behavior: use opt_mode=ignore + models=1 to
+    determine satisfiability/removal without paying optimization costs.
     """
     try:
         cfg = ctl.configuration.solve
     except Exception:
         return None
 
-    prev = None
+    prev_opt_mode = None
+    prev_models = None
     try:
-        prev = getattr(cfg, "opt_mode", None)
+        prev_opt_mode = getattr(cfg, "opt_mode", None)
     except Exception:
-        prev = None
+        prev_opt_mode = None
+    try:
+        prev_models = getattr(cfg, "models", None)
+    except Exception:
+        prev_models = None
 
-    # Intentionally no changes to cfg.opt_mode.
-    return prev
+    try:
+        cfg.opt_mode = "ignore"
+    except Exception:
+        pass
+    try:
+        cfg.models = 1
+    except Exception:
+        pass
+    return (prev_opt_mode, prev_models)
 
 
-def _restore_opt_mode(ctl, prev_opt_mode):
-    if prev_opt_mode is None:
+def _restore_opt_mode(ctl, prev_opt_state):
+    if prev_opt_state is None:
         return
+    prev_opt_mode, prev_models = prev_opt_state
     try:
         cast(Any, ctl.configuration).solve.opt_mode = prev_opt_mode
     except Exception:
-        return
+        pass
+    try:
+        if prev_models is not None:
+            cast(Any, ctl.configuration).solve.models = prev_models
+    except Exception:
+        pass
 
 
 def _add_pair_rules_incremental(
@@ -437,6 +462,7 @@ def CausalABA(
         "add_bayesball_sec": 0.0,
         "solve_sec_total": 0.0,
         "solve_sec_last": 0.0,
+        "post_solve_sec_total": 0.0,
         "compile_calls": 0,
         "ground_calls_internal": 0,
         "solve_calls_internal": 0,
@@ -449,6 +475,8 @@ def CausalABA(
         "peak_after_solve_bytes_max": None,
         "timed_out": False,
     }
+
+    last_solve_end: float | None = None
 
     def _record_solve(duration_sec: float, *, kind: str | None = None, timed_out: bool = False) -> None:
         try:
@@ -481,6 +509,14 @@ def CausalABA(
             pass
 
     def _ret(models_out, multiple: bool, remove_n: int = 0):
+        # Record time after the last clingo solve call until returning.
+        try:
+            if last_solve_end is not None:
+                profile["post_solve_sec_total"] = max(0.0, time.perf_counter() - float(last_solve_end))
+            else:
+                profile["post_solve_sec_total"] = 0.0
+        except Exception:
+            pass
         if return_statistics:
             try:
                 stats = ctl.statistics  # type: ignore[name-defined]
@@ -749,7 +785,7 @@ def CausalABA(
 
     cpu_count = min(os.cpu_count() or 1, 64)
     threads = threads or cpu_count
-    control_args = [f"-t {threads}"]
+    control_args = [f"-t {threads}", "--warn=none"]
     if cycle_length is not None:
         control_args += [f"-c l_cyc={int(cycle_length)}"]
     if collider_tree_depth is not None:
@@ -1221,6 +1257,7 @@ def CausalABA(
             assumptions=_assumptions_from_exts(),
         )
         t_s1 = time.perf_counter()
+        last_solve_end = float(t_s1)
         _record_solve(t_s1 - t_s0)
         try:
             logger.info("[timing] mode=No solve=%.3fs since-ground=%.3fs", t_s1 - t_s0, t_s1 - t_post_ground)
@@ -1245,17 +1282,12 @@ def CausalABA(
         last_syms = None
         logger.info("[first-solve] activated %d facts, solving...", len(facts))
         _t_first_solve = time.perf_counter()
-        prev_opt_mode = _set_opt_mode_for_first(ctl, opt_mode)
+        prev_opt_state = _set_opt_mode_for_first(ctl, opt_mode)
         try:
             def _on_model_first(model):
                 nonlocal last_syms
                 syms = model.symbols(shown=True)
                 last_syms = syms
-                if opt_mode in ("opt", "optN"):
-                    if getattr(model, 'optimality_proven', False):
-                        models.append(syms)
-                    return
-                # No optimization: first model is enough.
                 if not models:
                     models.append(syms)
 
@@ -1267,15 +1299,14 @@ def CausalABA(
                 assumptions=_assumptions_from_exts(),
             )
             t_s1 = time.perf_counter()
+            last_solve_end = float(t_s1)
             _record_solve(t_s1 - t_s0)
             try:
                 logger.info("[timing] first-solve=%.3fs since-ground=%.3fs", t_s1 - t_s0, t_s1 - t_post_ground)
             except Exception:
                 pass
         finally:
-            _restore_opt_mode(ctl, prev_opt_mode)
-        # Fallback: if optimization was requested but no optimality was proven (likely no #minimize),
-        # return the last seen model so callers get a witness.
+            _restore_opt_mode(ctl, prev_opt_state)
         if not models and last_syms is not None:
             models.append(last_syms)
         n_models = int(ctl.statistics['summary']['models']['enumerated'])
@@ -1291,7 +1322,6 @@ def CausalABA(
             # In increm-only mode, downstream MUS/OptMCS expects a base program file.
             # If the instance is already SAT (remove_n=0), still emit the dump when requested.
             _maybe_dump_grounded(note=f"remove_n=0 models={n_models} timed_out={bool(profile.get('timed_out', False))}")
-            return _ret(models, False, 0)
         
     elif 'subsets' in search_for_models:
         # Explore all subsets of facts by toggling externals; collect solutions.
@@ -1329,6 +1359,7 @@ def CausalABA(
                 assumptions=None,
             )
             t_s1 = time.perf_counter()
+            last_solve_end = float(t_s1)
             _record_solve(t_s1 - t_s0)
             n_curr = int(ctl.statistics['summary']['models']['enumerated'])
             if n_curr > 0:
@@ -1340,7 +1371,7 @@ def CausalABA(
             _maybe_dump_grounded(note=f"remove_n=0 models={len(set_of_models)} timed_out={bool(profile.get('timed_out', False))}")
             return _ret(set_of_models, True, 0)
 
-    if (search_for_models != 'first') or n_models > 0:
+    if (search_for_models != 'first'):
         _maybe_dump_grounded(note=f"remove_n=0 models={n_models} timed_out={bool(profile.get('timed_out', False))}")
         return _ret(models, False, 0)
 
@@ -1402,6 +1433,7 @@ def CausalABA(
                 assumptions=_assumptions_from_exts(),
             )
             t1 = time.perf_counter()
+            last_solve_end = float(t1)
             _record_solve(t1 - t0, kind="satcheck", timed_out=(not finished))
             if found["sat"]:
                 satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
@@ -1414,6 +1446,7 @@ def CausalABA(
                 t2 = time.perf_counter()
                 res = ctl.solve(assumptions=cast(Any, _assumptions_from_exts()))
                 t3 = time.perf_counter()
+                last_solve_end = float(t3)
                 _record_solve(t3 - t2, kind="satcheck")
                 satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
                 return bool(getattr(res, "satisfiable", False))
@@ -1434,27 +1467,29 @@ def CausalABA(
                     pass
 
     # Binary search the minimal removed count that yields SAT.
-    lo = 0
-    hi = len(facts)
-    _t_binsearch_start = time.perf_counter()
-    # If already satisfiable, no removals needed.
-    if n_models == 0:
+    if n_models > 0:
+        remove_n = 0
+    else:
+        lo = 0
+        hi = len(facts)
+        _t_binsearch_start = time.perf_counter()
+        # If already satisfiable, no removals needed.
         _apply_removed(0)
         if _is_satisfiable():
             lo = 0
             hi = 0
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if _verb >= 2 or (debug_enabled and _verb >= 1):
-            logger.debug("[remove-search] trying removed=%s (lo=%s hi=%s)", mid, lo, hi)
-        _apply_removed(mid)
-        sat = _is_satisfiable()
-        if sat:
-            hi = mid
-        else:
-            lo = mid + 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if _verb >= 2 or (debug_enabled and _verb >= 1):
+                logger.debug("[remove-search] trying removed=%s (lo=%s hi=%s)", mid, lo, hi)
+            _apply_removed(mid)
+            sat = _is_satisfiable()
+            if sat:
+                hi = mid
+            else:
+                lo = mid + 1
 
-    remove_n = lo
+        remove_n = lo
     # Record exactly which facts are considered removed under our ordering.
     # Facts are sorted in descending I; removals correspond to releasing the tail
     # (lowest-I) facts to mirror baseline behavior.
@@ -1467,9 +1502,10 @@ def CausalABA(
     except Exception:
         pass
     try:
-        _t_binsearch_end = time.perf_counter()
-        logger.info("[remove-search] completed in %.3fs, minimal removal=%s facts", _t_binsearch_end - _t_binsearch_start, remove_n)
-        logger.info("[satcheck] calls=%d time=%.3fs time_since_ground=%.3fs timeouts=%d", satcheck_stats["calls"], satcheck_stats["sec"], _t_binsearch_end - t_post_ground, satcheck_stats["timeouts"])
+        if n_models == 0:
+            _t_binsearch_end = time.perf_counter()
+            logger.info("[remove-search] completed in %.3fs, minimal removal=%s facts", _t_binsearch_end - _t_binsearch_start, remove_n)
+            logger.info("[satcheck] calls=%d time=%.3fs time_since_ground=%.3fs timeouts=%d", satcheck_stats["calls"], satcheck_stats["sec"], _t_binsearch_end - t_post_ground, satcheck_stats["timeouts"])
     except Exception:
         pass
     if remove_n > 0:
@@ -1483,34 +1519,31 @@ def CausalABA(
     models = []
     last_syms = None
     logger.info("   Solving...")
-    prev_opt_mode = _set_opt_mode_for_first(ctl, opt_mode)
-    try:
-        def _on_model_post(model):
-            nonlocal last_syms
-            syms = model.symbols(shown=True)
-            last_syms = syms
-            if opt_mode in ("opt", "optN"):
-                if getattr(model, 'optimality_proven', False):
-                    models.append(syms)
-                return
-            if not models:
+    def _on_model_post(model):
+        nonlocal last_syms
+        syms = model.symbols(shown=True)
+        last_syms = syms
+        if opt_mode in ("opt", "optN"):
+            if getattr(model, 'optimality_proven', False):
                 models.append(syms)
+            return
+        if not models:
+            models.append(syms)
 
-        t_f0 = time.perf_counter()
-        finished = _solve_with_timeout(
-            ctl,
-            solve_timeout=solve_timeout,
-            on_model=_on_model_post,
-            assumptions=_assumptions_from_exts(),
-        )
-        t_f1 = time.perf_counter()
-        _record_solve(t_f1 - t_f0, kind="final", timed_out=(not finished))
-        try:
-            logger.info("[timing] final-solve=%.3fs since-ground=%.3fs", t_f1 - t_f0, t_f1 - t_post_ground)
-        except Exception:
-            pass
-    finally:
-        _restore_opt_mode(ctl, prev_opt_mode)
+    t_f0 = time.perf_counter()
+    finished = _solve_with_timeout(
+        ctl,
+        solve_timeout=solve_timeout,
+        on_model=_on_model_post,
+        assumptions=_assumptions_from_exts(),
+    )
+    t_f1 = time.perf_counter()
+    last_solve_end = float(t_f1)
+    _record_solve(t_f1 - t_f0, kind="final", timed_out=(not finished))
+    try:
+        logger.info("[timing] final-solve=%.3fs since-ground=%.3fs", t_f1 - t_f0, t_f1 - t_post_ground)
+    except Exception:
+        pass
     if not models and last_syms is not None:
         models.append(last_syms)
     n_models = int(ctl.statistics['summary']['models']['enumerated'])
