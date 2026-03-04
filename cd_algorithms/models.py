@@ -21,8 +21,6 @@ import os
 import time
 import networkx as nx
 import pandas as pd
-import torch
-import pydot
 import logging
 import gc
 gc.set_threshold(0,0,0)
@@ -40,31 +38,56 @@ except ImportError:  # pragma: no cover
     from utils.helpers import random_stability, get_freer_gpu
 from math import floor
 
-try:
-    from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
-except:
-    logging.info('Castle not installed')
-    sys.path.append('../trustworthyAI/gcastle/')
-    from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
-os.environ['CASTLE_BACKEND'] = 'pytorch'
+
+def _import_torch():
+    try:
+        import torch  # type: ignore
+    except Exception as e:  # pragma: no cover
+        raise ImportError(
+            "PyTorch is required for this method but could not be imported. "
+            "Install torch or run a method that does not require it."
+        ) from e
+    return torch
+
+
+def _import_castle_algorithms():
+    # Only needed for castle-based methods; importing castle can be slow.
+    os.environ.setdefault('CASTLE_BACKEND', 'pytorch')
+    try:
+        from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears  # type: ignore
+    except Exception:  # pragma: no cover
+        logging.info('Castle not installed')
+        sys.path.append('../trustworthyAI/gcastle/')
+        from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears  # type: ignore
+    return MCSL, GraNDAG, NotearsNonlinear, Notears
+
+
+def _import_notears():
+    try:
+        from notears.nonlinear import NotearsMLP, notears_nonlinear  # type: ignore
+    except Exception:  # pragma: no cover
+        sys.path.append('../notears/')
+        from notears.nonlinear import NotearsMLP, notears_nonlinear  # type: ignore
+    return NotearsMLP, notears_nonlinear
+
+
+def _import_cdt_cam():
+    # Only needed for CAM; CDT import is slow and may require R components.
+    try:
+        import cdt  # type: ignore
+        cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
+        from cdt.causality.graph import CAM  # type: ignore
+        os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
+    except Exception:  # pragma: no cover
+        logging.info('CDT or R components not installed')
+        sys.path.append('../CausalDiscoveryToolbox/')
+        import cdt  # type: ignore
+        cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
+        from cdt.causality.graph import CAM  # type: ignore
+        os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
+    return CAM
+
 notears_from = 'notears' ## 'castle' or 'notears'
-try:
-    from notears.nonlinear import NotearsMLP, notears_nonlinear
-except:
-    sys.path.append('../notears/')
-    from notears.nonlinear import NotearsMLP, notears_nonlinear
-  
-try:
-    import cdt
-    cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
-    from cdt.causality.graph import CAM
-    os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
-except:
-    logging.info('CDT or R components not installed')
-    sys.path.append('../CausalDiscoveryToolbox/')
-    import cdt
-    cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
-    os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -125,6 +148,9 @@ def run_method(X,
 
     ##---------MODELS--------------
     if method == 'nt':
+        torch = _import_torch()
+        MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
+        NotearsMLP, notears_nonlinear = _import_notears()
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
         logging.info(f"Running on: {device}")
@@ -145,6 +171,7 @@ def run_method(X,
         logging.info(f'Time taken for Notears: {round(elapsed,2)}s')
 
     elif method == 'nt_lin':
+        MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
         start = time.time()
         random_stability(seed)
         fitted = Notears()
@@ -155,6 +182,8 @@ def run_method(X,
         logging.info(f'Time taken for Notears: {round(elapsed,2)}s')
 
     elif method == 'mcsl':
+        torch = _import_torch()
+        MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
         logging.info(f"Running on: {device}")
@@ -180,6 +209,8 @@ def run_method(X,
         logging.info(f'Time taken for MCSL: {round(elapsed,2)}s')
 
     elif method == 'grandag':
+        torch = _import_torch()
+        MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
         logging.info(f"Running on: {device}")
@@ -290,6 +321,7 @@ def run_method(X,
         logging.info(f'Time taken for GES: {round(elapsed,2)}s')
 
     elif method == 'fgs':
+        import pydot  # type: ignore
         from pycausal.pycausal import pycausal as pyc
         
         start = time.time()
@@ -329,6 +361,7 @@ def run_method(X,
         logging.info(f'Time taken for FGS: {round(elapsed,2)}s')
 
     elif method == 'cam':
+        CAM = _import_cdt_cam()
         random_stability(seed)
         start = time.time()
         fitted = CAM()
