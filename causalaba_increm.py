@@ -9,6 +9,11 @@ from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
+try:
+    from .utils.progress import start_heartbeat as _start_heartbeat, fmt_hhmmss as _fmt_hhmmss
+except ImportError:  # pragma: no cover
+    from utils.progress import start_heartbeat as _start_heartbeat, fmt_hhmmss as _fmt_hhmmss
+
 
 def _tm_stage(msg: str) -> None:
     """Log current/peak tracemalloc stats when enabled via env var.
@@ -1473,17 +1478,65 @@ def CausalABA(
         lo = 0
         hi = len(facts)
         _t_binsearch_start = time.perf_counter()
+        satcheck_records: list[dict[str, Any]] = []
+        # Expected checks: 1 initial + ceil(log2(n+1)) binary steps.
+        try:
+            import math
+
+            satcheck_expected = 1 + int(math.ceil(math.log2(max(1, hi) + 1)))
+        except Exception:
+            satcheck_expected = None
         # If already satisfiable, no removals needed.
         _apply_removed(0)
-        if _is_satisfiable():
+        logger.info(
+            "[satcheck] call=%d%s lo=%d hi=%d mid=%d removed=%d",
+            satcheck_stats["calls"] + 1,
+            f"/{satcheck_expected}" if satcheck_expected is not None else "",
+            lo,
+            hi,
+            0,
+            0,
+        )
+        _t_sc0 = time.perf_counter()
+        sat0 = _is_satisfiable()
+        _t_sc1 = time.perf_counter()
+        satcheck_records.append(
+            {
+                "call": int(satcheck_stats["calls"]),
+                "lo": int(lo),
+                "hi": int(hi),
+                "mid": 0,
+                "removed": 0,
+                "sat": bool(sat0),
+                "sec": float(_t_sc1 - _t_sc0),
+            }
+        )
+        logger.info("[satcheck] result=%s sec=%.3f removed=%d", "SAT" if sat0 else "UNSAT", _t_sc1 - _t_sc0, 0)
+        if sat0:
             lo = 0
             hi = 0
         while lo < hi:
             mid = (lo + hi) // 2
-            if _verb >= 2 or (debug_enabled and _verb >= 1):
-                logger.debug("[remove-search] trying removed=%s (lo=%s hi=%s)", mid, lo, hi)
+            logger.info(
+                "[satcheck] call=%d%s lo=%d hi=%d mid=%d removed=%d",
+                satcheck_stats["calls"] + 1,
+                f"/{satcheck_expected}" if satcheck_expected is not None else "",
+                lo,
+                hi,
+                mid,
+                mid,
+            )
             _apply_removed(mid)
+            _t_sc0 = time.perf_counter()
             sat = _is_satisfiable()
+            logger.info(
+                "[satcheck] result=%s sec=%.3f lo=%d hi=%d mid=%d",
+                "SAT" if sat else "UNSAT",
+                _t_sc1 - _t_sc0,
+                lo,
+                hi,
+                mid,
+            )
             if sat:
                 hi = mid
             else:
@@ -1530,6 +1583,13 @@ def CausalABA(
         if not models:
             models.append(syms)
 
+    logger.info("[final] starting solve opt_mode=%s removed=%s/%s", opt_mode, remove_n, len(facts))
+    hb_stop, _hb_thread = _start_heartbeat(
+        logger,
+        phase="final-solve",
+        interval_sec=60.0 * 60.0,
+        describe=lambda: f"removed={remove_n}/{len(facts)} satchecks={satcheck_stats['calls']}",
+    )
     t_f0 = time.perf_counter()
     finished = _solve_with_timeout(
         ctl,
@@ -1538,6 +1598,11 @@ def CausalABA(
         assumptions=_assumptions_from_exts(),
     )
     t_f1 = time.perf_counter()
+    if hb_stop is not None:
+        try:
+            hb_stop.set()
+        except Exception:
+            pass
     last_solve_end = float(t_f1)
     _record_solve(t_f1 - t_f0, kind="final", timed_out=(not finished))
     try:
