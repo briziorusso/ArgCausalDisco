@@ -16,6 +16,8 @@ except ImportError:  # pragma: no cover
 
 
 SolveStatus = Literal["sat", "unsat", "unknown"]
+_GAP_AWARE_UNKNOWN_THRESHOLD = 2
+_FRONTIER_UNKNOWN_THRESHOLD = 4
 
 
 def solve_with_timeout(
@@ -115,6 +117,27 @@ def build_probe_candidates(lo: int, hi: int, mid: int, limit: int) -> list[int]:
     _add(lo)
 
     return candidates[:limit]
+
+
+def _gap_candidates_from_tested_points(
+    *,
+    lo: int,
+    hi: int,
+    tested_points: set[int],
+) -> list[tuple[int, int, int, int]]:
+    if lo > hi:
+        return []
+    anchors = sorted({lo - 1, hi, *[p for p in tested_points if lo <= p <= hi]})
+    candidates: list[tuple[int, int, int, int]] = []
+    for left, right in zip(anchors, anchors[1:]):
+        width = int(right - left)
+        if width <= 1:
+            continue
+        cand = (left + right) // 2
+        if cand < lo or cand > hi or cand in tested_points:
+            continue
+        candidates.append((width, cand, left, right))
+    return candidates
 
 
 def satcheck_peak_kib(
@@ -692,6 +715,62 @@ def run_remove_search(
     satcheck_cache: dict[int, dict[str, Any]] = dict(checkpoint.cache)
     satcheck_call_count = 0
 
+    def _unknown_points(lo_now: int, hi_now: int) -> list[int]:
+        return sorted(
+            removed
+            for removed, entry in satcheck_cache.items()
+            if lo_now <= removed <= hi_now and entry.get("status") == "unknown"
+        )
+
+    def _choose_next_candidate(lo_now: int, hi_now: int) -> tuple[int, str]:
+        default_mid = (lo_now + hi_now) // 2
+        if default_mid not in satcheck_cache:
+            fallback_candidate = default_mid
+        else:
+            fallback_candidate = -1
+
+        unknowns = _unknown_points(lo_now, hi_now)
+        tested_points = {removed for removed in satcheck_cache if lo_now <= removed <= hi_now}
+        gap_infos = _gap_candidates_from_tested_points(
+            lo=lo_now,
+            hi=hi_now,
+            tested_points=tested_points,
+        )
+        gap_infos.sort(key=lambda item: (item[0], item[1]), reverse=True)
+
+        if len(unknowns) >= _FRONTIER_UNKNOWN_THRESHOLD and gap_infos:
+            upper_half = [info for info in gap_infos if info[1] > default_mid]
+            frontier_infos = upper_half if upper_half else gap_infos
+            frontier_infos.sort(key=lambda item: (item[0], item[1]), reverse=True)
+            frontier_candidate = frontier_infos[0][1]
+            logger.info(
+                "[remove-search] frontier-aware candidate=%d unknowns=%d lo=%d hi=%d",
+                frontier_candidate,
+                len(unknowns),
+                lo_now,
+                hi_now,
+            )
+            return frontier_candidate, "mid-frontier"
+
+        if len(unknowns) >= _GAP_AWARE_UNKNOWN_THRESHOLD and gap_infos:
+            gap_candidate = gap_infos[0][1]
+            logger.info(
+                "[remove-search] gap-aware candidate=%d unknowns=%d lo=%d hi=%d",
+                gap_candidate,
+                len(unknowns),
+                lo_now,
+                hi_now,
+            )
+            return gap_candidate, "mid-gap"
+
+        if fallback_candidate >= 0:
+            return fallback_candidate, "mid"
+
+        for _, cand, _, _ in gap_infos:
+            return cand, "mid-gap"
+
+        return default_mid, "mid"
+
     def _run_satcheck(removed: int, *, lo_now: int, hi_now: int, mid_now: int, label: str) -> SolveStatus:
         nonlocal satcheck_call_count, best_sat_removed, best_unsat_removed, approximate_remove_search
         removed = max(0, min(total_facts, int(removed)))
@@ -798,8 +877,8 @@ def run_remove_search(
             remove_n = None
 
         while remove_n is None and lo < hi:
-            mid = (lo + hi) // 2
-            status = _run_satcheck(mid, lo_now=lo, hi_now=hi, mid_now=mid, label="mid")
+            mid, mid_label = _choose_next_candidate(lo, hi)
+            status = _run_satcheck(mid, lo_now=lo, hi_now=hi, mid_now=mid, label=mid_label)
             if status == "sat":
                 hi = mid
                 best_sat_removed = hi if best_sat_removed is None else min(best_sat_removed, hi)
