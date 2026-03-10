@@ -1,4 +1,5 @@
 import logging
+import math
 import rustworkx as rx
 from clingo import Function, Number, Symbol
 import os
@@ -13,6 +14,30 @@ try:
     from .utils.progress import start_heartbeat as _start_heartbeat, fmt_hhmmss as _fmt_hhmmss
 except ImportError:  # pragma: no cover
     from utils.progress import start_heartbeat as _start_heartbeat, fmt_hhmmss as _fmt_hhmmss
+try:
+    from .utils import mem as _mem
+    from .utils.satcheck import (
+        SolveStatus as _SolveStatus,
+        SatcheckSearchCheckpoint as _SatcheckSearchCheckpoint,
+        SatcheckThreadTuner as _SatcheckThreadTuner,
+        build_search_fingerprint as _build_search_fingerprint,
+        classify_solve_result as _classify_solve_result,
+        run_remove_search as _run_remove_search,
+        satcheck_peak_kib as _satcheck_peak_kib,
+        solve_with_timeout as _solve_with_timeout,
+    )
+except ImportError:  # pragma: no cover
+    from utils import mem as _mem
+    from utils.satcheck import (
+        SolveStatus as _SolveStatus,
+        SatcheckSearchCheckpoint as _SatcheckSearchCheckpoint,
+        SatcheckThreadTuner as _SatcheckThreadTuner,
+        build_search_fingerprint as _build_search_fingerprint,
+        classify_solve_result as _classify_solve_result,
+        run_remove_search as _run_remove_search,
+        satcheck_peak_kib as _satcheck_peak_kib,
+        solve_with_timeout as _solve_with_timeout,
+    )
 
 
 def _tm_stage(msg: str) -> None:
@@ -35,6 +60,16 @@ def _tm_stage(msg: str) -> None:
 def _should_debug(verbose: bool) -> bool:
     return verbose and logger.isEnabledFor(logging.DEBUG)
 
+
+def _fact_sort_key(fact: tuple[Any, ...]) -> tuple[float, str]:
+    try:
+        strength = float(fact[5])
+    except Exception:
+        strength = float("-inf")
+    if math.isnan(strength):
+        strength = float("-inf")
+    return (-strength, str(fact[4]).strip())
+
 try:
     from .causalaba import (
         compile_and_ground,
@@ -55,40 +90,6 @@ except ImportError:  # pragma: no cover
     from causalaba_binsearch import (
         CausalABA as _binsearch_causalaba,
     )
-
-
-def _solve_with_timeout(ctl, *, solve_timeout: float | None, on_model, assumptions: Any = None) -> bool:
-    """Run clingo solve with an optional hard wall-time limit.
-
-    Returns True if finished normally, False if cancelled due to timeout.
-    """
-    if solve_timeout is None:
-        with ctl.solve(yield_=True, assumptions=cast(Any, assumptions or [])) as handle:
-            for model in handle:
-                on_model(model)
-        return True
-
-    handle = ctl.solve(async_=True, on_model=on_model, assumptions=cast(Any, assumptions or []))
-    finished = handle.wait(solve_timeout)
-    if not finished:
-        try:
-            handle.cancel()
-        except Exception:
-            pass
-        cancelled_finished = False
-        try:
-            cancelled_finished = bool(handle.wait(1.0))
-        except TypeError:
-            pass
-        if cancelled_finished:
-            try:
-                handle.get()
-            except Exception:
-                pass
-        return False
-    handle.get()
-    return True
-
 
 def _iter_paths_with_cutoff(graph, src, dst, cutoff):
     try:
@@ -419,6 +420,12 @@ def CausalABA(
     debug_dump_materialize_block_edges: bool = False,
     debug_traces: bool = False,
     solve_timeout: float | None = None,
+    satcheck_timeout: float | None = None,
+    satcheck_threads: int | None = None,
+    satcheck_probe_limit: int = 8,
+    adaptive_satcheck_threads: bool = False,
+    satcheck_min_threads: int = 1,
+    satcheck_increase_step: int = 2,
     verbosity: int = 0,
     )->list:
     # For pre-grounding workloads, fall back to the baseline grounding
@@ -762,7 +769,7 @@ def CausalABA(
     # Match baseline ordering: remove lowest-I facts first.
     # Note: strength is often unknown (nan) for many callers; Python's sort is
     # stable so order is preserved when strengths are equal.
-    facts = sorted(facts, key=lambda x: x[5], reverse=True)
+    facts = sorted(facts, key=_fact_sort_key)
     block_pairs |= {_pair_key(x, y) for (x, y) in indep_facts}
     if _verb >= 2 or (debug_enabled and _verb >= 1):
         logger.debug("Ordered facts for processing:\n%s", "\n".join([f[4] for f in facts]))
@@ -790,6 +797,42 @@ def CausalABA(
 
     cpu_count = min(os.cpu_count() or 1, 64)
     threads = threads or cpu_count
+    satcheck_timeout = solve_timeout if satcheck_timeout is None else satcheck_timeout
+    search_fingerprint = _build_search_fingerprint(
+        n_nodes=n_nodes,
+        fact_keys=[str(f[4]).strip() for f in facts],
+        max_path_length=max_path_length,
+        max_conditioning_size=max_conditioning_size,
+        collider_tree_depth=collider_tree_depth,
+        cycle_length=cycle_length,
+        prior_forbidden=sorted(list(getattr(prior_knowledge, "forbidden", []) or [])),
+        prior_required=sorted(list(getattr(prior_knowledge, "required", []) or [])),
+    )
+    satcheck_tuner = _SatcheckThreadTuner(
+        facts_location=facts_location,
+        max_threads=int(threads),
+        initial_threads=satcheck_threads,
+        adaptive=bool(adaptive_satcheck_threads),
+        min_threads=satcheck_min_threads,
+        increase_step=satcheck_increase_step,
+        logger=logger,
+    )
+    satcheck_checkpoint = _SatcheckSearchCheckpoint(
+        facts_location=facts_location,
+        fingerprint=search_fingerprint,
+        satcheck_timeout=satcheck_timeout,
+        logger=logger,
+    )
+    satcheck_probe_limit = max(0, int(satcheck_probe_limit or 0))
+    profile["satcheck_timeout"] = satcheck_timeout
+    profile["satcheck_threads"] = satcheck_tuner.current_threads
+    profile["satcheck_probe_limit"] = satcheck_probe_limit
+    profile["adaptive_satcheck_threads"] = satcheck_tuner.adaptive
+    profile["satcheck_min_threads"] = satcheck_tuner.min_threads
+    profile["satcheck_increase_step"] = satcheck_tuner.increase_step
+    profile["satcheck_memtotal_kib"] = satcheck_tuner.total_mem_kib
+    profile["satcheck_autotune_path"] = satcheck_tuner.state_path_str
+    profile["satcheck_search_checkpoint_path"] = satcheck_checkpoint.summary()["path"]
     control_args = [f"-t {threads}", "--warn=none"]
     if cycle_length is not None:
         control_args += [f"-c l_cyc={int(cycle_length)}"]
@@ -1255,7 +1298,7 @@ def CausalABA(
             models.append(model.symbols(shown=True))
 
         t_s0 = time.perf_counter()
-        _solve_with_timeout(
+        finished, _solve_result = _solve_with_timeout(
             ctl,
             solve_timeout=solve_timeout,
             on_model=_on_model_no,
@@ -1263,7 +1306,7 @@ def CausalABA(
         )
         t_s1 = time.perf_counter()
         last_solve_end = float(t_s1)
-        _record_solve(t_s1 - t_s0)
+        _record_solve(t_s1 - t_s0, timed_out=(not finished))
         try:
             logger.info("[timing] mode=No solve=%.3fs since-ground=%.3fs", t_s1 - t_s0, t_s1 - t_post_ground)
         except Exception:
@@ -1284,49 +1327,64 @@ def CausalABA(
             logger.info("[timing] first-setup=%.3fs", time.perf_counter() - _t_first_setup)
         except Exception:
             pass
-        last_syms = None
-        logger.info("[first-solve] activated %d facts, solving...", len(facts))
-        _t_first_solve = time.perf_counter()
-        prev_opt_state = _set_opt_mode_for_first(ctl, opt_mode)
-        try:
-            def _on_model_first(model):
-                nonlocal last_syms
-                syms = model.symbols(shown=True)
-                last_syms = syms
-                if not models:
-                    models.append(syms)
-
-            t_s0 = time.perf_counter()
-            _solve_with_timeout(
-                ctl,
-                solve_timeout=solve_timeout,
-                on_model=_on_model_first,
-                assumptions=_assumptions_from_exts(),
-            )
-            t_s1 = time.perf_counter()
-            last_solve_end = float(t_s1)
-            _record_solve(t_s1 - t_s0)
+        resume_remove_search = satcheck_checkpoint.has_resume_state()
+        profile["satcheck_resume"] = resume_remove_search
+        if resume_remove_search:
             try:
-                logger.info("[timing] first-solve=%.3fs since-ground=%.3fs", t_s1 - t_s0, t_s1 - t_post_ground)
+                logger.info(
+                    "[first-solve] skipping solve; resuming remove-search from checkpoint cache=%d best_unsat=%s best_sat=%s complete=%s",
+                    len(satcheck_checkpoint.cache),
+                    satcheck_checkpoint.best_unsat_removed,
+                    satcheck_checkpoint.best_sat_removed,
+                    satcheck_checkpoint.search_complete,
+                )
             except Exception:
                 pass
-        finally:
-            _restore_opt_mode(ctl, prev_opt_state)
-        if not models and last_syms is not None:
-            models.append(last_syms)
-        n_models = int(ctl.statistics['summary']['models']['enumerated'])
-        try:
-            _t_first_end = time.perf_counter()
-            logger.info("[first-solve] found n_models=%s in %.3fs", n_models, _t_first_end - _t_first_solve)
-        except Exception:
-            pass
-        _tm_stage("after first solve")
-        if debug_enabled:
-            logger.debug("[first] models: %s", models)
-        if n_models > 0 and models:
-            # In increm-only mode, downstream MUS/OptMCS expects a base program file.
-            # If the instance is already SAT (remove_n=0), still emit the dump when requested.
-            _maybe_dump_grounded(note=f"remove_n=0 models={n_models} timed_out={bool(profile.get('timed_out', False))}")
+            n_models = 0
+        else:
+            last_syms = None
+            logger.info("[first-solve] activated %d facts, solving...", len(facts))
+            _t_first_solve = time.perf_counter()
+            prev_opt_state = _set_opt_mode_for_first(ctl, opt_mode)
+            try:
+                def _on_model_first(model):
+                    nonlocal last_syms
+                    syms = model.symbols(shown=True)
+                    last_syms = syms
+                    if not models:
+                        models.append(syms)
+
+                t_s0 = time.perf_counter()
+                finished, _solve_result = _solve_with_timeout(
+                    ctl,
+                    solve_timeout=solve_timeout,
+                    on_model=_on_model_first,
+                    assumptions=_assumptions_from_exts(),
+                )
+                t_s1 = time.perf_counter()
+                last_solve_end = float(t_s1)
+                _record_solve(t_s1 - t_s0, timed_out=(not finished))
+                try:
+                    logger.info("[timing] first-solve=%.3fs since-ground=%.3fs", t_s1 - t_s0, t_s1 - t_post_ground)
+                except Exception:
+                    pass
+            finally:
+                _restore_opt_mode(ctl, prev_opt_state)
+            if not models and last_syms is not None:
+                models.append(last_syms)
+            n_models = int(ctl.statistics['summary']['models']['enumerated'])
+            try:
+                _t_first_end = time.perf_counter()
+                logger.info("[first-solve] found n_models=%s in %.3fs", n_models, _t_first_end - _t_first_solve)
+            except Exception:
+                pass
+            _tm_stage("after first solve")
+            if debug_enabled:
+                logger.debug("[first] models: %s", models)
+            if n_models > 0 and models:
+                # In increm-only mode, downstream MUS/OptMCS expects a base program file.
+                # If the instance is already SAT (remove_n=0), still emit the dump when requested.
+                _maybe_dump_grounded(note=f"remove_n=0 models={n_models} timed_out={bool(profile.get('timed_out', False))}")
         
     elif 'subsets' in search_for_models:
         # Explore all subsets of facts by toggling externals; collect solutions.
@@ -1355,7 +1413,7 @@ def CausalABA(
                 curr.append(model.symbols(shown=True))
 
             t_s0 = time.perf_counter()
-            _solve_with_timeout(
+            finished, _solve_result = _solve_with_timeout(
                 ctl,
                 solve_timeout=solve_timeout,
                 on_model=_on_model_sub,
@@ -1365,7 +1423,7 @@ def CausalABA(
             )
             t_s1 = time.perf_counter()
             last_solve_end = float(t_s1)
-            _record_solve(t_s1 - t_s0)
+            _record_solve(t_s1 - t_s0, timed_out=(not finished))
             n_curr = int(ctl.statistics['summary']['models']['enumerated'])
             if n_curr > 0:
                 if search_for_models == 'first_subsets':
@@ -1393,25 +1451,30 @@ def CausalABA(
         _assign_fact_externals(int(removed or 0))
         _assign_block_edges()
 
-    satcheck_stats = {"calls": 0, "sec": 0.0, "timeouts": 0}
+    satcheck_stats = {"calls": 0, "sec": 0.0, "timeouts": 0, "unknown": 0}
 
-    def _is_satisfiable() -> bool:
+    def _is_satisfiable(*, removed: int) -> _SolveStatus:
         """Check satisfiability *without* spending time optimizing.
 
         Weak constraints never change satisfiable/unsatisfiable, but clingo's
         optimization can make repeated checks (during binary search) extremely
         slow. We temporarily set opt_mode=ignore and models=1.
         """
+        nonlocal last_solve_end
         satcheck_stats["calls"] += 1
         _t_satcheck0 = time.perf_counter()
         cfg_solve: Any = None
         prev_opt_mode = None
         prev_models = None
+        prev_parallel_mode = None
+        current_satcheck_threads = int(satcheck_tuner.current_threads)
         try:
+            satcheck_tuner.mark_start(removed=removed)
             try:
                 cfg_solve = ctl.configuration.solve
                 prev_opt_mode = getattr(cfg_solve, "opt_mode", None)
                 prev_models = getattr(cfg_solve, "models", None)
+                prev_parallel_mode = getattr(cfg_solve, "parallel_mode", None)
                 try:
                     cfg_solve.opt_mode = "ignore"
                 except Exception:
@@ -1420,44 +1483,84 @@ def CausalABA(
                     cfg_solve.models = 1
                 except Exception:
                     pass
+                try:
+                    cfg_solve.parallel_mode = current_satcheck_threads
+                except Exception:
+                    pass
             except Exception:
                 cfg_solve = None
 
             # Hard-timeout satisfiability checks too; treat timeout as "unknown"
-            # and conservatively return False so the search continues.
+            # and let the search probe nearby removal counts instead of
+            # collapsing unknown into UNSAT.
             found = {"sat": False}
 
             def _on_model_sat(_model):
                 found["sat"] = True
 
+            rss0 = _mem.rss_kib()
+            hwm0 = _mem.maxrss_kib()
             t0 = time.perf_counter()
-            finished = _solve_with_timeout(
+            finished, solve_result = _solve_with_timeout(
                 ctl,
-                solve_timeout=solve_timeout,
+                solve_timeout=satcheck_timeout,
                 on_model=_on_model_sat,
                 assumptions=_assumptions_from_exts(),
             )
             t1 = time.perf_counter()
+            rss1 = _mem.rss_kib()
+            hwm1 = _mem.maxrss_kib()
+            available_mem_kib = _mem.memavailable_kib()
+            peak_kib = _satcheck_peak_kib(
+                rss_before_kib=rss0,
+                rss_after_kib=rss1,
+                hwm_before_kib=hwm0,
+                hwm_after_kib=hwm1,
+            )
             last_solve_end = float(t1)
             _record_solve(t1 - t0, kind="satcheck", timed_out=(not finished))
-            if found["sat"]:
-                satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
-                return True
+            try:
+                logger.info(
+                    "[mem] satcheck rss=%s->%s hwm=%s->%s",
+                    _mem.fmt_kib(rss0),
+                    _mem.fmt_kib(rss1),
+                    _mem.fmt_kib(hwm0),
+                    _mem.fmt_kib(hwm1),
+                )
+            except Exception:
+                pass
+            status = _classify_solve_result(
+                found_sat=bool(found["sat"]),
+                finished=bool(finished),
+                result=solve_result,
+            )
+            if status == "unknown":
+                satcheck_stats["unknown"] += 1
             if not finished:
                 satcheck_stats["timeouts"] += 1
-                satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
-                return False
-            try:
-                t2 = time.perf_counter()
-                res = ctl.solve(assumptions=cast(Any, _assumptions_from_exts()))
-                t3 = time.perf_counter()
-                last_solve_end = float(t3)
-                _record_solve(t3 - t2, kind="satcheck")
-                satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
-                return bool(getattr(res, "satisfiable", False))
-            except Exception:
-                satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
-                return False
+            tune_result = satcheck_tuner.finish(
+                removed=removed,
+                status=status,
+                timed_out=(not finished),
+                rss_kib=rss1,
+                peak_kib=peak_kib,
+                available_mem_kib=available_mem_kib,
+            )
+            if bool(tune_result.get("changed")):
+                logger.info(
+                    "[autotune] satcheck_threads %d->%d event=%s peak=%s avail=%s total=%s removed=%d status=%s",
+                    int(tune_result["previous_threads"]),
+                    int(tune_result["current_threads"]),
+                    tune_result["event"],
+                    _mem.fmt_kib(peak_kib),
+                    _mem.fmt_kib(available_mem_kib),
+                    _mem.fmt_kib(satcheck_tuner.total_mem_kib),
+                    int(removed),
+                    status,
+                )
+            profile["satcheck_threads"] = satcheck_tuner.current_threads
+            satcheck_stats["sec"] += time.perf_counter() - _t_satcheck0
+            return status
         finally:
             if cfg_solve is not None:
                 try:
@@ -1470,79 +1573,51 @@ def CausalABA(
                         cfg_solve.models = prev_models
                 except Exception:
                     pass
+                try:
+                    if prev_parallel_mode is not None:
+                        cfg_solve.parallel_mode = prev_parallel_mode
+                except Exception:
+                    pass
 
     # Binary search the minimal removed count that yields SAT.
     if n_models > 0:
         remove_n = 0
-    else:
-        lo = 0
-        hi = len(facts)
-        _t_binsearch_start = time.perf_counter()
+        best_sat_removed: int | None = 0
+        best_unsat_removed: int | None = None
+        approximate_remove_search = False
         satcheck_records: list[dict[str, Any]] = []
-        # Expected checks: 1 initial + ceil(log2(n+1)) binary steps.
-        try:
-            import math
-
-            satcheck_expected = 1 + int(math.ceil(math.log2(max(1, hi) + 1)))
-        except Exception:
-            satcheck_expected = None
-        # If already satisfiable, no removals needed.
-        _apply_removed(0)
+    else:
+        _t_binsearch_start = time.perf_counter()
         logger.info(
-            "[satcheck] call=%d%s lo=%d hi=%d mid=%d removed=%d",
-            satcheck_stats["calls"] + 1,
-            f"/{satcheck_expected}" if satcheck_expected is not None else "",
-            lo,
-            hi,
-            0,
-            0,
+            "[remove-search] satcheck_timeout=%s satcheck_threads=%s probe_limit=%s adaptive=%s min_threads=%s step=%s total_mem=%s",
+            satcheck_timeout,
+            satcheck_tuner.current_threads,
+            satcheck_probe_limit,
+            satcheck_tuner.adaptive,
+            satcheck_tuner.min_threads,
+            satcheck_tuner.increase_step,
+            _mem.fmt_kib(satcheck_tuner.total_mem_kib),
         )
-        _t_sc0 = time.perf_counter()
-        sat0 = _is_satisfiable()
-        _t_sc1 = time.perf_counter()
-        satcheck_records.append(
-            {
-                "call": int(satcheck_stats["calls"]),
-                "lo": int(lo),
-                "hi": int(hi),
-                "mid": 0,
-                "removed": 0,
-                "sat": bool(sat0),
-                "sec": float(_t_sc1 - _t_sc0),
-            }
-        )
-        logger.info("[satcheck] result=%s sec=%.3f removed=%d", "SAT" if sat0 else "UNSAT", _t_sc1 - _t_sc0, 0)
-        if sat0:
-            lo = 0
-            hi = 0
-        while lo < hi:
-            mid = (lo + hi) // 2
-            logger.info(
-                "[satcheck] call=%d%s lo=%d hi=%d mid=%d removed=%d",
-                satcheck_stats["calls"] + 1,
-                f"/{satcheck_expected}" if satcheck_expected is not None else "",
-                lo,
-                hi,
-                mid,
-                mid,
-            )
-            _apply_removed(mid)
-            _t_sc0 = time.perf_counter()
-            sat = _is_satisfiable()
-            logger.info(
-                "[satcheck] result=%s sec=%.3f lo=%d hi=%d mid=%d",
-                "SAT" if sat else "UNSAT",
-                _t_sc1 - _t_sc0,
-                lo,
-                hi,
-                mid,
-            )
-            if sat:
-                hi = mid
-            else:
-                lo = mid + 1
+        def _solve_removed(removed: int) -> _SolveStatus:
+            _apply_removed(removed)
+            return _is_satisfiable(removed=removed)
 
-        remove_n = lo
+        search_result = _run_remove_search(
+            total_facts=len(facts),
+            checkpoint=satcheck_checkpoint,
+            satcheck_probe_limit=satcheck_probe_limit,
+            logger=logger,
+            solve_removed=_solve_removed,
+        )
+        remove_n = int(search_result.remove_n)
+        satcheck_records = search_result.satcheck_records
+        best_sat_removed = search_result.best_sat_removed
+        best_unsat_removed = search_result.best_unsat_removed
+        approximate_remove_search = bool(search_result.approximate_remove_search)
+    profile["remove_search_approximate"] = bool(approximate_remove_search)
+    profile["satcheck_records"] = satcheck_records
+    profile["best_sat_removed"] = best_sat_removed
+    profile["best_unsat_removed"] = best_unsat_removed
     # Record exactly which facts are considered removed under our ordering.
     # Facts are sorted in descending I; removals correspond to releasing the tail
     # (lowest-I) facts to mirror baseline behavior.
@@ -1558,7 +1633,15 @@ def CausalABA(
         if n_models == 0:
             _t_binsearch_end = time.perf_counter()
             logger.info("[remove-search] completed in %.3fs, minimal removal=%s facts", _t_binsearch_end - _t_binsearch_start, remove_n)
-            logger.info("[satcheck] calls=%d time=%.3fs time_since_ground=%.3fs timeouts=%d", satcheck_stats["calls"], satcheck_stats["sec"], _t_binsearch_end - t_post_ground, satcheck_stats["timeouts"])
+            logger.info(
+                "[satcheck] calls=%d time=%.3fs time_since_ground=%.3fs timeouts=%d unknown=%d approximate=%s",
+                satcheck_stats["calls"],
+                satcheck_stats["sec"],
+                _t_binsearch_end - t_post_ground,
+                satcheck_stats["timeouts"],
+                satcheck_stats["unknown"],
+                bool(profile.get("remove_search_approximate", False)),
+            )
     except Exception:
         pass
     if remove_n > 0:
@@ -1591,7 +1674,7 @@ def CausalABA(
         describe=lambda: f"removed={remove_n}/{len(facts)} satchecks={satcheck_stats['calls']}",
     )
     t_f0 = time.perf_counter()
-    finished = _solve_with_timeout(
+    finished, _solve_result = _solve_with_timeout(
         ctl,
         solve_timeout=solve_timeout,
         on_model=_on_model_post,

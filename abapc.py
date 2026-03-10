@@ -18,6 +18,7 @@ __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
 import os,gc
 import logging
+import math
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -37,6 +38,16 @@ except ImportError:  # pragma: no cover
     from utils.helpers import logger_setup, random_stability
     from utils.graph_utils import initial_strength, set_of_models_to_set_of_graphs
 
+
+def _fact_sort_key(fact):
+    try:
+        strength = float(fact[5])
+    except Exception:
+        strength = float("-inf")
+    if math.isnan(strength):
+        strength = float("-inf")
+    return (-strength, str(fact[4]))
+
 def ABAPC(data, 
           seed=2024, alpha=0.05, indep_test='fisherz',
           stable=True, conservative=True,
@@ -53,6 +64,13 @@ def ABAPC(data,
           collider_tree_depth: int | None = None,
           cycle_length: int | None = None,
           threads: int | None = None,
+          solve_timeout: float | None = None,
+          satcheck_timeout: float | None = None,
+          satcheck_threads: int | None = None,
+          satcheck_probe_limit: int = 8,
+          adaptive_satcheck_threads: bool = False,
+          satcheck_min_threads: int = 1,
+          satcheck_increase_step: int = 2,
           use_incremental: bool = True,
           verbosity: int = 0,
           ):
@@ -120,6 +138,7 @@ def ABAPC(data,
             I = initial_strength(p, len(S), alpha, 0.5, n_nodes, smoothing_k=smoothing_k, S_weight=S_weight)
             s_str = 'empty' if len(S)==0 else 's'+'y'.join([str(i) for i in S])
             facts.add((X,S,Y,dep_type_PC, f"{dep_type_PC}({X},{Y},{s_str}).", I))
+    facts = sorted(facts, key=_fact_sort_key)
 
     ### Save external statements
     with open(facts_location, "w") as f:
@@ -157,9 +176,7 @@ def ABAPC(data,
         except ImportError:  # pragma: no cover
             from causalaba import CausalABA as CausalSolver
 
-    model_sets, multiple_solutions = CausalSolver(
-        n_nodes,
-        facts_location,
+    solver_kwargs = dict(
         weak_constraints=True,
         skeleton_rules_reduction=skeleton_rules_reduction,
         fact_pct=base_fact_pct,
@@ -178,7 +195,23 @@ def ABAPC(data,
         collider_tree_depth=collider_tree_depth,
         cycle_length=cycle_length,
         threads=threads,
+        solve_timeout=solve_timeout,
         verbosity=verbosity,
+    )
+    if use_incremental:
+        solver_kwargs.update(
+            satcheck_timeout=satcheck_timeout,
+            satcheck_threads=satcheck_threads,
+            satcheck_probe_limit=satcheck_probe_limit,
+            adaptive_satcheck_threads=adaptive_satcheck_threads,
+            satcheck_min_threads=satcheck_min_threads,
+            satcheck_increase_step=satcheck_increase_step,
+        )
+
+    model_sets, multiple_solutions = CausalSolver(
+        n_nodes,
+        facts_location,
+        **solver_kwargs,
     )
 
     if multiple_solutions:

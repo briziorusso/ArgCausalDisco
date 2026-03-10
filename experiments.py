@@ -213,6 +213,13 @@ parser.add_argument('--disable_reground', type=str_to_bool, default=False, metav
 parser.add_argument('--return_statistics', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC: return statistics')
 parser.add_argument('--out_n', type=int, default=5, help='ABAPC: number of output models to request')   
 parser.add_argument('--threads', type=int, default=None, help='ABAPC/CausalABA: clingo solver threads (-t); smaller uses less memory, default is to let clingo decide based on available cores')
+parser.add_argument('--solve_timeout', type=float, default=None, help='ABAPC/CausalABA: optional wall-time limit per clingo solve call (seconds)')
+parser.add_argument('--satcheck_timeout', type=float, default=None, help='ABAPC/CausalABA: optional wall-time limit per satcheck during removal search (seconds); defaults to --solve_timeout')
+parser.add_argument('--satcheck_threads', type=int, default=None, help='ABAPC/CausalABA: solver threads to use for satchecks during removal search; defaults to --threads')
+parser.add_argument('--satcheck_probe_limit', type=int, default=8, help='ABAPC/CausalABA: number of alternate removal counts to probe when a satcheck times out')
+parser.add_argument('--adaptive_satcheck_threads', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC/CausalABA: adapt satcheck threads using timeout+memory signals and persist recommendations across resumed runs')
+parser.add_argument('--satcheck_min_threads', type=int, default=1, help='ABAPC/CausalABA: lower bound for adaptive satcheck thread tuning')
+parser.add_argument('--satcheck_increase_step', type=int, default=2, help='ABAPC/CausalABA: additive thread increase used by the adaptive satcheck tuner after low-memory timeouts')
 parser.add_argument('--abapc_solver', choices=['incremental', 'baseline'], default='incremental', help='Use incremental or baseline CausalABA inside ABAPC')
 
 # Bounded Causal ABA parameters
@@ -311,6 +318,13 @@ disable_reground = args.disable_reground
 return_statistics = args.return_statistics
 out_n = args.out_n
 threads = args.threads
+solve_timeout = args.solve_timeout
+satcheck_timeout = args.satcheck_timeout
+satcheck_threads = args.satcheck_threads
+satcheck_probe_limit = args.satcheck_probe_limit
+adaptive_satcheck_threads = args.adaptive_satcheck_threads
+satcheck_min_threads = args.satcheck_min_threads
+satcheck_increase_step = args.satcheck_increase_step
 max_path_length = args.max_path_length
 max_conditioning_size = args.max_conditioning_size
 collider_tree_depth = args.collider_tree_depth
@@ -590,6 +604,13 @@ for dataset_name, src, info in datasets:
                     lb_ratio=lb_ratio,
                     lcyc_ratio=lcyc_ratio,
                     threads=threads,
+                    solve_timeout=solve_timeout,
+                    satcheck_timeout=satcheck_timeout,
+                    satcheck_threads=satcheck_threads,
+                    satcheck_probe_limit=satcheck_probe_limit,
+                    adaptive_satcheck_threads=adaptive_satcheck_threads,
+                    satcheck_min_threads=satcheck_min_threads,
+                    satcheck_increase_step=satcheck_increase_step,
                     abapc_solver=abapc_solver,
                 )
                 if 'Tensor' in str(type(W_est)):

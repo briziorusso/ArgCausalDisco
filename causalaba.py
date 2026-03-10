@@ -18,6 +18,7 @@ __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 
 import os, sys
 import logging
+import math
 import time
 from typing import Any
 from clingo.control import Control
@@ -36,6 +37,16 @@ try:
 except ImportError:  # pragma: no cover
     from utils.graph_utils import powerset, extract_test_elements_from_symbol
     from utils.prior_knowledge import PriorKnowledge
+
+
+def _fact_sort_key(fact):
+    try:
+        strength = float(fact[5])
+    except Exception:
+        strength = float("-inf")
+    if math.isnan(strength):
+        strength = float("-inf")
+    return (-strength, str(fact[4]).strip())
 
 def _solve_with_timeout(
     ctl: Control,
@@ -478,7 +489,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 assert condition_set not in facts_group[(X,Y)], f"Redundant external fact: {line_clean}"
                 facts_group[(X,Y)].add(condition_set)
 
-    facts = sorted(facts, key=lambda x: x[5], reverse=True)
+    facts = sorted(facts, key=_fact_sort_key)
     ctl = compile_and_ground(
         n_nodes,
         facts_location,

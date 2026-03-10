@@ -120,6 +120,13 @@ def run_method(X,
                lb_ratio:float|None=None,
                lcyc_ratio:float|None=None,
                threads:int|None=None,
+               solve_timeout:float|None=None,
+               satcheck_timeout:float|None=None,
+               satcheck_threads:int|None=None,
+               satcheck_probe_limit:int=8,
+               adaptive_satcheck_threads:bool=False,
+               satcheck_min_threads:int=1,
+               satcheck_increase_step:int=2,
                abapc_solver:str='incremental',
                ):
     """
@@ -307,6 +314,13 @@ def run_method(X,
                       cycle_length=cycle_length,
                       # Solver threads
                       threads=threads,
+                      solve_timeout=solve_timeout,
+                      satcheck_timeout=satcheck_timeout,
+                      satcheck_threads=satcheck_threads,
+                      satcheck_probe_limit=satcheck_probe_limit,
+                      adaptive_satcheck_threads=adaptive_satcheck_threads,
+                      satcheck_min_threads=satcheck_min_threads,
+                      satcheck_increase_step=satcheck_increase_step,
                       )
         elapsed = time.time() - start
         logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')
