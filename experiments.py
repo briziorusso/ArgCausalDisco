@@ -112,7 +112,7 @@ parser.add_argument('--save_res', action='store_true', default=True)
 parser.add_argument('--resume', action='store_true', help='Resume from saved progress and summaries')
 parser.add_argument('--standardise', type=str_to_bool, default=True, metavar='{true,false}', help='Standardise data (z-score) after label encoding')
 parser.add_argument('--test_alpha', type=float, default=0.05, help='Significance level for conditional independence tests')
-parser.add_argument('--test_name', choices=['fisherz', 'chisq', 'gsq', 'kci', 'fastkci', 'rcit'], default='fisherz', help='Independence test to use')
+parser.add_argument('--test_name', choices=['fisherz', 'chisq', 'gsq', 'kci', 'fastkci', 'rcit'], default='gsq', help='Independence test to use')
 
 ## ABAPC specific
 parser.add_argument('--S_weight', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC: use S_weight')
