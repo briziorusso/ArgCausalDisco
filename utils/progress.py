@@ -1,5 +1,7 @@
+import os
 import time
 import threading
+from pathlib import Path
 from typing import Callable
 
 
@@ -17,26 +19,50 @@ def start_heartbeat(
     phase: str,
     interval_sec: float,
     describe: Callable[[], str] | None = None,
+    status_path: str | Path | None = None,
+    log_every_beat: bool = False,
 ):
-    """Emit a periodic INFO heartbeat while a long-running phase is active.
+    """Emit a periodic heartbeat while a long-running phase is active.
 
-    Intended to keep visibility without bloating logs: use a large interval
-    (e.g., 3600s). Returns (stop_event, thread) or (None, None) if disabled.
+    By default, heartbeats overwrite a status file instead of appending to the
+    main log on every interval. Returns (stop_event, thread) or (None, None) if
+    disabled.
     """
     if interval_sec <= 0:
         return None, None
 
     stop = threading.Event()
     started = time.time()
+    started_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(started))
+    status_path_obj = Path(status_path) if status_path is not None else None
+
+    def _snapshot_text() -> str:
+        elapsed = time.time() - started
+        extra = f" {describe()}" if describe is not None else ""
+        return f"[hb] st={started_str} phase={phase} elapsed={fmt_hhmmss(elapsed)}{extra}"
+
+    def _write_status_snapshot() -> None:
+        if status_path_obj is None:
+            return
+        tmp_path = status_path_obj.with_suffix(status_path_obj.suffix + ".tmp")
+        status_path_obj.parent.mkdir(parents=True, exist_ok=True)
+        with open(tmp_path, "w") as f:
+            f.write(_snapshot_text())
+            f.write("\n")
+        os.replace(tmp_path, status_path_obj)
+
+    try:
+        _write_status_snapshot()
+    except Exception:
+        pass
 
     def _run():
         # Wait first so fast phases don't print.
         while not stop.wait(interval_sec):
             try:
-                now = time.strftime("%Y-%m-%d %H:%M:%S")
-                elapsed = time.time() - started
-                extra = f" {describe()}" if describe is not None else ""
-                logger.info("[hb] ts=%s phase=%s elapsed=%s%s", now, phase, fmt_hhmmss(elapsed), extra)
+                _write_status_snapshot()
+                if log_every_beat:
+                    logger.info("%s", _snapshot_text())
             except Exception:
                 # Best-effort; never break the solver.
                 pass
@@ -44,4 +70,3 @@ def start_heartbeat(
     t = threading.Thread(target=_run, name=f"heartbeat:{phase}", daemon=True)
     t.start()
     return stop, t
-

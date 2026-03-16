@@ -3,6 +3,7 @@ import math
 import rustworkx as rx
 from clingo import Function, Number, Symbol
 import os
+from pathlib import Path
 import re
 import tracemalloc
 import time
@@ -1689,9 +1690,18 @@ def CausalABA(
     except Exception:
         pass
     if remove_n > 0:
-        # Log the last fact that gets released at the minimal point.
-        ext_sym = fact_syms[-remove_n]
-        logger.info("[remove] releasing %s", ext_sym)
+        # Facts are released as a suffix of the sorted fact order. Log the
+        # release count and the boundary facts rather than a single symbol,
+        # which is easy to misread as "the only released fact".
+        removed_syms = fact_syms[-remove_n:]
+        threshold_sym = removed_syms[0]
+        tail_sym = removed_syms[-1]
+        logger.info(
+            "[remove] releasing count=%s threshold=%s tail_end=%s",
+            remove_n,
+            threshold_sym,
+            tail_sym,
+        )
 
     # Apply the chosen removal and collect a witness model (or optimal models
     # when optimization is active), matching the earlier 'first' behavior.
@@ -1732,11 +1742,20 @@ def CausalABA(
         remove_n,
         len(facts),
     )
+    try:
+        heartbeat_status_path = str(Path(facts_location).resolve().parent / "heartbeat_final-solve.status")
+    except Exception:
+        heartbeat_status_path = None
+    profile["heartbeat_final_solve_status_path"] = heartbeat_status_path
+    if heartbeat_status_path is not None:
+        logger.info("[final] heartbeat_status=%s", heartbeat_status_path)
     hb_stop, _hb_thread = _start_heartbeat(
         logger,
         phase="final-solve",
         interval_sec=60.0 * 60.0,
-        describe=lambda: f"removed={remove_n}/{len(facts)} satchecks={satcheck_stats['calls']}",
+        describe=lambda: f"removed={remove_n}/{len(facts)}",
+        status_path=heartbeat_status_path,
+        log_every_beat=False,
     )
     t_f0 = time.perf_counter()
     finished, _solve_result = _solve_with_timeout(
