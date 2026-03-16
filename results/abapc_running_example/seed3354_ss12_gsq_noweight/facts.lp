@@ -1,0 +1,10 @@
+#external ext_indep(0,2,empty).
+#external ext_dep(2,3,s0).
+#external ext_dep(0,1,empty).
+#external ext_dep(0,3,s1).
+#external ext_indep(1,3,empty).
+#external ext_dep(2,3,empty).
+#external ext_indep(1,2,empty).
+#external ext_dep(0,3,empty).
+#external ext_indep(0,3,s2).
+#external ext_indep(0,1,s3).

@@ -1,0 +1,1879 @@
+{
+  "approximate_remove_search": true,
+  "best_sat_removed": 3128,
+  "best_unsat_removed": 2306,
+  "cache": {
+    "0": {
+      "label": "initial",
+      "sec": 10.422510123811662,
+      "status": "unsat"
+    },
+    "1771": {
+      "label": "mid",
+      "sec": 11.834887410514057,
+      "status": "unsat"
+    },
+    "2214": {
+      "label": "probe",
+      "sec": 194.35579481255263,
+      "status": "unsat"
+    },
+    "2242": {
+      "label": "probe",
+      "sec": 417.2007388891652,
+      "status": "unsat"
+    },
+    "2259": {
+      "label": "probe",
+      "sec": 604.2088183499873,
+      "status": "unknown"
+    },
+    "2264": {
+      "label": "probe",
+      "sec": 603.7898721955717,
+      "status": "unknown"
+    },
+    "2270": {
+      "label": "probe",
+      "sec": 603.1162642640993,
+      "status": "unknown"
+    },
+    "2271": {
+      "label": "probe",
+      "sec": 595.763449113816,
+      "status": "unsat"
+    },
+    "2276": {
+      "label": "probe",
+      "sec": 604.0599519442767,
+      "status": "unknown"
+    },
+    "2281": {
+      "label": "probe",
+      "sec": 411.87411624751985,
+      "status": "unsat"
+    },
+    "2285": {
+      "label": "probe",
+      "sec": 603.6325664380565,
+      "status": "unknown"
+    },
+    "2291": {
+      "label": "probe",
+      "sec": 604.4905737498775,
+      "status": "unknown"
+    },
+    "2298": {
+      "label": "probe",
+      "sec": 552.1577780861408,
+      "status": "unsat"
+    },
+    "2299": {
+      "label": "probe",
+      "sec": 604.0542797064409,
+      "status": "unknown"
+    },
+    "2306": {
+      "label": "probe",
+      "sec": 64.01902261283249,
+      "status": "unsat"
+    },
+    "2308": {
+      "label": "retry-frontier-unsat",
+      "sec": 1203.4893475910649,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    "2310": {
+      "label": "probe",
+      "sec": 603.9468236807734,
+      "status": "unknown"
+    },
+    "2311": {
+      "label": "probe",
+      "sec": 604.2989839725196,
+      "status": "unknown"
+    },
+    "2312": {
+      "label": "probe",
+      "sec": 604.3969853632152,
+      "status": "unknown"
+    },
+    "2313": {
+      "label": "probe",
+      "sec": 604.6712793204933,
+      "status": "unknown"
+    },
+    "2314": {
+      "label": "probe",
+      "sec": 603.992195494473,
+      "status": "unknown"
+    },
+    "2315": {
+      "label": "probe",
+      "sec": 603.5508579555899,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "2323": {
+      "label": "probe",
+      "sec": 603.3985444763675,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "2325": {
+      "label": "probe",
+      "sec": 603.2152724657208,
+      "status": "unknown"
+    },
+    "2327": {
+      "label": "probe",
+      "sec": 604.8276424258947,
+      "status": "unknown"
+    },
+    "2328": {
+      "label": "probe",
+      "sec": 603.6050561117008,
+      "status": "unknown"
+    },
+    "2340": {
+      "label": "probe",
+      "sec": 603.6322045130655,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "2344": {
+      "label": "probe",
+      "sec": 604.0647570388392,
+      "status": "unknown"
+    },
+    "2346": {
+      "label": "probe",
+      "sec": 604.4337869174778,
+      "status": "unknown"
+    },
+    "2350": {
+      "label": "probe",
+      "sec": 604.287064159289,
+      "status": "unknown"
+    },
+    "2351": {
+      "label": "probe",
+      "sec": 604.2412330638617,
+      "status": "unknown"
+    },
+    "2356": {
+      "label": "probe",
+      "sec": 603.7669542497024,
+      "status": "unknown"
+    },
+    "2367": {
+      "label": "probe",
+      "sec": 603.6878710472956,
+      "status": "unknown"
+    },
+    "2373": {
+      "label": "probe",
+      "sec": 603.4488441003487,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "2377": {
+      "label": "probe",
+      "sec": 603.8846968552098,
+      "status": "unknown"
+    },
+    "2403": {
+      "label": "probe",
+      "sec": 604.1698301145807,
+      "status": "unknown"
+    },
+    "2411": {
+      "label": "probe",
+      "sec": 604.340471223928,
+      "status": "unknown"
+    },
+    "2413": {
+      "label": "probe",
+      "sec": 603.6465170131996,
+      "status": "unknown"
+    },
+    "2414": {
+      "label": "probe",
+      "sec": 604.6396705433726,
+      "status": "unknown"
+    },
+    "2416": {
+      "label": "probe",
+      "sec": 604.1976197073236,
+      "status": "unknown"
+    },
+    "2428": {
+      "label": "probe",
+      "sec": 604.3601809795946,
+      "status": "unknown"
+    },
+    "2435": {
+      "label": "mid-gap",
+      "sec": 603.544814244844,
+      "status": "unknown"
+    },
+    "2439": {
+      "label": "probe",
+      "sec": 603.3860141681507,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "2446": {
+      "label": "probe",
+      "sec": 604.9199387906119,
+      "status": "unknown"
+    },
+    "2470": {
+      "label": "probe",
+      "sec": 604.1217327043414,
+      "status": "unknown"
+    },
+    "2491": {
+      "label": "probe",
+      "sec": 603.2983111450449,
+      "status": "unknown"
+    },
+    "2508": {
+      "label": "probe",
+      "sec": 604.3748950455338,
+      "status": "unknown"
+    },
+    "2511": {
+      "label": "probe",
+      "sec": 603.7659012377262,
+      "status": "unknown"
+    },
+    "2529": {
+      "label": "probe",
+      "sec": 604.4644477060065,
+      "status": "unknown"
+    },
+    "2541": {
+      "label": "probe",
+      "sec": 604.5499418852851,
+      "status": "unknown"
+    },
+    "2560": {
+      "label": "probe",
+      "sec": 604.0460900329053,
+      "status": "unknown"
+    },
+    "2571": {
+      "label": "probe",
+      "sec": 603.2187547283247,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "2584": {
+      "label": "probe",
+      "sec": 603.5874484339729,
+      "status": "unknown"
+    },
+    "2585": {
+      "label": "probe",
+      "sec": 604.4273062143475,
+      "status": "unknown"
+    },
+    "2656": {
+      "label": "mid",
+      "sec": 603.7140117781237,
+      "status": "unknown"
+    },
+    "2697": {
+      "label": "mid-frontier",
+      "sec": 604.2185915000737,
+      "status": "unknown"
+    },
+    "2718": {
+      "label": "mid-frontier",
+      "sec": 604.3734806375578,
+      "status": "unknown"
+    },
+    "2739": {
+      "label": "mid-frontier",
+      "sec": 603.4754826789722,
+      "status": "unknown"
+    },
+    "2759": {
+      "label": "mid-frontier",
+      "sec": 604.6920238463208,
+      "status": "unknown"
+    },
+    "2780": {
+      "label": "mid-frontier",
+      "sec": 603.8567791804671,
+      "status": "unknown"
+    },
+    "2801": {
+      "label": "mid-frontier",
+      "sec": 604.9195427112281,
+      "status": "unknown"
+    },
+    "2822": {
+      "label": "probe",
+      "sec": 603.3552784295753,
+      "status": "unknown"
+    },
+    "2835": {
+      "label": "mid-frontier",
+      "sec": 611.1103782122955,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "2849": {
+      "label": "mid-frontier",
+      "sec": 604.3552135694772,
+      "status": "unknown"
+    },
+    "2863": {
+      "label": "mid-frontier",
+      "sec": 604.9922338202596,
+      "status": "unknown"
+    },
+    "2877": {
+      "label": "mid-gap",
+      "sec": 603.6776870694011,
+      "status": "unknown"
+    },
+    "2898": {
+      "label": "mid-frontier",
+      "sec": 604.1968895923346,
+      "status": "unknown"
+    },
+    "2920": {
+      "label": "probe",
+      "sec": 604.0127240698785,
+      "status": "unknown"
+    },
+    "2925": {
+      "label": "mid-frontier",
+      "sec": 603.5208125505596,
+      "status": "unknown"
+    },
+    "2926": {
+      "label": "probe",
+      "sec": 604.2687930176035,
+      "status": "unknown"
+    },
+    "2944": {
+      "label": "probe",
+      "sec": 604.5679870257154,
+      "status": "unknown"
+    },
+    "2964": {
+      "label": "probe",
+      "sec": 603.6733941631392,
+      "status": "unknown"
+    },
+    "2968": {
+      "label": "probe",
+      "sec": 604.7684809602797,
+      "status": "unknown"
+    },
+    "2974": {
+      "label": "probe",
+      "sec": 603.4452041126788,
+      "status": "unknown"
+    },
+    "2982": {
+      "label": "probe",
+      "sec": 603.366438399069,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "2996": {
+      "label": "probe",
+      "sec": 604.1047273036093,
+      "status": "unknown"
+    },
+    "3016": {
+      "label": "probe",
+      "sec": 603.167993158102,
+      "status": "unknown"
+    },
+    "3030": {
+      "label": "probe",
+      "sec": 604.2160389833152,
+      "status": "unknown"
+    },
+    "3032": {
+      "label": "probe",
+      "sec": 604.0250244345516,
+      "status": "unknown"
+    },
+    "3036": {
+      "label": "probe",
+      "sec": 604.5435179788619,
+      "status": "unknown"
+    },
+    "3038": {
+      "label": "probe",
+      "sec": 603.3737716656178,
+      "status": "unknown"
+    },
+    "3051": {
+      "label": "probe",
+      "sec": 604.6189734851941,
+      "status": "unknown"
+    },
+    "3055": {
+      "label": "probe",
+      "sec": 603.3390800394118,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "3056": {
+      "label": "probe",
+      "sec": 603.8471957370639,
+      "status": "unknown"
+    },
+    "3062": {
+      "label": "probe",
+      "sec": 604.6807095939294,
+      "status": "unknown"
+    },
+    "3070": {
+      "label": "probe",
+      "sec": 603.9970923196524,
+      "status": "unknown"
+    },
+    "3075": {
+      "label": "probe",
+      "sec": 604.239540560171,
+      "status": "unknown"
+    },
+    "3082": {
+      "label": "probe",
+      "sec": 604.2738206004724,
+      "status": "unknown"
+    },
+    "3088": {
+      "label": "probe",
+      "sec": 603.7992602530867,
+      "status": "unknown"
+    },
+    "3092": {
+      "label": "probe",
+      "sec": 603.2732597906142,
+      "status": "unknown"
+    },
+    "3093": {
+      "label": "probe",
+      "sec": 604.4265749771148,
+      "status": "unknown"
+    },
+    "3095": {
+      "label": "probe",
+      "sec": 603.5810126969591,
+      "status": "unknown"
+    },
+    "3099": {
+      "label": "probe",
+      "sec": 603.8253427036107,
+      "status": "unknown"
+    },
+    "3102": {
+      "label": "probe",
+      "sec": 603.8283251933753,
+      "status": "unknown"
+    },
+    "3105": {
+      "label": "probe",
+      "sec": 604.2896060971543,
+      "status": "unknown"
+    },
+    "3107": {
+      "label": "probe",
+      "sec": 604.0715539949015,
+      "status": "unknown"
+    },
+    "3108": {
+      "label": "probe",
+      "sec": 604.4003731021658,
+      "status": "unknown"
+    },
+    "3110": {
+      "label": "probe",
+      "sec": 603.3690804587677,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "3113": {
+      "label": "probe",
+      "sec": 603.2587042180821,
+      "status": "unknown"
+    },
+    "3114": {
+      "label": "probe",
+      "sec": 604.3518773885444,
+      "status": "unknown"
+    },
+    "3116": {
+      "label": "probe",
+      "sec": 604.0963845783845,
+      "status": "unknown"
+    },
+    "3117": {
+      "label": "probe",
+      "sec": 604.7117387568578,
+      "status": "unknown"
+    },
+    "3119": {
+      "label": "probe",
+      "sec": 603.5469837952405,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "3120": {
+      "label": "probe",
+      "sec": 604.4691783655435,
+      "status": "unknown"
+    },
+    "3121": {
+      "label": "probe",
+      "sec": 604.4159277202561,
+      "status": "unknown"
+    },
+    "3123": {
+      "label": "probe",
+      "sec": 603.6045339750126,
+      "status": "unknown"
+    },
+    "3124": {
+      "label": "probe",
+      "sec": 604.4992240667343,
+      "status": "unknown"
+    },
+    "3125": {
+      "label": "probe",
+      "sec": 603.9232612280175,
+      "status": "unknown"
+    },
+    "3127": {
+      "label": "retry-frontier-sat",
+      "sec": 1203.2591404011473,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    "3128": {
+      "label": "probe",
+      "sec": 72.12728282995522,
+      "status": "sat"
+    },
+    "3131": {
+      "label": "probe",
+      "sec": 604.8215789683163,
+      "status": "unknown"
+    },
+    "3134": {
+      "label": "probe",
+      "sec": 545.4504856094718,
+      "status": "sat"
+    },
+    "3137": {
+      "label": "probe",
+      "sec": 603.798739284277,
+      "status": "unknown"
+    },
+    "3143": {
+      "label": "probe",
+      "sec": 15.500647431239486,
+      "status": "sat"
+    },
+    "3144": {
+      "label": "probe",
+      "sec": 603.8454281836748,
+      "status": "unknown"
+    },
+    "3148": {
+      "label": "probe",
+      "sec": 386.0852866116911,
+      "status": "sat"
+    },
+    "3151": {
+      "label": "probe",
+      "sec": 198.66748079378158,
+      "status": "sat"
+    },
+    "3209": {
+      "label": "probe",
+      "sec": 59.126584206707776,
+      "status": "sat"
+    },
+    "3541": {
+      "label": "mid",
+      "sec": 9.077490783296525,
+      "status": "sat"
+    }
+  },
+  "fingerprint": "86748624509df80c1195edd79c8ff5627e3122f94a7b000008cd2fc5e4c0b3ff",
+  "remove_n": 3128,
+  "satcheck_records": [
+    {
+      "call": 1,
+      "hi": 7082,
+      "label": "initial",
+      "lo": 0,
+      "mid": 0,
+      "removed": 0,
+      "sec": 10.422510123811662,
+      "status": "unsat"
+    },
+    {
+      "call": 2,
+      "hi": 7082,
+      "label": "mid",
+      "lo": 1,
+      "mid": 3541,
+      "removed": 3541,
+      "sec": 9.077490783296525,
+      "status": "sat"
+    },
+    {
+      "call": 3,
+      "hi": 3541,
+      "label": "mid",
+      "lo": 1,
+      "mid": 1771,
+      "removed": 1771,
+      "sec": 11.834887410514057,
+      "status": "unsat"
+    },
+    {
+      "call": 4,
+      "hi": 3541,
+      "label": "mid",
+      "lo": 1772,
+      "mid": 2656,
+      "removed": 2656,
+      "sec": 603.7140117781237,
+      "status": "unknown"
+    },
+    {
+      "call": 5,
+      "hi": 3541,
+      "label": "probe",
+      "lo": 1772,
+      "mid": 2656,
+      "removed": 3099,
+      "sec": 603.8253427036107,
+      "status": "unknown"
+    },
+    {
+      "call": 6,
+      "hi": 3541,
+      "label": "probe",
+      "lo": 1772,
+      "mid": 2656,
+      "removed": 2214,
+      "sec": 194.35579481255263,
+      "status": "unsat"
+    },
+    {
+      "call": 7,
+      "hi": 3541,
+      "label": "mid-gap",
+      "lo": 2215,
+      "mid": 2877,
+      "removed": 2877,
+      "sec": 603.6776870694011,
+      "status": "unknown"
+    },
+    {
+      "call": 8,
+      "hi": 3541,
+      "label": "probe",
+      "lo": 2215,
+      "mid": 2877,
+      "removed": 3209,
+      "sec": 59.126584206707776,
+      "status": "sat"
+    },
+    {
+      "call": 9,
+      "hi": 3209,
+      "label": "mid-gap",
+      "lo": 2215,
+      "mid": 2435,
+      "removed": 2435,
+      "sec": 603.544814244844,
+      "status": "unknown"
+    },
+    {
+      "call": 10,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2215,
+      "mid": 2435,
+      "removed": 2822,
+      "sec": 603.3552784295753,
+      "status": "unknown"
+    },
+    {
+      "call": 11,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2215,
+      "mid": 2435,
+      "removed": 2325,
+      "sec": 603.2152724657208,
+      "status": "unknown"
+    },
+    {
+      "call": 12,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2215,
+      "mid": 2435,
+      "removed": 3016,
+      "sec": 603.167993158102,
+      "status": "unknown"
+    },
+    {
+      "call": 13,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2215,
+      "mid": 2435,
+      "removed": 2270,
+      "sec": 603.1162642640993,
+      "status": "unknown"
+    },
+    {
+      "call": 14,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2215,
+      "mid": 2435,
+      "removed": 3113,
+      "sec": 603.2587042180821,
+      "status": "unknown"
+    },
+    {
+      "call": 15,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2215,
+      "mid": 2435,
+      "removed": 2242,
+      "sec": 417.2007388891652,
+      "status": "unsat"
+    },
+    {
+      "call": 16,
+      "hi": 3209,
+      "label": "mid-frontier",
+      "lo": 2243,
+      "mid": 2739,
+      "removed": 2739,
+      "sec": 603.4754826789722,
+      "status": "unknown"
+    },
+    {
+      "call": 17,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2739,
+      "removed": 2974,
+      "sec": 603.4452041126788,
+      "status": "unknown"
+    },
+    {
+      "call": 18,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2739,
+      "removed": 2491,
+      "sec": 603.2983111450449,
+      "status": "unknown"
+    },
+    {
+      "call": 19,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2739,
+      "removed": 3092,
+      "sec": 603.2732597906142,
+      "status": "unknown"
+    },
+    {
+      "call": 20,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2739,
+      "removed": 2367,
+      "sec": 603.6878710472956,
+      "status": "unknown"
+    },
+    {
+      "call": 21,
+      "hi": 3209,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2739,
+      "removed": 3151,
+      "sec": 198.66748079378158,
+      "status": "sat"
+    },
+    {
+      "call": 22,
+      "hi": 3151,
+      "label": "mid-frontier",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 2925,
+      "sec": 603.5208125505596,
+      "status": "unknown"
+    },
+    {
+      "call": 23,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 3038,
+      "sec": 603.3737716656178,
+      "status": "unknown"
+    },
+    {
+      "call": 24,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 2584,
+      "sec": 603.5874484339729,
+      "status": "unknown"
+    },
+    {
+      "call": 25,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 3095,
+      "sec": 603.5810126969591,
+      "status": "unknown"
+    },
+    {
+      "call": 26,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 2413,
+      "sec": 603.6465170131996,
+      "status": "unknown"
+    },
+    {
+      "call": 27,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 3123,
+      "sec": 603.6045339750126,
+      "status": "unknown"
+    },
+    {
+      "call": 28,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 2328,
+      "sec": 603.6050561117008,
+      "status": "unknown"
+    },
+    {
+      "call": 29,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 3137,
+      "sec": 603.798739284277,
+      "status": "unknown"
+    },
+    {
+      "call": 30,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 2285,
+      "sec": 603.6325664380565,
+      "status": "unknown"
+    },
+    {
+      "call": 31,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 3144,
+      "sec": 603.8454281836748,
+      "status": "unknown"
+    },
+    {
+      "call": 32,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 2264,
+      "sec": 603.7898721955717,
+      "status": "unknown"
+    },
+    {
+      "call": 33,
+      "hi": 3151,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2925,
+      "removed": 3148,
+      "sec": 386.0852866116911,
+      "status": "sat"
+    },
+    {
+      "call": 34,
+      "hi": 3148,
+      "label": "mid-frontier",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 2780,
+      "sec": 603.8567791804671,
+      "status": "unknown"
+    },
+    {
+      "call": 35,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 2964,
+      "sec": 603.6733941631392,
+      "status": "unknown"
+    },
+    {
+      "call": 36,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 2511,
+      "sec": 603.7659012377262,
+      "status": "unknown"
+    },
+    {
+      "call": 37,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 3056,
+      "sec": 603.8471957370639,
+      "status": "unknown"
+    },
+    {
+      "call": 38,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 2377,
+      "sec": 603.8846968552098,
+      "status": "unknown"
+    },
+    {
+      "call": 39,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 3102,
+      "sec": 603.8283251933753,
+      "status": "unknown"
+    },
+    {
+      "call": 40,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 2310,
+      "sec": 603.9468236807734,
+      "status": "unknown"
+    },
+    {
+      "call": 41,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 3125,
+      "sec": 603.9232612280175,
+      "status": "unknown"
+    },
+    {
+      "call": 42,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 2276,
+      "sec": 604.0599519442767,
+      "status": "unknown"
+    },
+    {
+      "call": 43,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 2259,
+      "sec": 604.2088183499873,
+      "status": "unknown"
+    },
+    {
+      "call": 44,
+      "hi": 3148,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2780,
+      "removed": 3143,
+      "sec": 15.500647431239486,
+      "status": "sat"
+    },
+    {
+      "call": 45,
+      "hi": 3143,
+      "label": "mid-frontier",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 2697,
+      "sec": 604.2185915000737,
+      "status": "unknown"
+    },
+    {
+      "call": 46,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 2920,
+      "sec": 604.0127240698785,
+      "status": "unknown"
+    },
+    {
+      "call": 47,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 2470,
+      "sec": 604.1217327043414,
+      "status": "unknown"
+    },
+    {
+      "call": 48,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 3032,
+      "sec": 604.0250244345516,
+      "status": "unknown"
+    },
+    {
+      "call": 49,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 2356,
+      "sec": 603.7669542497024,
+      "status": "unknown"
+    },
+    {
+      "call": 50,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 3088,
+      "sec": 603.7992602530867,
+      "status": "unknown"
+    },
+    {
+      "call": 51,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 2299,
+      "sec": 604.0542797064409,
+      "status": "unknown"
+    },
+    {
+      "call": 52,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 3116,
+      "sec": 604.0963845783845,
+      "status": "unknown"
+    },
+    {
+      "call": 53,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2243,
+      "mid": 2697,
+      "removed": 2271,
+      "sec": 595.763449113816,
+      "status": "unsat"
+    },
+    {
+      "call": 54,
+      "hi": 3143,
+      "label": "mid-frontier",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 2849,
+      "sec": 604.3552135694772,
+      "status": "unknown"
+    },
+    {
+      "call": 55,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 2996,
+      "sec": 604.1047273036093,
+      "status": "unknown"
+    },
+    {
+      "call": 56,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 2560,
+      "sec": 604.0460900329053,
+      "status": "unknown"
+    },
+    {
+      "call": 57,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 3070,
+      "sec": 603.9970923196524,
+      "status": "unknown"
+    },
+    {
+      "call": 58,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 2416,
+      "sec": 604.1976197073236,
+      "status": "unknown"
+    },
+    {
+      "call": 59,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 3107,
+      "sec": 604.0715539949015,
+      "status": "unknown"
+    },
+    {
+      "call": 60,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 2344,
+      "sec": 604.0647570388392,
+      "status": "unknown"
+    },
+    {
+      "call": 61,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 2308,
+      "sec": 604.1686032488942,
+      "status": "unknown"
+    },
+    {
+      "call": 62,
+      "hi": 3143,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2849,
+      "removed": 3134,
+      "sec": 545.4504856094718,
+      "status": "sat"
+    },
+    {
+      "call": 63,
+      "hi": 3134,
+      "label": "mid-frontier",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 2898,
+      "sec": 604.1968895923346,
+      "status": "unknown"
+    },
+    {
+      "call": 64,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 2585,
+      "sec": 604.4273062143475,
+      "status": "unknown"
+    },
+    {
+      "call": 65,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 3075,
+      "sec": 604.239540560171,
+      "status": "unknown"
+    },
+    {
+      "call": 66,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 2428,
+      "sec": 604.3601809795946,
+      "status": "unknown"
+    },
+    {
+      "call": 67,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 3105,
+      "sec": 604.2896060971543,
+      "status": "unknown"
+    },
+    {
+      "call": 68,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 2350,
+      "sec": 604.287064159289,
+      "status": "unknown"
+    },
+    {
+      "call": 69,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 3120,
+      "sec": 604.4691783655435,
+      "status": "unknown"
+    },
+    {
+      "call": 70,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 2311,
+      "sec": 604.2989839725196,
+      "status": "unknown"
+    },
+    {
+      "call": 71,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 3127,
+      "sec": 604.642233283259,
+      "status": "unknown"
+    },
+    {
+      "call": 72,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 2291,
+      "sec": 604.4905737498775,
+      "status": "unknown"
+    },
+    {
+      "call": 73,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 3131,
+      "sec": 604.8215789683163,
+      "status": "unknown"
+    },
+    {
+      "call": 74,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2272,
+      "mid": 2898,
+      "removed": 2281,
+      "sec": 411.87411624751985,
+      "status": "unsat"
+    },
+    {
+      "call": 75,
+      "hi": 3134,
+      "label": "mid-frontier",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 2801,
+      "sec": 604.9195427112281,
+      "status": "unknown"
+    },
+    {
+      "call": 76,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 2968,
+      "sec": 604.7684809602797,
+      "status": "unknown"
+    },
+    {
+      "call": 77,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 2541,
+      "sec": 604.5499418852851,
+      "status": "unknown"
+    },
+    {
+      "call": 78,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 3051,
+      "sec": 604.6189734851941,
+      "status": "unknown"
+    },
+    {
+      "call": 79,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 2411,
+      "sec": 604.340471223928,
+      "status": "unknown"
+    },
+    {
+      "call": 80,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 3093,
+      "sec": 604.4265749771148,
+      "status": "unknown"
+    },
+    {
+      "call": 81,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 2346,
+      "sec": 604.4337869174778,
+      "status": "unknown"
+    },
+    {
+      "call": 82,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 3114,
+      "sec": 604.3518773885444,
+      "status": "unknown"
+    },
+    {
+      "call": 83,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 2314,
+      "sec": 603.992195494473,
+      "status": "unknown"
+    },
+    {
+      "call": 84,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 3124,
+      "sec": 604.4992240667343,
+      "status": "unknown"
+    },
+    {
+      "call": 85,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2282,
+      "mid": 2801,
+      "removed": 2298,
+      "sec": 552.1577780861408,
+      "status": "unsat"
+    },
+    {
+      "call": 86,
+      "hi": 3134,
+      "label": "mid-frontier",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 2718,
+      "sec": 604.3734806375578,
+      "status": "unknown"
+    },
+    {
+      "call": 87,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 2926,
+      "sec": 604.2687930176035,
+      "status": "unknown"
+    },
+    {
+      "call": 88,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 2508,
+      "sec": 604.3748950455338,
+      "status": "unknown"
+    },
+    {
+      "call": 89,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 3030,
+      "sec": 604.2160389833152,
+      "status": "unknown"
+    },
+    {
+      "call": 90,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 2403,
+      "sec": 604.1698301145807,
+      "status": "unknown"
+    },
+    {
+      "call": 91,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 3082,
+      "sec": 604.2738206004724,
+      "status": "unknown"
+    },
+    {
+      "call": 92,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 2351,
+      "sec": 604.2412330638617,
+      "status": "unknown"
+    },
+    {
+      "call": 93,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 3108,
+      "sec": 604.4003731021658,
+      "status": "unknown"
+    },
+    {
+      "call": 94,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 3121,
+      "sec": 604.4159277202561,
+      "status": "unknown"
+    },
+    {
+      "call": 95,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 2312,
+      "sec": 604.3969853632152,
+      "status": "unknown"
+    },
+    {
+      "call": 96,
+      "hi": 3134,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2718,
+      "removed": 3128,
+      "sec": 72.12728282995522,
+      "status": "sat"
+    },
+    {
+      "call": 97,
+      "hi": 3128,
+      "label": "mid-frontier",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 2759,
+      "sec": 604.6920238463208,
+      "status": "unknown"
+    },
+    {
+      "call": 98,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 2944,
+      "sec": 604.5679870257154,
+      "status": "unknown"
+    },
+    {
+      "call": 99,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 2529,
+      "sec": 604.4644477060065,
+      "status": "unknown"
+    },
+    {
+      "call": 100,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 3036,
+      "sec": 604.5435179788619,
+      "status": "unknown"
+    },
+    {
+      "call": 101,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 2414,
+      "sec": 604.6396705433726,
+      "status": "unknown"
+    },
+    {
+      "call": 102,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 2327,
+      "sec": 604.8276424258947,
+      "status": "unknown"
+    },
+    {
+      "call": 103,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 3117,
+      "sec": 604.7117387568578,
+      "status": "unknown"
+    },
+    {
+      "call": 104,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 2313,
+      "sec": 604.6712793204933,
+      "status": "unknown"
+    },
+    {
+      "call": 105,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2299,
+      "mid": 2759,
+      "removed": 2306,
+      "sec": 64.01902261283249,
+      "status": "unsat"
+    },
+    {
+      "call": 106,
+      "hi": 3128,
+      "label": "mid-frontier",
+      "lo": 2307,
+      "mid": 2863,
+      "removed": 2863,
+      "sec": 604.9922338202596,
+      "status": "unknown"
+    },
+    {
+      "call": 107,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2863,
+      "removed": 3062,
+      "sec": 604.6807095939294,
+      "status": "unknown"
+    },
+    {
+      "call": 108,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2863,
+      "removed": 2446,
+      "sec": 604.9199387906119,
+      "status": "unknown"
+    },
+    {
+      "call": 1,
+      "hi": 3128,
+      "label": "mid-frontier",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2835,
+      "sec": 611.1103782122955,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 2,
+      "hi": 3128,
+      "label": "portfolio",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2982,
+      "sec": 303.646094837226,
+      "status": "unknown",
+      "timeout_budget_sec": 300.0
+    },
+    {
+      "call": 3,
+      "hi": 3128,
+      "label": "portfolio",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2571,
+      "sec": 303.48892853036523,
+      "status": "unknown",
+      "timeout_budget_sec": 300.0
+    },
+    {
+      "call": 4,
+      "hi": 3128,
+      "label": "portfolio",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 3055,
+      "sec": 303.24273236468434,
+      "status": "unknown",
+      "timeout_budget_sec": 300.0
+    },
+    {
+      "call": 5,
+      "hi": 3128,
+      "label": "retry-frontier-sat",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 3127,
+      "sec": 1203.2591404011473,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    {
+      "call": 6,
+      "hi": 3128,
+      "label": "retry-frontier-unsat",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2308,
+      "sec": 1203.4893475910649,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    {
+      "call": 7,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2982,
+      "sec": 603.366438399069,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 8,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2571,
+      "sec": 603.2187547283247,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 9,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 3055,
+      "sec": 603.3390800394118,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 10,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2439,
+      "sec": 603.3860141681507,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 11,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2373,
+      "sec": 603.4488441003487,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 12,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 3110,
+      "sec": 603.3690804587677,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 13,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2340,
+      "sec": 603.6322045130655,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 14,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 3119,
+      "sec": 603.5469837952405,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 15,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2323,
+      "sec": 603.3985444763675,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 16,
+      "hi": 3128,
+      "label": "probe",
+      "lo": 2307,
+      "mid": 2835,
+      "removed": 2315,
+      "sec": 603.5508579555899,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    }
+  ],
+  "satcheck_timeout": 600.0,
+  "search_complete": true,
+  "updated_at": 1773249223.3242803,
+  "version": 1
+}

@@ -1,0 +1,213 @@
+{
+  "ab_cpdag_dir": [
+    [
+      0,
+      1
+    ],
+    [
+      2,
+      1
+    ]
+  ],
+  "ab_cpdag_metrics": {
+    "F1": 0.6667,
+    "fdr": 0.0,
+    "fpr": 0.0,
+    "nnz": 2,
+    "precision": 1.0,
+    "recall": 0.5,
+    "shd": 2.0,
+    "tpr": 0.5
+  },
+  "ab_cpdag_undir": [],
+  "ab_edges": [
+    [
+      0,
+      1
+    ],
+    [
+      2,
+      1
+    ]
+  ],
+  "ab_eval": [
+    1,
+    2.0,
+    0.6666666666666666,
+    0.6666666666666666,
+    0.6666666666666666,
+    0,
+    1,
+    0,
+    2.0,
+    0.6667,
+    0.6666666666666666,
+    1.0,
+    false
+  ],
+  "ab_metrics": {
+    "F1": 0.6667,
+    "fdr": 0.0,
+    "fpr": 0.0,
+    "nnz": 2,
+    "precision": 1.0,
+    "recall": 0.5,
+    "shd": 2.0,
+    "tpr": 0.5
+  },
+  "accepted_keys": [
+    "ext_dep(0,1,empty)",
+    "ext_dep(1,2,s0)",
+    "ext_indep(0,2,empty)",
+    "ext_indep(0,3,empty)",
+    "ext_indep(1,3,empty)",
+    "ext_indep(2,3,empty)"
+  ],
+  "all_eval": [
+    0,
+    null,
+    null,
+    null,
+    null,
+    0,
+    0,
+    0,
+    null,
+    null,
+    null,
+    null,
+    false
+  ],
+  "all_incompatible": true,
+  "alpha": 0.05,
+  "facts_count": 8,
+  "facts_files": {
+    "facts": "/vol/bitbucket/fr920/ArgCausalDisco-1/results/abapc_running_example/seed2143_ss10_gsq_noweight/facts.lp",
+    "facts_I": "/vol/bitbucket/fr920/ArgCausalDisco-1/results/abapc_running_example/seed2143_ss10_gsq_noweight/facts_I.lp",
+    "facts_wc": "/vol/bitbucket/fr920/ArgCausalDisco-1/results/abapc_running_example/seed2143_ss10_gsq_noweight/facts_wc.lp"
+  },
+  "indep_test": "gsq",
+  "pc_dir": [],
+  "pc_metrics": {
+    "F1": NaN,
+    "fdr": 0.0,
+    "fpr": 0.0,
+    "nnz": 1,
+    "precision": 0.0,
+    "recall": 0.0,
+    "shd": 4.0,
+    "tpr": 0.25
+  },
+  "pc_undir": [
+    [
+      1,
+      2
+    ]
+  ],
+  "remove_n": 2,
+  "removed_keys": [
+    "ext_dep(1,2,empty)",
+    "ext_indep(0,1,s2)"
+  ],
+  "sample_size": 10,
+  "seed": 2143,
+  "solver_profile": {
+    "adaptive_satcheck_threads": false,
+    "add_bayesball_sec": 0.0002865828573703766,
+    "best_sat_removed": 2,
+    "best_unsat_removed": 1,
+    "compile_calls": 1,
+    "compile_sec_last": 0.004829021170735359,
+    "compile_sec_total": 0.004829021170735359,
+    "final_opt_sec": 0.0025854045525193214,
+    "ground_calls_internal": 1,
+    "ground_sec_last": 0.002864326350390911,
+    "ground_sec_total": 0.002864326350390911,
+    "load_encoding_sec": 0.002014435827732086,
+    "load_facts_sec": 0.00012326892465353012,
+    "load_wc_sec": 0.00011679902672767639,
+    "peak_after_compile_bytes": null,
+    "peak_after_ground_bytes": null,
+    "peak_after_solve_bytes_last": null,
+    "peak_after_solve_bytes_max": null,
+    "post_solve_sec_total": 0.0007700333371758461,
+    "remove_n": 2,
+    "remove_search_approximate": false,
+    "removed_fact_keys": [
+      "ext_indep(0,1,s2).",
+      "ext_dep(1,2,empty)."
+    ],
+    "sat_check_sec_last": 0.0011326316744089127,
+    "sat_check_sec_total": 0.009708620607852936,
+    "satcheck_autotune_path": "/tmp/tmpl_cfstj2/satcheck_autotune.json",
+    "satcheck_frontier_crawl": true,
+    "satcheck_increase_step": 2,
+    "satcheck_memtotal_kib": 131399944,
+    "satcheck_min_threads": 1,
+    "satcheck_portfolio": true,
+    "satcheck_portfolio_min_timeout": 180.0,
+    "satcheck_portfolio_size": 3,
+    "satcheck_portfolio_timeout_scale": 0.5,
+    "satcheck_probe_limit": 8,
+    "satcheck_promoted_retry": true,
+    "satcheck_promoted_retry_max_retries": 1,
+    "satcheck_promoted_retry_timeout_scale": 2.0,
+    "satcheck_records": [
+      {
+        "call": 1,
+        "hi": 8,
+        "label": "initial",
+        "lo": 0,
+        "mid": 0,
+        "removed": 0,
+        "sec": 0.005513887852430344,
+        "status": "unsat",
+        "timeout_budget_sec": 15.0
+      },
+      {
+        "call": 2,
+        "hi": 8,
+        "label": "mid",
+        "lo": 1,
+        "mid": 4,
+        "removed": 4,
+        "sec": 0.002496981993317604,
+        "status": "sat",
+        "timeout_budget_sec": 15.0
+      },
+      {
+        "call": 3,
+        "hi": 4,
+        "label": "mid",
+        "lo": 1,
+        "mid": 2,
+        "removed": 2,
+        "sec": 0.0035718679428100586,
+        "status": "sat",
+        "timeout_budget_sec": 15.0
+      },
+      {
+        "call": 4,
+        "hi": 2,
+        "label": "mid",
+        "lo": 1,
+        "mid": 1,
+        "removed": 1,
+        "sec": 0.0018888330087065697,
+        "status": "unsat",
+        "timeout_budget_sec": 15.0
+      }
+    ],
+    "satcheck_resume": false,
+    "satcheck_search_checkpoint_path": "/tmp/tmpl_cfstj2/satcheck_search.json",
+    "satcheck_threads": 24,
+    "satcheck_timeout": 15.0,
+    "solve_calls_internal": 6,
+    "solve_sec_last": 0.0025854045525193214,
+    "solve_sec_total": 0.027499482966959476,
+    "timed_out": false,
+    "write_gen_lp_sec": 0.0002452908083796501
+  },
+  "strength_S_weight": false,
+  "wrong_count": 4
+}

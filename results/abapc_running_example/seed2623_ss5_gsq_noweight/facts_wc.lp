@@ -1,0 +1,8 @@
+:~ ext_indep(2,3,empty). [-7647157]
+:~ ext_dep(0,1,empty). [-6543999]
+:~ ext_dep(1,2,empty). [-6543999]
+:~ ext_indep(1,3,empty). [-6246762]
+:~ ext_indep(0,3,empty). [-5464421]
+:~ ext_indep(0,2,empty). [-5199871]
+:~ ext_indep(0,1,s2). [-5003536]
+:~ ext_indep(1,2,s0). [-5003536]

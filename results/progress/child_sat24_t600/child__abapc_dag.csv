@@ -1,0 +1,2 @@
+dataset,model,elapsed,nnz,fdr,tpr,fpr,precision,recall,F1,shd,sid,run_idx,seed
+child,ABAPC (Ours),1832.7580125331879,133,0.9173,0.44,0.7394,0.0827,0.44,0.1392,127.0,197.0,0,7816
