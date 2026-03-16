@@ -1,13 +1,16 @@
 import os
+import json
 import logging
 import re
 import fnmatch
 import argparse
+from collections import Counter
 from pathlib import Path
 import shutil
 import signal
 import faulthandler
 import resource
+import socket
 import sys
 
 import numpy as np
@@ -169,6 +172,293 @@ def save_summary_tables(base_path: Path, version: str, dag_df: pd.DataFrame, cpd
     np.save(base_path / f'stored_results_{version}_cpdag.npy', cpdag_df.reindex(columns=CPDAG_SUMMARY_COLUMNS).to_numpy())
 
 
+def _json_safe(value):
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    return value
+
+
+def _write_json_atomic(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp_path, "w") as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+        f.write("\n")
+    os.replace(tmp_path, path)
+
+
+def _diff_dicts(old: dict, new: dict, *, ignore_keys: set[str] | None = None) -> dict[str, dict[str, object]]:
+    ignore = set(ignore_keys or set())
+    diffs: dict[str, dict[str, object]] = {}
+    for key in sorted(set(old) | set(new)):
+        if key in ignore:
+            continue
+        left = old.get(key)
+        right = new.get(key)
+        if left != right:
+            diffs[str(key)] = {"old": _json_safe(left), "new": _json_safe(right)}
+    return diffs
+
+
+def record_run_manifest(*, results_path: Path, version: str, args: argparse.Namespace) -> Path:
+    manifest_path = results_path / f"run_config_{version}.json"
+    args_payload = _json_safe(vars(args))
+    attempt = {
+        "started_at": datetime.now().isoformat(),
+        "pid": int(os.getpid()),
+        "cwd": os.getcwd(),
+        "host": socket.gethostname(),
+        "argv": [str(x) for x in sys.argv],
+        "args": args_payload,
+    }
+    runtime_only_keys = {"resume", "load_res", "save_res"}
+    manifest: dict
+    if manifest_path.exists():
+        try:
+            with open(manifest_path, "r") as f:
+                manifest = json.load(f)
+            if not isinstance(manifest, dict):
+                manifest = {}
+        except Exception:
+            manifest = {}
+    else:
+        manifest = {}
+
+    baseline_args = manifest.get("baseline_args")
+    if not isinstance(baseline_args, dict):
+        baseline_args = dict(args_payload)
+
+    drift_from_baseline = _diff_dicts(baseline_args, args_payload)
+    meaningful_drift = _diff_dicts(baseline_args, args_payload, ignore_keys=runtime_only_keys)
+    attempt["diff_from_baseline"] = drift_from_baseline
+    attempt["meaningful_diff_from_baseline"] = meaningful_drift
+    attempts = manifest.get("attempts")
+    if not isinstance(attempts, list):
+        attempts = []
+    attempts.append(attempt)
+
+    manifest = {
+        "version": version,
+        "script_path": str(Path(__file__).resolve()),
+        "results_dir": str(results_path.resolve()),
+        "created_at": manifest.get("created_at") or attempt["started_at"],
+        "updated_at": attempt["started_at"],
+        "baseline_args": baseline_args,
+        "latest_args": args_payload,
+        "attempt_count": len(attempts),
+        "attempts": attempts,
+    }
+    _write_json_atomic(manifest_path, manifest)
+
+    if meaningful_drift:
+        logging.warning(
+            "[run-config] current invocation differs from baseline for version=%s; changed_keys=%s manifest=%s",
+            version,
+            sorted(meaningful_drift.keys()),
+            manifest_path,
+        )
+    else:
+        logging.info(
+            "[run-config] recorded invocation %d for version=%s at %s",
+            len(attempts),
+            version,
+            manifest_path,
+        )
+    return manifest_path
+
+
+def _clean_scalar(value):
+    if value is None:
+        return None
+    try:
+        if pd.isna(value):
+            return None
+    except Exception:
+        pass
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
+
+
+def _clean_metric_subset(metrics: dict, keys: list[str]) -> dict:
+    return {key: _clean_scalar(metrics.get(key)) for key in keys}
+
+
+def _profile_float(profile: dict, key: str) -> float:
+    try:
+        return float(profile.get(key, 0.0) or 0.0)
+    except Exception:
+        return 0.0
+
+
+def _fmt_sec(value) -> str:
+    if value is None:
+        return "n/a"
+    try:
+        return f"{float(value):.3f}s"
+    except Exception:
+        return "n/a"
+
+
+def build_run_summary(
+    *,
+    dataset_name: str,
+    model_name: str,
+    run_idx: int,
+    seed: int,
+    elapsed: float,
+    run_details: dict | None,
+    dag_metrics: dict,
+    cpdag_metrics: dict,
+) -> dict:
+    summary = {
+        "dataset": dataset_name,
+        "model": model_name,
+        "run_idx": int(run_idx),
+        "seed": int(seed),
+        "elapsed_sec": float(elapsed),
+        "dag": _clean_metric_subset(dag_metrics, ["precision", "recall", "F1", "shd", "sid"]),
+        "cpdag": _clean_metric_subset(cpdag_metrics, ["precision", "recall", "F1", "shd", "sid_low", "sid_high"]),
+    }
+    if not isinstance(run_details, dict):
+        return summary
+
+    profile = run_details.get("solver_profile")
+    if not isinstance(profile, dict):
+        summary["remove_n"] = _clean_scalar(run_details.get("remove_n"))
+        return summary
+
+    satcheck_records = list(profile.get("satcheck_records") or [])
+    satcheck_secs: list[float] = []
+    satcheck_statuses: Counter[str] = Counter()
+    satcheck_labels: Counter[str] = Counter()
+    for record in satcheck_records:
+        if not isinstance(record, dict):
+            continue
+        try:
+            satcheck_secs.append(float(record.get("sec", 0.0) or 0.0))
+        except Exception:
+            pass
+        status = str(record.get("status", "")).lower()
+        label = str(record.get("label", ""))
+        if status:
+            satcheck_statuses[status] += 1
+        if label:
+            satcheck_labels[label] += 1
+
+    compile_sec = _profile_float(profile, "compile_sec_total")
+    gen_sec = _profile_float(profile, "write_gen_lp_sec")
+    load_encoding_sec = _profile_float(profile, "load_encoding_sec")
+    load_facts_sec = _profile_float(profile, "load_facts_sec")
+    load_wc_sec = _profile_float(profile, "load_wc_sec")
+    add_bayesball_sec = _profile_float(profile, "add_bayesball_sec")
+    build_sec = compile_sec + gen_sec + load_encoding_sec + load_facts_sec + load_wc_sec + add_bayesball_sec
+    ground_sec = _profile_float(profile, "ground_sec_total")
+    final_solve_sec = _profile_float(profile, "final_opt_sec")
+    satcheck_total_sec = sum(satcheck_secs) if satcheck_secs else _profile_float(profile, "sat_check_sec_total")
+    first_solve_sec = max(
+        0.0,
+        _profile_float(profile, "solve_sec_total") - _profile_float(profile, "sat_check_sec_total") - final_solve_sec,
+    )
+
+    summary.update(
+        {
+            "scenario": run_details.get("scenario"),
+            "remove_n": _clean_scalar(profile.get("remove_n", run_details.get("remove_n"))),
+            "best_unsat_removed": _clean_scalar(profile.get("best_unsat_removed")),
+            "best_sat_removed": _clean_scalar(profile.get("best_sat_removed")),
+            "approximate_remove_search": bool(profile.get("remove_search_approximate", False)),
+            "satcheck_resume": bool(profile.get("satcheck_resume", False)),
+            "build_sec": build_sec,
+            "build_breakdown": {
+                "compile_sec": compile_sec,
+                "gen_facts_sec": gen_sec,
+                "load_encoding_sec": load_encoding_sec,
+                "load_facts_sec": load_facts_sec,
+                "load_wc_sec": load_wc_sec,
+                "add_bayesball_sec": add_bayesball_sec,
+            },
+            "ground_sec": ground_sec,
+            "first_solve_sec": first_solve_sec,
+            "final_solve_sec": final_solve_sec,
+            "final_solve_config": {
+                "timeout_sec": _clean_scalar(profile.get("final_solve_timeout")),
+                "opt_mode": _clean_scalar(profile.get("final_solve_opt_mode")),
+                "n_models": _clean_scalar(profile.get("final_solve_n_models")),
+            },
+            "satchecks": {
+                "calls": int(len(satcheck_records)),
+                "total_sec": satcheck_total_sec,
+                "avg_sec": (satcheck_total_sec / len(satcheck_records)) if satcheck_records else 0.0,
+                "min_sec": min(satcheck_secs) if satcheck_secs else 0.0,
+                "max_sec": max(satcheck_secs) if satcheck_secs else 0.0,
+                "sat": int(satcheck_statuses.get("sat", 0)),
+                "unsat": int(satcheck_statuses.get("unsat", 0)),
+                "unknown": int(satcheck_statuses.get("unknown", 0)),
+                "labels": dict(sorted(satcheck_labels.items())),
+            },
+        }
+    )
+    return summary
+
+
+def log_run_summary(summary: dict) -> None:
+    satchecks = summary.get("satchecks")
+    if isinstance(satchecks, dict):
+        logging.info(
+            "[run-summary] dataset=%s model=%s run=%s seed=%s elapsed=%s build=%s ground=%s first_solve=%s "
+            "satchecks=%d total=%s avg=%s min=%s max=%s sat=%d unsat=%d unknown=%d final_solve=%s "
+            "remove_n=%s bracket=[%s,%s] approximate=%s resumed=%s",
+            summary.get("dataset"),
+            summary.get("model"),
+            summary.get("run_idx"),
+            summary.get("seed"),
+            _fmt_sec(summary.get("elapsed_sec")),
+            _fmt_sec(summary.get("build_sec")),
+            _fmt_sec(summary.get("ground_sec")),
+            _fmt_sec(summary.get("first_solve_sec")),
+            int(satchecks.get("calls", 0) or 0),
+            _fmt_sec(satchecks.get("total_sec")),
+            _fmt_sec(satchecks.get("avg_sec")),
+            _fmt_sec(satchecks.get("min_sec")),
+            _fmt_sec(satchecks.get("max_sec")),
+            int(satchecks.get("sat", 0) or 0),
+            int(satchecks.get("unsat", 0) or 0),
+            int(satchecks.get("unknown", 0) or 0),
+            _fmt_sec(summary.get("final_solve_sec")),
+            summary.get("remove_n"),
+            summary.get("best_unsat_removed"),
+            summary.get("best_sat_removed"),
+            summary.get("approximate_remove_search"),
+            summary.get("satcheck_resume"),
+        )
+        labels = satchecks.get("labels")
+        if labels:
+            logging.info("[run-summary] satcheck_labels=%s", labels)
+        build_breakdown = summary.get("build_breakdown")
+        if build_breakdown:
+            logging.info("[run-summary] build_breakdown=%s", build_breakdown)
+        final_solve_config = summary.get("final_solve_config")
+        if final_solve_config:
+            logging.info("[run-summary] final_solve_config=%s", final_solve_config)
+    else:
+        logging.info(
+            "[run-summary] dataset=%s model=%s run=%s seed=%s elapsed=%s",
+            summary.get("dataset"),
+            summary.get("model"),
+            summary.get("run_idx"),
+            summary.get("seed"),
+            _fmt_sec(summary.get("elapsed_sec")),
+        )
+    logging.info("[run-summary] dag=%s cpdag=%s", summary.get("dag"), summary.get("cpdag"))
+
+
 # CLI
 parser = argparse.ArgumentParser(
     description='Run causal discovery experiments on CauseNet or BNLearn datasets',
@@ -214,9 +504,20 @@ parser.add_argument('--return_statistics', type=str_to_bool, default=False, meta
 parser.add_argument('--out_n', type=int, default=5, help='ABAPC: number of output models to request')   
 parser.add_argument('--threads', type=int, default=None, help='ABAPC/CausalABA: clingo solver threads (-t); smaller uses less memory, default is to let clingo decide based on available cores')
 parser.add_argument('--solve_timeout', type=float, default=None, help='ABAPC/CausalABA: optional wall-time limit per clingo solve call (seconds)')
+parser.add_argument('--final-solve-timeout', '--final_solve_timeout', dest='final_solve_timeout', type=float, default=None, help='ABAPC/CausalABA incremental: optional wall-time limit for the final solve only (seconds); use 0 to disable even if --solve_timeout is set')
+parser.add_argument('--final-solve-opt-mode', '--final_solve_opt_mode', dest='final_solve_opt_mode', choices=['ignore', 'opt', 'optN'], default=None, help='ABAPC/CausalABA incremental: opt_mode to use for the final solve only; defaults to the solver opt_mode')
+parser.add_argument('--final-solve-n-models', '--final_solve_n_models', dest='final_solve_n_models', type=int, default=None, help='ABAPC/CausalABA incremental: models limit for the final solve only; defaults to --out_n')
 parser.add_argument('--satcheck_timeout', type=float, default=None, help='ABAPC/CausalABA: optional wall-time limit per satcheck during removal search (seconds); defaults to --solve_timeout')
 parser.add_argument('--satcheck_threads', type=int, default=None, help='ABAPC/CausalABA: solver threads to use for satchecks during removal search; defaults to --threads')
 parser.add_argument('--satcheck_probe_limit', type=int, default=8, help='ABAPC/CausalABA: number of alternate removal counts to probe when a satcheck times out')
+parser.add_argument('--satcheck_frontier_crawl', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC/CausalABA: bias plateau search toward the SAT frontier instead of plain midpoint search')
+parser.add_argument('--satcheck_promoted_retry', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC/CausalABA: retry frontier-adjacent UNKNOWN satchecks with a larger timeout budget')
+parser.add_argument('--satcheck_promoted_retry_timeout_scale', type=float, default=2.0, help='ABAPC/CausalABA: timeout multiplier used for promoted retries of UNKNOWN satchecks')
+parser.add_argument('--satcheck_promoted_retry_max_retries', type=int, default=1, help='ABAPC/CausalABA: maximum number of promoted retries per UNKNOWN removal count')
+parser.add_argument('--satcheck_portfolio', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC/CausalABA: use a small plateau portfolio of alternative candidates before full probe fallback')
+parser.add_argument('--satcheck_portfolio_size', type=int, default=3, help='ABAPC/CausalABA: number of candidates in each plateau portfolio batch')
+parser.add_argument('--satcheck_portfolio_timeout_scale', type=float, default=0.5, help='ABAPC/CausalABA: timeout ratio for each plateau portfolio candidate')
+parser.add_argument('--satcheck_portfolio_min_timeout', type=float, default=180.0, help='ABAPC/CausalABA: minimum timeout in seconds for each plateau portfolio candidate')
 parser.add_argument('--adaptive_satcheck_threads', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC/CausalABA: adapt satcheck threads using timeout+memory signals and persist recommendations across resumed runs')
 parser.add_argument('--satcheck_min_threads', type=int, default=1, help='ABAPC/CausalABA: lower bound for adaptive satcheck thread tuning')
 parser.add_argument('--satcheck_increase_step', type=int, default=2, help='ABAPC/CausalABA: additive thread increase used by the adaptive satcheck tuner after low-memory timeouts')
@@ -249,6 +550,7 @@ version = args.version
 results_path = Path(args.results_dir)
 results_path.mkdir(parents=True, exist_ok=True)
 logger_setup(str(results_path / f'log_{version}.log'))
+run_manifest_path = record_run_manifest(results_path=results_path, version=version, args=args)
 
 # Log which code is actually executing/imported. This helps detect accidental
 # execution from a different checkout (e.g., ArgCausalDisco vs ArgCausalDisco-1).
@@ -261,6 +563,8 @@ try:
     logging.info(f"abapc.py path: {_abapc_mod.__file__}")
 except Exception as _e:  # pragma: no cover
     logging.warning(f"Could not log import paths: {_e}")
+
+logging.info(f"run_config manifest: {run_manifest_path}")
 
 
 # If this process is terminated externally (SIGTERM => exit code 143),
@@ -319,9 +623,20 @@ return_statistics = args.return_statistics
 out_n = args.out_n
 threads = args.threads
 solve_timeout = args.solve_timeout
+final_solve_timeout = args.final_solve_timeout
+final_solve_opt_mode = args.final_solve_opt_mode
+final_solve_n_models = args.final_solve_n_models
 satcheck_timeout = args.satcheck_timeout
 satcheck_threads = args.satcheck_threads
 satcheck_probe_limit = args.satcheck_probe_limit
+satcheck_frontier_crawl = args.satcheck_frontier_crawl
+satcheck_promoted_retry = args.satcheck_promoted_retry
+satcheck_promoted_retry_timeout_scale = args.satcheck_promoted_retry_timeout_scale
+satcheck_promoted_retry_max_retries = args.satcheck_promoted_retry_max_retries
+satcheck_portfolio = args.satcheck_portfolio
+satcheck_portfolio_size = args.satcheck_portfolio_size
+satcheck_portfolio_timeout_scale = args.satcheck_portfolio_timeout_scale
+satcheck_portfolio_min_timeout = args.satcheck_portfolio_min_timeout
 adaptive_satcheck_threads = args.adaptive_satcheck_threads
 satcheck_min_threads = args.satcheck_min_threads
 satcheck_increase_step = args.satcheck_increase_step
@@ -564,6 +879,7 @@ for dataset_name, src, info in datasets:
             if 'random' in method.lower():
                 random_stability(seed)
                 start = datetime.now()
+                run_details = None
                 if method == 'random_edge':
                     s0 = int(B_true.sum())
                 elif method == 'random':
@@ -588,7 +904,8 @@ for dataset_name, src, info in datasets:
                         'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
                     }
             else:
-                W_est, elapsed = run_method(
+                return_run_details = method == 'abapc'
+                run_output = run_method(
                     X_s, method, seed, test_alpha=test_alpha, test_name=test_name,
                     device=device, scenario=f"{method}_{version}_{dataset_name}",
                     S_weight=S_weight, pre_grounding=pre_grounding,
@@ -605,14 +922,31 @@ for dataset_name, src, info in datasets:
                     lcyc_ratio=lcyc_ratio,
                     threads=threads,
                     solve_timeout=solve_timeout,
+                    final_solve_timeout=final_solve_timeout,
+                    final_solve_opt_mode=final_solve_opt_mode,
+                    final_solve_n_models=final_solve_n_models,
                     satcheck_timeout=satcheck_timeout,
                     satcheck_threads=satcheck_threads,
                     satcheck_probe_limit=satcheck_probe_limit,
+                    satcheck_frontier_crawl=satcheck_frontier_crawl,
+                    satcheck_promoted_retry=satcheck_promoted_retry,
+                    satcheck_promoted_retry_timeout_scale=satcheck_promoted_retry_timeout_scale,
+                    satcheck_promoted_retry_max_retries=satcheck_promoted_retry_max_retries,
+                    satcheck_portfolio=satcheck_portfolio,
+                    satcheck_portfolio_size=satcheck_portfolio_size,
+                    satcheck_portfolio_timeout_scale=satcheck_portfolio_timeout_scale,
+                    satcheck_portfolio_min_timeout=satcheck_portfolio_min_timeout,
                     adaptive_satcheck_threads=adaptive_satcheck_threads,
                     satcheck_min_threads=satcheck_min_threads,
                     satcheck_increase_step=satcheck_increase_step,
                     abapc_solver=abapc_solver,
+                    return_run_details=return_run_details,
                 )
+                if return_run_details:
+                    W_est, elapsed, run_details = run_output
+                else:
+                    W_est, elapsed = run_output
+                    run_details = None
                 if 'Tensor' in str(type(W_est)):
                     W_est = np.asarray([list(i) for i in W_est])
                 logger_setup(str(results_path / f'log_{version}.log'), continue_logging=True)
@@ -678,6 +1012,18 @@ for dataset_name, src, info in datasets:
             mt_cpdag['sid_low'] = mt_sid_low
             mt_cpdag['sid_high'] = mt_sid_high
             cpdag_row = {'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_cpdag, 'run_idx': idx, 'seed': seed}
+
+            run_summary = build_run_summary(
+                dataset_name=dataset_name,
+                model_name=display_name,
+                run_idx=idx,
+                seed=seed,
+                elapsed=elapsed,
+                run_details=run_details,
+                dag_metrics=dag_row,
+                cpdag_metrics=cpdag_row,
+            )
+            log_run_summary(run_summary)
 
             append_progress_row(dag_progress_path, dag_row, DAG_PROGRESS_COLUMNS)
             append_progress_row(cpdag_progress_path, cpdag_row, CPDAG_PROGRESS_COLUMNS)

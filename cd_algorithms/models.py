@@ -121,17 +121,28 @@ def run_method(X,
                lcyc_ratio:float|None=None,
                threads:int|None=None,
                solve_timeout:float|None=None,
+               final_solve_timeout:float|None=None,
+               final_solve_opt_mode:str|None=None,
+               final_solve_n_models:int|None=None,
                satcheck_timeout:float|None=None,
                satcheck_threads:int|None=None,
                satcheck_probe_limit:int=8,
+               satcheck_frontier_crawl:bool=True,
+               satcheck_promoted_retry:bool=True,
+               satcheck_promoted_retry_timeout_scale:float=2.0,
+               satcheck_promoted_retry_max_retries:int=1,
+               satcheck_portfolio:bool=True,
+               satcheck_portfolio_size:int=3,
+               satcheck_portfolio_timeout_scale:float=0.5,
+               satcheck_portfolio_min_timeout:float=180.0,
                adaptive_satcheck_threads:bool=False,
                satcheck_min_threads:int=1,
                satcheck_increase_step:int=2,
                abapc_solver:str='incremental',
+               return_run_details:bool=False,
                ):
     """
     Runs the causal discovery method specified by method on the data X
-
     Parameters
     ----------
     X : np.array or pd.DataFrame to run the method on
@@ -152,6 +163,8 @@ def run_method(X,
         Time taken to run the method
 
     """
+
+    run_details = None
 
     ##---------MODELS--------------
     if method == 'nt':
@@ -301,27 +314,43 @@ def run_method(X,
         if cycle_length is None and lcyc_ratio is not None and n >= 3:
             lcyc_max = n
             cycle_length = max(3, min(lcyc_max, int(floor(lcyc_ratio * lcyc_max))))
-        W_est = ABAPC(data=X, alpha=test_alpha, indep_test=test_name,
-                      scenario=scenario, S_weight=S_weight, pre_grounding=pre_grounding,
-                      skeleton_rules_reduction=skeleton_rules_reduction,
-                      disable_reground=disable_reground,
-                      return_statistics=return_statistics, out_n=out_n,
-                      use_incremental=(abapc_solver == 'incremental'),
-                      # Bounds
-                      max_path_length=max_path_length,
-                      max_conditioning_size=max_conditioning_size,
-                      collider_tree_depth=collider_tree_depth,
-                      cycle_length=cycle_length,
-                      # Solver threads
-                      threads=threads,
-                      solve_timeout=solve_timeout,
-                      satcheck_timeout=satcheck_timeout,
-                      satcheck_threads=satcheck_threads,
-                      satcheck_probe_limit=satcheck_probe_limit,
-                      adaptive_satcheck_threads=adaptive_satcheck_threads,
-                      satcheck_min_threads=satcheck_min_threads,
-                      satcheck_increase_step=satcheck_increase_step,
-                      )
+        abapc_result = ABAPC(data=X, alpha=test_alpha, indep_test=test_name,
+                             scenario=scenario, S_weight=S_weight, pre_grounding=pre_grounding,
+                             skeleton_rules_reduction=skeleton_rules_reduction,
+                             disable_reground=disable_reground,
+                             return_statistics=return_statistics, out_n=out_n,
+                             return_run_details=return_run_details,
+                             use_incremental=(abapc_solver == 'incremental'),
+                             # Bounds
+                             max_path_length=max_path_length,
+                             max_conditioning_size=max_conditioning_size,
+                             collider_tree_depth=collider_tree_depth,
+                             cycle_length=cycle_length,
+                             # Solver threads
+                             threads=threads,
+                             solve_timeout=solve_timeout,
+                             final_solve_timeout=final_solve_timeout,
+                             final_solve_opt_mode=final_solve_opt_mode,
+                             final_solve_n_models=final_solve_n_models,
+                             satcheck_timeout=satcheck_timeout,
+                             satcheck_threads=satcheck_threads,
+                             satcheck_probe_limit=satcheck_probe_limit,
+                             satcheck_frontier_crawl=satcheck_frontier_crawl,
+                             satcheck_promoted_retry=satcheck_promoted_retry,
+                             satcheck_promoted_retry_timeout_scale=satcheck_promoted_retry_timeout_scale,
+                             satcheck_promoted_retry_max_retries=satcheck_promoted_retry_max_retries,
+                             satcheck_portfolio=satcheck_portfolio,
+                             satcheck_portfolio_size=satcheck_portfolio_size,
+                             satcheck_portfolio_timeout_scale=satcheck_portfolio_timeout_scale,
+                             satcheck_portfolio_min_timeout=satcheck_portfolio_min_timeout,
+                             adaptive_satcheck_threads=adaptive_satcheck_threads,
+                             satcheck_min_threads=satcheck_min_threads,
+                             satcheck_increase_step=satcheck_increase_step,
+                             )
+        if return_run_details:
+            W_est, run_details = abapc_result
+        else:
+            W_est = abapc_result
         elapsed = time.time() - start
         logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')
 
@@ -387,4 +416,6 @@ def run_method(X,
         elapsed = time.time() - start
         logging.info(f'Time taken for CAM: {round(elapsed,2)}s')
 
+    if return_run_details:
+        return W_est, elapsed, run_details
     return W_est, elapsed

@@ -58,6 +58,7 @@ def ABAPC(data,
           skeleton_rules_reduction=True, pre_grounding=False, 
           disable_reground=False, prior_knowledge=None, 
           return_statistics=False, out_n=0,
+          return_run_details: bool = False,
           # Bounds for Causal ABA
           max_path_length: int | None = None,
           max_conditioning_size: int | None = None,
@@ -65,9 +66,20 @@ def ABAPC(data,
           cycle_length: int | None = None,
           threads: int | None = None,
           solve_timeout: float | None = None,
+          final_solve_timeout: float | None = None,
+          final_solve_opt_mode: str | None = None,
+          final_solve_n_models: int | None = None,
           satcheck_timeout: float | None = None,
           satcheck_threads: int | None = None,
           satcheck_probe_limit: int = 8,
+          satcheck_frontier_crawl: bool = True,
+          satcheck_promoted_retry: bool = True,
+          satcheck_promoted_retry_timeout_scale: float = 2.0,
+          satcheck_promoted_retry_max_retries: int = 1,
+          satcheck_portfolio: bool = True,
+          satcheck_portfolio_size: int = 3,
+          satcheck_portfolio_timeout_scale: float = 0.5,
+          satcheck_portfolio_min_timeout: float = 180.0,
           adaptive_satcheck_threads: bool = False,
           satcheck_min_threads: int = 1,
           satcheck_increase_step: int = 2,
@@ -176,6 +188,10 @@ def ABAPC(data,
         except ImportError:  # pragma: no cover
             from causalaba import CausalABA as CausalSolver
 
+    solver_stats = None
+    solver_remove_n = 0
+    solver_profile = None
+    solver_return_statistics = bool(return_statistics or return_run_details)
     solver_kwargs = dict(
         weak_constraints=True,
         skeleton_rules_reduction=skeleton_rules_reduction,
@@ -187,7 +203,7 @@ def ABAPC(data,
         pre_grounding=pre_grounding,
         disable_reground=disable_reground,
         prior_knowledge=prior_knowledge,
-        return_statistics=return_statistics,
+        return_statistics=solver_return_statistics,
         out_n=out_n,
         # Bounds
         max_path_length=max_path_length,
@@ -201,18 +217,51 @@ def ABAPC(data,
     if use_incremental:
         solver_kwargs.update(
             satcheck_timeout=satcheck_timeout,
+            final_solve_timeout=final_solve_timeout,
+            final_solve_opt_mode=final_solve_opt_mode,
+            final_solve_n_models=final_solve_n_models,
             satcheck_threads=satcheck_threads,
             satcheck_probe_limit=satcheck_probe_limit,
+            satcheck_frontier_crawl=satcheck_frontier_crawl,
+            satcheck_promoted_retry=satcheck_promoted_retry,
+            satcheck_promoted_retry_timeout_scale=satcheck_promoted_retry_timeout_scale,
+            satcheck_promoted_retry_max_retries=satcheck_promoted_retry_max_retries,
+            satcheck_portfolio=satcheck_portfolio,
+            satcheck_portfolio_size=satcheck_portfolio_size,
+            satcheck_portfolio_timeout_scale=satcheck_portfolio_timeout_scale,
+            satcheck_portfolio_min_timeout=satcheck_portfolio_min_timeout,
             adaptive_satcheck_threads=adaptive_satcheck_threads,
             satcheck_min_threads=satcheck_min_threads,
             satcheck_increase_step=satcheck_increase_step,
         )
 
-    model_sets, multiple_solutions = CausalSolver(
+    solver_result = CausalSolver(
         n_nodes,
         facts_location,
         **solver_kwargs,
     )
+    if solver_return_statistics:
+        if len(solver_result) >= 5:
+            model_sets, multiple_solutions, solver_stats, solver_remove_n, solver_profile = solver_result[:5]
+        elif len(solver_result) >= 4:
+            model_sets, multiple_solutions, solver_stats, solver_remove_n = solver_result[:4]
+        else:
+            raise ValueError("Unexpected solver return shape when return_statistics=True")
+    else:
+        model_sets, multiple_solutions = solver_result
+
+    run_details = None
+    if return_run_details:
+        run_details = {
+            "scenario": scenario,
+            "facts_location": facts_location,
+            "facts_wc_location": facts_location_wc,
+            "facts_I_location": facts_location_I,
+            "multiple_solutions": bool(multiple_solutions),
+            "remove_n": int(solver_remove_n or 0),
+            "solver_statistics": solver_stats,
+            "solver_profile": solver_profile,
+        }
 
     if multiple_solutions:
         for model in model_sets:
@@ -227,11 +276,14 @@ def ABAPC(data,
         B_est = np.zeros((n_nodes, n_nodes))
         for edge in single_model:
             B_est[edge[0], edge[1]] = 1
+        if run_details is not None:
+            run_details["model_count"] = int(len(models))
         if out_mode == "optN":
             # Return the model set and its adjacency matrix
-            return models, B_est
+            result = (models, B_est)
+            return (result, run_details) if return_run_details else result
         else:
-            return B_est
+            return (B_est, run_details) if return_run_details else B_est
 
     if len(set_of_model_sets) > 0:
         logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
@@ -278,13 +330,18 @@ def ABAPC(data,
 
     logging.info(f"Best model by I:")
     logging.info(B_est)
+    if run_details is not None:
+        run_details["model_count"] = int(len(models))
+        run_details["selected_model_rank"] = int(best_model[0][0])
+        run_details["selected_model_score"] = float(best_model[0][1])
 
     if out_mode == "opt":
         del models, model_ranking, model_sets, MECs, facts, I_from_data
         gc.collect()
-        return B_est
+        return (B_est, run_details) if return_run_details else B_est
     elif out_mode == "optN":
-        return models, best_model
+        result = (models, best_model)
+        return (result, run_details) if return_run_details else result
     else:
         raise ValueError("out_mode must be either 'opt' or 'optN'")
 

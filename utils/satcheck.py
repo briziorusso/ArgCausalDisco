@@ -18,6 +18,8 @@ except ImportError:  # pragma: no cover
 SolveStatus = Literal["sat", "unsat", "unknown"]
 _GAP_AWARE_UNKNOWN_THRESHOLD = 2
 _FRONTIER_UNKNOWN_THRESHOLD = 4
+_PORTFOLIO_UNKNOWN_THRESHOLD = 3
+_RETRY_UNKNOWN_THRESHOLD = 6
 
 
 def solve_with_timeout(
@@ -633,6 +635,7 @@ class SatcheckSearchCheckpoint:
         hi: int,
         mid: int,
         call: int,
+        timeout_budget_sec: float | None = None,
     ) -> None:
         removed = int(removed)
         status = status.lower()
@@ -641,6 +644,8 @@ class SatcheckSearchCheckpoint:
             "sec": float(sec),
             "label": str(label),
         }
+        if timeout_budget_sec is not None:
+            self.cache[removed]["timeout_budget_sec"] = float(timeout_budget_sec)
         self.records.append(
             {
                 "call": int(call),
@@ -651,6 +656,7 @@ class SatcheckSearchCheckpoint:
                 "status": status,
                 "sec": float(sec),
                 "label": str(label),
+                "timeout_budget_sec": float(timeout_budget_sec) if timeout_budget_sec is not None else None,
             }
         )
         if status == "unknown":
@@ -680,10 +686,22 @@ def run_remove_search(
     checkpoint: SatcheckSearchCheckpoint,
     satcheck_probe_limit: int,
     logger: logging.Logger,
-    solve_removed: Callable[[int], SolveStatus],
+    solve_removed: Callable[[int, float | None], SolveStatus],
+    base_satcheck_timeout: float | None = None,
+    enable_frontier_crawl: bool = True,
+    enable_promoted_retry: bool = True,
+    promoted_retry_timeout_scale: float = 2.0,
+    promoted_retry_max_retries: int = 1,
+    enable_portfolio: bool = True,
+    portfolio_size: int = 3,
+    portfolio_timeout_scale: float = 0.5,
+    portfolio_min_timeout: float = 180.0,
 ) -> RemoveSearchResult:
     total_facts = max(0, int(total_facts))
     probe_limit = max(0, int(satcheck_probe_limit or 0))
+    promoted_retry_max_retries = max(0, int(promoted_retry_max_retries or 0))
+    portfolio_size = max(0, int(portfolio_size or 0))
+    portfolio_min_timeout = max(0.0, float(portfolio_min_timeout or 0.0))
     restored_summary = checkpoint.summary()
     satcheck_records: list[dict[str, Any]] = list(checkpoint.records)
     best_sat_removed: int | None = checkpoint.best_sat_removed
@@ -714,6 +732,42 @@ def run_remove_search(
 
     satcheck_cache: dict[int, dict[str, Any]] = dict(checkpoint.cache)
     satcheck_call_count = 0
+    unknown_attempts_by_removed: dict[int, int] = {}
+    last_timeout_budget_by_removed: dict[int, float | None] = {}
+    promoted_retry_attempts_by_removed: dict[int, int] = {}
+    for record in satcheck_records:
+        try:
+            removed = int(record.get("removed"))
+        except Exception:
+            continue
+        timeout_budget = record.get("timeout_budget_sec", base_satcheck_timeout)
+        try:
+            last_timeout_budget_by_removed[removed] = None if timeout_budget is None else float(timeout_budget)
+        except Exception:
+            last_timeout_budget_by_removed[removed] = base_satcheck_timeout
+        if str(record.get("label", "")).startswith("retry-frontier"):
+            promoted_retry_attempts_by_removed[removed] = promoted_retry_attempts_by_removed.get(removed, 0) + 1
+        if str(record.get("status", "")).lower() == "unknown":
+            unknown_attempts_by_removed[removed] = unknown_attempts_by_removed.get(removed, 0) + 1
+
+    def _portfolio_timeout_budget() -> float | None:
+        if base_satcheck_timeout is None:
+            return None
+        reduced = float(base_satcheck_timeout) * max(0.0, float(portfolio_timeout_scale))
+        return min(float(base_satcheck_timeout), max(portfolio_min_timeout, reduced))
+
+    def _promoted_retry_budget(removed: int) -> float | None:
+        if base_satcheck_timeout is None:
+            return None
+        unknown_attempts = unknown_attempts_by_removed.get(removed, 0)
+        if unknown_attempts <= 0:
+            return None
+        growth = max(0.0, float(promoted_retry_timeout_scale) - 1.0)
+        budget = float(base_satcheck_timeout) * (1.0 + growth * float(unknown_attempts))
+        prev_budget = last_timeout_budget_by_removed.get(removed, base_satcheck_timeout)
+        if prev_budget is not None and budget <= float(prev_budget) + 1e-9:
+            return None
+        return budget
 
     def _unknown_points(lo_now: int, hi_now: int) -> list[int]:
         return sorted(
@@ -738,7 +792,7 @@ def run_remove_search(
         )
         gap_infos.sort(key=lambda item: (item[0], item[1]), reverse=True)
 
-        if len(unknowns) >= _FRONTIER_UNKNOWN_THRESHOLD and gap_infos:
+        if enable_frontier_crawl and len(unknowns) >= _FRONTIER_UNKNOWN_THRESHOLD and gap_infos:
             upper_half = [info for info in gap_infos if info[1] > default_mid]
             frontier_infos = upper_half if upper_half else gap_infos
             frontier_infos.sort(key=lambda item: (item[0], item[1]), reverse=True)
@@ -771,16 +825,31 @@ def run_remove_search(
 
         return default_mid, "mid"
 
-    def _run_satcheck(removed: int, *, lo_now: int, hi_now: int, mid_now: int, label: str) -> SolveStatus:
+    def _run_satcheck(
+        removed: int,
+        *,
+        lo_now: int,
+        hi_now: int,
+        mid_now: int,
+        label: str,
+        timeout_override: float | None = None,
+        force_retry_unknown: bool = False,
+    ) -> SolveStatus:
         nonlocal satcheck_call_count, best_sat_removed, best_unsat_removed, approximate_remove_search
         removed = max(0, min(total_facts, int(removed)))
+        effective_timeout = timeout_override if timeout_override is not None else base_satcheck_timeout
         cached = satcheck_cache.get(removed)
         if cached is not None:
-            return cast(SolveStatus, cached["status"])
+            cached_status = cast(SolveStatus, cached["status"])
+            if cached_status != "unknown" or not force_retry_unknown:
+                return cached_status
+            prev_budget = last_timeout_budget_by_removed.get(removed, base_satcheck_timeout)
+            if effective_timeout is None or (prev_budget is not None and float(prev_budget) >= float(effective_timeout) - 1e-9):
+                return cached_status
 
         satcheck_call_count += 1
         logger.info(
-            "[satcheck] call=%d baseline=%s lo=%d hi=%d mid=%d removed=%d label=%s",
+            "[satcheck] call=%d baseline=%s lo=%d hi=%d mid=%d removed=%d label=%s budget=%s",
             satcheck_call_count,
             satcheck_baseline if satcheck_baseline is not None else "?",
             lo_now,
@@ -788,15 +857,18 @@ def run_remove_search(
             mid_now,
             removed,
             label,
+            "none" if effective_timeout is None else f"{float(effective_timeout):.1f}s",
         )
         t0 = time.perf_counter()
-        status = solve_removed(removed)
+        status = solve_removed(removed, effective_timeout)
         t1 = time.perf_counter()
         satcheck_cache[removed] = {
             "status": status,
             "sec": float(t1 - t0),
             "label": label,
         }
+        if effective_timeout is not None:
+            satcheck_cache[removed]["timeout_budget_sec"] = float(effective_timeout)
         satcheck_records.append(
             {
                 "call": int(satcheck_call_count),
@@ -807,6 +879,7 @@ def run_remove_search(
                 "status": status,
                 "sec": float(t1 - t0),
                 "label": label,
+                "timeout_budget_sec": float(effective_timeout) if effective_timeout is not None else None,
             }
         )
         checkpoint.record(
@@ -818,7 +891,13 @@ def run_remove_search(
             hi=hi_now,
             mid=mid_now,
             call=int(satcheck_call_count),
+            timeout_budget_sec=effective_timeout,
         )
+        last_timeout_budget_by_removed[removed] = effective_timeout
+        if status == "unknown":
+            unknown_attempts_by_removed[removed] = unknown_attempts_by_removed.get(removed, 0) + 1
+        if label.startswith("retry-frontier"):
+            promoted_retry_attempts_by_removed[removed] = promoted_retry_attempts_by_removed.get(removed, 0) + 1
         logger.info(
             "[satcheck] result=%s sec=%.3f lo=%d hi=%d mid=%d removed=%d",
             status.upper(),
@@ -836,6 +915,102 @@ def run_remove_search(
             approximate_remove_search = True
         return status
 
+    def _build_portfolio_candidates(lo_now: int, hi_now: int, mid_now: int) -> list[int]:
+        if portfolio_size <= 0:
+            return []
+        candidates: list[int] = []
+        for cand in build_probe_candidates(lo_now, hi_now, mid_now, max(portfolio_size * 3, portfolio_size)):
+            if cand in satcheck_cache:
+                continue
+            candidates.append(cand)
+            if len(candidates) >= portfolio_size:
+                break
+        return candidates
+
+    def _run_portfolio(lo_now: int, hi_now: int, mid_now: int) -> tuple[int, SolveStatus] | None:
+        unknowns = _unknown_points(lo_now, hi_now)
+        if (
+            not enable_portfolio
+            or base_satcheck_timeout is None
+            or portfolio_size <= 0
+            or len(unknowns) < _PORTFOLIO_UNKNOWN_THRESHOLD
+        ):
+            return None
+        timeout_budget = _portfolio_timeout_budget()
+        candidates = _build_portfolio_candidates(lo_now, hi_now, mid_now)
+        if not candidates:
+            return None
+        logger.info(
+            "[remove-search] portfolio candidates=%s budget=%s lo=%d hi=%d mid=%d unknowns=%d",
+            candidates,
+            "none" if timeout_budget is None else f"{float(timeout_budget):.1f}s",
+            lo_now,
+            hi_now,
+            mid_now,
+            len(unknowns),
+        )
+        for cand in candidates:
+            status = _run_satcheck(
+                cand,
+                lo_now=lo_now,
+                hi_now=hi_now,
+                mid_now=mid_now,
+                label="portfolio",
+                timeout_override=timeout_budget,
+            )
+            if status == "sat" and cand < hi_now:
+                return cand, status
+            if status == "unsat" and cand >= lo_now:
+                return cand, status
+        return None
+
+    def _retry_frontier_unknown(lo_now: int, hi_now: int, mid_now: int) -> tuple[int, SolveStatus] | None:
+        unknowns = _unknown_points(lo_now, hi_now)
+        if (
+            not enable_promoted_retry
+            or base_satcheck_timeout is None
+            or promoted_retry_max_retries <= 0
+            or len(unknowns) < _RETRY_UNKNOWN_THRESHOLD
+        ):
+            return None
+
+        sat_side = [u for u in sorted(unknowns, key=lambda u: (hi_now - u, u)) if u < hi_now]
+        unsat_side = [u for u in sorted(unknowns, key=lambda u: (u - lo_now, u)) if u >= lo_now]
+        frontier_candidates: list[tuple[int, str]] = []
+        if sat_side:
+            frontier_candidates.append((sat_side[0], "retry-frontier-sat"))
+        if unsat_side and (not frontier_candidates or unsat_side[0] != frontier_candidates[0][0]):
+            frontier_candidates.append((unsat_side[0], "retry-frontier-unsat"))
+        for cand, label in frontier_candidates:
+            if promoted_retry_attempts_by_removed.get(cand, 0) >= promoted_retry_max_retries:
+                continue
+            retry_budget = _promoted_retry_budget(cand)
+            if retry_budget is None:
+                continue
+            logger.info(
+                "[remove-search] promoted retry candidate=%d budget=%s label=%s lo=%d hi=%d unknowns=%d",
+                cand,
+                f"{float(retry_budget):.1f}s",
+                label,
+                lo_now,
+                hi_now,
+                len(unknowns),
+            )
+            status = _run_satcheck(
+                cand,
+                lo_now=lo_now,
+                hi_now=hi_now,
+                mid_now=mid_now,
+                label=label,
+                timeout_override=retry_budget,
+                force_retry_unknown=True,
+            )
+            if status == "sat" and cand < hi_now:
+                return cand, status
+            if status == "unsat" and cand >= lo_now:
+                return cand, status
+        return None
+
     def _probe_unknown(lo_now: int, hi_now: int, mid_now: int) -> tuple[int, SolveStatus] | None:
         for cand in build_probe_candidates(lo_now, hi_now, mid_now, probe_limit):
             status = _run_satcheck(
@@ -844,6 +1019,8 @@ def run_remove_search(
                 hi_now=hi_now,
                 mid_now=mid_now,
                 label="probe",
+                timeout_override=base_satcheck_timeout,
+                force_retry_unknown=(base_satcheck_timeout is not None),
             )
             if status == "sat" and cand < hi_now:
                 return cand, status
@@ -886,6 +1063,28 @@ def run_remove_search(
             if status == "unsat":
                 lo = mid + 1
                 best_unsat_removed = lo - 1 if best_unsat_removed is None else max(best_unsat_removed, lo - 1)
+                continue
+
+            portfolio_result = _run_portfolio(lo, hi, mid)
+            if portfolio_result is not None:
+                portfolio_removed, portfolio_status = portfolio_result
+                if portfolio_status == "sat":
+                    hi = min(hi, portfolio_removed)
+                    best_sat_removed = hi if best_sat_removed is None else min(best_sat_removed, hi)
+                else:
+                    lo = max(lo, portfolio_removed + 1)
+                    best_unsat_removed = lo - 1 if best_unsat_removed is None else max(best_unsat_removed, lo - 1)
+                continue
+
+            retry_result = _retry_frontier_unknown(lo, hi, mid)
+            if retry_result is not None:
+                retry_removed, retry_status = retry_result
+                if retry_status == "sat":
+                    hi = min(hi, retry_removed)
+                    best_sat_removed = hi if best_sat_removed is None else min(best_sat_removed, hi)
+                else:
+                    lo = max(lo, retry_removed + 1)
+                    best_unsat_removed = lo - 1 if best_unsat_removed is None else max(best_unsat_removed, lo - 1)
                 continue
 
             probe_result = _probe_unknown(lo, hi, mid)

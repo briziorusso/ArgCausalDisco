@@ -420,9 +420,20 @@ def CausalABA(
     debug_dump_materialize_block_edges: bool = False,
     debug_traces: bool = False,
     solve_timeout: float | None = None,
+    final_solve_timeout: float | None = None,
+    final_solve_opt_mode: str | None = None,
+    final_solve_n_models: int | None = None,
     satcheck_timeout: float | None = None,
     satcheck_threads: int | None = None,
     satcheck_probe_limit: int = 8,
+    satcheck_frontier_crawl: bool = True,
+    satcheck_promoted_retry: bool = True,
+    satcheck_promoted_retry_timeout_scale: float = 2.0,
+    satcheck_promoted_retry_max_retries: int = 1,
+    satcheck_portfolio: bool = True,
+    satcheck_portfolio_size: int = 3,
+    satcheck_portfolio_timeout_scale: float = 0.5,
+    satcheck_portfolio_min_timeout: float = 180.0,
     adaptive_satcheck_threads: bool = False,
     satcheck_min_threads: int = 1,
     satcheck_increase_step: int = 2,
@@ -823,10 +834,26 @@ def CausalABA(
         satcheck_timeout=satcheck_timeout,
         logger=logger,
     )
+    effective_final_solve_timeout = solve_timeout if final_solve_timeout is None else (
+        None if float(final_solve_timeout) <= 0.0 else float(final_solve_timeout)
+    )
+    effective_final_solve_opt_mode = str(final_solve_opt_mode) if final_solve_opt_mode is not None else str(opt_mode)
+    effective_final_solve_n_models = max(0, int(out_n) if final_solve_n_models is None else int(final_solve_n_models))
     satcheck_probe_limit = max(0, int(satcheck_probe_limit or 0))
     profile["satcheck_timeout"] = satcheck_timeout
     profile["satcheck_threads"] = satcheck_tuner.current_threads
     profile["satcheck_probe_limit"] = satcheck_probe_limit
+    profile["final_solve_timeout"] = effective_final_solve_timeout
+    profile["final_solve_opt_mode"] = effective_final_solve_opt_mode
+    profile["final_solve_n_models"] = effective_final_solve_n_models
+    profile["satcheck_frontier_crawl"] = bool(satcheck_frontier_crawl)
+    profile["satcheck_promoted_retry"] = bool(satcheck_promoted_retry)
+    profile["satcheck_promoted_retry_timeout_scale"] = float(satcheck_promoted_retry_timeout_scale)
+    profile["satcheck_promoted_retry_max_retries"] = int(satcheck_promoted_retry_max_retries)
+    profile["satcheck_portfolio"] = bool(satcheck_portfolio)
+    profile["satcheck_portfolio_size"] = int(satcheck_portfolio_size)
+    profile["satcheck_portfolio_timeout_scale"] = float(satcheck_portfolio_timeout_scale)
+    profile["satcheck_portfolio_min_timeout"] = float(satcheck_portfolio_min_timeout)
     profile["adaptive_satcheck_threads"] = satcheck_tuner.adaptive
     profile["satcheck_min_threads"] = satcheck_tuner.min_threads
     profile["satcheck_increase_step"] = satcheck_tuner.increase_step
@@ -1453,7 +1480,7 @@ def CausalABA(
 
     satcheck_stats = {"calls": 0, "sec": 0.0, "timeouts": 0, "unknown": 0}
 
-    def _is_satisfiable(*, removed: int) -> _SolveStatus:
+    def _is_satisfiable(*, removed: int, timeout_override: float | None = None) -> _SolveStatus:
         """Check satisfiability *without* spending time optimizing.
 
         Weak constraints never change satisfiable/unsatisfiable, but clingo's
@@ -1503,7 +1530,7 @@ def CausalABA(
             t0 = time.perf_counter()
             finished, solve_result = _solve_with_timeout(
                 ctl,
-                solve_timeout=satcheck_timeout,
+                solve_timeout=satcheck_timeout if timeout_override is None else timeout_override,
                 on_model=_on_model_sat,
                 assumptions=_assumptions_from_exts(),
             )
@@ -1589,18 +1616,26 @@ def CausalABA(
     else:
         _t_binsearch_start = time.perf_counter()
         logger.info(
-            "[remove-search] satcheck_timeout=%s satcheck_threads=%s probe_limit=%s adaptive=%s min_threads=%s step=%s total_mem=%s",
+            "[remove-search] satcheck_timeout=%s satcheck_threads=%s probe_limit=%s frontier=%s retry=%s retry_scale=%s retry_max=%s portfolio=%s portfolio_size=%s portfolio_scale=%s portfolio_min=%s adaptive=%s min_threads=%s step=%s total_mem=%s",
             satcheck_timeout,
             satcheck_tuner.current_threads,
             satcheck_probe_limit,
+            bool(satcheck_frontier_crawl),
+            bool(satcheck_promoted_retry),
+            satcheck_promoted_retry_timeout_scale,
+            satcheck_promoted_retry_max_retries,
+            bool(satcheck_portfolio),
+            satcheck_portfolio_size,
+            satcheck_portfolio_timeout_scale,
+            satcheck_portfolio_min_timeout,
             satcheck_tuner.adaptive,
             satcheck_tuner.min_threads,
             satcheck_tuner.increase_step,
             _mem.fmt_kib(satcheck_tuner.total_mem_kib),
         )
-        def _solve_removed(removed: int) -> _SolveStatus:
+        def _solve_removed(removed: int, timeout_override: float | None = None) -> _SolveStatus:
             _apply_removed(removed)
-            return _is_satisfiable(removed=removed)
+            return _is_satisfiable(removed=removed, timeout_override=timeout_override)
 
         search_result = _run_remove_search(
             total_facts=len(facts),
@@ -1608,6 +1643,15 @@ def CausalABA(
             satcheck_probe_limit=satcheck_probe_limit,
             logger=logger,
             solve_removed=_solve_removed,
+            base_satcheck_timeout=satcheck_timeout,
+            enable_frontier_crawl=bool(satcheck_frontier_crawl),
+            enable_promoted_retry=bool(satcheck_promoted_retry),
+            promoted_retry_timeout_scale=float(satcheck_promoted_retry_timeout_scale),
+            promoted_retry_max_retries=int(satcheck_promoted_retry_max_retries),
+            enable_portfolio=bool(satcheck_portfolio),
+            portfolio_size=int(satcheck_portfolio_size),
+            portfolio_timeout_scale=float(satcheck_portfolio_timeout_scale),
+            portfolio_min_timeout=float(satcheck_portfolio_min_timeout),
         )
         remove_n = int(search_result.remove_n)
         satcheck_records = search_result.satcheck_records
@@ -1655,18 +1699,39 @@ def CausalABA(
     models = []
     last_syms = None
     logger.info("   Solving...")
+    try:
+        final_cfg = cast(Any, ctl.configuration).solve
+    except Exception:
+        final_cfg = None
+    if final_cfg is not None:
+        try:
+            final_cfg.opt_mode = effective_final_solve_opt_mode
+        except Exception:
+            pass
+        try:
+            final_cfg.models = effective_final_solve_n_models
+        except Exception:
+            pass
+
     def _on_model_post(model):
         nonlocal last_syms
         syms = model.symbols(shown=True)
         last_syms = syms
-        if opt_mode in ("opt", "optN"):
+        if effective_final_solve_opt_mode in ("opt", "optN"):
             if getattr(model, 'optimality_proven', False):
                 models.append(syms)
             return
         if not models:
             models.append(syms)
 
-    logger.info("[final] starting solve opt_mode=%s removed=%s/%s", opt_mode, remove_n, len(facts))
+    logger.info(
+        "[final] starting solve opt_mode=%s models=%s timeout=%s removed=%s/%s",
+        effective_final_solve_opt_mode,
+        effective_final_solve_n_models,
+        effective_final_solve_timeout,
+        remove_n,
+        len(facts),
+    )
     hb_stop, _hb_thread = _start_heartbeat(
         logger,
         phase="final-solve",
@@ -1676,7 +1741,7 @@ def CausalABA(
     t_f0 = time.perf_counter()
     finished, _solve_result = _solve_with_timeout(
         ctl,
-        solve_timeout=solve_timeout,
+        solve_timeout=effective_final_solve_timeout,
         on_model=_on_model_post,
         assumptions=_assumptions_from_exts(),
     )
