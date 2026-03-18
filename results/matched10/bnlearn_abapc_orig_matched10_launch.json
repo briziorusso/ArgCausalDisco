@@ -1,0 +1,61 @@
+{
+  "version": "bnlearn_abapc_orig_matched10",
+  "ref": "origin/kr2024",
+  "worktree": "/vol/bitbucket/fr920/.legacy_worktrees/kr2024",
+  "names": [
+    "cancer",
+    "earthquake",
+    "survey",
+    "asia"
+  ],
+  "selected_seeds": [
+    7816,
+    3578,
+    2656,
+    2688,
+    2494,
+    183,
+    7977,
+    3199,
+    316,
+    8266
+  ],
+  "selection_rule": "first 10 seeds from random_stability(2024) + np.random.randint(0, 10000, (50,))",
+  "legacy_runner": "origin/kr2024:experiments_bnlearn.py + abapc.ABAPC",
+  "legacy_abapc_call": {
+    "alpha": 0.01,
+    "indep_test": "fisherz",
+    "S_weight": true,
+    "base_location": "/vol/bitbucket/fr920/ArgCausalDisco-1/results",
+    "out_mode": "opt",
+    "skeleton_rules_reduction": true
+  },
+  "command": [
+    "/vol/bitbucket/fr920/miniconda3/envs/aba-env/bin/python",
+    "/vol/bitbucket/fr920/ArgCausalDisco-1/scripts/run_bnlearn_abapc_orig_matched10.py",
+    "--worker",
+    "--version",
+    "bnlearn_abapc_orig_matched10",
+    "--worktree",
+    "/vol/bitbucket/fr920/.legacy_worktrees/kr2024",
+    "--sample-size",
+    "5000",
+    "--n-runs",
+    "10",
+    "--test-alpha",
+    "0.01",
+    "--test-name",
+    "fisherz",
+    "--bn-data-path",
+    "/vol/bitbucket/fr920/.legacy_worktrees/kr2024/datasets",
+    "--results-dir",
+    "/vol/bitbucket/fr920/ArgCausalDisco-1/results",
+    "--names",
+    "cancer",
+    "earthquake",
+    "survey",
+    "asia"
+  ],
+  "cwd": "/vol/bitbucket/fr920/ArgCausalDisco-1",
+  "python": "/vol/bitbucket/fr920/miniconda3/envs/aba-env/bin/python"
+}
