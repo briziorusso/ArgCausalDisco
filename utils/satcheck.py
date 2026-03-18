@@ -692,16 +692,32 @@ def run_remove_search(
     enable_promoted_retry: bool = True,
     promoted_retry_timeout_scale: float = 2.0,
     promoted_retry_max_retries: int = 1,
+    enable_retry_frontier_sat: bool = False,
     enable_portfolio: bool = True,
     portfolio_size: int = 3,
     portfolio_timeout_scale: float = 0.5,
     portfolio_min_timeout: float = 180.0,
+    enable_portfolio_throttle: bool = True,
+    portfolio_min_size: int = 2,
+    enable_plateau_stop: bool = True,
+    plateau_stop_width_ratio: float = 0.07,
+    plateau_stop_min_calls: int = 40,
+    plateau_stop_unknown_ratio: float = 0.80,
 ) -> RemoveSearchResult:
     total_facts = max(0, int(total_facts))
     probe_limit = max(0, int(satcheck_probe_limit or 0))
     promoted_retry_max_retries = max(0, int(promoted_retry_max_retries or 0))
     portfolio_size = max(0, int(portfolio_size or 0))
     portfolio_min_timeout = max(0.0, float(portfolio_min_timeout or 0.0))
+    portfolio_min_size = max(1, int(portfolio_min_size or 1))
+    plateau_stop_width_ratio = max(0.0, float(plateau_stop_width_ratio or 0.0))
+    plateau_stop_min_calls = max(0, int(plateau_stop_min_calls or 0))
+    plateau_stop_unknown_ratio = max(0.0, min(1.0, float(plateau_stop_unknown_ratio or 0.0)))
+    if total_facts > 0:
+        import math
+        effective_plateau_stop_width = max(1, int(math.ceil(float(total_facts) * plateau_stop_width_ratio)))
+    else:
+        effective_plateau_stop_width = 0
     restored_summary = checkpoint.summary()
     satcheck_records: list[dict[str, Any]] = list(checkpoint.records)
     best_sat_removed: int | None = checkpoint.best_sat_removed
@@ -729,12 +745,19 @@ def run_remove_search(
             restored_summary["timeout_mismatch"],
             restored_summary["dropped_unknown_records"],
         )
+    logger.info(
+        "[remove-search] plateau_stop_ratio=%.4f effective_plateau_width=%d total_facts=%d",
+        plateau_stop_width_ratio,
+        effective_plateau_stop_width,
+        total_facts,
+    )
 
     satcheck_cache: dict[int, dict[str, Any]] = dict(checkpoint.cache)
     satcheck_call_count = 0
     unknown_attempts_by_removed: dict[int, int] = {}
     last_timeout_budget_by_removed: dict[int, float | None] = {}
     promoted_retry_attempts_by_removed: dict[int, int] = {}
+    portfolio_all_unknown_batches_by_bracket: dict[tuple[int, int], int] = {}
     for record in satcheck_records:
         try:
             removed = int(record.get("removed"))
@@ -775,6 +798,31 @@ def run_remove_search(
             for removed, entry in satcheck_cache.items()
             if lo_now <= removed <= hi_now and entry.get("status") == "unknown"
         )
+
+    def _current_unknown_ratio() -> float:
+        if not satcheck_records:
+            return 0.0
+        unknown_calls = sum(1 for record in satcheck_records if str(record.get("status", "")).lower() == "unknown")
+        return float(unknown_calls) / float(len(satcheck_records))
+
+    def _current_bracket_width(lo_now: int, hi_now: int) -> int | None:
+        if best_sat_removed is None or best_unsat_removed is None:
+            return None
+        return int(best_sat_removed) - int(best_unsat_removed)
+
+    def _should_accept_plateau_approx(lo_now: int, hi_now: int) -> bool:
+        if not enable_plateau_stop:
+            return False
+        width = _current_bracket_width(lo_now, hi_now)
+        if width is None or width > effective_plateau_stop_width:
+            return False
+        if len(satcheck_records) < plateau_stop_min_calls:
+            return False
+        if _current_unknown_ratio() < plateau_stop_unknown_ratio:
+            return False
+        if len(_unknown_points(lo_now, hi_now)) < _RETRY_UNKNOWN_THRESHOLD:
+            return False
+        return best_sat_removed is not None
 
     def _choose_next_candidate(lo_now: int, hi_now: int) -> tuple[int, str]:
         default_mid = (lo_now + hi_now) // 2
@@ -915,15 +963,15 @@ def run_remove_search(
             approximate_remove_search = True
         return status
 
-    def _build_portfolio_candidates(lo_now: int, hi_now: int, mid_now: int) -> list[int]:
-        if portfolio_size <= 0:
+    def _build_portfolio_candidates(lo_now: int, hi_now: int, mid_now: int, limit: int) -> list[int]:
+        if limit <= 0:
             return []
         candidates: list[int] = []
-        for cand in build_probe_candidates(lo_now, hi_now, mid_now, max(portfolio_size * 3, portfolio_size)):
+        for cand in build_probe_candidates(lo_now, hi_now, mid_now, max(limit * 3, limit)):
             if cand in satcheck_cache:
                 continue
             candidates.append(cand)
-            if len(candidates) >= portfolio_size:
+            if len(candidates) >= limit:
                 break
         return candidates
 
@@ -936,19 +984,28 @@ def run_remove_search(
             or len(unknowns) < _PORTFOLIO_UNKNOWN_THRESHOLD
         ):
             return None
+        bracket_key = (int(lo_now), int(hi_now))
+        all_unknown_batches = portfolio_all_unknown_batches_by_bracket.get(bracket_key, 0)
+        effective_portfolio_size = portfolio_size
+        if enable_portfolio_throttle and all_unknown_batches > 0:
+            effective_portfolio_size = max(portfolio_min_size, portfolio_size - all_unknown_batches)
         timeout_budget = _portfolio_timeout_budget()
-        candidates = _build_portfolio_candidates(lo_now, hi_now, mid_now)
+        candidates = _build_portfolio_candidates(lo_now, hi_now, mid_now, effective_portfolio_size)
         if not candidates:
             return None
         logger.info(
-            "[remove-search] portfolio candidates=%s budget=%s lo=%d hi=%d mid=%d unknowns=%d",
+            "[remove-search] portfolio candidates=%s budget=%s lo=%d hi=%d mid=%d unknowns=%d size=%d/%d repeat_unknown_batches=%d",
             candidates,
             "none" if timeout_budget is None else f"{float(timeout_budget):.1f}s",
             lo_now,
             hi_now,
             mid_now,
             len(unknowns),
+            effective_portfolio_size,
+            portfolio_size,
+            all_unknown_batches,
         )
+        all_unknown = True
         for cand in candidates:
             status = _run_satcheck(
                 cand,
@@ -959,9 +1016,21 @@ def run_remove_search(
                 timeout_override=timeout_budget,
             )
             if status == "sat" and cand < hi_now:
+                portfolio_all_unknown_batches_by_bracket.pop(bracket_key, None)
                 return cand, status
             if status == "unsat" and cand >= lo_now:
+                portfolio_all_unknown_batches_by_bracket.pop(bracket_key, None)
                 return cand, status
+            if status != "unknown":
+                all_unknown = False
+        if all_unknown:
+            portfolio_all_unknown_batches_by_bracket[bracket_key] = all_unknown_batches + 1
+            logger.info(
+                "[remove-search] portfolio batch exhausted with all UNKNOWN results lo=%d hi=%d repeat_unknown_batches=%d",
+                lo_now,
+                hi_now,
+                portfolio_all_unknown_batches_by_bracket[bracket_key],
+            )
         return None
 
     def _retry_frontier_unknown(lo_now: int, hi_now: int, mid_now: int) -> tuple[int, SolveStatus] | None:
@@ -977,10 +1046,14 @@ def run_remove_search(
         sat_side = [u for u in sorted(unknowns, key=lambda u: (hi_now - u, u)) if u < hi_now]
         unsat_side = [u for u in sorted(unknowns, key=lambda u: (u - lo_now, u)) if u >= lo_now]
         frontier_candidates: list[tuple[int, str]] = []
-        if sat_side:
-            frontier_candidates.append((sat_side[0], "retry-frontier-sat"))
-        if unsat_side and (not frontier_candidates or unsat_side[0] != frontier_candidates[0][0]):
+        if unsat_side:
             frontier_candidates.append((unsat_side[0], "retry-frontier-unsat"))
+        if (
+            enable_retry_frontier_sat
+            and sat_side
+            and (not frontier_candidates or sat_side[0] != frontier_candidates[0][0])
+        ):
+            frontier_candidates.append((sat_side[0], "retry-frontier-sat"))
         for cand, label in frontier_candidates:
             if promoted_retry_attempts_by_removed.get(cand, 0) >= promoted_retry_max_retries:
                 continue
@@ -1054,6 +1127,20 @@ def run_remove_search(
             remove_n = None
 
         while remove_n is None and lo < hi:
+            if _should_accept_plateau_approx(lo, hi):
+                logger.warning(
+                    "[remove-search] plateau stop lo=%d hi=%d best_unsat=%s best_sat=%s width=%s calls=%d unknown_ratio=%.1f%%; "
+                    "accepting best-known SAT bound",
+                    lo,
+                    hi,
+                    best_unsat_removed,
+                    best_sat_removed,
+                    _current_bracket_width(lo, hi),
+                    len(satcheck_records),
+                    100.0 * _current_unknown_ratio(),
+                )
+                approximate_remove_search = True
+                break
             mid, mid_label = _choose_next_candidate(lo, hi)
             status = _run_satcheck(mid, lo_now=lo, hi_now=hi, mid_now=mid, label=mid_label)
             if status == "sat":
@@ -1065,17 +1152,6 @@ def run_remove_search(
                 best_unsat_removed = lo - 1 if best_unsat_removed is None else max(best_unsat_removed, lo - 1)
                 continue
 
-            portfolio_result = _run_portfolio(lo, hi, mid)
-            if portfolio_result is not None:
-                portfolio_removed, portfolio_status = portfolio_result
-                if portfolio_status == "sat":
-                    hi = min(hi, portfolio_removed)
-                    best_sat_removed = hi if best_sat_removed is None else min(best_sat_removed, hi)
-                else:
-                    lo = max(lo, portfolio_removed + 1)
-                    best_unsat_removed = lo - 1 if best_unsat_removed is None else max(best_unsat_removed, lo - 1)
-                continue
-
             retry_result = _retry_frontier_unknown(lo, hi, mid)
             if retry_result is not None:
                 retry_removed, retry_status = retry_result
@@ -1084,6 +1160,17 @@ def run_remove_search(
                     best_sat_removed = hi if best_sat_removed is None else min(best_sat_removed, hi)
                 else:
                     lo = max(lo, retry_removed + 1)
+                    best_unsat_removed = lo - 1 if best_unsat_removed is None else max(best_unsat_removed, lo - 1)
+                continue
+
+            portfolio_result = _run_portfolio(lo, hi, mid)
+            if portfolio_result is not None:
+                portfolio_removed, portfolio_status = portfolio_result
+                if portfolio_status == "sat":
+                    hi = min(hi, portfolio_removed)
+                    best_sat_removed = hi if best_sat_removed is None else min(best_sat_removed, hi)
+                else:
+                    lo = max(lo, portfolio_removed + 1)
                     best_unsat_removed = lo - 1 if best_unsat_removed is None else max(best_unsat_removed, lo - 1)
                 continue
 

@@ -137,10 +137,17 @@ parser.add_argument('--satcheck_frontier_crawl', type=str_to_bool, default=True,
 parser.add_argument('--satcheck_promoted_retry', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC/CausalABA: retry frontier-adjacent UNKNOWN satchecks with a larger timeout budget')
 parser.add_argument('--satcheck_promoted_retry_timeout_scale', type=float, default=2.0, help='ABAPC/CausalABA: timeout multiplier used for promoted retries of UNKNOWN satchecks')
 parser.add_argument('--satcheck_promoted_retry_max_retries', type=int, default=1, help='ABAPC/CausalABA: maximum number of promoted retries per UNKNOWN removal count')
+parser.add_argument('--satcheck_retry_frontier_sat', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC/CausalABA: allow promoted retries on the SAT frontier; disabled by default because UNSAT-frontier retries are usually more informative on hard plateaus')
 parser.add_argument('--satcheck_portfolio', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC/CausalABA: use a small plateau portfolio of alternative candidates before full probe fallback')
 parser.add_argument('--satcheck_portfolio_size', type=int, default=3, help='ABAPC/CausalABA: number of candidates in each plateau portfolio batch')
 parser.add_argument('--satcheck_portfolio_timeout_scale', type=float, default=0.5, help='ABAPC/CausalABA: timeout ratio for each plateau portfolio candidate')
 parser.add_argument('--satcheck_portfolio_min_timeout', type=float, default=180.0, help='ABAPC/CausalABA: minimum timeout in seconds for each plateau portfolio candidate')
+parser.add_argument('--satcheck_portfolio_throttle', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC/CausalABA: gently reduce portfolio batch size after repeated all-UNKNOWN portfolio batches in the same bracket')
+parser.add_argument('--satcheck_portfolio_min_size', type=int, default=2, help='ABAPC/CausalABA: smallest portfolio batch size when plateau throttling is active')
+parser.add_argument('--satcheck_plateau_stop', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC/CausalABA: stop early and accept the best SAT bound when the bracket is already narrow and the search is dominated by UNKNOWN outcomes')
+parser.add_argument('--satcheck_plateau_stop_width_ratio', type=float, default=0.07, help='ABAPC/CausalABA: maximum certified bracket width as a fraction of total facts for the plateau stop rule')
+parser.add_argument('--satcheck_plateau_stop_min_calls', type=int, default=40, help='ABAPC/CausalABA: minimum number of recorded satchecks before the plateau stop rule can trigger')
+parser.add_argument('--satcheck_plateau_stop_unknown_ratio', type=float, default=0.80, help='ABAPC/CausalABA: minimum UNKNOWN call ratio needed to trigger the plateau stop rule')
 parser.add_argument('--adaptive_satcheck_threads', type=str_to_bool, default=False, metavar='{true,false}', help='ABAPC/CausalABA: adapt satcheck threads using timeout+memory signals and persist recommendations across resumed runs')
 parser.add_argument('--satcheck_min_threads', type=int, default=1, help='ABAPC/CausalABA: lower bound for adaptive satcheck thread tuning')
 parser.add_argument('--satcheck_increase_step', type=int, default=2, help='ABAPC/CausalABA: additive thread increase used by the adaptive satcheck tuner after low-memory timeouts')
@@ -226,10 +233,17 @@ satcheck_frontier_crawl = args.satcheck_frontier_crawl
 satcheck_promoted_retry = args.satcheck_promoted_retry
 satcheck_promoted_retry_timeout_scale = args.satcheck_promoted_retry_timeout_scale
 satcheck_promoted_retry_max_retries = args.satcheck_promoted_retry_max_retries
+satcheck_retry_frontier_sat = args.satcheck_retry_frontier_sat
 satcheck_portfolio = args.satcheck_portfolio
 satcheck_portfolio_size = args.satcheck_portfolio_size
 satcheck_portfolio_timeout_scale = args.satcheck_portfolio_timeout_scale
 satcheck_portfolio_min_timeout = args.satcheck_portfolio_min_timeout
+satcheck_portfolio_throttle = args.satcheck_portfolio_throttle
+satcheck_portfolio_min_size = args.satcheck_portfolio_min_size
+satcheck_plateau_stop = args.satcheck_plateau_stop
+satcheck_plateau_stop_width_ratio = args.satcheck_plateau_stop_width_ratio
+satcheck_plateau_stop_min_calls = args.satcheck_plateau_stop_min_calls
+satcheck_plateau_stop_unknown_ratio = args.satcheck_plateau_stop_unknown_ratio
 adaptive_satcheck_threads = args.adaptive_satcheck_threads
 satcheck_min_threads = args.satcheck_min_threads
 satcheck_increase_step = args.satcheck_increase_step
@@ -493,10 +507,17 @@ for dataset_name, src, info in datasets:
                     satcheck_promoted_retry=satcheck_promoted_retry,
                     satcheck_promoted_retry_timeout_scale=satcheck_promoted_retry_timeout_scale,
                     satcheck_promoted_retry_max_retries=satcheck_promoted_retry_max_retries,
+                    satcheck_retry_frontier_sat=satcheck_retry_frontier_sat,
                     satcheck_portfolio=satcheck_portfolio,
                     satcheck_portfolio_size=satcheck_portfolio_size,
                     satcheck_portfolio_timeout_scale=satcheck_portfolio_timeout_scale,
                     satcheck_portfolio_min_timeout=satcheck_portfolio_min_timeout,
+                    satcheck_portfolio_throttle=satcheck_portfolio_throttle,
+                    satcheck_portfolio_min_size=satcheck_portfolio_min_size,
+                    satcheck_plateau_stop=satcheck_plateau_stop,
+                    satcheck_plateau_stop_width_ratio=satcheck_plateau_stop_width_ratio,
+                    satcheck_plateau_stop_min_calls=satcheck_plateau_stop_min_calls,
+                    satcheck_plateau_stop_unknown_ratio=satcheck_plateau_stop_unknown_ratio,
                     adaptive_satcheck_threads=adaptive_satcheck_threads,
                     satcheck_min_threads=satcheck_min_threads,
                     satcheck_increase_step=satcheck_increase_step,

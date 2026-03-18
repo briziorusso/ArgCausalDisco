@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -50,10 +50,17 @@ def build_command(version: str, python_bin: str, test_alpha: float, test_name: s
         "--satcheck_promoted_retry", "true",
         "--satcheck_promoted_retry_timeout_scale", "2.0",
         "--satcheck_promoted_retry_max_retries", "1",
+        "--satcheck_retry_frontier_sat", "false",
         "--satcheck_portfolio", "true",
         "--satcheck_portfolio_size", "3",
-        "--satcheck_portfolio_timeout_scale", "0.5",
+        "--satcheck_portfolio_timeout_scale", "1.0",
         "--satcheck_portfolio_min_timeout", "180",
+        "--satcheck_portfolio_throttle", "true",
+        "--satcheck_portfolio_min_size", "2",
+        "--satcheck_plateau_stop", "true",
+        "--satcheck_plateau_stop_width_ratio", "0.07",
+        "--satcheck_plateau_stop_min_calls", "40",
+        "--satcheck_plateau_stop_unknown_ratio", "0.80",
         "--adaptive_satcheck_threads", "true",
         "--satcheck_min_threads", "8",
         "--satcheck_increase_step", "2",

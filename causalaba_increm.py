@@ -431,10 +431,17 @@ def CausalABA(
     satcheck_promoted_retry: bool = True,
     satcheck_promoted_retry_timeout_scale: float = 2.0,
     satcheck_promoted_retry_max_retries: int = 1,
+    satcheck_retry_frontier_sat: bool = False,
     satcheck_portfolio: bool = True,
     satcheck_portfolio_size: int = 3,
     satcheck_portfolio_timeout_scale: float = 0.5,
     satcheck_portfolio_min_timeout: float = 180.0,
+    satcheck_portfolio_throttle: bool = True,
+    satcheck_portfolio_min_size: int = 2,
+    satcheck_plateau_stop: bool = True,
+    satcheck_plateau_stop_width_ratio: float = 0.07,
+    satcheck_plateau_stop_min_calls: int = 40,
+    satcheck_plateau_stop_unknown_ratio: float = 0.80,
     adaptive_satcheck_threads: bool = False,
     satcheck_min_threads: int = 1,
     satcheck_increase_step: int = 2,
@@ -851,10 +858,17 @@ def CausalABA(
     profile["satcheck_promoted_retry"] = bool(satcheck_promoted_retry)
     profile["satcheck_promoted_retry_timeout_scale"] = float(satcheck_promoted_retry_timeout_scale)
     profile["satcheck_promoted_retry_max_retries"] = int(satcheck_promoted_retry_max_retries)
+    profile["satcheck_retry_frontier_sat"] = bool(satcheck_retry_frontier_sat)
     profile["satcheck_portfolio"] = bool(satcheck_portfolio)
     profile["satcheck_portfolio_size"] = int(satcheck_portfolio_size)
     profile["satcheck_portfolio_timeout_scale"] = float(satcheck_portfolio_timeout_scale)
     profile["satcheck_portfolio_min_timeout"] = float(satcheck_portfolio_min_timeout)
+    profile["satcheck_portfolio_throttle"] = bool(satcheck_portfolio_throttle)
+    profile["satcheck_portfolio_min_size"] = int(satcheck_portfolio_min_size)
+    profile["satcheck_plateau_stop"] = bool(satcheck_plateau_stop)
+    profile["satcheck_plateau_stop_width_ratio"] = float(satcheck_plateau_stop_width_ratio)
+    profile["satcheck_plateau_stop_min_calls"] = int(satcheck_plateau_stop_min_calls)
+    profile["satcheck_plateau_stop_unknown_ratio"] = float(satcheck_plateau_stop_unknown_ratio)
     profile["adaptive_satcheck_threads"] = satcheck_tuner.adaptive
     profile["satcheck_min_threads"] = satcheck_tuner.min_threads
     profile["satcheck_increase_step"] = satcheck_tuner.increase_step
@@ -1617,7 +1631,7 @@ def CausalABA(
     else:
         _t_binsearch_start = time.perf_counter()
         logger.info(
-            "[remove-search] satcheck_timeout=%s satcheck_threads=%s probe_limit=%s frontier=%s retry=%s retry_scale=%s retry_max=%s portfolio=%s portfolio_size=%s portfolio_scale=%s portfolio_min=%s adaptive=%s min_threads=%s step=%s total_mem=%s",
+            "[remove-search] satcheck_timeout=%s satcheck_threads=%s probe_limit=%s frontier=%s retry=%s retry_scale=%s retry_max=%s retry_sat=%s portfolio=%s portfolio_size=%s portfolio_scale=%s portfolio_min=%s portfolio_throttle=%s portfolio_min_size=%s plateau_stop=%s plateau_width_ratio=%s plateau_min_calls=%s plateau_unknown_ratio=%s adaptive=%s min_threads=%s step=%s total_mem=%s",
             satcheck_timeout,
             satcheck_tuner.current_threads,
             satcheck_probe_limit,
@@ -1625,10 +1639,17 @@ def CausalABA(
             bool(satcheck_promoted_retry),
             satcheck_promoted_retry_timeout_scale,
             satcheck_promoted_retry_max_retries,
+            bool(satcheck_retry_frontier_sat),
             bool(satcheck_portfolio),
             satcheck_portfolio_size,
             satcheck_portfolio_timeout_scale,
             satcheck_portfolio_min_timeout,
+            bool(satcheck_portfolio_throttle),
+            satcheck_portfolio_min_size,
+            bool(satcheck_plateau_stop),
+            satcheck_plateau_stop_width_ratio,
+            satcheck_plateau_stop_min_calls,
+            satcheck_plateau_stop_unknown_ratio,
             satcheck_tuner.adaptive,
             satcheck_tuner.min_threads,
             satcheck_tuner.increase_step,
@@ -1649,10 +1670,17 @@ def CausalABA(
             enable_promoted_retry=bool(satcheck_promoted_retry),
             promoted_retry_timeout_scale=float(satcheck_promoted_retry_timeout_scale),
             promoted_retry_max_retries=int(satcheck_promoted_retry_max_retries),
+            enable_retry_frontier_sat=bool(satcheck_retry_frontier_sat),
             enable_portfolio=bool(satcheck_portfolio),
             portfolio_size=int(satcheck_portfolio_size),
             portfolio_timeout_scale=float(satcheck_portfolio_timeout_scale),
             portfolio_min_timeout=float(satcheck_portfolio_min_timeout),
+            enable_portfolio_throttle=bool(satcheck_portfolio_throttle),
+            portfolio_min_size=int(satcheck_portfolio_min_size),
+            enable_plateau_stop=bool(satcheck_plateau_stop),
+            plateau_stop_width_ratio=float(satcheck_plateau_stop_width_ratio),
+            plateau_stop_min_calls=int(satcheck_plateau_stop_min_calls),
+            plateau_stop_unknown_ratio=float(satcheck_plateau_stop_unknown_ratio),
         )
         remove_n = int(search_result.remove_n)
         satcheck_records = search_result.satcheck_records
