@@ -669,7 +669,7 @@ def _evaluate_instance(
         }
 
 
-def _candidate_score(case: dict[str, Any]) -> tuple[int, int, int, float, float, int, int]:
+def _candidate_score(case: dict[str, Any]) -> tuple[int, int, int, int, float, float, int, int]:
     ab_shd = float(case.get("ab_metrics", {}).get("shd", 10**9))
     ab_f1 = float(case.get("ab_metrics", {}).get("F1", 0.0))
     if math.isnan(ab_f1):
@@ -678,9 +678,11 @@ def _candidate_score(case: dict[str, Any]) -> tuple[int, int, int, float, float,
     exact = 1 if ab_shd == 0 else 0
     ab_true = int(case.get("ab_oriented_correct", 0))
     ab_edges = len(list(case.get("ab_edges") or []))
+    ab_false = max(0, int(ab_edges) - int(ab_true))
     delta_shd = pc_shd - ab_shd
     return (
         -exact,
+        int(ab_false),
         -ab_true,
         -ab_edges,
         -float(delta_shd),
@@ -692,6 +694,23 @@ def _candidate_score(case: dict[str, Any]) -> tuple[int, int, int, float, float,
 
 def _mpc_edge_count(case: dict[str, Any]) -> int:
     return int(len(list(case.get("pc_dir") or [])) + len(list(case.get("pc_undir") or [])))
+
+
+def _mpc_wrong_edge_count(case: dict[str, Any]) -> int:
+    wrong = 0
+    for u, v in list(case.get("pc_dir") or []):
+        if int(B_TRUE[int(u), int(v)]) != 1:
+            wrong += 1
+    for u, v in list(case.get("pc_undir") or []):
+        if int(B_TRUE[int(u), int(v)]) != 1 and int(B_TRUE[int(v), int(u)]) != 1:
+            wrong += 1
+    return int(wrong)
+
+
+def _ab_false_arrow_count(case: dict[str, Any]) -> int:
+    edges = len(list(case.get("ab_edges") or []))
+    correct = int(case.get("ab_oriented_correct", 0))
+    return max(0, int(edges) - int(correct))
 
 
 def _alpha_tag(alpha: float) -> str:
@@ -847,7 +866,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--indep-test", default="gsq", choices=["fisherz", "chisq", "gsq", "kci", "fastkci", "rcit"])
     parser.add_argument("--min-ab-true-arrows", type=int, default=0)
     parser.add_argument("--min-ab-edge-count", type=int, default=0)
+    parser.add_argument("--max-ab-false-arrows", type=int, default=10**9)
     parser.add_argument("--min-mpc-edge-count", type=int, default=0)
+    parser.add_argument("--min-mpc-wrong-edges", type=int, default=0)
     parser.add_argument("--seed", type=int, default=None, help="Replay a single seed.")
     parser.add_argument("--sample-size", type=int, default=None, help="Replay a single sample size.")
     parser.add_argument("--seed-start", type=int, default=2000)
@@ -918,10 +939,22 @@ def main() -> int:
                 f"got {len(list(case.get('ab_edges') or []))}."
             )
             return 1
+        if _ab_false_arrow_count(case) > int(args.max_ab_false_arrows):
+            print(
+                f"Instance fails --max-ab-false-arrows={args.max_ab_false_arrows}: "
+                f"got {_ab_false_arrow_count(case)}."
+            )
+            return 1
         if _mpc_edge_count(case) < int(args.min_mpc_edge_count):
             print(
                 f"Instance fails --min-mpc-edge-count={args.min_mpc_edge_count}: "
                 f"got {_mpc_edge_count(case)}."
+            )
+            return 1
+        if _mpc_wrong_edge_count(case) < int(args.min_mpc_wrong_edges):
+            print(
+                f"Instance fails --min-mpc-wrong-edges={args.min_mpc_wrong_edges}: "
+                f"got {_mpc_wrong_edge_count(case)}."
             )
             return 1
         saved_dir = _save_case(case, Path(args.out_root))
@@ -960,7 +993,11 @@ def main() -> int:
                 continue
             if len(list(case.get("ab_edges") or [])) < int(args.min_ab_edge_count):
                 continue
+            if _ab_false_arrow_count(case) > int(args.max_ab_false_arrows):
+                continue
             if _mpc_edge_count(case) < int(args.min_mpc_edge_count):
+                continue
+            if _mpc_wrong_edge_count(case) < int(args.min_mpc_wrong_edges):
                 continue
             score = _candidate_score(case)
             if best is None or score < best_score:
@@ -971,8 +1008,10 @@ def main() -> int:
                     f"seed={case['seed']} sample_size={case['sample_size']} "
                     f"wrong={case['wrong_count']} remove_n={case['remove_n']} "
                     f"mpc_edges={_mpc_edge_count(case)} "
+                    f"mpc_wrong={_mpc_wrong_edge_count(case)} "
                     f"ab_true={case['ab_oriented_correct']} "
                     f"ab_edges={len(list(case.get('ab_edges') or []))} "
+                    f"ab_false={_ab_false_arrow_count(case)} "
                     f"mpc_shd={_fmt_metric(case['pc_metrics'], 'shd')} "
                     f"ab_shd={_fmt_metric(case['ab_metrics'], 'shd')} "
                     f"ab_f1={_fmt_metric(case['ab_metrics'], 'F1')}"

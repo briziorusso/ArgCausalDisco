@@ -126,6 +126,41 @@ def append_progress_row(path: Path, row: dict, columns):
     df_row.to_csv(path, mode="a", header=not path.exists(), index=False)
 
 
+def format_run_indicator(run_idx: int, total_runs: int | None = None) -> str:
+    run_no = int(run_idx) + 1
+    if total_runs is None:
+        return str(run_no)
+    return f"{run_no}/{int(total_runs)}"
+
+
+def log_run_start(
+    *,
+    dataset_name: str,
+    model_name: str,
+    run_idx: int,
+    total_runs: int,
+    seed: int,
+    scenario: str | None = None,
+) -> None:
+    if scenario:
+        logging.info(
+            "[run] dataset=%s model=%s run=%s seed=%s scenario=%s",
+            dataset_name,
+            model_name,
+            format_run_indicator(run_idx, total_runs),
+            int(seed),
+            scenario,
+        )
+    else:
+        logging.info(
+            "[run] dataset=%s model=%s run=%s seed=%s",
+            dataset_name,
+            model_name,
+            format_run_indicator(run_idx, total_runs),
+            int(seed),
+        )
+
+
 def summarise_results(df: pd.DataFrame, metric_pairs):
     if df.empty:
         return pd.DataFrame(columns=["dataset", "model"] + [
@@ -297,6 +332,7 @@ def build_run_summary(
     dataset_name: str,
     model_name: str,
     run_idx: int,
+    total_runs: int | None,
     seed: int,
     elapsed: float,
     run_details: dict | None,
@@ -307,6 +343,7 @@ def build_run_summary(
         "dataset": dataset_name,
         "model": model_name,
         "run_idx": int(run_idx),
+        "run_total": (int(total_runs) if total_runs is not None else None),
         "seed": int(seed),
         "elapsed_sec": float(elapsed),
         "dag": _clean_metric_subset(dag_metrics, ["precision", "recall", "F1", "shd", "sid"]),
@@ -395,6 +432,10 @@ def build_run_summary(
 
 
 def log_run_summary(summary: dict) -> None:
+    run_str = format_run_indicator(
+        int(summary.get("run_idx", 0) or 0),
+        int(summary["run_total"]) if summary.get("run_total") is not None else None,
+    )
     satchecks = summary.get("satchecks")
     if isinstance(satchecks, dict):
         logging.info(
@@ -403,7 +444,7 @@ def log_run_summary(summary: dict) -> None:
             "remove_n=%s bracket=[%s,%s] approximate=%s resumed=%s",
             summary.get("dataset"),
             summary.get("model"),
-            summary.get("run_idx"),
+            run_str,
             summary.get("seed"),
             _fmt_sec(summary.get("elapsed_sec")),
             _fmt_sec(summary.get("build_sec")),
@@ -438,7 +479,7 @@ def log_run_summary(summary: dict) -> None:
             "[run-summary] dataset=%s model=%s run=%s seed=%s elapsed=%s",
             summary.get("dataset"),
             summary.get("model"),
-            summary.get("run_idx"),
+            run_str,
             summary.get("seed"),
             _fmt_sec(summary.get("elapsed_sec")),
         )

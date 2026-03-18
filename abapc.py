@@ -52,7 +52,7 @@ def ABAPC(data,
           seed=2024, alpha=0.05, indep_test='fisherz',
           stable=True, conservative=True,
           base_fact_pct=1.0, set_indep_facts=False, 
-          scenario="ABAPC", base_location="results",
+          scenario="ABAPC", base_location="results", run_label: str | None = None,
           out_mode="opt" , print_models=False,
           sepsets = None, smoothing_k=0, S_weight=True,
           skeleton_rules_reduction=True, pre_grounding=False, 
@@ -119,6 +119,8 @@ def ABAPC(data,
         os.makedirs(f"{base_location}/{scenario}")
     logger_setup(f"{base_location}/{scenario}/log.log")
     logging.info(f"===============Running {scenario}===============")
+    if run_label:
+        logging.info("[run] scenario=%s run=%s seed=%s", scenario, run_label, int(seed))
     n_nodes = data.shape[1]
     random_stability(seed)
     uc_rule = 5 if conservative else 0
@@ -254,6 +256,8 @@ def ABAPC(data,
     if return_run_details:
         run_details = {
             "scenario": scenario,
+            "run_label": run_label,
+            "seed": int(seed),
             "facts_location": facts_location,
             "facts_wc_location": facts_location_wc,
             "facts_I_location": facts_location_I,

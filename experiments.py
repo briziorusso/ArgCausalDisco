@@ -24,10 +24,12 @@ try:
         DAG_SUMMARY_COLUMNS,
         append_progress_row,
         build_run_summary,
+        format_run_indicator,
         install_signal_breadcrumbs,
         keep_causenet_file,
         load_existing_summary,
         load_progress_df,
+        log_run_start,
         log_run_summary,
         record_run_manifest,
         safe_filename,
@@ -57,10 +59,12 @@ except ImportError:  # pragma: no cover
         DAG_SUMMARY_COLUMNS,
         append_progress_row,
         build_run_summary,
+        format_run_indicator,
         install_signal_breadcrumbs,
         keep_causenet_file,
         load_existing_summary,
         load_progress_df,
+        log_run_start,
         log_run_summary,
         record_run_manifest,
         safe_filename,
@@ -378,6 +382,22 @@ for dataset_name, src, info in datasets:
 
         for idx in range(completed_runs, n_runs):
             seed = seeds_list[idx]
+            scenario = f"{method}_{version}_{dataset_name}"
+            logging.info(
+                "Starting run %s for %s on %s (seed=%s)",
+                format_run_indicator(idx, n_runs),
+                display_name,
+                dataset_name,
+                seed,
+            )
+            log_run_start(
+                dataset_name=dataset_name,
+                model_name=display_name,
+                run_idx=idx,
+                total_runs=n_runs,
+                seed=seed,
+                scenario=scenario if method == 'abapc' else None,
+            )
             # Load data + true DAG
             std = True if standardise is None else standardise
             if src == 'bnlearn':
@@ -447,7 +467,8 @@ for dataset_name, src, info in datasets:
                 return_run_details = method == 'abapc'
                 run_output = run_method(
                     X_s, method, seed, test_alpha=test_alpha, test_name=test_name,
-                    device=device, scenario=f"{method}_{version}_{dataset_name}",
+                    device=device, scenario=scenario,
+                    run_label=format_run_indicator(idx, n_runs),
                     S_weight=S_weight, pre_grounding=pre_grounding,
                     skeleton_rules_reduction=skeleton_rules_reduction,
                     disable_reground=disable_reground,
@@ -557,6 +578,7 @@ for dataset_name, src, info in datasets:
                 dataset_name=dataset_name,
                 model_name=display_name,
                 run_idx=idx,
+                total_runs=n_runs,
                 seed=seed,
                 elapsed=elapsed,
                 run_details=run_details,
