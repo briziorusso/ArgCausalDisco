@@ -1,72 +1,69 @@
-# Argumentative Causal Discovery
-This repository provides the code for the paper "Argumentative Causal Discovery". 
+# Optimal Correction Sets for Argumentative Causal Discovery
 
-In this paper we propose Causal ABA, which combines statistical tests and expert domain knowledge with non-monotonic reasoning and performs argumentative reasoning to output causal graphs in accordance with the reported causal relationships. Below is an overview of the workflow.
+This `MCS` branch isolates the optimal-MCS version of Causal ABA from `dev` commit `307875557c20bc8821edf4a850ae662a0e3031a5`.
+It follows the narrative in [MUSandMCS___CausalABA_submitted1402260940.pdf](MUSandMCS___CausalABA_submitted1402260940.pdf): instead of ABA-PC's heuristic "release low-ranked facts until the encoding becomes satisfiable", this branch treats fact release as a repair problem and computes an optimal correction set (optimal MCS) with weak constraints.
+In the manuscript this solver-backed variant is the OptABA-PC method.
 
-![alt text](workflow.jpg)
+## Where the MCS logic lives
 
-We instantiate Causal ABA using the conditional independence tests from the Majority-PC algorithm [(Colombo and Maathuis, 2014)](https://jmlr.org/papers/v15/colombo14a.html) as input, resulting in ABA-PC, a practical Causal Discovery algorithm that, in our experiments, is competitive with state-of-the-art baselines.
-### Reproduce Experiments
-The experiments in the paper can be reproduced by running ```python experiments_bnlearn.py``` from the root folder. All the plots included in the paper can be inspected interactively from the [results/figs](results/figs) folder. Just download them and open them in a browser. 
+- `scripts/wc_opt_strategy_sweep.py` is the experiment driver used to generate the archived runs in [`results/final_mcs_experiments`](results/final_mcs_experiments).
+- `causalaba_mus.py` implements the published optimum-MCS path through `CausalABA_WC(...)`. It builds the guarded `mus(i)` program and optimizes the weight of released CI facts with clingo weak constraints.
+- `causalaba.py` and `causalaba_increm.py` are the ABA-PC baselines compared against the optimum-MCS solver in the sweep.
+- `causalaba_weakc.py` is still included as a related weak-constraint-only solver for attribution and benchmarking. The archived `final_mcs_experiments` artifacts are not produced by calling that file directly; they are produced by `scripts/wc_opt_strategy_sweep.py` invoking `causalaba_mus.CausalABA_WC(...)`.
 
-A jupyter notebook collecting the stored results and producing the plots in the paper is provided [here](notebooks/Experiments.ipynb).
+## Environment
 
-### Causal ABA
-Causal ABA is the main function of the repository, provided in ```causalaba.py```. This is a python wrapper around an ASP encoding provided in [causalaba.lp](encodings/causalaba.lp).
+The code was tested with Python 3.10.
+Install the Python dependencies from the repository root:
 
-### ABA-PC
-The file ```abapc.py``` hosts the wrapper function around Causal ABA, and runs Majority-PC to retrieve the independence tests used as facts, weights them and selects the strongest output extension output of ```causalABA()```.
-
-### Example usage
-To run the ABAPC directly from python at the root folder, run:
+```bash
+pip install -r requirements.txt
 ```
-import networkx as nx
-import numpy as np
-import pandas as pd
-from utils.data_utils import simulate_discrete_data
-from abapc import ABAPC
 
-## True Adjacency matrix
-B_true = np.array( [[ 0,  0,  1,  0],
-                    [ 0,  0,  1,  1],
-                    [ 0,  0,  0,  1],
-                    [ 0,  0,  0,  0]])
-n_nodes = B_true.shape[0]
-expected = {(0, 2), (1, 2), (1, 3), (2, 3)}
-G_true = nx.DiGraph(pd.DataFrame(B_true, columns=[f"X{i+1}" for i in range(B_true.shape[1])], index=[f"X{i+1}" for i in range(B_true.shape[1])]))
-truth_DAG_directed_edges = set([(int(e[0].replace("X",""))-1,int(e[1].replace("X",""))-1)for e in G_true.edges])
-## Simulate data 
-data = simulate_discrete_data(n_nodes, 10000, truth_DAG_directed_edges, 2376)
-## ABAPC
-B_est = ABAPC(data=data, alpha=0.05, indep_test='fisherz', scenario='test', 
-                set_indep_facts=False, stable=True, conservative=True)
-## Edges from adjacency matrix
-est_edges = set([(i,j) for i in range(n_nodes) for j in range(n_nodes) if B_est[i,j]==1])
+You need `clingo` on `PATH`.
+The published sweeps in `results/final_mcs_experiments` do not require `wasp`; that solver is only needed for separate MUS/MCS enumeration workflows.
 
-print(f"Expected edges: {expected}")
-print(f"Edges from ABAPC: {est_edges}")
+## How `results/final_mcs_experiments` was created
 
-OUTPUT:
->>> Expected edges: {(2, 3), (0, 2), (1, 2), (1, 3)}
->>> Edges from ABAPC: {(2, 3), (0, 2), (1, 2), (1, 3)}
+Each stored run directory contains a `0.Config` file with the command line captured when the run was launched on 2026-02-12.
+Running `scripts/wc_opt_strategy_sweep.py` creates a timestamped directory under `results/` named `wc_sweep_*_<timestamp>/` containing:
+
+- `0.Config` with the resolved configuration
+- `summary.json` and `metric_ranks.json`
+- per-repetition folders `rep*/` with the generated facts and emitted `.lp` programs
+
+The directories now collected under [`results/final_mcs_experiments`](results/final_mcs_experiments) were created that way and then copied into this archive folder.
+
+### Exact archived commands
+
+The following commands reproduce the archived sweep setup.
+Defaults not shown on the bnlearn commands resolve to `--strategies bb --objectives lex --encodings inc,base --opt-modes optN --reifications mus`.
+
+```bash
+python scripts/wc_opt_strategy_sweep.py --reps 10 --seed 2026 --source bnlearn --bnlearn-dataset cancer --bn-data-path datasets --timeout-sec 120 --graph-eval-timeout 120 --no-condset-weight
+python scripts/wc_opt_strategy_sweep.py --reps 10 --seed 2026 --source bnlearn --bnlearn-dataset survey --bn-data-path datasets --timeout-sec 120 --graph-eval-timeout 120 --no-condset-weight
+python scripts/wc_opt_strategy_sweep.py --reps 10 --seed 2026 --source bnlearn --bnlearn-dataset asia --bn-data-path datasets --timeout-sec 120 --graph-eval-timeout 120 --no-condset-weight
+python scripts/wc_opt_strategy_sweep.py --reps 10 --seed 2026 --source bnlearn --bnlearn-dataset earthquake --bn-data-path datasets --timeout-sec 120 --graph-eval-timeout 120 --no-condset-weight
+python scripts/wc_opt_strategy_sweep.py --n-nodes 5 --seed 2026 --reps 10 --strategies bb --objectives lex --encodings inc,base --opt-modes optN --timeout-sec 120 --pct-wrong-facts 0.2 --notes "musonly optonly lexonly solve120 eval120 gsq noweight std worst" --graph-eval-timeout 120 --reif mus --no-condset-weight
+python scripts/wc_opt_strategy_sweep.py --n-nodes 8 --seed 2026 --reps 10 --strategies bb --objectives lex --encodings inc --opt-modes optN --timeout-sec 300 --pct-wrong-facts 0.2 --notes "musonly optonly lexonly solve120 eval 300 gsq noweight std worst" --graph-eval-timeout 120 --reif mus --no-condset-weight
 ```
-ABAPC is integrated in the ```run_method()``` function together with the baselines used in the paper in [models.py](https://github.com/briziorusso/ArgCausalDisco/blob/main/abapc.py).
 
-### Environment
-The code was tested with Python 3.10. `requirements.txt` provides the necessary python packages. Run `pip install -r requirements.txt` from a terminal at the root folder to install all packages in your virtual environment. You will need clingo 5.6.2 installed from the potassco repository via conda (command provided in requirements.txt).
+The core published optimum-MCS setting is therefore:
 
+- reification: `mus`
+- objective: `lex`
+- clingo opt strategy: `bb`
+- clingo opt mode: `optN`
+- conditioning-set weighting disabled via `--no-condset-weight`
 
-### Reference
-If you are using this code, please cite our paper
+## Recreate the paper table
+
+Once the run directories are present as children of [`results/final_mcs_experiments`](results/final_mcs_experiments), regenerate the LaTeX table with:
+
+```bash
+python results/final_mcs_experiments/recreate_main_results_table.py
 ```
-@inproceedings{KR2024-88,
-    title     = {{Argumentative Causal Discovery}},
-    author    = {Russo, Fabrizio and Rapberger, Anna and Toni, Francesca},
-    booktitle = {{Proceedings of the 21st International Conference on Principles of Knowledge Representation and Reasoning}},
-    pages     = {938--949},
-    year      = {2024},
-    month     = {8},
-    doi       = {10.24963/kr.2024/88},
-    url       = {https://doi.org/10.24963/kr.2024/88},
-  }
-```
+
+This writes [`results/final_mcs_experiments/main_results_table.tex`](results/final_mcs_experiments/main_results_table.tex).
+The table script expects the five directories used in the manuscript table: `cancer`, `survey`, `asia`, synthetic `ER (5)`, and synthetic `ER (8)`.
+The archived `earthquake` sweep is kept in the folder as an additional run, but it is not consumed by the table recreation script.
