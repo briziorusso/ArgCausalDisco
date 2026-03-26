@@ -29,7 +29,14 @@ def canonical_seed_list(total_runs: int = 50) -> list[int]:
     return np.random.randint(0, 10000, (total_runs,)).tolist()
 
 
-def build_command(version: str, python_bin: str, test_alpha: float, test_name: str) -> list[str]:
+def build_command(
+    version: str,
+    python_bin: str,
+    sample_size: int,
+    n_runs: int,
+    test_alpha: float,
+    test_name: str,
+) -> list[str]:
     return [
         python_bin,
         str(REPO_ROOT / "experiments.py"),
@@ -37,8 +44,8 @@ def build_command(version: str, python_bin: str, test_alpha: float, test_name: s
         "--models", "abapc",
         "--names", "child",
         "--version", version,
-        "--sample_size", "5000",
-        "--n_runs", "10",
+        "--sample_size", str(sample_size),
+        "--n_runs", str(n_runs),
         "--resume",
         "--test_alpha", str(test_alpha),
         "--test_name", test_name,
@@ -73,6 +80,8 @@ def build_command(version: str, python_bin: str, test_alpha: float, test_name: s
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the exact child line-search on the matched 10 canonical seeds.")
     parser.add_argument("--version", default="child_abapc_bb_matched10_gsq_searchv3")
+    parser.add_argument("--sample-size", type=int, default=5000)
+    parser.add_argument("--n-runs", type=int, default=10)
     parser.add_argument("--test-alpha", type=float, default=0.05)
     parser.add_argument("--test-name", default="gsq")
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
@@ -83,8 +92,15 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    seeds = canonical_seed_list()[:10]
-    command = build_command(args.version, args.python_bin, args.test_alpha, args.test_name)
+    seeds = canonical_seed_list()[: args.n_runs]
+    command = build_command(
+        args.version,
+        args.python_bin,
+        args.sample_size,
+        args.n_runs,
+        args.test_alpha,
+        args.test_name,
+    )
 
     launch_note = {
         "version": args.version,
@@ -93,6 +109,8 @@ def main() -> None:
         "command": command,
         "cwd": str(REPO_ROOT),
         "python": args.python_bin,
+        "sample_size": args.sample_size,
+        "n_runs": args.n_runs,
         "test_alpha": args.test_alpha,
         "test_name": args.test_name,
     }

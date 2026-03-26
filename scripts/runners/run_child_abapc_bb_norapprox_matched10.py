@@ -25,11 +25,13 @@ def build_command(
     *,
     version: str,
     python_bin: str,
+    sample_size: int,
+    n_runs: int,
     test_alpha: float,
     test_name: str,
     disable_reground: bool,
 ) -> list[str]:
-    command = build_bb_command(version, python_bin, test_alpha, test_name)
+    command = build_bb_command(version, python_bin, sample_size, n_runs, test_alpha, test_name)
     command.extend(
         [
             "--abapc_solver",
@@ -52,6 +54,8 @@ def main() -> None:
         )
     )
     parser.add_argument("--version", default="child_abapc_bb_norapprox_matched10_gsq_searchv3")
+    parser.add_argument("--sample-size", type=int, default=5000)
+    parser.add_argument("--n-runs", type=int, default=10)
     parser.add_argument("--test-alpha", type=float, default=0.05)
     parser.add_argument("--test-name", default="gsq")
     parser.add_argument(
@@ -68,10 +72,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    seeds = canonical_seed_list()[:10]
+    seeds = canonical_seed_list()[: args.n_runs]
     command = build_command(
         version=args.version,
         python_bin=args.python_bin,
+        sample_size=args.sample_size,
+        n_runs=args.n_runs,
         test_alpha=args.test_alpha,
         test_name=args.test_name,
         disable_reground=args.disable_reground,
@@ -84,6 +90,8 @@ def main() -> None:
         "command": command,
         "cwd": str(REPO_ROOT),
         "python": args.python_bin,
+        "sample_size": args.sample_size,
+        "n_runs": args.n_runs,
         "test_alpha": args.test_alpha,
         "test_name": args.test_name,
         "abapc_solver": "incremental",
