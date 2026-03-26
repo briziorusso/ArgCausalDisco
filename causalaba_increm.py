@@ -11,9 +11,29 @@ from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
+
+class _RunLogger(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        prefix = str(self.extra.get("prefix", "") or "").strip()
+        if prefix:
+            return f"{prefix} {msg}", kwargs
+        return msg, kwargs
+
+
+def _make_run_logger(run_label: str | None, seed: int | None) -> logging.LoggerAdapter:
+    parts: list[str] = []
+    if run_label:
+        parts.append(f"run={run_label}")
+    if seed is not None:
+        parts.append(f"seed={int(seed)}")
+    prefix = f"[{' '.join(parts)}]" if parts else ""
+    return _RunLogger(logging.getLogger(__name__), {"prefix": prefix})
+
 try:
+    from .utils.fact_diagnostics import build_fact_profile
     from .utils.progress import start_heartbeat as _start_heartbeat, fmt_hhmmss as _fmt_hhmmss
 except ImportError:  # pragma: no cover
+    from utils.fact_diagnostics import build_fact_profile
     from utils.progress import start_heartbeat as _start_heartbeat, fmt_hhmmss as _fmt_hhmmss
 try:
     from .utils import mem as _mem
@@ -445,8 +465,11 @@ def CausalABA(
     adaptive_satcheck_threads: bool = False,
     satcheck_min_threads: int = 1,
     satcheck_increase_step: int = 2,
+    run_label: str | None = None,
+    seed: int | None = None,
     verbosity: int = 0,
     )->list:
+    logger = _make_run_logger(run_label, seed)
     # For pre-grounding workloads, fall back to the baseline grounding
     # with binary-search removal to improve solve-time over linear removal.
     if pre_grounding:
@@ -481,6 +504,9 @@ def CausalABA(
 
     t_compile0 = time.perf_counter()
     profile: dict = {
+        "solver_backend": "incremental",
+        "disable_reground": bool(disable_reground),
+        "block_edge_mode": "frozen_initial" if disable_reground else "dynamic",
         "compile_sec_total": 0.0,
         "compile_sec_last": 0.0,
         "ground_sec_total": 0.0,
@@ -1731,10 +1757,7 @@ def CausalABA(
     # (lowest-I) facts to mirror baseline behavior.
     try:
         profile["remove_n"] = int(remove_n or 0)
-        if remove_n > 0:
-            profile["removed_fact_keys"] = [str(f[4]).strip() for f in facts[-int(remove_n):] if str(f[4]).strip()]
-        else:
-            profile["removed_fact_keys"] = []
+        profile.update(build_fact_profile(facts, int(remove_n or 0)))
     except Exception:
         pass
     try:

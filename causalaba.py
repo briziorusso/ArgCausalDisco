@@ -32,9 +32,11 @@ from datetime import datetime
 from pathlib import Path
 # sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 try:
+    from .utils.fact_diagnostics import build_fact_profile, pair_key
     from .utils.graph_utils import powerset, extract_test_elements_from_symbol
     from .utils.prior_knowledge import PriorKnowledge
 except ImportError:  # pragma: no cover
+    from utils.fact_diagnostics import build_fact_profile, pair_key
     from utils.graph_utils import powerset, extract_test_elements_from_symbol
     from utils.prior_knowledge import PriorKnowledge
 
@@ -427,6 +429,21 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
     t_method0 = time.perf_counter()
     last_solve_end: float | None = None
 
+    if timing_recorder is None and return_statistics:
+        timing_recorder = {}
+
+    profile: dict[str, Any] = {
+        'solver_backend': 'baseline',
+        'pre_grounding': bool(pre_grounding),
+        'disable_reground': bool(disable_reground),
+        'skeleton_rules_reduction': bool(skeleton_rules_reduction),
+        'solve_timeout': (None if solve_timeout is None else float(solve_timeout)),
+    }
+    release_events: list[dict[str, Any]] = []
+    reground_performed_events: list[dict[str, Any]] = []
+    reground_skipped_events: list[dict[str, Any]] = []
+    reground_compile_profiles: list[dict[str, Any]] = []
+
     if timing_recorder is not None:
         timing_recorder.setdefault('solve_sec_total', 0.0)
         timing_recorder.setdefault('post_solve_sec_total', 0.0)
@@ -511,6 +528,18 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         deadline=deadline,
         timing_recorder=timing_recorder,
     )
+
+    try:
+        compile_profile = getattr(ctl, '_causalaba_profile', None)
+        if isinstance(compile_profile, dict):
+            profile.update({
+                'compile_sec_total': float(compile_profile.get('compile_sec', 0.0) or 0.0),
+                'ground_sec_total': float(compile_profile.get('ground_sec', 0.0) or 0.0),
+                'paths_added_initial': int(compile_profile.get('paths_added', 0) or 0),
+                'pairs_considered_initial': int(compile_profile.get('pairs_considered', 0) or 0),
+            })
+    except Exception:
+        pass
 
     if search_for_models == 'No':
         for n, fact in enumerate(facts):
@@ -693,20 +722,46 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
             reground = False
             fact_to_remove = facts[-remove_n]
             X, S, Y, dep_type, fact_str = fact_to_remove[:5]
+            truth_label = str(fact_to_remove[6]).strip().lower() if len(fact_to_remove) > 6 else 'unknown'
             logging.debug(f"Removing fact {fact_str}")
 
             facts_group = indep_facts if dep_type == "ext_indep" else dep_facts
             facts_group[(X, Y)].remove(tuple(sorted(S)))
+            pair_id = pair_key(X, Y)
+            reground_eligible = False
+            reground_skipped = False
+            last_of_kind = False
             if not facts_group[(X, Y)]:
                 del facts_group[(X, Y)]
-                ## regrground only if disable_reground is False, skeleton_rules_reduction is True, and either ext_flag is False or dep_type is "ext_indep"
-                reground = (
-                    disable_reground is False
-                    and skeleton_rules_reduction
+                last_of_kind = True
+                ## reground only if disable_reground is False, skeleton_rules_reduction is True, and either ext_flag is False or dep_type is "ext_indep"
+                reground_eligible = bool(
+                    skeleton_rules_reduction
                     and (ext_flag is False or dep_type == "ext_indep")
                 )
+                reground = bool((disable_reground is False) and reground_eligible)
+                reground_skipped = bool(reground_eligible and disable_reground)
             else:
                 logging.debug(f"   Not removing fact {fact_str} because there are multiple facts with the same X and Y")
+            pair_fully_released = ((X, Y) not in indep_facts) and ((X, Y) not in dep_facts)
+            release_event = {
+                'remove_idx': int(remove_n),
+                'pair': pair_id,
+                'dep_type': str(dep_type),
+                'kind': 'indep' if 'indep' in str(dep_type) else 'dep',
+                'fact_key': str(fact_str).strip(),
+                'truth': truth_label,
+                'last_of_kind': bool(last_of_kind),
+                'pair_fully_released': bool(pair_fully_released),
+                'reground_eligible': bool(reground_eligible),
+                'reground_performed': bool(reground),
+                'reground_skipped': bool(reground_skipped),
+            }
+            release_events.append(release_event)
+            if reground:
+                reground_performed_events.append(dict(release_event))
+            if reground_skipped:
+                reground_skipped_events.append(dict(release_event))
             ctl.assign_external(Function(dep_type, [Number(X), Number(Y), Function(fact_str.replace(').','').split(",")[-1])]), None)
 
             if reground:
@@ -746,6 +801,20 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                     deadline=reground_deadline,
                     timing_recorder=reground_timing,
                 )
+
+                # Ensure post-reground solve does not enumerate.
+                try:
+                    compile_profile = getattr(ctl, '_causalaba_profile', None)
+                    if isinstance(compile_profile, dict):
+                        reground_compile_profiles.append({
+                            'remove_idx': int(remove_n),
+                            'compile_sec': float(compile_profile.get('compile_sec', 0.0) or 0.0),
+                            'ground_sec': float(compile_profile.get('ground_sec', 0.0) or 0.0),
+                            'paths_added': int(compile_profile.get('paths_added', 0) or 0),
+                            'pairs_considered': int(compile_profile.get('pairs_considered', 0) or 0),
+                        })
+                except Exception:
+                    pass
 
                 # Ensure post-reground solve does not enumerate.
                 _configure_first_witness(ctl)
@@ -895,8 +964,39 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
         except Exception:
             pass
 
+    remove_n_final = int(remove_n if 'remove_n' in locals() else 0)
+    try:
+        profile.update(build_fact_profile(facts, remove_n_final))
+    except Exception:
+        pass
+    if timing_recorder is not None:
+        for key in (
+            'compile_sec_total', 'ground_sec_total', 'total_sec', 'solve_sec_total', 'post_solve_sec_total',
+            'unsat_ground_sec_total', 'unsat_solve_sec_total', 'timed_out', 'timeout_phase',
+        ):
+            if key in timing_recorder and key not in profile:
+                profile[key] = timing_recorder.get(key)
+            elif key in timing_recorder:
+                profile[key] = timing_recorder.get(key)
+    profile.update({
+        'release_event_count': int(len(release_events)),
+        'release_events': release_events,
+        'last_of_kind_release_count': int(sum(1 for e in release_events if e.get('last_of_kind'))),
+        'last_indep_release_count': int(sum(1 for e in release_events if e.get('last_of_kind') and e.get('kind') == 'indep')),
+        'reground_eligible_count': int(sum(1 for e in release_events if e.get('reground_eligible'))),
+        'reground_performed_count': int(len(reground_performed_events)),
+        'reground_skipped_count': int(len(reground_skipped_events)),
+        'reground_eligible_indep_count': int(sum(1 for e in release_events if e.get('reground_eligible') and e.get('kind') == 'indep')),
+        'reground_performed_indep_count': int(sum(1 for e in reground_performed_events if e.get('kind') == 'indep')),
+        'reground_skipped_indep_count': int(sum(1 for e in reground_skipped_events if e.get('kind') == 'indep')),
+        'reground_performed_pairs': sorted({str(e.get('pair')) for e in reground_performed_events if e.get('pair')}),
+        'reground_skipped_pairs': sorted({str(e.get('pair')) for e in reground_skipped_events if e.get('pair')}),
+        'reground_compile_profiles': reground_compile_profiles,
+        'reground_compile_count': int(len(reground_compile_profiles)),
+    })
+
     if return_statistics:
-        return [models, False, ctl.statistics, remove_n if 'remove_n' in locals() else 0]
+        return [models, False, ctl.statistics, remove_n_final, profile]
     else:
         return [models, False]
 

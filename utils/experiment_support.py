@@ -8,6 +8,7 @@ import re
 import resource
 import signal
 import socket
+import shutil
 import sys
 from collections import Counter
 from datetime import datetime
@@ -398,6 +399,7 @@ def build_run_summary(
             "best_sat_removed": _clean_scalar(profile.get("best_sat_removed")),
             "approximate_remove_search": bool(profile.get("remove_search_approximate", False)),
             "satcheck_resume": bool(profile.get("satcheck_resume", False)),
+            "solver_backend": profile.get("solver_backend"),
             "build_sec": build_sec,
             "build_breakdown": {
                 "compile_sec": compile_sec,
@@ -428,6 +430,34 @@ def build_run_summary(
             },
         }
     )
+    fact_keys = [
+        "facts_total", "removed_fact_count", "kept_fact_count",
+        "removed_indep_count", "removed_dep_count",
+        "kept_indep_count", "kept_dep_count",
+        "removed_truth_counts", "kept_truth_counts",
+        "fully_released_pair_count", "fully_released_pairs",
+        "removed_fact_keys", "removed_true_fact_keys",
+        "removed_false_fact_keys", "removed_unknown_fact_keys",
+        "removed_pair_counts", "pair_fact_counts_total",
+    ]
+    fact_summary = {k: profile.get(k) for k in fact_keys if k in profile}
+    if fact_summary:
+        summary["facts"] = fact_summary
+
+    reground_keys = [
+        "pre_grounding", "disable_reground", "skeleton_rules_reduction",
+        "block_edge_mode", "block_edge_initial_true_count", "block_edge_frozen_pair_count",
+        "release_event_count", "release_events",
+        "last_of_kind_release_count", "last_indep_release_count",
+        "reground_eligible_count", "reground_performed_count", "reground_skipped_count",
+        "reground_eligible_indep_count", "reground_performed_indep_count", "reground_skipped_indep_count",
+        "reground_performed_pairs", "reground_skipped_pairs",
+        "reground_compile_profiles", "reground_compile_count",
+        "paths_added_initial", "pairs_considered_initial",
+    ]
+    reground_summary = {k: profile.get(k) for k in reground_keys if k in profile}
+    if reground_summary:
+        summary["reground"] = reground_summary
     return summary
 
 
@@ -468,6 +498,29 @@ def log_run_summary(summary: dict) -> None:
         labels = satchecks.get("labels")
         if labels:
             logging.info("[run-summary] satcheck_labels=%s", labels)
+    facts = summary.get('facts')
+    if isinstance(facts, dict):
+        logging.info(
+            "[run-summary] facts total=%s removed=%s kept=%s removed_indep=%s removed_dep=%s fully_released_pairs=%s removed_truth=%s",
+            facts.get('facts_total'),
+            facts.get('removed_fact_count'),
+            facts.get('kept_fact_count'),
+            facts.get('removed_indep_count'),
+            facts.get('removed_dep_count'),
+            facts.get('fully_released_pair_count'),
+            facts.get('removed_truth_counts'),
+        )
+    reground = summary.get('reground')
+    if isinstance(reground, dict):
+        logging.info(
+            "[run-summary] reground pre_grounding=%s disable_reground=%s eligible=%s performed=%s skipped=%s indep_skipped=%s",
+            reground.get('pre_grounding'),
+            reground.get('disable_reground'),
+            reground.get('reground_eligible_count'),
+            reground.get('reground_performed_count'),
+            reground.get('reground_skipped_count'),
+            reground.get('reground_skipped_indep_count'),
+        )
         build_breakdown = summary.get("build_breakdown")
         if build_breakdown:
             logging.info("[run-summary] build_breakdown=%s", build_breakdown)
@@ -484,6 +537,38 @@ def log_run_summary(summary: dict) -> None:
             _fmt_sec(summary.get("elapsed_sec")),
         )
     logging.info("[run-summary] dag=%s cpdag=%s", summary.get("dag"), summary.get("cpdag"))
+
+
+def archive_run_artifacts(*, results_path: Path, summary: dict) -> Path | None:
+    scenario = summary.get("scenario")
+    if not scenario:
+        return None
+    seed = summary.get("seed")
+    run_idx = int(summary.get("run_idx", 0) or 0)
+    scenario_dir = results_path / str(scenario)
+    if not scenario_dir.exists():
+        return None
+
+    archive_dir = scenario_dir / "runs" / f"run_{run_idx + 1:04d}_seed_{int(seed)}"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    for name in [
+        "facts.lp",
+        "facts_I.lp",
+        "facts_wc.lp",
+        "log.log",
+        "satcheck_search.json",
+        "satcheck_autotune.json",
+        "heartbeat_final-solve.status",
+    ]:
+        src = scenario_dir / name
+        if src.exists():
+            shutil.copy2(src, archive_dir / name)
+
+    with open(archive_dir / "run_summary.json", "w") as f:
+        json.dump(summary, f, indent=2)
+
+    return archive_dir
 
 
 def install_signal_breadcrumbs(*, results_path: Path, version: str) -> Path:
