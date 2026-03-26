@@ -44,6 +44,7 @@ def build_command(
     s_weight: bool,
     pre_grounding: bool,
     disable_reground: bool,
+    resume: bool,
 ) -> list[str]:
     command = [
         python_bin,
@@ -60,7 +61,6 @@ def build_command(
         str(sample_size),
         "--n_runs",
         str(n_runs),
-        "--resume",
         "--device",
         str(device),
         "--test_alpha",
@@ -76,6 +76,8 @@ def build_command(
         "--disable_reground",
         str(disable_reground).lower(),
     ]
+    if resume:
+        command.append("--resume")
     if threads is not None:
         command.extend(["--threads", str(threads)])
     return command
@@ -101,6 +103,9 @@ def main() -> None:
     parser.set_defaults(s_weight=False)
     parser.add_argument("--pre-grounding", type=lambda x: str(x).lower() == "true", default=True)
     parser.add_argument("--disable-reground", type=lambda x: str(x).lower() == "true", default=True)
+    parser.add_argument("--resume", dest="resume", action="store_true", help="Resume from existing progress and summaries.")
+    parser.add_argument("--fresh", dest="resume", action="store_false", help="Ignore existing progress and rerun this version from scratch.")
+    parser.set_defaults(resume=True)
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
     parser.add_argument(
         "--python-bin",
@@ -123,6 +128,7 @@ def main() -> None:
         s_weight=args.s_weight,
         pre_grounding=args.pre_grounding,
         disable_reground=args.disable_reground,
+        resume=args.resume,
     )
 
     launch_note = {
@@ -143,6 +149,7 @@ def main() -> None:
         "s_weight": args.s_weight,
         "pre_grounding": args.pre_grounding,
         "disable_reground": args.disable_reground,
+        "resume": args.resume,
         "note": "Incomplete baseline comparison: same current fact generation as BB, but baseline CausalABA with pre_grounding=true and disable_reground=true by default.",
     }
     note_path = MATCHED_DIR / f"{args.version}_launch.json"

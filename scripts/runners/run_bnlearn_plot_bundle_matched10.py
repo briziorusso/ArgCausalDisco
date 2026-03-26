@@ -46,6 +46,7 @@ def _runner_command(
 
 
 def build_commands(args: argparse.Namespace) -> list[dict[str, object]]:
+    resume_flag = ["--resume"] if args.resume else ["--fresh"]
     common_fast = [
         "--sample-size",
         str(args.sample_size),
@@ -59,6 +60,7 @@ def build_commands(args: argparse.Namespace) -> list[dict[str, object]]:
         args.test_name,
         "--python-bin",
         args.python_bin,
+        *resume_flag,
     ]
     common_abapc = [
         "--sample-size",
@@ -71,6 +73,7 @@ def build_commands(args: argparse.Namespace) -> list[dict[str, object]]:
         args.test_name,
         "--python-bin",
         args.python_bin,
+        *resume_flag,
     ]
     common_child = [
         "--sample-size",
@@ -83,6 +86,7 @@ def build_commands(args: argparse.Namespace) -> list[dict[str, object]]:
         args.test_name,
         "--python-bin",
         args.python_bin,
+        *resume_flag,
     ]
 
     commands: list[dict[str, object]] = []
@@ -249,6 +253,16 @@ def main() -> None:
     parser.add_argument("--device", type=int, default=0)
     parser.add_argument("--test-alpha", type=float, default=0.05)
     parser.add_argument("--test-name", default="gsq")
+    parser.add_argument(
+        "--version-family",
+        default="",
+        help=(
+            "Override all bundle version names with a single family prefix. "
+            "For example, --version-family matched10_graphmetrics produces "
+            "matched10_graphmetrics_bb_others, matched10_graphmetrics_nt, etc."
+        ),
+    )
+    parser.add_argument("--version-suffix", default="", help="Suffix appended to all bundle version names for a clean rerun namespace.")
     parser.add_argument("--baselines-version", default="bnlearn_baselines_matched10_gsq")
     parser.add_argument("--nt-version", default="bnlearn_nt_matched10_gsq")
     parser.add_argument("--nor-others-version", default="bnlearn_abapc_nor_matched10_others_gsq")
@@ -257,6 +271,9 @@ def main() -> None:
     parser.add_argument("--bb-child-version", default="child_abapc_bb_matched10_gsq_searchv3")
     parser.add_argument("--bb-nor-others-version", default="bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3")
     parser.add_argument("--bb-nor-child-version", default="child_abapc_bb_norapprox_matched10_gsq_searchv3")
+    parser.add_argument("--resume", dest="resume", action="store_true", help="Resume from existing progress and summaries for all delegated runs.")
+    parser.add_argument("--fresh", dest="resume", action="store_false", help="Force fresh delegated runs for all versions in this bundle.")
+    parser.set_defaults(resume=True)
     parser.add_argument("--print-only", action="store_true", help="Print the delegated commands without executing them.")
     parser.add_argument(
         "--python-bin",
@@ -271,6 +288,32 @@ def main() -> None:
     args = parser.parse_args()
     if args.runner_python is None:
         args.runner_python = args.python_bin
+    if args.version_family:
+        version_family = args.version_family.rstrip("_")
+        family_versions = {
+            "baselines_version": f"{version_family}_baselines",
+            "nt_version": f"{version_family}_nt",
+            "nor_others_version": f"{version_family}_nor_others",
+            "nor_child_version": f"{version_family}_nor_child",
+            "bb_others_version": f"{version_family}_bb_others",
+            "bb_child_version": f"{version_family}_bb_child",
+            "bb_nor_others_version": f"{version_family}_bb_nor_others",
+            "bb_nor_child_version": f"{version_family}_bb_nor_child",
+        }
+        for attr, value in family_versions.items():
+            setattr(args, attr, value)
+    if args.version_suffix:
+        for attr in [
+            "baselines_version",
+            "nt_version",
+            "nor_others_version",
+            "nor_child_version",
+            "bb_others_version",
+            "bb_child_version",
+            "bb_nor_others_version",
+            "bb_nor_child_version",
+        ]:
+            setattr(args, attr, f"{getattr(args, attr)}{args.version_suffix}")
 
     seeds = canonical_seed_list()[: args.n_runs]
     commands = build_commands(args)
@@ -284,6 +327,9 @@ def main() -> None:
         "device": args.device,
         "test_alpha": args.test_alpha,
         "test_name": args.test_name,
+        "resume": args.resume,
+        "version_family": args.version_family,
+        "version_suffix": args.version_suffix,
         "python_bin": args.python_bin,
         "runner_python": args.runner_python,
         "commands": commands,

@@ -48,6 +48,7 @@ def build_command(
     final_solve_opt_mode: str,
     final_solve_n_models: int,
     disable_reground: bool,
+    resume: bool,
 ) -> list[str]:
     command = build_bb_command(
         version=version,
@@ -71,6 +72,7 @@ def build_command(
         final_solve_timeout=final_solve_timeout,
         final_solve_opt_mode=final_solve_opt_mode,
         final_solve_n_models=final_solve_n_models,
+        resume=resume,
     )
     command.extend(
         [
@@ -119,6 +121,9 @@ def main() -> None:
         default=True,
         help="Freeze block_edge assignments after the initial activation step.",
     )
+    parser.add_argument("--resume", dest="resume", action="store_true", help="Resume from existing progress and summaries.")
+    parser.add_argument("--fresh", dest="resume", action="store_false", help="Ignore existing progress and rerun this version from scratch.")
+    parser.set_defaults(resume=True)
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
     parser.add_argument(
         "--python-bin",
@@ -151,6 +156,7 @@ def main() -> None:
         final_solve_opt_mode=args.final_solve_opt_mode,
         final_solve_n_models=args.final_solve_n_models,
         disable_reground=args.disable_reground,
+        resume=args.resume,
     )
 
     launch_note = {
@@ -177,6 +183,7 @@ def main() -> None:
         "abapc_solver": "incremental",
         "pre_grounding": False,
         "disable_reground": args.disable_reground,
+        "resume": args.resume,
         "note": (
             "Isolation run: incremental Bayes-ball encoding on the matched-10 "
             "non-child bnlearn datasets, but block_edge assignments frozen "

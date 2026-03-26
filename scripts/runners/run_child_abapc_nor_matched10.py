@@ -41,8 +41,9 @@ def build_command(
     s_weight: bool,
     pre_grounding: bool,
     disable_reground: bool,
+    resume: bool,
 ) -> list[str]:
-    return [
+    command = [
         python_bin,
         str(REPO_ROOT / "experiments.py"),
         "--source", "bnlearn",
@@ -51,7 +52,6 @@ def build_command(
         "--version", version,
         "--sample_size", str(sample_size),
         "--n_runs", str(n_runs),
-        "--resume",
         "--test_alpha", str(test_alpha),
         "--test_name", test_name,
         "--abapc_solver", "baseline",
@@ -60,6 +60,9 @@ def build_command(
         "--disable_reground", str(disable_reground).lower(),
         "--threads", str(threads),
     ]
+    if resume:
+        command.append("--resume")
+    return command
 
 
 def main() -> None:
@@ -80,6 +83,9 @@ def main() -> None:
     parser.set_defaults(s_weight=False)
     parser.add_argument("--pre-grounding", type=lambda x: str(x).lower() == "true", default=True)
     parser.add_argument("--disable-reground", type=lambda x: str(x).lower() == "true", default=True)
+    parser.add_argument("--resume", dest="resume", action="store_true", help="Resume from existing progress and summaries.")
+    parser.add_argument("--fresh", dest="resume", action="store_false", help="Ignore existing progress and rerun this version from scratch.")
+    parser.set_defaults(resume=True)
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
     parser.add_argument(
         "--python-bin",
@@ -100,6 +106,7 @@ def main() -> None:
         s_weight=args.s_weight,
         pre_grounding=args.pre_grounding,
         disable_reground=args.disable_reground,
+        resume=args.resume,
     )
 
     launch_note = {
@@ -118,6 +125,7 @@ def main() -> None:
         "s_weight": args.s_weight,
         "pre_grounding": args.pre_grounding,
         "disable_reground": args.disable_reground,
+        "resume": args.resume,
         "note": "Incomplete baseline comparison on child: same current fact generation as BB, but baseline CausalABA with pre_grounding=true and disable_reground=true by default.",
     }
     note_path = MATCHED_DIR / f"{args.version}_launch.json"

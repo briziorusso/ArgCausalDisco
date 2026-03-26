@@ -42,8 +42,9 @@ def build_command(
     device: int,
     test_alpha: float,
     test_name: str,
+    resume: bool,
 ) -> list[str]:
-    return [
+    command = [
         python_bin,
         str(REPO_ROOT / "experiments.py"),
         "--source", "bnlearn",
@@ -52,11 +53,13 @@ def build_command(
         "--version", version,
         "--sample_size", str(sample_size),
         "--n_runs", str(n_runs),
-        "--resume",
         "--device", str(device),
         "--test_alpha", str(test_alpha),
         "--test_name", test_name,
     ]
+    if resume:
+        command.append("--resume")
+    return command
 
 
 def main() -> None:
@@ -71,6 +74,9 @@ def main() -> None:
     parser.add_argument("--device", type=int, default=0)
     parser.add_argument("--test-alpha", type=float, default=0.05)
     parser.add_argument("--test-name", default="gsq")
+    parser.add_argument("--resume", dest="resume", action="store_true", help="Resume from existing progress and summaries.")
+    parser.add_argument("--fresh", dest="resume", action="store_false", help="Ignore existing progress and rerun this version from scratch.")
+    parser.set_defaults(resume=True)
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
     parser.add_argument(
         "--python-bin",
@@ -90,6 +96,7 @@ def main() -> None:
         device=args.device,
         test_alpha=args.test_alpha,
         test_name=args.test_name,
+        resume=args.resume,
     )
 
     launch_note = {
@@ -106,6 +113,7 @@ def main() -> None:
         "device": args.device,
         "test_alpha": args.test_alpha,
         "test_name": args.test_name,
+        "resume": args.resume,
     }
     note_path = MATCHED_DIR / f"{args.version}_launch.json"
     with open(note_path, "w") as handle:

@@ -24,6 +24,13 @@ from utils.plotting import (  # noqa: E402
     sec_blue,
     sec_orange,
 )
+from utils.experiment_support import (  # noqa: E402
+    CPDAG_BASE_COLUMNS,
+    CPDAG_SUMMARY_COLUMNS,
+    DAG_BASE_COLUMNS,
+    DAG_SUMMARY_COLUMNS,
+    load_existing_summary,
+)
 
 
 RESULTS_DIR = REPO_ROOT / "results"
@@ -31,21 +38,10 @@ FIGS_DIR = RESULTS_DIR / "figs"
 FIGS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-DAG_COLS = [
-    "dataset", "model", "elapsed_mean", "elapsed_std", "nnz_mean", "nnz_std",
-    "fdr_mean", "fdr_std", "tpr_mean", "tpr_std", "fpr_mean", "fpr_std",
-    "precision_mean", "precision_std", "recall_mean", "recall_std",
-    "F1_mean", "F1_std", "shd_mean", "shd_std", "SID_mean", "SID_std",
-]
-CPDAG_COLS = [
-    "dataset", "model", "elapsed_mean", "elapsed_std", "nnz_mean", "nnz_std",
-    "fdr_mean", "fdr_std", "tpr_mean", "tpr_std", "fpr_mean", "fpr_std",
-    "precision_mean", "precision_std", "recall_mean", "recall_std",
-    "F1_mean", "F1_std", "shd_mean", "shd_std",
-    "SID_low_mean", "SID_low_std", "SID_high_mean", "SID_high_std",
-]
-DAG_PROGRESS_METRICS = ["elapsed", "nnz", "fdr", "tpr", "fpr", "precision", "recall", "F1", "shd", "sid"]
-CPDAG_PROGRESS_METRICS = ["elapsed", "nnz", "fdr", "tpr", "fpr", "precision", "recall", "F1", "shd", "sid_low", "sid_high"]
+DAG_COLS = DAG_SUMMARY_COLUMNS
+CPDAG_COLS = CPDAG_SUMMARY_COLUMNS
+DAG_PROGRESS_METRICS = [column for column in DAG_BASE_COLUMNS if column not in {"dataset", "model"}]
+CPDAG_PROGRESS_METRICS = [column for column in CPDAG_BASE_COLUMNS if column not in {"dataset", "model"}]
 
 DATASET_ORDER = ["cancer", "earthquake", "survey", "asia", "sachs", "child"]
 NODES_MAP = {"asia": 8, "cancer": 5, "earthquake": 5, "sachs": 11, "survey": 6, "child": 20}
@@ -117,7 +113,7 @@ def _load_summary(version: str, kind: str) -> pd.DataFrame:
     path = RESULTS_DIR / f"stored_results_{version}{suffix}"
     if not path.exists():
         return _load_progress_summary(version, kind)
-    frame = pd.DataFrame(np.load(path, allow_pickle=True), columns=columns)
+    frame = load_existing_summary(path, columns)
     frame["dataset"] = frame["dataset"].astype(str).str.lower()
     frame["model"] = frame["model"].astype(str)
     return frame
@@ -235,12 +231,22 @@ def _add_normalised_cpdag(frame: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def _metrics_available(frame: pd.DataFrame, metric_names: list[str]) -> bool:
+    if frame.empty:
+        return False
+    for metric in metric_names:
+        column = f"{metric}_mean"
+        if column in frame.columns and pd.to_numeric(frame[column], errors="coerce").notna().any():
+            return True
+    return False
+
+
 def _load_orig_runtime_fallback() -> pd.DataFrame:
     for version in ["bnlearn_dag_v5_2000", "bnlearn_dag_v5"]:
         path = RESULTS_DIR / f"stored_results_{version}.npy"
         if not path.exists():
             continue
-        frame = pd.DataFrame(np.load(path, allow_pickle=True), columns=DAG_COLS)
+        frame = load_existing_summary(path, DAG_COLS)
         frame["dataset"] = frame["dataset"].astype(str).str.lower()
         frame["model"] = frame["model"].astype(str)
         frame = frame[
@@ -622,6 +628,33 @@ def main() -> None:
         output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html"),
         debug=False,
     )
+    if _metrics_available(dag_df, ["adjacency_F1", "arrowhead_F1"]):
+        double_bar_chart_plotly(
+            dag_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, dag_methods,
+            save_figs=True, font_size=23,
+            output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_arrowhead_F1.html"),
+            debug=False,
+        )
+    else:
+        print("Skipping Fig.bn_matched10_dag_skeleton_arrowhead_F1.html: skeleton/arrowhead F1 metrics are missing from the saved summaries.")
+    if _metrics_available(dag_df, ["adjacency_precision", "adjacency_recall"]):
+        double_bar_chart_plotly(
+            dag_df, ["adjacency_precision", "adjacency_recall"], NAMES_DICT, COLORS_DICT, dag_methods,
+            save_figs=True, font_size=23,
+            output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_prec_rec.html"),
+            debug=False,
+        )
+    else:
+        print("Skipping Fig.bn_matched10_dag_skeleton_prec_rec.html: skeleton precision/recall metrics are missing from the saved summaries.")
+    if _metrics_available(dag_df, ["arrowhead_precision", "arrowhead_recall"]):
+        double_bar_chart_plotly(
+            dag_df, ["arrowhead_precision", "arrowhead_recall"], NAMES_DICT, COLORS_DICT, dag_methods,
+            save_figs=True, font_size=23,
+            output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_arrowhead_prec_rec.html"),
+            debug=False,
+        )
+    else:
+        print("Skipping Fig.bn_matched10_dag_arrowhead_prec_rec.html: arrowhead precision/recall metrics are missing from the saved summaries.")
     double_bar_chart_plotly(
         cpdag_df, ["p_SID_low", "p_SID_high"], NAMES_DICT, COLORS_DICT, cpdag_methods,
         save_figs=True, font_size=23,

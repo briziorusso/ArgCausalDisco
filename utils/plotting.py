@@ -82,6 +82,10 @@ def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, fon
     fig.show()
 
 
+def _pretty_metric_name(metric_name):
+    return metric_name.replace('_', ' ').title()
+
+
 
 def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict, 
                             methods=['Random', 'FGS', 'NOTEARS-MLP', 'Shapley-PC', 'ABAPC (Ours)'],
@@ -146,7 +150,12 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
     # )
 
     for n, var_to_plot in enumerate(vars_to_plot):
-        if vars_to_plot == ['precision', 'recall']:
+        if vars_to_plot in (
+            ['precision', 'recall'],
+            ['adjacency_precision', 'adjacency_recall'],
+            ['arrowhead_precision', 'arrowhead_recall'],
+            ['adjacency_F1', 'arrowhead_F1'],
+        ):
             range_y = range_y1 if range_y1 is not None else [0, 1.3]
         elif vars_to_plot == ['fdr', 'tpr']:
             range_y = [0, 1]
@@ -171,12 +180,15 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         elif var_to_plot == 'nnz':
             fig.update_yaxes(title={'text': 'Number of Edges in DAG', 'font': {'size': font_size}}, secondary_y=n == 1, range=range_y)
         elif range_y is not None:
-            fig.update_yaxes(title={'text': var_to_plot.title(), 'font': {'size': font_size}}, secondary_y=n == 1, range=range_y)
+            fig.update_yaxes(title={'text': _pretty_metric_name(var_to_plot), 'font': {'size': font_size}}, secondary_y=n == 1, range=range_y)
         else:
-            fig.update_yaxes(title={'text': var_to_plot.title(), 'font': {'size': font_size}}, secondary_y=n == 1)
+            fig.update_yaxes(title={'text': _pretty_metric_name(var_to_plot), 'font': {'size': font_size}}, secondary_y=n == 1)
 
     label_config = {
         ('precision', 'recall'): ('Precision', 'Recall', 0.65, 0.15),
+        ('adjacency_precision', 'adjacency_recall'): ('Sk-Prec', 'Sk-Rec', 0.62, 0.18),
+        ('arrowhead_precision', 'arrowhead_recall'): ('AH-Prec', 'AH-Rec', 0.62, 0.18),
+        ('adjacency_F1', 'arrowhead_F1'): ('Sk-F1', 'AH-F1', 0.56, 0.18),
         ('fdr', 'tpr'): ('FDR', 'TPR', 0.60, 0.12),
         ('p_shd', 'p_SID'): ('NSHD', 'NSID', 0.60, 0.12),
         ('p_shd', 'p_SID_low'): ('NSHD', 'NSID', 0.60, 0.12),
@@ -213,10 +225,13 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
 
     pad_lookup = {
         'Precision': 6, 'Recall': 8,
+        'Sk-Prec': 7, 'Sk-Rec': 8,
+        'AH-Prec': 7, 'AH-Rec': 8,
         'FDR': 5, 'TPR': 7,
         'NSHD': 9, 'NSID': 9,
         'Best': 9, 'Worst': 9,
         'F1': 11,
+        'Sk-F1': 11, 'AH-F1': 11,
     }
 
     for dataset_index in range(n_x_cat):

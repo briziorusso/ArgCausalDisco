@@ -55,8 +55,9 @@ def build_command(
     final_solve_timeout: float,
     final_solve_opt_mode: str,
     final_solve_n_models: int,
+    resume: bool,
 ) -> list[str]:
-    return [
+    command = [
         python_bin,
         str(REPO_ROOT / "experiments.py"),
         "--source", "bnlearn",
@@ -65,7 +66,6 @@ def build_command(
         "--version", version,
         "--sample_size", str(sample_size),
         "--n_runs", str(n_runs),
-        "--resume",
         "--test_alpha", str(test_alpha),
         "--test_name", test_name,
         "--threads", str(threads),
@@ -94,6 +94,9 @@ def build_command(
         "--final-solve-opt-mode", final_solve_opt_mode,
         "--final-solve-n-models", str(final_solve_n_models),
     ]
+    if resume:
+        command.append("--resume")
+    return command
 
 
 def main() -> None:
@@ -120,6 +123,9 @@ def main() -> None:
     parser.add_argument("--final-solve-timeout", type=float, default=0.0)
     parser.add_argument("--final-solve-opt-mode", default="opt", choices=["ignore", "opt", "optN"])
     parser.add_argument("--final-solve-n-models", type=int, default=1)
+    parser.add_argument("--resume", dest="resume", action="store_true", help="Resume from existing progress and summaries.")
+    parser.add_argument("--fresh", dest="resume", action="store_false", help="Ignore existing progress and rerun this version from scratch.")
+    parser.set_defaults(resume=True)
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
     parser.add_argument(
         "--python-bin",
@@ -151,6 +157,7 @@ def main() -> None:
         final_solve_timeout=args.final_solve_timeout,
         final_solve_opt_mode=args.final_solve_opt_mode,
         final_solve_n_models=args.final_solve_n_models,
+        resume=args.resume,
     )
 
     launch_note = {
@@ -174,6 +181,7 @@ def main() -> None:
         "final_solve_timeout": args.final_solve_timeout,
         "final_solve_opt_mode": args.final_solve_opt_mode,
         "final_solve_n_models": args.final_solve_n_models,
+        "resume": args.resume,
     }
     note_path = MATCHED_DIR / f"{args.version}_launch.json"
     with open(note_path, "w") as handle:

@@ -30,8 +30,9 @@ def build_command(
     test_alpha: float,
     test_name: str,
     disable_reground: bool,
+    resume: bool,
 ) -> list[str]:
-    command = build_bb_command(version, python_bin, sample_size, n_runs, test_alpha, test_name)
+    command = build_bb_command(version, python_bin, sample_size, n_runs, test_alpha, test_name, resume)
     command.extend(
         [
             "--abapc_solver",
@@ -64,6 +65,9 @@ def main() -> None:
         default=True,
         help="Freeze block_edge assignments after the initial activation step.",
     )
+    parser.add_argument("--resume", dest="resume", action="store_true", help="Resume from existing progress and summaries.")
+    parser.add_argument("--fresh", dest="resume", action="store_false", help="Ignore existing progress and rerun this version from scratch.")
+    parser.set_defaults(resume=True)
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
     parser.add_argument(
         "--python-bin",
@@ -81,6 +85,7 @@ def main() -> None:
         test_alpha=args.test_alpha,
         test_name=args.test_name,
         disable_reground=args.disable_reground,
+        resume=args.resume,
     )
 
     launch_note = {
@@ -97,6 +102,7 @@ def main() -> None:
         "abapc_solver": "incremental",
         "pre_grounding": False,
         "disable_reground": args.disable_reground,
+        "resume": args.resume,
         "note": (
             "Isolation run: incremental Bayes-ball encoding with the child "
             "matched-10 bb search settings, but block_edge assignments frozen "
