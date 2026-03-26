@@ -1,15 +1,14 @@
 # Optimal Correction Sets for Argumentative Causal Discovery
 
-This `MCS` branch isolates the optimal-MCS version of Causal ABA from `dev` commit `307875557c20bc8821edf4a850ae662a0e3031a5`.
-It follows the narrative in [MUSandMCS___CausalABA_submitted1402260940.pdf](MUSandMCS___CausalABA_submitted1402260940.pdf): instead of ABA-PC's heuristic "release low-ranked facts until the encoding becomes satisfiable", this branch treats fact release as a repair problem and computes an optimal correction set (optimal MCS) with weak constraints.
+This `MCS` branch of ArgCausalDisco contributes an optimal-MCS version of Causal ABA: instead of ABA-PC's heuristic "release low-ranked facts until the encoding becomes satisfiable", this branch treats fact release as a repair problem and computes an optimal correction set (optimal MCS) with weak constraints.
 In the manuscript this solver-backed variant is the OptABA-PC method.
 
 ## Where the MCS logic lives
 
 - `scripts/wc_opt_strategy_sweep.py` is the experiment driver used to generate the archived runs in [`results/final_mcs_experiments`](results/final_mcs_experiments).
-- `causalaba_mus.py` implements the published optimum-MCS path through `CausalABA_WC(...)`. It builds the guarded `mus(i)` program and optimizes the weight of released CI facts with clingo weak constraints.
+- `causalaba_mus.py` implements the proposed optimum-MCS path through `CausalABA_WC(...)`. It builds the guarded `mus(i)` program and optimizes the weight of released CI facts with clingo weak constraints.
 - `causalaba.py` and `causalaba_increm.py` are the ABA-PC baselines compared against the optimum-MCS solver in the sweep.
-- `causalaba_weakc.py` is still included as a related weak-constraint-only solver for attribution and benchmarking. The archived `final_mcs_experiments` artifacts are not produced by calling that file directly; they are produced by `scripts/wc_opt_strategy_sweep.py` invoking `causalaba_mus.CausalABA_WC(...)`.
+- The archived `final_mcs_experiments` artifacts are produced by `scripts/wc_opt_strategy_sweep.py` invoking `causalaba_mus.CausalABA_WC(...)`.
 
 ## Environment
 
@@ -25,7 +24,6 @@ The published sweeps in `results/final_mcs_experiments` do not require `wasp`; t
 
 ## How `results/final_mcs_experiments` was created
 
-Each stored run directory contains a `0.Config` file with the command line captured when the run was launched on 2026-02-12.
 Running `scripts/wc_opt_strategy_sweep.py` creates a timestamped directory under `results/` named `wc_sweep_*_<timestamp>/` containing:
 
 - `0.Config` with the resolved configuration
@@ -66,4 +64,4 @@ python results/final_mcs_experiments/recreate_main_results_table.py
 
 This writes [`results/final_mcs_experiments/main_results_table.tex`](results/final_mcs_experiments/main_results_table.tex).
 The table script expects the five directories used in the manuscript table: `cancer`, `survey`, `asia`, synthetic `ER (5)`, and synthetic `ER (8)`.
-The archived `earthquake` sweep is kept in the folder as an additional run, but it is not consumed by the table recreation script.
+The archived `earthquake` sweep is kept in the folder as an additional run, but it is not consumed by the table recreation script since no difference between methods are observed there (both perfect).
