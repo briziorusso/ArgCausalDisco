@@ -1,0 +1,60 @@
+{
+  "dataset": "asia",
+  "model": "ABAPC (Ours)",
+  "run_idx": 1,
+  "run_total": 10,
+  "seed": 3578,
+  "elapsed_sec": 0.6304152011871338,
+  "dag": {
+    "precision": 0.25,
+    "recall": 0.5,
+    "F1": 0.3333,
+    "shd": 15.0,
+    "sid": 24.0
+  },
+  "cpdag": {
+    "precision": 0.25,
+    "recall": 0.5,
+    "F1": 0.3333,
+    "shd": 16.0,
+    "sid_low": 4.0,
+    "sid_high": 31.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_matched10_others_gsq_searchv3_asia",
+  "remove_n": 32,
+  "best_unsat_removed": 31,
+  "best_sat_removed": 32,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "build_sec": 0.018217360600829124,
+  "build_breakdown": {
+    "compile_sec": 0.013368804007768631,
+    "gen_facts_sec": 0.00023111142218112946,
+    "load_encoding_sec": 0.0013673026114702225,
+    "load_facts_sec": 0.001436382532119751,
+    "load_wc_sec": 0.0016275644302368164,
+    "add_bayesball_sec": 0.00018619559705257416
+  },
+  "ground_sec": 0.018811680376529694,
+  "first_solve_sec": 0.02243098057806492,
+  "final_solve_sec": 0.011918069794774055,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 8,
+    "total_sec": 0.36631612852215767,
+    "avg_sec": 0.04578951606526971,
+    "min_sec": 0.023310944437980652,
+    "max_sec": 0.09185045585036278,
+    "sat": 4,
+    "unsat": 4,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 7
+    }
+  }
+}

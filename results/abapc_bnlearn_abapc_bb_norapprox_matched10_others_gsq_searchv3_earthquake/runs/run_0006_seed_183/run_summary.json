@@ -1,0 +1,125 @@
+{
+  "dataset": "earthquake",
+  "model": "ABAPC (Ours)",
+  "run_idx": 5,
+  "run_total": 10,
+  "seed": 183,
+  "elapsed_sec": 0.24057817459106445,
+  "dag": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "F1": 1.0,
+    "shd": 0.0,
+    "sid": 0.0
+  },
+  "cpdag": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "F1": 1.0,
+    "shd": 0.0,
+    "sid_low": 0.0,
+    "sid_high": 5.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_earthquake",
+  "remove_n": 8,
+  "best_unsat_removed": 7,
+  "best_sat_removed": 8,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.016080660745501518,
+  "build_breakdown": {
+    "compile_sec": 0.011992841958999634,
+    "gen_facts_sec": 0.0001621730625629425,
+    "load_encoding_sec": 0.0013389214873313904,
+    "load_facts_sec": 0.0011963937431573868,
+    "load_wc_sec": 0.0012458991259336472,
+    "add_bayesball_sec": 0.00014443136751651764
+  },
+  "ground_sec": 0.0037900004535913467,
+  "first_solve_sec": 0.004030419513583183,
+  "final_solve_sec": 0.0013233739882707596,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 7,
+    "total_sec": 0.10435041598975658,
+    "avg_sec": 0.01490720228425094,
+    "min_sec": 0.014070861041545868,
+    "max_sec": 0.01621830277144909,
+    "sat": 5,
+    "unsat": 2,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 6
+    }
+  },
+  "facts": {
+    "facts_total": 56,
+    "removed_fact_count": 8,
+    "kept_fact_count": 48,
+    "removed_indep_count": 5,
+    "removed_dep_count": 3,
+    "kept_indep_count": 1,
+    "kept_dep_count": 47,
+    "removed_truth_counts": {
+      "unknown": 8
+    },
+    "kept_truth_counts": {
+      "unknown": 48
+    },
+    "fully_released_pair_count": 0,
+    "fully_released_pairs": [],
+    "removed_fact_keys": [
+      "ext_dep(1,3,s0).",
+      "ext_dep(2,3,s4).",
+      "ext_dep(2,3,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(2,4,s0).",
+      "ext_indep(2,3,s0y1).",
+      "ext_indep(1,2,empty).",
+      "ext_indep(1,3,s0y2)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_dep(1,3,s0).",
+      "ext_dep(2,3,s4).",
+      "ext_dep(2,3,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(2,4,s0).",
+      "ext_indep(2,3,s0y1).",
+      "ext_indep(1,2,empty).",
+      "ext_indep(1,3,s0y2)."
+    ],
+    "removed_pair_counts": {
+      "1,2": 1,
+      "1,3": 2,
+      "2,3": 3,
+      "2,4": 1,
+      "3,4": 1
+    },
+    "pair_fact_counts_total": {
+      "0,1": 8,
+      "0,2": 8,
+      "0,3": 8,
+      "0,4": 8,
+      "1,2": 2,
+      "1,3": 5,
+      "1,4": 4,
+      "2,3": 5,
+      "2,4": 4,
+      "3,4": 4
+    }
+  },
+  "reground": {
+    "disable_reground": true,
+    "block_edge_mode": "frozen_initial",
+    "block_edge_initial_true_count": 6,
+    "block_edge_frozen_pair_count": 6
+  }
+}

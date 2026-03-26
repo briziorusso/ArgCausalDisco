@@ -1,0 +1,151 @@
+{
+  "approximate_remove_search": false,
+  "best_sat_removed": 34,
+  "best_unsat_removed": 33,
+  "cache": {
+    "0": {
+      "label": "initial",
+      "sec": 0.03240160830318928,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "19": {
+      "label": "mid",
+      "sec": 0.023756705224514008,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "29": {
+      "label": "mid",
+      "sec": 0.05160687863826752,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "32": {
+      "label": "mid",
+      "sec": 0.05933880992233753,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "33": {
+      "label": "mid",
+      "sec": 0.04942920617759228,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "34": {
+      "label": "mid",
+      "sec": 0.06624633073806763,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "38": {
+      "label": "mid",
+      "sec": 0.02746410295367241,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "76": {
+      "label": "mid",
+      "sec": 0.024589762091636658,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    }
+  },
+  "fingerprint": "4f4bbaeff785623500bb64bd2fc7f0f5fae2c0f6c2eebe9432349fad53195043",
+  "remove_n": 34,
+  "satcheck_records": [
+    {
+      "call": 1,
+      "hi": 151,
+      "label": "initial",
+      "lo": 0,
+      "mid": 0,
+      "removed": 0,
+      "sec": 0.03240160830318928,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 2,
+      "hi": 151,
+      "label": "mid",
+      "lo": 1,
+      "mid": 76,
+      "removed": 76,
+      "sec": 0.024589762091636658,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 3,
+      "hi": 76,
+      "label": "mid",
+      "lo": 1,
+      "mid": 38,
+      "removed": 38,
+      "sec": 0.02746410295367241,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 4,
+      "hi": 38,
+      "label": "mid",
+      "lo": 1,
+      "mid": 19,
+      "removed": 19,
+      "sec": 0.023756705224514008,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 5,
+      "hi": 38,
+      "label": "mid",
+      "lo": 20,
+      "mid": 29,
+      "removed": 29,
+      "sec": 0.05160687863826752,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 6,
+      "hi": 38,
+      "label": "mid",
+      "lo": 30,
+      "mid": 34,
+      "removed": 34,
+      "sec": 0.06624633073806763,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 7,
+      "hi": 34,
+      "label": "mid",
+      "lo": 30,
+      "mid": 32,
+      "removed": 32,
+      "sec": 0.05933880992233753,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 8,
+      "hi": 34,
+      "label": "mid",
+      "lo": 33,
+      "mid": 33,
+      "removed": 33,
+      "sec": 0.04942920617759228,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    }
+  ],
+  "satcheck_timeout": 600.0,
+  "search_complete": true,
+  "updated_at": 1774280135.178654,
+  "version": 1
+}

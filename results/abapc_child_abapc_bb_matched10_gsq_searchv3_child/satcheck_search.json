@@ -1,0 +1,1169 @@
+{
+  "approximate_remove_search": true,
+  "best_sat_removed": 1975,
+  "best_unsat_removed": 1578,
+  "cache": {
+    "0": {
+      "label": "initial",
+      "sec": 3.2713172743096948,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "1265": {
+      "label": "mid",
+      "sec": 5.9567921767011285,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "1475": {
+      "label": "mid-gap",
+      "sec": 271.14236570429057,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "1554": {
+      "label": "retry-frontier-unsat",
+      "sec": 704.4719818579033,
+      "status": "unsat",
+      "timeout_budget_sec": 1200.0
+    },
+    "1561": {
+      "label": "probe",
+      "sec": 5.014065123163164,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "1568": {
+      "label": "retry-frontier-unsat",
+      "sec": 157.16738987807184,
+      "status": "unsat",
+      "timeout_budget_sec": 1200.0
+    },
+    "1578": {
+      "label": "retry-frontier-unsat",
+      "sec": 409.76079066097736,
+      "status": "unsat",
+      "timeout_budget_sec": 1200.0
+    },
+    "1582": {
+      "label": "retry-frontier-unsat",
+      "sec": 1203.7613096758723,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    "1583": {
+      "label": "probe",
+      "sec": 604.4255454558879,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1587": {
+      "label": "probe",
+      "sec": 603.8567762011662,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1588": {
+      "label": "probe",
+      "sec": 604.1160899093375,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1594": {
+      "label": "retry-frontier-unsat",
+      "sec": 1203.4265822442248,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    "1598": {
+      "label": "probe",
+      "sec": 603.9192877151072,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1605": {
+      "label": "probe",
+      "sec": 603.6877707811072,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1609": {
+      "label": "probe",
+      "sec": 603.5397236347198,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1617": {
+      "label": "probe",
+      "sec": 603.9727733610198,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1620": {
+      "label": "portfolio",
+      "sec": 603.2028213068843,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1633": {
+      "label": "retry-frontier-unsat",
+      "sec": 1203.3121436219662,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    "1641": {
+      "label": "probe",
+      "sec": 603.7711412264034,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1655": {
+      "label": "portfolio",
+      "sec": 604.0640061572194,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1664": {
+      "label": "portfolio",
+      "sec": 603.4722572444007,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1686": {
+      "label": "mid",
+      "sec": 602.5029551452026,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1712": {
+      "label": "portfolio",
+      "sec": 603.2635232899338,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1713": {
+      "label": "portfolio",
+      "sec": 603.6474731070921,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1732": {
+      "label": "portfolio",
+      "sec": 603.8157181348652,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1755": {
+      "label": "portfolio",
+      "sec": 603.4080713521689,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1773": {
+      "label": "mid-frontier",
+      "sec": 603.2968391701579,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1791": {
+      "label": "mid-gap",
+      "sec": 602.7595074782148,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1804": {
+      "label": "mid-frontier",
+      "sec": 603.8703407654539,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1817": {
+      "label": "mid-frontier",
+      "sec": 603.2233866006136,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1830": {
+      "label": "mid-frontier",
+      "sec": 603.7279693549499,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1844": {
+      "label": "mid-frontier",
+      "sec": 603.0282573336735,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1857": {
+      "label": "mid-frontier",
+      "sec": 603.7223829124123,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1870": {
+      "label": "mid-frontier",
+      "sec": 603.2631578845903,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1875": {
+      "label": "portfolio",
+      "sec": 603.3515738388523,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1886": {
+      "label": "mid-frontier",
+      "sec": 603.9184700371698,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1897": {
+      "label": "mid",
+      "sec": 602.5120898680761,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1908": {
+      "label": "portfolio",
+      "sec": 603.517470991239,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1917": {
+      "label": "portfolio",
+      "sec": 603.987664478831,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1923": {
+      "label": "portfolio",
+      "sec": 602.7453272128478,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1926": {
+      "label": "portfolio",
+      "sec": 603.4779002238065,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1931": {
+      "label": "portfolio",
+      "sec": 603.8594094282016,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1938": {
+      "label": "portfolio",
+      "sec": 603.1268110247329,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1947": {
+      "label": "portfolio",
+      "sec": 603.726918769069,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1951": {
+      "label": "probe",
+      "sec": 603.552835511975,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1953": {
+      "label": "portfolio",
+      "sec": 603.4228491121903,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1956": {
+      "label": "mid-frontier",
+      "sec": 603.7762176562101,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1962": {
+      "label": "probe",
+      "sec": 603.7298198584467,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1964": {
+      "label": "probe",
+      "sec": 603.6296784682199,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1969": {
+      "label": "probe",
+      "sec": 604.1835302347317,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1970": {
+      "label": "probe",
+      "sec": 604.1414029793814,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1972": {
+      "label": "portfolio",
+      "sec": 603.362521417439,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1973": {
+      "label": "probe",
+      "sec": 604.0040357494727,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1974": {
+      "label": "probe",
+      "sec": 604.4154605446383,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1975": {
+      "label": "probe",
+      "sec": 41.38289527501911,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "1976": {
+      "label": "probe",
+      "sec": 418.0654215058312,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "1989": {
+      "label": "portfolio",
+      "sec": 602.868921469897,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    "1998": {
+      "label": "probe",
+      "sec": 438.47244767379016,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "2006": {
+      "label": "portfolio",
+      "sec": 146.4430902050808,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "2022": {
+      "label": "probe",
+      "sec": 521.4646728932858,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "2055": {
+      "label": "mid-gap",
+      "sec": 21.332227937877178,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "2213": {
+      "label": "probe",
+      "sec": 21.915927595458925,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "2529": {
+      "label": "probe",
+      "sec": 28.866955460049212,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "3371": {
+      "label": "mid",
+      "sec": 5.338774476200342,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    }
+  },
+  "fingerprint": "53e5b61e6737c12fc3914b141e73ef5debb2042109973b57259797355d259adb",
+  "remove_n": 1975,
+  "satcheck_records": [
+    {
+      "call": 1,
+      "hi": 6741,
+      "label": "initial",
+      "lo": 0,
+      "mid": 0,
+      "removed": 0,
+      "sec": 3.2713172743096948,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 2,
+      "hi": 6741,
+      "label": "mid",
+      "lo": 1,
+      "mid": 3371,
+      "removed": 3371,
+      "sec": 5.338774476200342,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 3,
+      "hi": 3371,
+      "label": "mid",
+      "lo": 1,
+      "mid": 1686,
+      "removed": 1686,
+      "sec": 602.5029551452026,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 4,
+      "hi": 3371,
+      "label": "probe",
+      "lo": 1,
+      "mid": 1686,
+      "removed": 2529,
+      "sec": 28.866955460049212,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 5,
+      "hi": 2529,
+      "label": "mid",
+      "lo": 1,
+      "mid": 1265,
+      "removed": 1265,
+      "sec": 5.9567921767011285,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 6,
+      "hi": 2529,
+      "label": "mid",
+      "lo": 1266,
+      "mid": 1897,
+      "removed": 1897,
+      "sec": 602.5120898680761,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 7,
+      "hi": 2529,
+      "label": "probe",
+      "lo": 1266,
+      "mid": 1897,
+      "removed": 2213,
+      "sec": 21.915927595458925,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 8,
+      "hi": 2213,
+      "label": "mid-gap",
+      "lo": 1266,
+      "mid": 1475,
+      "removed": 1475,
+      "sec": 271.14236570429057,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 9,
+      "hi": 2213,
+      "label": "mid-gap",
+      "lo": 1476,
+      "mid": 2055,
+      "removed": 2055,
+      "sec": 21.332227937877178,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 10,
+      "hi": 2055,
+      "label": "mid-gap",
+      "lo": 1476,
+      "mid": 1791,
+      "removed": 1791,
+      "sec": 602.7595074782148,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 11,
+      "hi": 2055,
+      "label": "portfolio",
+      "lo": 1476,
+      "mid": 1791,
+      "removed": 1923,
+      "sec": 602.7453272128478,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 12,
+      "hi": 2055,
+      "label": "portfolio",
+      "lo": 1476,
+      "mid": 1791,
+      "removed": 1633,
+      "sec": 602.7549449270591,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 13,
+      "hi": 2055,
+      "label": "portfolio",
+      "lo": 1476,
+      "mid": 1791,
+      "removed": 1989,
+      "sec": 602.868921469897,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 14,
+      "hi": 2055,
+      "label": "probe",
+      "lo": 1476,
+      "mid": 1791,
+      "removed": 1554,
+      "sec": 602.9332580752671,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 15,
+      "hi": 2055,
+      "label": "probe",
+      "lo": 1476,
+      "mid": 1791,
+      "removed": 2022,
+      "sec": 521.4646728932858,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 16,
+      "hi": 2022,
+      "label": "mid-frontier",
+      "lo": 1476,
+      "mid": 1844,
+      "removed": 1844,
+      "sec": 603.0282573336735,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 17,
+      "hi": 2022,
+      "label": "retry-frontier-unsat",
+      "lo": 1476,
+      "mid": 1844,
+      "removed": 1554,
+      "sec": 704.4719818579033,
+      "status": "unsat",
+      "timeout_budget_sec": 1200.0
+    },
+    {
+      "call": 18,
+      "hi": 2022,
+      "label": "mid-frontier",
+      "lo": 1555,
+      "mid": 1956,
+      "removed": 1956,
+      "sec": 603.7762176562101,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 19,
+      "hi": 2022,
+      "label": "retry-frontier-unsat",
+      "lo": 1555,
+      "mid": 1956,
+      "removed": 1633,
+      "sec": 1203.3121436219662,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    {
+      "call": 20,
+      "hi": 2022,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1956,
+      "removed": 1755,
+      "sec": 603.4080713521689,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 21,
+      "hi": 2022,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1956,
+      "removed": 2006,
+      "sec": 146.4430902050808,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 22,
+      "hi": 2006,
+      "label": "mid-frontier",
+      "lo": 1555,
+      "mid": 1870,
+      "removed": 1870,
+      "sec": 603.2631578845903,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 23,
+      "hi": 2006,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1870,
+      "removed": 1938,
+      "sec": 603.1268110247329,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 24,
+      "hi": 2006,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1870,
+      "removed": 1712,
+      "sec": 603.2635232899338,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 25,
+      "hi": 2006,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1870,
+      "removed": 1972,
+      "sec": 603.362521417439,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 26,
+      "hi": 2006,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1870,
+      "removed": 1594,
+      "sec": 603.4403571831062,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 27,
+      "hi": 2006,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1870,
+      "removed": 1998,
+      "sec": 438.47244767379016,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 28,
+      "hi": 1998,
+      "label": "mid-frontier",
+      "lo": 1555,
+      "mid": 1817,
+      "removed": 1817,
+      "sec": 603.2233866006136,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 29,
+      "hi": 1998,
+      "label": "retry-frontier-unsat",
+      "lo": 1555,
+      "mid": 1817,
+      "removed": 1594,
+      "sec": 1203.4265822442248,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    {
+      "call": 30,
+      "hi": 1998,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1817,
+      "removed": 1908,
+      "sec": 603.517470991239,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 31,
+      "hi": 1998,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1817,
+      "removed": 1953,
+      "sec": 603.4228491121903,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 32,
+      "hi": 1998,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1817,
+      "removed": 1620,
+      "sec": 603.2028213068843,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 33,
+      "hi": 1998,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1817,
+      "removed": 1976,
+      "sec": 418.0654215058312,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 34,
+      "hi": 1976,
+      "label": "mid-frontier",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1773,
+      "sec": 603.2968391701579,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 35,
+      "hi": 1976,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1875,
+      "sec": 603.3515738388523,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 36,
+      "hi": 1976,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1664,
+      "sec": 603.4722572444007,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 37,
+      "hi": 1976,
+      "label": "portfolio",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1926,
+      "sec": 603.4779002238065,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 38,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1609,
+      "sec": 603.5397236347198,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 39,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1951,
+      "sec": 603.552835511975,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 40,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1582,
+      "sec": 603.4230012781918,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 41,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1964,
+      "sec": 603.6296784682199,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 42,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1568,
+      "sec": 603.5908903162926,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 43,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1970,
+      "sec": 604.1414029793814,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 44,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1555,
+      "mid": 1773,
+      "removed": 1561,
+      "sec": 5.014065123163164,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 45,
+      "hi": 1976,
+      "label": "mid-frontier",
+      "lo": 1562,
+      "mid": 1830,
+      "removed": 1830,
+      "sec": 603.7279693549499,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 46,
+      "hi": 1976,
+      "label": "retry-frontier-unsat",
+      "lo": 1562,
+      "mid": 1830,
+      "removed": 1568,
+      "sec": 157.16738987807184,
+      "status": "unsat",
+      "timeout_budget_sec": 1200.0
+    },
+    {
+      "call": 47,
+      "hi": 1976,
+      "label": "mid-frontier",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1857,
+      "sec": 603.7223829124123,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 48,
+      "hi": 1976,
+      "label": "retry-frontier-unsat",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1582,
+      "sec": 1203.7613096758723,
+      "status": "unknown",
+      "timeout_budget_sec": 1200.0
+    },
+    {
+      "call": 49,
+      "hi": 1976,
+      "label": "portfolio",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1917,
+      "sec": 603.987664478831,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 50,
+      "hi": 1976,
+      "label": "portfolio",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1713,
+      "sec": 603.6474731070921,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 51,
+      "hi": 1976,
+      "label": "portfolio",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1947,
+      "sec": 603.726918769069,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 52,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1641,
+      "sec": 603.7711412264034,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 53,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1962,
+      "sec": 603.7298198584467,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 54,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1605,
+      "sec": 603.6877707811072,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 55,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1969,
+      "sec": 604.1835302347317,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 56,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1587,
+      "sec": 603.8567762011662,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 57,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1973,
+      "sec": 604.0040357494727,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 58,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1578,
+      "sec": 603.8801910541952,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 59,
+      "hi": 1976,
+      "label": "probe",
+      "lo": 1569,
+      "mid": 1857,
+      "removed": 1975,
+      "sec": 41.38289527501911,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 60,
+      "hi": 1975,
+      "label": "mid-frontier",
+      "lo": 1569,
+      "mid": 1804,
+      "removed": 1804,
+      "sec": 603.8703407654539,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 61,
+      "hi": 1975,
+      "label": "retry-frontier-unsat",
+      "lo": 1569,
+      "mid": 1804,
+      "removed": 1578,
+      "sec": 409.76079066097736,
+      "status": "unsat",
+      "timeout_budget_sec": 1200.0
+    },
+    {
+      "call": 62,
+      "hi": 1975,
+      "label": "mid-frontier",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1886,
+      "sec": 603.9184700371698,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 63,
+      "hi": 1975,
+      "label": "portfolio",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1931,
+      "sec": 603.8594094282016,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 64,
+      "hi": 1975,
+      "label": "portfolio",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1732,
+      "sec": 603.8157181348652,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 65,
+      "hi": 1975,
+      "label": "portfolio",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1655,
+      "sec": 604.0640061572194,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 66,
+      "hi": 1975,
+      "label": "probe",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1617,
+      "sec": 603.9727733610198,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 67,
+      "hi": 1975,
+      "label": "probe",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1598,
+      "sec": 603.9192877151072,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 68,
+      "hi": 1975,
+      "label": "probe",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1588,
+      "sec": 604.1160899093375,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 69,
+      "hi": 1975,
+      "label": "probe",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1974,
+      "sec": 604.4154605446383,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 70,
+      "hi": 1975,
+      "label": "probe",
+      "lo": 1579,
+      "mid": 1886,
+      "removed": 1583,
+      "sec": 604.4255454558879,
+      "status": "unknown",
+      "timeout_budget_sec": 600.0
+    }
+  ],
+  "satcheck_timeout": 600.0,
+  "search_complete": true,
+  "updated_at": 1774236810.9031506,
+  "version": 1
+}

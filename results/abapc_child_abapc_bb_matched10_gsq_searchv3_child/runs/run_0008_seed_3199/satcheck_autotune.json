@@ -1,0 +1,17 @@
+{
+  "inflight": false,
+  "last_available_mem_kib": 87732456,
+  "last_event": "timeout_keep",
+  "last_peak_kib": 39627780,
+  "last_removed": 1602,
+  "last_rss_kib": 39627780,
+  "last_started_threads": 24,
+  "last_status": "unknown",
+  "last_timed_out": true,
+  "max_threads": 24,
+  "min_threads": 8,
+  "recommended_threads": 24,
+  "total_mem_kib": 131399944,
+  "updated_at": 1774152654.4970844,
+  "version": 1
+}

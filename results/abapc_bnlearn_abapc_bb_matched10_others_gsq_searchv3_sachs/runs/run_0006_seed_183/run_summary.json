@@ -1,0 +1,60 @@
+{
+  "dataset": "sachs",
+  "model": "ABAPC (Ours)",
+  "run_idx": 5,
+  "run_total": 10,
+  "seed": 183,
+  "elapsed_sec": 24.803122520446777,
+  "dag": {
+    "precision": 0.3056,
+    "recall": 0.6471,
+    "F1": 0.4151,
+    "shd": 25.0,
+    "sid": 31.0
+  },
+  "cpdag": {
+    "precision": 0.1944,
+    "recall": 0.4118,
+    "F1": 0.2642,
+    "shd": 28.0,
+    "sid_low": 6.0,
+    "sid_high": 43.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_matched10_others_gsq_searchv3_sachs",
+  "remove_n": 83,
+  "best_unsat_removed": 82,
+  "best_sat_removed": 83,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "build_sec": 0.04186609201133251,
+  "build_breakdown": {
+    "compile_sec": 0.0293777696788311,
+    "gen_facts_sec": 0.0011734068393707275,
+    "load_encoding_sec": 0.0014007631689310074,
+    "load_facts_sec": 0.004133868962526321,
+    "load_wc_sec": 0.0056138113141059875,
+    "add_bayesball_sec": 0.00016647204756736755
+  },
+  "ground_sec": 0.38022784516215324,
+  "first_solve_sec": 0.5469589550048113,
+  "final_solve_sec": 0.19112605974078178,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 11,
+    "total_sec": 22.53110247477889,
+    "avg_sec": 2.0482820431617172,
+    "min_sec": 0.16112951934337616,
+    "max_sec": 8.501962829381227,
+    "sat": 6,
+    "unsat": 5,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 10
+    }
+  }
+}

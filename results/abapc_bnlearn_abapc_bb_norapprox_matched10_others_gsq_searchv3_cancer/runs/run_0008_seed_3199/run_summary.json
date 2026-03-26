@@ -1,0 +1,145 @@
+{
+  "dataset": "cancer",
+  "model": "ABAPC (Ours)",
+  "run_idx": 7,
+  "run_total": 10,
+  "seed": 3199,
+  "elapsed_sec": 0.24457311630249023,
+  "dag": {
+    "precision": 0.6667,
+    "recall": 0.5,
+    "F1": 0.5714,
+    "shd": 2.0,
+    "sid": 6.0
+  },
+  "cpdag": {
+    "precision": 0.6667,
+    "recall": 0.5,
+    "F1": 0.5714,
+    "shd": 2.0,
+    "sid_low": 6.0,
+    "sid_high": 11.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_cancer",
+  "remove_n": 13,
+  "best_unsat_removed": 12,
+  "best_sat_removed": 13,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.015114562585949898,
+  "build_breakdown": {
+    "compile_sec": 0.011182684451341629,
+    "gen_facts_sec": 0.00012843497097492218,
+    "load_encoding_sec": 0.0013718046247959137,
+    "load_facts_sec": 0.0011278912425041199,
+    "load_wc_sec": 0.0011425409466028214,
+    "add_bayesball_sec": 0.00016120634973049164
+  },
+  "ground_sec": 0.002562550827860832,
+  "first_solve_sec": 0.002598462626338005,
+  "final_solve_sec": 0.0011091213673353195,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 6,
+    "total_sec": 0.13320460356771946,
+    "avg_sec": 0.022200767261286575,
+    "min_sec": 0.013899965211749077,
+    "max_sec": 0.040966494008898735,
+    "sat": 2,
+    "unsat": 4,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 5
+    }
+  },
+  "facts": {
+    "facts_total": 28,
+    "removed_fact_count": 13,
+    "kept_fact_count": 15,
+    "removed_indep_count": 10,
+    "removed_dep_count": 3,
+    "kept_indep_count": 0,
+    "kept_dep_count": 15,
+    "removed_truth_counts": {
+      "unknown": 13
+    },
+    "kept_truth_counts": {
+      "unknown": 15
+    },
+    "fully_released_pair_count": 7,
+    "fully_released_pairs": [
+      "0,2",
+      "1,2",
+      "1,3",
+      "1,4",
+      "2,3",
+      "2,4",
+      "3,4"
+    ],
+    "removed_fact_keys": [
+      "ext_dep(0,2,s3).",
+      "ext_indep(1,3,s0).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(2,4,empty).",
+      "ext_dep(0,2,empty).",
+      "ext_indep(1,2,empty).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(3,4,s0).",
+      "ext_dep(0,2,s4).",
+      "ext_indep(1,3,empty).",
+      "ext_indep(3,4,empty).",
+      "ext_indep(1,4,s0).",
+      "ext_indep(0,2,s1)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_dep(0,2,s3).",
+      "ext_indep(1,3,s0).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(2,4,empty).",
+      "ext_dep(0,2,empty).",
+      "ext_indep(1,2,empty).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(3,4,s0).",
+      "ext_dep(0,2,s4).",
+      "ext_indep(1,3,empty).",
+      "ext_indep(3,4,empty).",
+      "ext_indep(1,4,s0).",
+      "ext_indep(0,2,s1)."
+    ],
+    "removed_pair_counts": {
+      "0,2": 4,
+      "1,2": 1,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 1,
+      "2,4": 1,
+      "3,4": 2
+    },
+    "pair_fact_counts_total": {
+      "0,1": 5,
+      "0,2": 4,
+      "0,3": 5,
+      "0,4": 5,
+      "1,2": 1,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 1,
+      "2,4": 1,
+      "3,4": 2
+    }
+  },
+  "reground": {
+    "disable_reground": true,
+    "block_edge_mode": "frozen_initial",
+    "block_edge_initial_true_count": 7,
+    "block_edge_frozen_pair_count": 7
+  }
+}

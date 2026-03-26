@@ -1,0 +1,60 @@
+{
+  "dataset": "cancer",
+  "model": "ABAPC (Ours)",
+  "run_idx": 9,
+  "run_total": 10,
+  "seed": 8266,
+  "elapsed_sec": 0.3019070625305176,
+  "dag": {
+    "precision": 0.4286,
+    "recall": 0.75,
+    "F1": 0.5455,
+    "shd": 4.0,
+    "sid": 12.0
+  },
+  "cpdag": {
+    "precision": 0.2857,
+    "recall": 0.5,
+    "F1": 0.3636,
+    "shd": 5.0,
+    "sid_low": 0.0,
+    "sid_high": 14.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_matched10_others_gsq_searchv3_cancer",
+  "remove_n": 11,
+  "best_unsat_removed": 10,
+  "best_sat_removed": 11,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "build_sec": 0.01570475846529007,
+  "build_breakdown": {
+    "compile_sec": 0.011625593528151512,
+    "gen_facts_sec": 0.00017015449702739716,
+    "load_encoding_sec": 0.0013919845223426819,
+    "load_facts_sec": 0.0011850185692310333,
+    "load_wc_sec": 0.001194823533296585,
+    "add_bayesball_sec": 0.00013718381524085999
+  },
+  "ground_sec": 0.0031946320086717606,
+  "first_solve_sec": 0.003183480352163315,
+  "final_solve_sec": 0.0015739835798740387,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 6,
+    "total_sec": 0.15953277982771397,
+    "avg_sec": 0.026588796637952328,
+    "min_sec": 0.013982279226183891,
+    "max_sec": 0.041478145867586136,
+    "sat": 2,
+    "unsat": 4,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 5
+    }
+  }
+}

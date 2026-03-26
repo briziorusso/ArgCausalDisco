@@ -1,0 +1,158 @@
+{
+  "dataset": "cancer",
+  "model": "ABAPC (Ours)",
+  "run_idx": 6,
+  "run_total": 10,
+  "seed": 7977,
+  "elapsed_sec": 0.2702617645263672,
+  "dag": {
+    "precision": 0.2,
+    "recall": 0.25,
+    "F1": 0.2222,
+    "shd": 4.0,
+    "sid": 15.0
+  },
+  "cpdag": {
+    "precision": 0.4,
+    "recall": 0.5,
+    "F1": 0.4444,
+    "shd": 3.0,
+    "sid_low": 5.0,
+    "sid_high": 15.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_cancer",
+  "remove_n": 21,
+  "best_unsat_removed": 20,
+  "best_sat_removed": 21,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.016030151396989822,
+  "build_breakdown": {
+    "compile_sec": 0.011873139068484306,
+    "gen_facts_sec": 0.00021110475063323975,
+    "load_encoding_sec": 0.00136527419090271,
+    "load_facts_sec": 0.0011905543506145477,
+    "load_wc_sec": 0.0012435205280780792,
+    "add_bayesball_sec": 0.0001465585082769394
+  },
+  "ground_sec": 0.0038544628769159317,
+  "first_solve_sec": 0.004058942198753357,
+  "final_solve_sec": 0.001307336613535881,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 7,
+    "total_sec": 0.15653014555573463,
+    "avg_sec": 0.02236144936510495,
+    "min_sec": 0.014281706884503365,
+    "max_sec": 0.032430196180939674,
+    "sat": 3,
+    "unsat": 4,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 6
+    }
+  },
+  "facts": {
+    "facts_total": 57,
+    "removed_fact_count": 21,
+    "kept_fact_count": 36,
+    "removed_indep_count": 12,
+    "removed_dep_count": 9,
+    "kept_indep_count": 2,
+    "kept_dep_count": 34,
+    "removed_truth_counts": {
+      "unknown": 21
+    },
+    "kept_truth_counts": {
+      "unknown": 36
+    },
+    "fully_released_pair_count": 4,
+    "fully_released_pairs": [
+      "1,2",
+      "1,4",
+      "2,3",
+      "2,4"
+    ],
+    "removed_fact_keys": [
+      "ext_indep(1,3,s2).",
+      "ext_dep(2,3,s0).",
+      "ext_dep(2,4,empty).",
+      "ext_dep(2,4,s1).",
+      "ext_dep(0,2,s1y4).",
+      "ext_indep(2,3,s1).",
+      "ext_indep(1,3,empty).",
+      "ext_dep(1,2,empty).",
+      "ext_dep(1,2,s4).",
+      "ext_dep(1,2,s0).",
+      "ext_dep(1,4,empty).",
+      "ext_indep(1,4,s0y2).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(1,4,s0).",
+      "ext_dep(1,4,s2).",
+      "ext_indep(2,4,s0y1).",
+      "ext_indep(2,4,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,s3).",
+      "ext_indep(2,3,s0y1).",
+      "ext_indep(2,4,s3)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_indep(1,3,s2).",
+      "ext_dep(2,3,s0).",
+      "ext_dep(2,4,empty).",
+      "ext_dep(2,4,s1).",
+      "ext_dep(0,2,s1y4).",
+      "ext_indep(2,3,s1).",
+      "ext_indep(1,3,empty).",
+      "ext_dep(1,2,empty).",
+      "ext_dep(1,2,s4).",
+      "ext_dep(1,2,s0).",
+      "ext_dep(1,4,empty).",
+      "ext_indep(1,4,s0y2).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(1,4,s0).",
+      "ext_dep(1,4,s2).",
+      "ext_indep(2,4,s0y1).",
+      "ext_indep(2,4,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,s3).",
+      "ext_indep(2,3,s0y1).",
+      "ext_indep(2,4,s3)."
+    ],
+    "removed_pair_counts": {
+      "0,2": 1,
+      "1,2": 3,
+      "1,3": 2,
+      "1,4": 5,
+      "2,3": 4,
+      "2,4": 5,
+      "3,4": 1
+    },
+    "pair_fact_counts_total": {
+      "0,1": 8,
+      "0,2": 8,
+      "0,3": 8,
+      "0,4": 8,
+      "1,2": 3,
+      "1,3": 4,
+      "1,4": 5,
+      "2,3": 4,
+      "2,4": 5,
+      "3,4": 4
+    }
+  },
+  "reground": {
+    "disable_reground": true,
+    "block_edge_mode": "frozen_initial",
+    "block_edge_initial_true_count": 5,
+    "block_edge_frozen_pair_count": 5
+  }
+}

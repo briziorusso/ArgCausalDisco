@@ -1,0 +1,145 @@
+{
+  "dataset": "cancer",
+  "model": "ABAPC (Ours)",
+  "run_idx": 2,
+  "run_total": 10,
+  "seed": 2656,
+  "elapsed_sec": 0.24268221855163574,
+  "dag": {
+    "precision": 0.6667,
+    "recall": 0.5,
+    "F1": 0.5714,
+    "shd": 2.0,
+    "sid": 6.0
+  },
+  "cpdag": {
+    "precision": 0.6667,
+    "recall": 0.5,
+    "F1": 0.5714,
+    "shd": 2.0,
+    "sid_low": 6.0,
+    "sid_high": 11.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_cancer",
+  "remove_n": 13,
+  "best_unsat_removed": 12,
+  "best_sat_removed": 13,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.01749563030898571,
+  "build_breakdown": {
+    "compile_sec": 0.012997448444366455,
+    "gen_facts_sec": 0.00015019811689853668,
+    "load_encoding_sec": 0.001648981124162674,
+    "load_facts_sec": 0.0013692565262317657,
+    "load_wc_sec": 0.0011899899691343307,
+    "add_bayesball_sec": 0.00013975612819194794
+  },
+  "ground_sec": 0.002451971173286438,
+  "first_solve_sec": 0.002648714929819107,
+  "final_solve_sec": 0.0015333984047174454,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 6,
+    "total_sec": 0.11353899165987968,
+    "avg_sec": 0.018923165276646614,
+    "min_sec": 0.01475442759692669,
+    "max_sec": 0.03703254461288452,
+    "sat": 2,
+    "unsat": 4,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 5
+    }
+  },
+  "facts": {
+    "facts_total": 28,
+    "removed_fact_count": 13,
+    "kept_fact_count": 15,
+    "removed_indep_count": 10,
+    "removed_dep_count": 3,
+    "kept_indep_count": 0,
+    "kept_dep_count": 15,
+    "removed_truth_counts": {
+      "unknown": 13
+    },
+    "kept_truth_counts": {
+      "unknown": 15
+    },
+    "fully_released_pair_count": 7,
+    "fully_released_pairs": [
+      "0,2",
+      "1,2",
+      "1,3",
+      "1,4",
+      "2,3",
+      "2,4",
+      "3,4"
+    ],
+    "removed_fact_keys": [
+      "ext_dep(0,2,s3).",
+      "ext_indep(2,4,empty).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(1,3,empty).",
+      "ext_dep(0,2,empty).",
+      "ext_dep(0,2,s1).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(3,4,empty).",
+      "ext_indep(1,2,empty).",
+      "ext_indep(1,3,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,s0).",
+      "ext_indep(0,2,s4)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_dep(0,2,s3).",
+      "ext_indep(2,4,empty).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(1,3,empty).",
+      "ext_dep(0,2,empty).",
+      "ext_dep(0,2,s1).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(3,4,empty).",
+      "ext_indep(1,2,empty).",
+      "ext_indep(1,3,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,s0).",
+      "ext_indep(0,2,s4)."
+    ],
+    "removed_pair_counts": {
+      "0,2": 4,
+      "1,2": 1,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 1,
+      "2,4": 1,
+      "3,4": 2
+    },
+    "pair_fact_counts_total": {
+      "0,1": 5,
+      "0,2": 4,
+      "0,3": 5,
+      "0,4": 5,
+      "1,2": 1,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 1,
+      "2,4": 1,
+      "3,4": 2
+    }
+  },
+  "reground": {
+    "disable_reground": true,
+    "block_edge_mode": "frozen_initial",
+    "block_edge_initial_true_count": 7,
+    "block_edge_frozen_pair_count": 7
+  }
+}

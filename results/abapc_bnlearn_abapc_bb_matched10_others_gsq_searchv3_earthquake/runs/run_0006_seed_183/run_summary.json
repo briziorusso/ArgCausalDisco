@@ -1,0 +1,60 @@
+{
+  "dataset": "earthquake",
+  "model": "ABAPC (Ours)",
+  "run_idx": 5,
+  "run_total": 10,
+  "seed": 183,
+  "elapsed_sec": 0.4039020538330078,
+  "dag": {
+    "precision": 0.8,
+    "recall": 1.0,
+    "F1": 0.8889,
+    "shd": 1.0,
+    "sid": 0.0
+  },
+  "cpdag": {
+    "precision": 0.8,
+    "recall": 1.0,
+    "F1": 0.8889,
+    "shd": 1.0,
+    "sid_low": 0.0,
+    "sid_high": 14.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_matched10_others_gsq_searchv3_earthquake",
+  "remove_n": 1,
+  "best_unsat_removed": 0,
+  "best_sat_removed": 1,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "build_sec": 0.015736086294054985,
+  "build_breakdown": {
+    "compile_sec": 0.011611294001340866,
+    "gen_facts_sec": 0.00016429275274276733,
+    "load_encoding_sec": 0.0013473667204380035,
+    "load_facts_sec": 0.0012229345738887787,
+    "load_wc_sec": 0.0012470688670873642,
+    "add_bayesball_sec": 0.0001431293785572052
+  },
+  "ground_sec": 0.003817213699221611,
+  "first_solve_sec": 0.003934310749173164,
+  "final_solve_sec": 0.0013386532664299011,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 7,
+    "total_sec": 0.22918896563351154,
+    "avg_sec": 0.032741280804787366,
+    "min_sec": 0.015857955440878868,
+    "max_sec": 0.05614328756928444,
+    "sat": 6,
+    "unsat": 1,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 6
+    }
+  }
+}

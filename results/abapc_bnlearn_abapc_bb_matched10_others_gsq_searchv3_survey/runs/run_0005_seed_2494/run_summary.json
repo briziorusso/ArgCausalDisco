@@ -1,0 +1,60 @@
+{
+  "dataset": "survey",
+  "model": "ABAPC (Ours)",
+  "run_idx": 4,
+  "run_total": 10,
+  "seed": 2494,
+  "elapsed_sec": 0.4770228862762451,
+  "dag": {
+    "precision": 0.375,
+    "recall": 0.5,
+    "F1": 0.4286,
+    "shd": 6.0,
+    "sid": 21.0
+  },
+  "cpdag": {
+    "precision": 0.5,
+    "recall": 0.6667,
+    "F1": 0.5714,
+    "shd": 7.0,
+    "sid_low": 16.0,
+    "sid_high": 22.0
+  },
+  "scenario": "abapc_bnlearn_abapc_bb_matched10_others_gsq_searchv3_survey",
+  "remove_n": 28,
+  "best_unsat_removed": 27,
+  "best_sat_removed": 28,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "build_sec": 0.016363728791475296,
+  "build_breakdown": {
+    "compile_sec": 0.012067332863807678,
+    "gen_facts_sec": 0.00016164220869541168,
+    "load_encoding_sec": 0.001506144180893898,
+    "load_facts_sec": 0.0012305490672588348,
+    "load_wc_sec": 0.0012341570109128952,
+    "add_bayesball_sec": 0.00016390345990657806
+  },
+  "ground_sec": 0.0048043448477983475,
+  "first_solve_sec": 0.0051775407046079636,
+  "final_solve_sec": 0.002197764813899994,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 7,
+    "total_sec": 0.2334677390754223,
+    "avg_sec": 0.033352534153631756,
+    "min_sec": 0.024446865543723106,
+    "max_sec": 0.05141902156174183,
+    "sat": 4,
+    "unsat": 3,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 6
+    }
+  }
+}
