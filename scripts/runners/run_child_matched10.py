@@ -58,9 +58,9 @@ def build_command(version: str, python_bin: str, test_alpha: float, test_name: s
         "--satcheck_portfolio_throttle", "true",
         "--satcheck_portfolio_min_size", "2",
         "--satcheck_plateau_stop", "true",
-        "--satcheck_plateau_stop_width_ratio", "0.07",
+        "--satcheck_plateau_stop_width_ratio", "0.08",
         "--satcheck_plateau_stop_min_calls", "40",
-        "--satcheck_plateau_stop_unknown_ratio", "0.80",
+        "--satcheck_plateau_stop_unknown_ratio", "0.75",
         "--adaptive_satcheck_threads", "true",
         "--satcheck_min_threads", "8",
         "--satcheck_increase_step", "2",
@@ -72,7 +72,7 @@ def build_command(version: str, python_bin: str, test_alpha: float, test_name: s
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the exact child line-search on the matched 10 canonical seeds.")
-    parser.add_argument("--version", default="child_sat24_t600_matched10")
+    parser.add_argument("--version", default="child_abapc_bb_matched10_gsq_searchv3")
     parser.add_argument("--test-alpha", type=float, default=0.05)
     parser.add_argument("--test-name", default="gsq")
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")

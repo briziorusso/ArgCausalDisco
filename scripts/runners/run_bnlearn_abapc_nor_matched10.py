@@ -84,11 +84,11 @@ def build_command(
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Run ABAPC with the current baseline CausalABA solver on the matched canonical "
-            "seeds so the facts match the other bnlearn experiments."
+            "Run ABAPC (nor) with the baseline CausalABA solver on the matched canonical "
+            "seeds for the non-child bnlearn datasets, using the same current gsq facts as BB."
         )
     )
-    parser.add_argument("--version", default="bnlearn_abapc_orig_matched10_others_gsq")
+    parser.add_argument("--version", default="bnlearn_abapc_nor_matched10_others_gsq")
     parser.add_argument("--names", nargs="+", default=DEFAULT_NAMES)
     parser.add_argument("--sample-size", type=int, default=5000)
     parser.add_argument("--n-runs", type=int, default=10)
@@ -99,8 +99,8 @@ def main() -> None:
     parser.add_argument("--S-weight", dest="s_weight", action="store_true", help="Enable conditioning-set weighting in fact strengths.")
     parser.add_argument("--no-S-weight", dest="s_weight", action="store_false", help="Disable conditioning-set weighting in fact strengths.")
     parser.set_defaults(s_weight=False)
-    parser.add_argument("--pre-grounding", type=lambda x: str(x).lower() == "true", default=False)
-    parser.add_argument("--disable-reground", type=lambda x: str(x).lower() == "true", default=False)
+    parser.add_argument("--pre-grounding", type=lambda x: str(x).lower() == "true", default=True)
+    parser.add_argument("--disable-reground", type=lambda x: str(x).lower() == "true", default=True)
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
     parser.add_argument(
         "--python-bin",
@@ -143,7 +143,7 @@ def main() -> None:
         "s_weight": args.s_weight,
         "pre_grounding": args.pre_grounding,
         "disable_reground": args.disable_reground,
-        "note": "Solver-only comparison: same current fact generation as the other matched-10 runs, but with baseline CausalABA instead of incremental CausalABA.",
+        "note": "Incomplete baseline comparison: same current fact generation as BB, but baseline CausalABA with pre_grounding=true and disable_reground=true by default.",
     }
     note_path = MATCHED_DIR / f"{args.version}_launch.json"
     with open(note_path, "w") as handle:

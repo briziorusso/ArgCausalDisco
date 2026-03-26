@@ -8,28 +8,20 @@ import subprocess
 import sys
 from pathlib import Path
 
-import numpy as np
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from utils.helpers import random_stability  # noqa: E402
-
-
-RESULTS_DIR = REPO_ROOT / "results"
-MATCHED_DIR = RESULTS_DIR / "matched10"
-MATCHED_DIR.mkdir(parents=True, exist_ok=True)
-DEFAULT_PYTHON = Path("/vol/bitbucket/fr920/miniconda3/envs/aba-env/bin/python")
-DEFAULT_NAMES = ["cancer", "earthquake", "survey", "asia", "sachs"]
-DEFAULT_PLATEAU_WIDTH_RATIO = 0.08
-DEFAULT_PLATEAU_UNKNOWN_RATIO = 0.75
-
-
-def canonical_seed_list(total_runs: int = 50) -> list[int]:
-    random_stability(2024)
-    return np.random.randint(0, 10000, (total_runs,)).tolist()
+from scripts.runners.run_bnlearn_abapc_bb_matched10 import (  # noqa: E402
+    DEFAULT_NAMES,
+    DEFAULT_PLATEAU_UNKNOWN_RATIO,
+    DEFAULT_PLATEAU_WIDTH_RATIO,
+    DEFAULT_PYTHON,
+    MATCHED_DIR,
+    build_command as build_bb_command,
+    canonical_seed_list,
+)
 
 
 def build_command(
@@ -55,52 +47,53 @@ def build_command(
     final_solve_timeout: float,
     final_solve_opt_mode: str,
     final_solve_n_models: int,
+    disable_reground: bool,
 ) -> list[str]:
-    return [
-        python_bin,
-        str(REPO_ROOT / "experiments.py"),
-        "--source", "bnlearn",
-        "--models", "abapc",
-        "--names", *names,
-        "--version", version,
-        "--sample_size", str(sample_size),
-        "--n_runs", str(n_runs),
-        "--resume",
-        "--test_alpha", str(test_alpha),
-        "--test_name", test_name,
-        "--threads", str(threads),
-        "--satcheck_threads", str(satcheck_threads),
-        "--satcheck_timeout", str(satcheck_timeout),
-        "--satcheck_probe_limit", str(satcheck_probe_limit),
-        "--satcheck_frontier_crawl", "true",
-        "--satcheck_promoted_retry", "true",
-        "--satcheck_promoted_retry_timeout_scale", "2.0",
-        "--satcheck_promoted_retry_max_retries", "1",
-        "--satcheck_retry_frontier_sat", "false",
-        "--satcheck_portfolio", "true",
-        "--satcheck_portfolio_size", str(portfolio_size),
-        "--satcheck_portfolio_timeout_scale", str(portfolio_timeout_scale),
-        "--satcheck_portfolio_min_timeout", str(portfolio_min_timeout),
-        "--satcheck_portfolio_throttle", "true",
-        "--satcheck_portfolio_min_size", "2",
-        "--satcheck_plateau_stop", "true",
-        "--satcheck_plateau_stop_width_ratio", str(satcheck_plateau_stop_width_ratio),
-        "--satcheck_plateau_stop_min_calls", "40",
-        "--satcheck_plateau_stop_unknown_ratio", str(satcheck_plateau_stop_unknown_ratio),
-        "--adaptive_satcheck_threads", "true",
-        "--satcheck_min_threads", str(satcheck_min_threads),
-        "--satcheck_increase_step", str(satcheck_increase_step),
-        "--final-solve-timeout", str(final_solve_timeout),
-        "--final-solve-opt-mode", final_solve_opt_mode,
-        "--final-solve-n-models", str(final_solve_n_models),
-    ]
+    command = build_bb_command(
+        version=version,
+        python_bin=python_bin,
+        names=names,
+        sample_size=sample_size,
+        n_runs=n_runs,
+        test_alpha=test_alpha,
+        test_name=test_name,
+        threads=threads,
+        satcheck_threads=satcheck_threads,
+        satcheck_timeout=satcheck_timeout,
+        satcheck_probe_limit=satcheck_probe_limit,
+        portfolio_size=portfolio_size,
+        portfolio_timeout_scale=portfolio_timeout_scale,
+        portfolio_min_timeout=portfolio_min_timeout,
+        satcheck_min_threads=satcheck_min_threads,
+        satcheck_increase_step=satcheck_increase_step,
+        satcheck_plateau_stop_width_ratio=satcheck_plateau_stop_width_ratio,
+        satcheck_plateau_stop_unknown_ratio=satcheck_plateau_stop_unknown_ratio,
+        final_solve_timeout=final_solve_timeout,
+        final_solve_opt_mode=final_solve_opt_mode,
+        final_solve_n_models=final_solve_n_models,
+    )
+    command.extend(
+        [
+            "--abapc_solver",
+            "incremental",
+            "--pre_grounding",
+            "false",
+            "--disable_reground",
+            str(disable_reground).lower(),
+        ]
+    )
+    return command
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run ABAPC (bb) on the bnlearn non-child datasets using the matched canonical seeds."
+        description=(
+            "Run ABAPC on the non-child bnlearn datasets with the incremental "
+            "Bayes-ball encoding but freeze the initial block_edge skeleton to "
+            "emulate the old no-reground approximation."
+        )
     )
-    parser.add_argument("--version", default="bnlearn_abapc_bb_matched10_others_gsq_searchv3")
+    parser.add_argument("--version", default="bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3")
     parser.add_argument("--names", nargs="+", default=DEFAULT_NAMES)
     parser.add_argument("--sample-size", type=int, default=5000)
     parser.add_argument("--n-runs", type=int, default=10)
@@ -120,6 +113,12 @@ def main() -> None:
     parser.add_argument("--final-solve-timeout", type=float, default=0.0)
     parser.add_argument("--final-solve-opt-mode", default="opt", choices=["ignore", "opt", "optN"])
     parser.add_argument("--final-solve-n-models", type=int, default=1)
+    parser.add_argument(
+        "--disable-reground",
+        type=lambda x: str(x).lower() == "true",
+        default=True,
+        help="Freeze block_edge assignments after the initial activation step.",
+    )
     parser.add_argument("--print-only", action="store_true", help="Print the command and selected seeds without executing.")
     parser.add_argument(
         "--python-bin",
@@ -128,7 +127,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    seeds = canonical_seed_list()[:args.n_runs]
+    seeds = canonical_seed_list()[: args.n_runs]
     command = build_command(
         version=args.version,
         python_bin=args.python_bin,
@@ -151,6 +150,7 @@ def main() -> None:
         final_solve_timeout=args.final_solve_timeout,
         final_solve_opt_mode=args.final_solve_opt_mode,
         final_solve_n_models=args.final_solve_n_models,
+        disable_reground=args.disable_reground,
     )
 
     launch_note = {
@@ -174,6 +174,15 @@ def main() -> None:
         "final_solve_timeout": args.final_solve_timeout,
         "final_solve_opt_mode": args.final_solve_opt_mode,
         "final_solve_n_models": args.final_solve_n_models,
+        "abapc_solver": "incremental",
+        "pre_grounding": False,
+        "disable_reground": args.disable_reground,
+        "note": (
+            "Isolation run: incremental Bayes-ball encoding on the matched-10 "
+            "non-child bnlearn datasets, but block_edge assignments frozen "
+            "after the initial activation step to emulate the old nor "
+            "no-reground approximation."
+        ),
     }
     note_path = MATCHED_DIR / f"{args.version}_launch.json"
     with open(note_path, "w") as handle:

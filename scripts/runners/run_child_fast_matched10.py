@@ -61,7 +61,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run the fast child baselines on the matched canonical seeds."
     )
-    parser.add_argument("--version", default="child_fgs_nt_matched10")
+    parser.add_argument("--version", default="child_fast_matched10_gsq")
     parser.add_argument("--models", nargs="+", default=DEFAULT_MODELS)
     parser.add_argument("--sample-size", type=int, default=5000)
     parser.add_argument("--n-runs", type=int, default=10)

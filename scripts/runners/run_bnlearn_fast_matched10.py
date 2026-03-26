@@ -63,7 +63,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run the fast bnlearn baselines on the matched canonical seeds."
     )
-    parser.add_argument("--version", default="bnlearn_fgs_nt_matched10")
+    parser.add_argument("--version", default="bnlearn_fast_matched10_gsq")
     parser.add_argument("--models", nargs="+", default=DEFAULT_MODELS)
     parser.add_argument("--names", nargs="+", default=DEFAULT_NAMES)
     parser.add_argument("--sample-size", type=int, default=5000)
