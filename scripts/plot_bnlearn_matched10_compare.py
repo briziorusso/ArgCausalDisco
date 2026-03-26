@@ -44,36 +44,71 @@ CPDAG_COLS = [
     "F1_mean", "F1_std", "shd_mean", "shd_std",
     "SID_low_mean", "SID_low_std", "SID_high_mean", "SID_high_std",
 ]
+DAG_PROGRESS_METRICS = ["elapsed", "nnz", "fdr", "tpr", "fpr", "precision", "recall", "F1", "shd", "sid"]
+CPDAG_PROGRESS_METRICS = ["elapsed", "nnz", "fdr", "tpr", "fpr", "precision", "recall", "F1", "shd", "sid_low", "sid_high"]
 
 DATASET_ORDER = ["cancer", "earthquake", "survey", "asia", "sachs", "child"]
 NODES_MAP = {"asia": 8, "cancer": 5, "earthquake": 5, "sachs": 11, "survey": 6, "child": 20}
 EDGES_MAP = {"asia": 8, "cancer": 4, "earthquake": 4, "sachs": 17, "survey": 6, "child": 25}
 
-METHOD_ORDER = ["Random", "FGS", "NOTEARS-MLP", "MPC", "ABAPC (nor)", "ABAPC (bb)"]
+METHOD_ORDER = [
+    "Random",
+    "FGS",
+    "NOTEARS-MLP",
+    "MPC",
+    "ABAPC (orig)",
+    "ABAPC (nor)",
+    "ABAPC (bb)",
+    "ABAPC (bb-nor)",
+]
 NAMES_DICT = {
     "random": "Random",
     "fgs": "FGS",
     "nt": "NOTEARS-MLP",
     "mpc": "MPC",
+    "abapc_orig": "ABAPC (orig)",
     "abapc_nor": "ABAPC (nor)",
     "abapc_bb": "ABAPC (bb)",
+    "abapc_bb_nor": "ABAPC (bb-nor)",
 }
 COLORS_DICT = {
     "random": "#7f7f7f",
     "fgs": sec_orange,
     "nt": sec_blue,
     "mpc": main_green,
+    "abapc_orig": "#8c564b",
     "abapc_nor": "#bcbd22",
     "abapc_bb": main_purple,
+    "abapc_bb_nor": "#e377c2",
 }
 SYMBOLS_DICT = {
     "random": "x",
     "fgs": "circle-open-dot",
     "nt": "x",
     "mpc": "diamond-dot",
+    "abapc_orig": "square-dot",
     "abapc_nor": "triangle-down-dot",
     "abapc_bb": "triangle-up-dot",
+    "abapc_bb_nor": "star",
 }
+
+
+def _version_has_artifacts(version: str) -> bool:
+    return any(
+        path.exists()
+        for path in [
+            RESULTS_DIR / f"stored_results_{version}.npy",
+            RESULTS_DIR / f"stored_results_{version}_cpdag.npy",
+            RESULTS_DIR / "progress" / version,
+        ]
+    )
+
+
+def _resolve_version(primary: str, *fallbacks: str) -> str:
+    for candidate in (primary, *fallbacks):
+        if candidate and _version_has_artifacts(candidate):
+            return candidate
+    return primary
 
 
 def _load_summary(version: str, kind: str) -> pd.DataFrame:
@@ -81,11 +116,55 @@ def _load_summary(version: str, kind: str) -> pd.DataFrame:
     columns = CPDAG_COLS if kind == "cpdag" else DAG_COLS
     path = RESULTS_DIR / f"stored_results_{version}{suffix}"
     if not path.exists():
-        return pd.DataFrame(columns=columns)
+        return _load_progress_summary(version, kind)
     frame = pd.DataFrame(np.load(path, allow_pickle=True), columns=columns)
     frame["dataset"] = frame["dataset"].astype(str).str.lower()
     frame["model"] = frame["model"].astype(str)
     return frame
+
+
+def _load_progress_summary(version: str, kind: str) -> pd.DataFrame:
+    progress_dir = RESULTS_DIR / "progress" / version
+    columns = CPDAG_COLS if kind == "cpdag" else DAG_COLS
+    if not progress_dir.exists():
+        return pd.DataFrame(columns=columns)
+
+    suffix = "_cpdag.csv" if kind == "cpdag" else "_dag.csv"
+    metrics = CPDAG_PROGRESS_METRICS if kind == "cpdag" else DAG_PROGRESS_METRICS
+    frames: list[pd.DataFrame] = []
+
+    for path in sorted(progress_dir.glob(f"*{suffix}")):
+        try:
+            frame = pd.read_csv(path)
+        except Exception:
+            continue
+        required = {"dataset", "model", *metrics}
+        if not required.issubset(frame.columns):
+            continue
+        frames.append(frame)
+
+    if not frames:
+        return pd.DataFrame(columns=columns)
+
+    combined = pd.concat(frames, ignore_index=True)
+    rows: list[dict[str, object]] = []
+    for (dataset, model), group in combined.groupby(["dataset", "model"], sort=False):
+        row: dict[str, object] = {"dataset": str(dataset).lower(), "model": str(model)}
+        for metric in metrics:
+            values = pd.to_numeric(group[metric], errors="coerce").dropna()
+            row[f"{metric}_mean"] = float(values.mean()) if len(values) else np.nan
+            row[f"{metric}_std"] = float(values.std(ddof=1)) if len(values) > 1 else 0.0
+        if kind == "dag" and "sid_mean" in row:
+            row["SID_mean"] = row.pop("sid_mean")
+            row["SID_std"] = row.pop("sid_std")
+        if kind == "cpdag" and "sid_low_mean" in row:
+            row["SID_low_mean"] = row.pop("sid_low_mean")
+            row["SID_low_std"] = row.pop("sid_low_std")
+            row["SID_high_mean"] = row.pop("sid_high_mean")
+            row["SID_high_std"] = row.pop("sid_high_std")
+        rows.append(row)
+
+    return pd.DataFrame(rows, columns=columns)
 
 
 def _load_combined(kind: str, run_specs: list[dict[str, object]]) -> pd.DataFrame:
@@ -116,11 +195,20 @@ def _load_combined(kind: str, run_specs: list[dict[str, object]]) -> pd.DataFram
 def _add_dataset_metadata(frame: pd.DataFrame) -> pd.DataFrame:
     out = frame.copy()
     out = out[out["dataset"].isin(DATASET_ORDER)].copy()
-    out["n_nodes"] = out["dataset"].map(NODES_MAP).astype(float)
-    out["n_edges"] = out["dataset"].map(EDGES_MAP).astype(float)
-    out["dataset_label"] = out["dataset"].map(
+    out["base_dataset"] = out["dataset"].astype(str).str.lower()
+    out["n_nodes"] = out["base_dataset"].map(NODES_MAP).astype(float)
+    out["n_edges"] = out["base_dataset"].map(EDGES_MAP).astype(float)
+    out["dataset"] = out["base_dataset"].map(
         lambda name: f"{name.upper()}<br> |V|={NODES_MAP[name]}, |E|={EDGES_MAP[name]}"
     )
+    return out
+
+
+def _sort_by_dataset_order(frame: pd.DataFrame) -> pd.DataFrame:
+    out = frame.copy()
+    if "base_dataset" in out.columns:
+        out["_dataset_order"] = out["base_dataset"].map({name: i for i, name in enumerate(DATASET_ORDER)})
+        out = out.sort_values(["_dataset_order", "model"]).drop(columns=["_dataset_order"])
     return out
 
 
@@ -145,6 +233,49 @@ def _add_normalised_cpdag(frame: pd.DataFrame) -> pd.DataFrame:
     out["p_SID_low_mean"] = out["p_SID_low_mean"].replace(0, 0.03)
     out["p_SID_high_mean"] = out["p_SID_high_mean"].replace(0, 0.03)
     return out
+
+
+def _load_orig_runtime_fallback() -> pd.DataFrame:
+    for version in ["bnlearn_dag_v5_2000", "bnlearn_dag_v5"]:
+        path = RESULTS_DIR / f"stored_results_{version}.npy"
+        if not path.exists():
+            continue
+        frame = pd.DataFrame(np.load(path, allow_pickle=True), columns=DAG_COLS)
+        frame["dataset"] = frame["dataset"].astype(str).str.lower()
+        frame["model"] = frame["model"].astype(str)
+        frame = frame[
+            frame["model"].str.contains("ABAPC", case=False, na=False)
+            & frame["dataset"].isin(["cancer", "earthquake", "survey", "asia", "sachs"])
+        ].copy()
+        if frame.empty:
+            continue
+        frame["model"] = "ABAPC (orig)"
+        return _add_dataset_metadata(frame)
+    return pd.DataFrame()
+
+
+def _augment_runtime_with_orig_fallback(dag_df: pd.DataFrame) -> pd.DataFrame:
+    runtime_df = dag_df.copy()
+    fallback = _load_orig_runtime_fallback()
+    if fallback.empty:
+        return runtime_df
+
+    existing_orig = runtime_df[runtime_df["model"] == "ABAPC (orig)"].copy()
+    existing_datasets = set(existing_orig.get("base_dataset", pd.Series(dtype=str)).astype(str))
+    fallback = fallback[~fallback["base_dataset"].isin(existing_datasets)].copy()
+    if fallback.empty:
+        return runtime_df
+
+    for col in runtime_df.columns:
+        if col not in fallback.columns:
+            fallback[col] = np.nan
+    for col in fallback.columns:
+        if col not in runtime_df.columns:
+            runtime_df[col] = np.nan
+    fallback = fallback[runtime_df.columns]
+    runtime_df = pd.concat([runtime_df, fallback], ignore_index=True)
+    runtime_df = _sort_by_dataset_order(runtime_df)
+    return runtime_df
 
 
 def _series_color(pretty_name: str) -> str:
@@ -173,7 +304,7 @@ def build_cpdag_sid_compare(cpdag_df: pd.DataFrame) -> go.Figure:
             sub = sub.sort_values("_dataset_order")
             fig.add_trace(
                 go.Bar(
-                    x=sub["dataset_label"],
+                    x=sub["dataset"],
                     y=sub[f"{metric}_mean"],
                     error_y=dict(type="data", array=sub[f"{metric}_std"], visible=True),
                     name=method,
@@ -190,7 +321,7 @@ def build_cpdag_sid_compare(cpdag_df: pd.DataFrame) -> go.Figure:
             ref = ref.sort_values("_dataset_order")
             fig.add_trace(
                 go.Bar(
-                    x=ref["dataset_label"],
+                    x=ref["dataset"],
                     y=np.zeros(len(ref)),
                     name="",
                     marker_color="white",
@@ -216,7 +347,7 @@ def build_cpdag_sid_compare(cpdag_df: pd.DataFrame) -> go.Figure:
     fig.update_yaxes(title={"text": "Normalised SID", "font": {"size": 23}}, range=[0, 16.8], secondary_y=False)
     fig.update_yaxes(title={"text": "", "font": {"size": 23}}, range=[0, 16.8], secondary_y=True, showticklabels=False)
 
-    unique_datasets = list(dict.fromkeys(cpdag_df.sort_values("n_nodes")["dataset_label"].tolist()))
+    unique_datasets = list(dict.fromkeys(cpdag_df.sort_values("n_nodes")["dataset"].tolist()))
     n_x_cat = max(len(unique_datasets), 1)
     cluster_width = 1.0 / n_x_cat
     total_tile_width = min(cluster_width * 0.55, cluster_width * 0.9)
@@ -289,8 +420,8 @@ def build_runtime_compare(dag_df: pd.DataFrame) -> go.Figure:
 
 
 def build_child_comparison_table(dag_df: pd.DataFrame, cpdag_df: pd.DataFrame) -> pd.DataFrame:
-    dag_child = dag_df[dag_df["dataset"] == "child"].copy()
-    cpdag_child = cpdag_df[cpdag_df["dataset"] == "child"].copy()
+    dag_child = dag_df[dag_df["base_dataset"] == "child"].copy()
+    cpdag_child = cpdag_df[cpdag_df["base_dataset"] == "child"].copy()
     merged = dag_child.merge(
         cpdag_child[["dataset", "model", "SID_low_mean", "SID_high_mean"]],
         on=["dataset", "model"],
@@ -306,12 +437,31 @@ def build_child_comparison_table(dag_df: pd.DataFrame, cpdag_df: pd.DataFrame) -
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Plot the full bnlearn matched-10 comparison for the seed-resolved methods.")
-    parser.add_argument("--fgs-nt-version", default="bnlearn_fgs_nt_matched10")
-    parser.add_argument("--mpc-version", default="bnlearn_50rep_mpc_matched10")
-    parser.add_argument("--abapc-nor-version", default="bnlearn_50rep_abapc_matched10")
-    parser.add_argument("--abapc-bb-others-version", default="bnlearn_abapc_bb_matched10_others")
-    parser.add_argument("--abapc-bb-child-version", default="child_sat24_t600_matched10")
+    parser.add_argument(
+        "--fgs-nt-version",
+        default=None,
+        help="Legacy combined version containing Random/FGS/NOTEARS. Used as fallback when the split baseline version args are omitted.",
+    )
+    parser.add_argument("--random-fgs-version", default="bnlearn_baselines_matched10_gsq")
+    parser.add_argument("--nt-version", default="bnlearn_nt_matched10_gsq")
+    parser.add_argument("--mpc-version", default="bnlearn_baselines_matched10_gsq")
+    parser.add_argument("--abapc-orig-others-version", default="bnlearn_abapc_orig_matched10_others_gsq")
+    parser.add_argument("--abapc-orig-child-version", default="child_abapc_orig_matched10_gsq")
+    parser.add_argument("--abapc-nor-others-version", default="bnlearn_abapc_nor_matched10_others_gsq")
+    parser.add_argument("--abapc-nor-child-version", default="child_abapc_nor_matched10_gsq")
+    parser.add_argument("--abapc-bb-others-version", default="bnlearn_abapc_bb_matched10_others_gsq_searchv3")
+    parser.add_argument("--abapc-bb-child-version", default="child_abapc_bb_matched10_gsq_searchv3")
+    parser.add_argument("--abapc-bb-nor-others-version", default="bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3")
+    parser.add_argument("--abapc-bb-nor-child-version", default="child_abapc_bb_norapprox_matched10_gsq_searchv3")
     args = parser.parse_args()
+
+    random_fgs_version = args.random_fgs_version or args.fgs_nt_version
+    nt_version = args.nt_version or args.fgs_nt_version
+    abapc_orig_others_version = _resolve_version(
+        args.abapc_orig_others_version,
+        "abapc_orig_problem3_matched10_gsq",
+    )
+    abapc_orig_child_version = _resolve_version(args.abapc_orig_child_version)
 
     # The plotting helpers also try to render interactively and export images.
     # For scripted report generation, keep the HTML output and suppress the rest.
@@ -319,12 +469,35 @@ def main() -> None:
     go.Figure.write_image = lambda self, *args, **kwargs: None
 
     run_specs = [
-        {"version": args.fgs_nt_version, "kind": "dag", "include": ["Random", "FGS", "NOTEARS-MLP"]},
+        {"version": random_fgs_version, "kind": "dag", "include": ["Random", "FGS"]},
+        {"version": nt_version, "kind": "dag", "include": ["NOTEARS-MLP"]},
         {"version": args.mpc_version, "kind": "dag", "include": ["MPC"]},
         {
-            "version": args.abapc_nor_version,
+            "version": abapc_orig_others_version,
             "kind": "dag",
             "include": ["ABAPC (Ours)"],
+            "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
+        },
+        {
+            "version": abapc_orig_child_version,
+            "kind": "dag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["child"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
+        },
+        {
+            "version": args.abapc_nor_others_version,
+            "kind": "dag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (nor)"},
+        },
+        {
+            "version": args.abapc_nor_child_version,
+            "kind": "dag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (nor)"},
         },
         {
@@ -341,12 +514,49 @@ def main() -> None:
             "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb)"},
         },
-        {"version": args.fgs_nt_version, "kind": "cpdag", "include": ["Random", "FGS", "NOTEARS-MLP"]},
+        {
+            "version": args.abapc_bb_nor_others_version,
+            "kind": "dag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (bb-nor)"},
+        },
+        {
+            "version": args.abapc_bb_nor_child_version,
+            "kind": "dag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["child"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (bb-nor)"},
+        },
+        {"version": random_fgs_version, "kind": "cpdag", "include": ["Random", "FGS"]},
+        {"version": nt_version, "kind": "cpdag", "include": ["NOTEARS-MLP"]},
         {"version": args.mpc_version, "kind": "cpdag", "include": ["MPC"]},
         {
-            "version": args.abapc_nor_version,
+            "version": abapc_orig_others_version,
             "kind": "cpdag",
             "include": ["ABAPC (Ours)"],
+            "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
+        },
+        {
+            "version": abapc_orig_child_version,
+            "kind": "cpdag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["child"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
+        },
+        {
+            "version": args.abapc_nor_others_version,
+            "kind": "cpdag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (nor)"},
+        },
+        {
+            "version": args.abapc_nor_child_version,
+            "kind": "cpdag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (nor)"},
         },
         {
@@ -362,17 +572,37 @@ def main() -> None:
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb)"},
+        },
+        {
+            "version": args.abapc_bb_nor_others_version,
+            "kind": "cpdag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (bb-nor)"},
+        },
+        {
+            "version": args.abapc_bb_nor_child_version,
+            "kind": "cpdag",
+            "include": ["ABAPC (Ours)"],
+            "include_datasets": ["child"],
+            "replace_models": {"ABAPC (Ours)": "ABAPC (bb-nor)"},
         },
     ]
 
-    dag_df = _add_normalised_dag(_add_dataset_metadata(_load_combined("dag", run_specs)))
-    cpdag_df = _add_normalised_cpdag(_add_dataset_metadata(_load_combined("cpdag", run_specs)))
+    dag_df = _sort_by_dataset_order(_add_normalised_dag(_add_dataset_metadata(_load_combined("dag", run_specs))))
+    cpdag_df = _sort_by_dataset_order(_add_normalised_cpdag(_add_dataset_metadata(_load_combined("cpdag", run_specs))))
 
     if dag_df.empty or cpdag_df.empty:
         raise SystemExit("No matched-10 summaries were found for the requested versions.")
 
     dag_methods = [method for method in METHOD_ORDER if method in dag_df["model"].unique()]
     cpdag_methods = [method for method in METHOD_ORDER if method in cpdag_df["model"].unique()]
+    runtime_df = _augment_runtime_with_orig_fallback(dag_df)
+    runtime_method_keys = [
+        method
+        for method in ["random", "fgs", "nt", "mpc", "abapc_orig", "abapc_nor", "abapc_bb", "abapc_bb_nor"]
+        if NAMES_DICT[method] in runtime_df["model"].unique()
+    ]
 
     double_bar_chart_plotly(
         dag_df, ["p_shd", "F1"], NAMES_DICT, COLORS_DICT, dag_methods,
@@ -405,13 +635,13 @@ def main() -> None:
         debug=False, range_y1=[0, 6], range_y2=[0, 6], rect_exp=0.01,
     )
     plot_runtime(
-        dag_df,
+        runtime_df,
         ["n_nodes"],
         "",
         NAMES_DICT,
         SYMBOLS_DICT,
         COLORS_DICT,
-        ["random", "fgs", "nt", "mpc", "abapc_nor", "abapc_bb"],
+        runtime_method_keys,
         share_y=False,
         save_figs=True,
         output_name=str(FIGS_DIR / "Fig.3_runtime_matched10.html"),

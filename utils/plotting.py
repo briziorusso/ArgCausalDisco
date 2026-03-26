@@ -286,6 +286,8 @@ def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, color
         for model in methods:#df_to_plot['model_test'].unique():
             filter = f"model=='{names_dict[model]}'"
             tab = df.query(filter)
+            if tab.empty:
+                continue
             tab_grouped = pd.DataFrame()
             for g in df[group_list].drop_duplicates().values:
                 ## aggregate only if more than one obs in the group
@@ -306,8 +308,15 @@ def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, color
                     tab_grouped = pd.concat([tab_grouped, single_tab], axis=0)
             tab_grouped.reset_index(drop=True, inplace=True)
             tab_grouped.sort_values(by=[x_var], inplace=True)
+            # Normalise numeric x labels so single-point traces use the same category
+            # names as multi-point traces, e.g. "8" rather than mixing "8" and "8.0".
+            x_numeric = pd.to_numeric(tab_grouped[x_var], errors='coerce')
+            if x_numeric.notna().all():
+                tab_grouped[x_var] = x_numeric.astype(int).astype(str)
+            else:
+                tab_grouped[x_var] = tab_grouped[x_var].astype(str)
             # Use categorical x by converting to string; this avoids mixed numeric/categorical axes.
-            fig.add_trace(go.Scatter(x=tab_grouped[x_var].astype(str)
+            fig.add_trace(go.Scatter(x=tab_grouped[x_var]
                                     ,y=tab_grouped[metric.split("_")[1]]
                                     ,error_y=dict(type='data', array=tab_grouped['std'])
                                     ,name=model_aliases[model], #legendgroup=f'group{i}{j}', 
@@ -318,30 +327,19 @@ def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, color
 
     fig.update_yaxes(matches='y', type="log")
 
-    # # Force a single categorical x-axis with a stable category order derived from the data.
-    # try:
-    #     for c, x_var in enumerate(x_var_list):
-    #         # Collect categories from the (possibly filtered) df
-    #         cats = (
-    #             pd.to_numeric(df[x_var], errors='coerce')
-    #               .dropna()
-    #               .astype(int)
-    #               .sort_values()
-    #               .unique()
-    #         )
-    #         cat_array = [str(v) for v in cats]
-    #         this_xaxis = next(fig.select_xaxes(row=rows, col=c+1))
-    #         this_xaxis.update(type='category', categoryorder='array', categoryarray=cat_array, side='bottom')
-
-    #     # Hide any accidental secondary x-axes that Plotly may generate
-    #     xaxes_all = list(fig.select_xaxes())
-    #     for idx, ax in enumerate(xaxes_all):
-    #         if idx > 0:
-    #             ax.update(showticklabels=False, ticks='', showgrid=False, title='')
-    # except Exception:
-    #     # If anything goes wrong, leave Plotly's defaults
-    #     if debug:
-    #         print("[plot_runtime] Could not enforce category x-axis ordering.")
+    # Force a single categorical x-axis with a stable order across all traces.
+    try:
+        for c, x_var in enumerate(x_var_list):
+            cats_numeric = pd.to_numeric(df[x_var], errors='coerce').dropna()
+            if len(cats_numeric):
+                cat_array = [str(v) for v in sorted(cats_numeric.astype(int).unique())]
+            else:
+                cat_array = df[x_var].astype(str).dropna().drop_duplicates().tolist()
+            this_xaxis = next(fig.select_xaxes(row=rows, col=c+1))
+            this_xaxis.update(type='category', categoryorder='array', categoryarray=cat_array, side='bottom')
+    except Exception:
+        if debug:
+            print("[plot_runtime] Could not enforce category x-axis ordering.")
 
     for r in range(1,rows+1):
         this_yaxis = next(fig.select_yaxes(row = r, col = 1))
