@@ -21,11 +21,17 @@ import pandas as pd
 
 DAG_BASE_COLUMNS = [
     "dataset", "model", "elapsed", "nnz", "fdr", "tpr", "fpr",
-    "precision", "recall", "F1", "shd", "sid",
+    "precision", "recall", "F1",
+    "adjacency_precision", "adjacency_recall", "adjacency_F1",
+    "arrowhead_precision", "arrowhead_recall", "arrowhead_F1",
+    "shd", "sid",
 ]
 CPDAG_BASE_COLUMNS = [
     "dataset", "model", "elapsed", "nnz", "fdr", "tpr", "fpr",
-    "precision", "recall", "F1", "shd", "sid_low", "sid_high",
+    "precision", "recall", "F1",
+    "adjacency_precision", "adjacency_recall", "adjacency_F1",
+    "arrowhead_precision", "arrowhead_recall", "arrowhead_F1",
+    "shd", "sid_low", "sid_high",
 ]
 DAG_PROGRESS_COLUMNS = DAG_BASE_COLUMNS + ["run_idx", "seed"]
 CPDAG_PROGRESS_COLUMNS = CPDAG_BASE_COLUMNS + ["run_idx", "seed"]
@@ -39,6 +45,12 @@ DAG_METRIC_MAP = [
     ("precision", "precision"),
     ("recall", "recall"),
     ("F1", "F1"),
+    ("adjacency_precision", "adjacency_precision"),
+    ("adjacency_recall", "adjacency_recall"),
+    ("adjacency_F1", "adjacency_F1"),
+    ("arrowhead_precision", "arrowhead_precision"),
+    ("arrowhead_recall", "arrowhead_recall"),
+    ("arrowhead_F1", "arrowhead_F1"),
     ("shd", "shd"),
     ("sid", "SID"),
 ]
@@ -51,6 +63,12 @@ CPDAG_METRIC_MAP = [
     ("precision", "precision"),
     ("recall", "recall"),
     ("F1", "F1"),
+    ("adjacency_precision", "adjacency_precision"),
+    ("adjacency_recall", "adjacency_recall"),
+    ("adjacency_F1", "adjacency_F1"),
+    ("arrowhead_precision", "arrowhead_precision"),
+    ("arrowhead_recall", "arrowhead_recall"),
+    ("arrowhead_F1", "arrowhead_F1"),
     ("shd", "shd"),
     ("sid_low", "SID_low"),
     ("sid_high", "SID_high"),
@@ -332,6 +350,7 @@ def build_run_summary(
     *,
     dataset_name: str,
     model_name: str,
+    scenario: str | None,
     run_idx: int,
     total_runs: int | None,
     seed: int,
@@ -347,8 +366,25 @@ def build_run_summary(
         "run_total": (int(total_runs) if total_runs is not None else None),
         "seed": int(seed),
         "elapsed_sec": float(elapsed),
-        "dag": _clean_metric_subset(dag_metrics, ["precision", "recall", "F1", "shd", "sid"]),
-        "cpdag": _clean_metric_subset(cpdag_metrics, ["precision", "recall", "F1", "shd", "sid_low", "sid_high"]),
+        "scenario": scenario,
+        "dag": _clean_metric_subset(
+            dag_metrics,
+            [
+                "precision", "recall", "F1",
+                "adjacency_precision", "adjacency_recall", "adjacency_F1",
+                "arrowhead_precision", "arrowhead_recall", "arrowhead_F1",
+                "shd", "sid",
+            ],
+        ),
+        "cpdag": _clean_metric_subset(
+            cpdag_metrics,
+            [
+                "precision", "recall", "F1",
+                "adjacency_precision", "adjacency_recall", "adjacency_F1",
+                "arrowhead_precision", "arrowhead_recall", "arrowhead_F1",
+                "shd", "sid_low", "sid_high",
+            ],
+        ),
     }
     if not isinstance(run_details, dict):
         return summary
@@ -539,15 +575,18 @@ def log_run_summary(summary: dict) -> None:
     logging.info("[run-summary] dag=%s cpdag=%s", summary.get("dag"), summary.get("cpdag"))
 
 
-def archive_run_artifacts(*, results_path: Path, summary: dict) -> Path | None:
+def archive_run_artifacts(
+    *,
+    results_path: Path,
+    summary: dict,
+    graph_artifacts: dict[str, np.ndarray] | None = None,
+) -> Path | None:
     scenario = summary.get("scenario")
     if not scenario:
         return None
     seed = summary.get("seed")
     run_idx = int(summary.get("run_idx", 0) or 0)
     scenario_dir = results_path / str(scenario)
-    if not scenario_dir.exists():
-        return None
 
     archive_dir = scenario_dir / "runs" / f"run_{run_idx + 1:04d}_seed_{int(seed)}"
     archive_dir.mkdir(parents=True, exist_ok=True)
@@ -565,8 +604,25 @@ def archive_run_artifacts(*, results_path: Path, summary: dict) -> Path | None:
         if src.exists():
             shutil.copy2(src, archive_dir / name)
 
+    summary_payload = dict(summary)
+    if graph_artifacts:
+        saved_graph_artifacts: dict[str, dict[str, Any]] = {}
+        for name, array in graph_artifacts.items():
+            if array is None:
+                continue
+            arr = np.asarray(array)
+            filename = f"{name}.npy"
+            np.save(archive_dir / filename, arr)
+            saved_graph_artifacts[name] = {
+                "file": filename,
+                "shape": [int(x) for x in arr.shape],
+                "dtype": str(arr.dtype),
+            }
+        if saved_graph_artifacts:
+            summary_payload["graph_artifacts"] = saved_graph_artifacts
+
     with open(archive_dir / "run_summary.json", "w") as f:
-        json.dump(summary, f, indent=2)
+        json.dump(summary_payload, f, indent=2)
 
     return archive_dir
 

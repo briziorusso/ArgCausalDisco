@@ -270,6 +270,50 @@ def dag2cpdag(G, cdt_method=False):
         C = (C != 0).astype(int)
     return C
 
+
+def matrix_adjacency_set(B: np.ndarray) -> set[tuple[int, int]]:
+    """Return the undirected skeleton as unordered node pairs."""
+    adj: set[tuple[int, int]] = set()
+    n = int(B.shape[0])
+    for i in range(n):
+        for j in range(i + 1, n):
+            try:
+                if int(B[i, j]) != 0 or int(B[j, i]) != 0:
+                    adj.add((i, j))
+            except Exception:
+                continue
+    return adj
+
+
+def matrix_arrowhead_set(B: np.ndarray) -> set[tuple[int, int]]:
+    """Return directed arrowheads, ignoring undirected CPDAG edges."""
+    arrows: set[tuple[int, int]] = set()
+    n = int(B.shape[0])
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue
+            try:
+                if int(B[i, j]) != 0 and int(B[j, i]) == 0:
+                    arrows.add((i, j))
+            except Exception:
+                continue
+    return arrows
+
+
+def set_precision_recall_f1(
+    pred: set[tuple[int, int]],
+    true: set[tuple[int, int]],
+) -> tuple[float, float, float]:
+    """Precision/recall/F1 on hashable edge or arrow sets."""
+    tp = len(pred & true)
+    fp = len(pred - true)
+    fn = len(true - pred)
+    precision = float(tp / (tp + fp)) if (tp + fp) > 0 else 0.0
+    recall = float(tp / (tp + fn)) if (tp + fn) > 0 else 0.0
+    f1 = float(2.0 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
+    return precision, recall, f1
+
 ### Largely from TrustworthyAI repo, with some modifications and the addition of SID from cdt.metrics
 class DAGMetrics(object):
     """
@@ -428,8 +472,25 @@ class DAGMetrics(object):
         # gscore = DAGMetrics._cal_gscore(W_p, W_true)
         precision, recall, F1 = DAGMetrics._cal_precision_recall(W_p, W_true)
 
+        if cpdag:
+            B_ref = dag2cpdag(B_true.copy())
+            pred_adj = matrix_adjacency_set(B_est_unique)
+            true_adj = matrix_adjacency_set(B_ref)
+            pred_arrows = matrix_arrowhead_set(B_est_unique)
+            true_arrows = matrix_arrowhead_set(B_ref)
+        else:
+            pred_adj = matrix_adjacency_set(B_est)
+            true_adj = matrix_adjacency_set(B_true)
+            pred_arrows = matrix_arrowhead_set(B_est)
+            true_arrows = matrix_arrowhead_set(B_true)
+
+        adjacency_precision, adjacency_recall, adjacency_F1 = set_precision_recall_f1(pred_adj, true_adj)
+        arrowhead_precision, arrowhead_recall, arrowhead_F1 = set_precision_recall_f1(pred_arrows, true_arrows)
+
         mt = {'nnz': pred_size, 'fdr': fdr, 'tpr': tpr, 'fpr': fpr,  
-              'precision': precision, 'recall': recall, 'F1': F1,#, 'gscore': gscore
+              'precision': precision, 'recall': recall, 'F1': F1,
+              'adjacency_precision': adjacency_precision, 'adjacency_recall': adjacency_recall, 'adjacency_F1': adjacency_F1,
+              'arrowhead_precision': arrowhead_precision, 'arrowhead_recall': arrowhead_recall, 'arrowhead_F1': arrowhead_F1,
               'shd': shd}
 
         for i in mt:

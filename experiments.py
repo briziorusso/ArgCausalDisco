@@ -303,6 +303,40 @@ if load_existing and save_res:
     np.save(results_path / f'stored_results_{version}_bkp.npy', mt_res.reindex(columns=DAG_SUMMARY_COLUMNS).to_numpy())
     np.save(results_path / f'stored_results_{version}_cpdag_bkp.npy', mt_res_cpdag.reindex(columns=CPDAG_SUMMARY_COLUMNS).to_numpy())
 
+GRAPH_METRIC_KEYS = [
+    'nnz', 'fdr', 'tpr', 'fpr',
+    'precision', 'recall', 'F1',
+    'adjacency_precision', 'adjacency_recall', 'adjacency_F1',
+    'arrowhead_precision', 'arrowhead_recall', 'arrowhead_F1',
+    'shd',
+]
+
+
+def empty_metric_result():
+    metrics = {key: np.nan for key in GRAPH_METRIC_KEYS}
+    metrics['sid'] = np.nan
+    return metrics
+
+
+def graph_artifact_bundle(
+    *,
+    B_true,
+    W_est=None,
+    B_est_binary=None,
+    B_est_dag_eval=None,
+    B_est_cpdag_eval=None,
+):
+    artifacts = {'graph_true': np.asarray(B_true)}
+    if W_est is not None:
+        artifacts['graph_est_raw'] = np.asarray(W_est)
+    if B_est_binary is not None:
+        artifacts['graph_est_binary'] = np.asarray(B_est_binary)
+    if B_est_dag_eval is not None:
+        artifacts['graph_est_dag_eval'] = np.asarray(B_est_dag_eval)
+    if B_est_cpdag_eval is not None:
+        artifacts['graph_est_cpdag_eval'] = np.asarray(B_est_cpdag_eval)
+    return artifacts
+
 # Gather datasets according to source
 datasets = []  # list of tuples: (dataset_name, loader, loader_kwargs)
 if args.source == 'causenet':
@@ -465,21 +499,8 @@ for dataset_name, src, info in datasets:
                     logging.info(f'Sampling random graph with {s0} edges')
                 else:
                     raise ValueError(f'Unknown random method {method}')
-                B_est = simulate_dag(d=B_true.shape[1], s0=s0, graph_type='ER')
+                W_est = simulate_dag(d=B_true.shape[1], s0=s0, graph_type='ER')
                 elapsed = (datetime.now() - start).total_seconds()
-                try:
-                    mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true).metrics
-                    mt_dag = DAGMetrics(B_est, B_true).metrics
-                except Exception as e:
-                    logging.error(f'DAGMetrics computation failed for random baseline: {e}')
-                    mt_cpdag = {
-                        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                        'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                    }
-                    mt_dag = {
-                        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                        'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                    }
             else:
                 return_run_details = method == 'abapc'
                 run_output = run_method(
@@ -535,45 +556,42 @@ for dataset_name, src, info in datasets:
                 if 'Tensor' in str(type(W_est)):
                     W_est = np.asarray([list(i) for i in W_est])
                 logger_setup(str(results_path / f'log_{version}.log'), continue_logging=True)
-                if W_est is None:
-                    mt_cpdag = {
-                        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                        'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                    }
-                    mt_dag = {
-                        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                        'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                    }
-                else:
-                    B_est_binary = (W_est != 0).astype(int)
+
+            graph_artifacts = graph_artifact_bundle(B_true=B_true)
+            B_est_binary = None
+            B_est_cpdag_eval = None
+            B_est_dag_eval = None
+            if W_est is not None:
+                W_est = np.asarray(W_est)
+                graph_artifacts['graph_est_raw'] = W_est.copy()
+                B_est_binary = (W_est != 0).astype(int)
+                graph_artifacts['graph_est_binary'] = B_est_binary.copy()
+                try:
+                    B_est_cpdag_eval = dag2cpdag(B_est_binary.copy())
+                    graph_artifacts['graph_est_cpdag_eval'] = B_est_cpdag_eval.copy()
+                    mt_cpdag = DAGMetrics(B_est_cpdag_eval, B_true).metrics
+                except Exception as e:
+                    logging.error(f'DAGMetrics computation failed for CPDAG: {e}')
+                    mt_cpdag = empty_metric_result()
+
+                B_est_dag_eval = (W_est > 0).astype(int)
+                bidirected_mask = (B_est_dag_eval == 1) & (B_est_dag_eval.T == 1)
+                if bidirected_mask.any():
+                    logging.warning('Estimated graph contains bidirected edges; removing them before DAG metrics computation.')
+                    B_est_dag_eval[bidirected_mask] = 0
+                graph_artifacts['graph_est_dag_eval'] = B_est_dag_eval.copy()
+                if is_dag(B_est_dag_eval):
                     try:
-                        mt_cpdag = DAGMetrics(dag2cpdag(B_est_binary.copy()), B_true).metrics
+                        mt_dag = DAGMetrics(B_est_dag_eval, B_true).metrics
                     except Exception as e:
-                        logging.error(f'DAGMetrics computation failed for CPDAG: {e}')
-                        mt_cpdag = {
-                            'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                            'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                        }
-                    B_est = (W_est > 0).astype(int)
-                    bidirected_mask = (B_est == 1) & (B_est.T == 1)
-                    if bidirected_mask.any():
-                        logging.warning('Estimated graph contains bidirected edges; removing them before DAG metrics computation.')
-                        B_est[bidirected_mask] = 0
-                    if is_dag(B_est):
-                        try:
-                            mt_dag = DAGMetrics(B_est, B_true).metrics
-                        except Exception as e:
-                            logging.error(f'DAGMetrics computation failed for DAG: {e}')
-                            mt_dag = {
-                                'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                                'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                            }
-                    else:
-                        logging.warning('Estimated graph is not a DAG after bidirected edge removal; skipping DAG metrics for this run.')
-                        mt_dag = {
-                            'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                            'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                        }
+                        logging.error(f'DAGMetrics computation failed for DAG: {e}')
+                        mt_dag = empty_metric_result()
+                else:
+                    logging.warning('Estimated graph is not a DAG after bidirected edge removal; skipping DAG metrics for this run.')
+                    mt_dag = empty_metric_result()
+            else:
+                mt_cpdag = empty_metric_result()
+                mt_dag = empty_metric_result()
 
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_dag})
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_cpdag})
@@ -601,6 +619,7 @@ for dataset_name, src, info in datasets:
             run_summary = build_run_summary(
                 dataset_name=dataset_name,
                 model_name=display_name,
+                scenario=scenario,
                 run_idx=idx,
                 total_runs=n_runs,
                 seed=seed,
@@ -610,7 +629,11 @@ for dataset_name, src, info in datasets:
                 cpdag_metrics=cpdag_row,
             )
             log_run_summary(run_summary)
-            archived_run_dir = archive_run_artifacts(results_path=results_path, summary=run_summary)
+            archived_run_dir = archive_run_artifacts(
+                results_path=results_path,
+                summary=run_summary,
+                graph_artifacts=graph_artifacts,
+            )
             if archived_run_dir is not None:
                 logging.info("[run-summary] archived_run_artifacts=%s", archived_run_dir)
 
