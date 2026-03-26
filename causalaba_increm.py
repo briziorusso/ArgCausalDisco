@@ -1154,25 +1154,60 @@ def CausalABA(
             ctl.add("specific", [], ext_line)
             extra_specific_src.append(ext_line)
 
+    frozen_block_values: dict[tuple[int, int], bool] | None = None
+
+    def _compute_block_edge_value(a: int, b: int) -> bool:
+        val = False
+        # indep_facts stores conditioning sets for ordered pairs as they
+        # appear in the facts; check both orientations.
+        for (x, y) in ((a, b), (b, a)):
+            for cond in indep_facts.get((x, y), set()):
+                ext_sym = Function("ext_indep", [Number(x), Number(y), _cond_to_symbol(cond)])
+                if ext_values.get(ext_sym) is True:
+                    val = True
+                    break
+            if val:
+                break
+        return val
+
     def _assign_block_edges():
+        nonlocal frozen_block_values
         if not skeleton_rules_reduction or not ext_flag:
             return
-        # Block an undirected pair (a,b) iff there exists any *currently active*
-        # ext_indep(a,b,S) (for any conditioning set S). This allows skeleton
-        # unblocking purely by releasing ext_indep externals, without regrounding.
+        # In incremental mode, disable_reground emulates the old "no-reground"
+        # approximation by freezing the initial skeleton blocks induced by the
+        # currently active indep externals. Once assigned the first time, these
+        # blocks are not recomputed after later fact releases.
+        if disable_reground:
+            if frozen_block_values is None:
+                frozen_block_values = {
+                    (a, b): _compute_block_edge_value(a, b)
+                    for (a, b) in block_pairs
+                }
+                frozen_true = sum(1 for val in frozen_block_values.values() if val)
+                profile["block_edge_initial_true_count"] = int(frozen_true)
+                profile["block_edge_frozen_pair_count"] = int(len(frozen_block_values))
+                logger.info(
+                    "[block-edge] disable_reground=true freezing %d/%d pair blocks from initial active indeps",
+                    frozen_true,
+                    len(frozen_block_values),
+                )
+            for (a, b), val in frozen_block_values.items():
+                sym = _block_sym(a, b)
+                try:
+                    ctl.assign_external(sym, val)
+                    ext_values[sym] = val
+                except Exception:
+                    if debug_enabled:
+                        logger.debug("Failed to assign frozen block_edge(%s,%s)", a, b)
+            return
+
+        # Dynamic mode: block an undirected pair (a,b) iff there exists any
+        # *currently active* ext_indep(a,b,S). This allows unblocking purely
+        # by releasing ext_indep externals, without regrounding.
         for (a, b) in block_pairs:
             sym = _block_sym(a, b)
-            val = False
-            # indep_facts stores conditioning sets for ordered pairs as they
-            # appear in the facts; check both orientations.
-            for (x, y) in ((a, b), (b, a)):
-                for cond in indep_facts.get((x, y), set()):
-                    ext_sym = Function("ext_indep", [Number(x), Number(y), _cond_to_symbol(cond)])
-                    if ext_values.get(ext_sym) is True:
-                        val = True
-                        break
-                if val:
-                    break
+            val = _compute_block_edge_value(a, b)
             try:
                 ctl.assign_external(sym, val)
                 ext_values[sym] = val
