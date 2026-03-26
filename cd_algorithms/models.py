@@ -192,7 +192,14 @@ def run_method(X,
         else:
             start = time.time()
             random_stability(seed)
-            fitted = NotearsMLP(dims=[X.shape[1], 10, 1], bias=True)#, device=device)
+            dims = [X.shape[1], 10, 1]
+            try:
+                fitted = NotearsMLP(dims=dims, bias=True, device=device)
+            except TypeError:
+                try:
+                    fitted = NotearsMLP(device=device, dims=dims, bias=True)
+                except TypeError:
+                    fitted = NotearsMLP(device, dims, bias=True)
             W_est = notears_nonlinear(fitted, X, lambda1=0.01, lambda2=0.01)
 
         elapsed = time.time() - start
@@ -322,7 +329,7 @@ def run_method(X,
         if cycle_length is None and lcyc_ratio is not None and n >= 3:
             lcyc_max = n
             cycle_length = max(3, min(lcyc_max, int(floor(lcyc_ratio * lcyc_max))))
-        abapc_result = ABAPC(data=X, alpha=test_alpha, indep_test=test_name,
+        abapc_result = ABAPC(data=X, seed=seed, alpha=test_alpha, indep_test=test_name,
                              scenario=scenario, run_label=run_label, S_weight=S_weight, pre_grounding=pre_grounding,
                              skeleton_rules_reduction=skeleton_rules_reduction,
                              disable_reground=disable_reground,

@@ -3,6 +3,7 @@ import logging
 import argparse
 from pathlib import Path
 import shutil
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -23,6 +24,7 @@ try:
         DAG_PROGRESS_COLUMNS,
         DAG_SUMMARY_COLUMNS,
         append_progress_row,
+        archive_run_artifacts,
         build_run_summary,
         format_run_indicator,
         install_signal_breadcrumbs,
@@ -58,6 +60,7 @@ except ImportError:  # pragma: no cover
         DAG_PROGRESS_COLUMNS,
         DAG_SUMMARY_COLUMNS,
         append_progress_row,
+        archive_run_artifacts,
         build_run_summary,
         format_run_indicator,
         install_signal_breadcrumbs,
@@ -607,6 +610,9 @@ for dataset_name, src, info in datasets:
                 cpdag_metrics=cpdag_row,
             )
             log_run_summary(run_summary)
+            archived_run_dir = archive_run_artifacts(results_path=results_path, summary=run_summary)
+            if archived_run_dir is not None:
+                logging.info("[run-summary] archived_run_artifacts=%s", archived_run_dir)
 
             append_progress_row(dag_progress_path, dag_row, DAG_PROGRESS_COLUMNS)
             append_progress_row(cpdag_progress_path, cpdag_row, CPDAG_PROGRESS_COLUMNS)
@@ -644,3 +650,4 @@ for dataset_name, src, info in datasets:
             save_summary_tables(results_path, version, mt_res, mt_res_cpdag)
 
 print('Done')
+raise SystemExit(0)

@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
 from itertools import combinations
+from pathlib import Path
 try:
     from .cd_algorithms.PC import pc
     from .causalaba_increm import CausalABA as CausalABA_increm
@@ -124,6 +125,11 @@ def ABAPC(data,
     ## create folder if it does not exist
     if not os.path.exists(f"{base_location}/{scenario}"):
         os.makedirs(f"{base_location}/{scenario}")
+    for stale_status in Path(f"{base_location}/{scenario}").glob("heartbeat_*.status"):
+        try:
+            stale_status.unlink()
+        except Exception:
+            pass
     logger_setup(f"{base_location}/{scenario}/log.log")
     logging.info(f"===============Running {scenario}===============")
     if run_label:
@@ -221,10 +227,13 @@ def ABAPC(data,
         cycle_length=cycle_length,
         threads=threads,
         solve_timeout=solve_timeout,
-        verbosity=verbosity,
     )
+    baseline_timing: dict[str, float | bool | None] | None = None
     if use_incremental:
         solver_kwargs.update(
+            verbosity=verbosity,
+            run_label=run_label,
+            seed=seed,
             satcheck_timeout=satcheck_timeout,
             final_solve_timeout=final_solve_timeout,
             final_solve_opt_mode=final_solve_opt_mode,
@@ -250,6 +259,9 @@ def ABAPC(data,
             satcheck_min_threads=satcheck_min_threads,
             satcheck_increase_step=satcheck_increase_step,
         )
+    else:
+        baseline_timing = {}
+        solver_kwargs.update(timing_recorder=baseline_timing)
 
     solver_result = CausalSolver(
         n_nodes,
