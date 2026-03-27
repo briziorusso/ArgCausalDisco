@@ -7,7 +7,8 @@ In the manuscript this solver-backed variant is the OptABA-PC method.
 
 - `scripts/wc_opt_strategy_sweep.py` is the experiment driver used to generate the archived runs in [`results/final_mcs_experiments`](results/final_mcs_experiments).
 - `causalaba_mus.py` implements the proposed optimum-MCS path through `CausalABA_WC(...)`. It builds the guarded `mus(i)` program and optimizes the weight of released CI facts with clingo weak constraints.
-- `causalaba.py` and `causalaba_increm.py` are the ABA-PC baselines compared against the optimum-MCS solver in the sweep.
+- `causalaba.py` is the original implementation of Causal ABA.
+- `causalaba_increm.py` is the more efficient engine behind the ABA-PC baselines compared against the optimum-MCS solver in the presented results.
 - The archived `final_mcs_experiments` artifacts are produced by `scripts/wc_opt_strategy_sweep.py` invoking `causalaba_mus.CausalABA_WC(...)`.
 
 ## Environment
