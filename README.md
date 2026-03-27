@@ -46,13 +46,6 @@ python scripts/wc_opt_strategy_sweep.py --n-nodes 5 --seed 2026 --reps 10 --stra
 python scripts/wc_opt_strategy_sweep.py --n-nodes 8 --seed 2026 --reps 10 --strategies bb --objectives lex --encodings inc --opt-modes optN --timeout-sec 300 --pct-wrong-facts 0.2 --notes "musonly optonly lexonly solve120 eval 300 gsq noweight std worst" --graph-eval-timeout 120 --reif mus --no-condset-weight
 ```
 
-The core published optimum-MCS setting is therefore:
-
-- reification: `mus`
-- objective: `lex`
-- clingo opt strategy: `bb`
-- clingo opt mode: `optN`
-- conditioning-set weighting disabled via `--no-condset-weight`
 
 ## Recreate the paper table
 
