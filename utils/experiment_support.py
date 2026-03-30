@@ -358,6 +358,8 @@ def build_run_summary(
     run_details: dict | None,
     dag_metrics: dict,
     cpdag_metrics: dict,
+    dag_eval_status: dict | None = None,
+    cpdag_eval_status: dict | None = None,
 ) -> dict:
     summary = {
         "dataset": dataset_name,
@@ -386,6 +388,10 @@ def build_run_summary(
             ],
         ),
     }
+    if isinstance(dag_eval_status, dict) and dag_eval_status:
+        summary["dag_eval_status"] = _json_safe(dag_eval_status)
+    if isinstance(cpdag_eval_status, dict) and cpdag_eval_status:
+        summary["cpdag_eval_status"] = _json_safe(cpdag_eval_status)
     if not isinstance(run_details, dict):
         return summary
 
@@ -573,6 +579,28 @@ def log_run_summary(summary: dict) -> None:
             _fmt_sec(summary.get("elapsed_sec")),
         )
     logging.info("[run-summary] dag=%s cpdag=%s", summary.get("dag"), summary.get("cpdag"))
+    for graph_kind in ("dag", "cpdag"):
+        eval_status = summary.get(f"{graph_kind}_eval_status")
+        if not isinstance(eval_status, dict):
+            continue
+        for metric_name, status in sorted(eval_status.items()):
+            if not isinstance(status, dict):
+                continue
+            if status.get("status") == "timeout":
+                logging.warning(
+                    "[run-summary] %s metric %s timed out after %ss (elapsed=%ss)",
+                    graph_kind,
+                    metric_name,
+                    status.get("timeout_sec"),
+                    status.get("elapsed_sec"),
+                )
+            elif status.get("status") == "error":
+                logging.warning(
+                    "[run-summary] %s metric %s errored: %s",
+                    graph_kind,
+                    metric_name,
+                    status.get("error"),
+                )
 
 
 def archive_run_artifacts(

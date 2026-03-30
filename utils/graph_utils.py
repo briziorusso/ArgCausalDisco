@@ -1,9 +1,12 @@
 import os, sys
 import logging
+import multiprocessing as mp
 import numpy as np
 import pandas as pd
 import networkx as nx
 import igraph as ig
+import time
+import traceback
 from collections import defaultdict
 from itertools import combinations, chain
 from copy import deepcopy
@@ -90,6 +93,173 @@ def SID_CPDAG(*args: Any, **kwargs: Any) -> Any:
     _ensure_cdt_loaded()
     assert _CDT_SID_CPDAG is not None
     return _CDT_SID_CPDAG(*args, **kwargs)
+
+
+def _normalize_metric_timeout(timeout_sec: float | None) -> float | None:
+    if timeout_sec is None:
+        return None
+    try:
+        timeout = float(timeout_sec)
+    except Exception:
+        return None
+    return timeout if timeout > 0 else None
+
+
+def _metric_process_context():
+    try:
+        if "fork" in mp.get_all_start_methods():
+            return mp.get_context("fork")
+    except Exception:
+        pass
+    return None
+
+
+def _compute_expensive_metric(metric_name: str, B_est: np.ndarray, B_true: np.ndarray):
+    if metric_name == "shd_dag":
+        return SHD(B_true, B_est, False)
+    if metric_name == "sid_dag":
+        return SID(B_true, B_est).flat[0]
+    if metric_name == "shd_cpdag":
+        return SHD(dag2cpdag(B_true, True), (B_est != 0).astype(int), False)
+    if metric_name == "sid_cpdag":
+        sid_low, sid_high = [a.flat[0] for a in SID_CPDAG(B_true, (B_est != 0).astype(int))]
+        return sid_low, sid_high
+    raise ValueError(f"Unknown metric_name={metric_name}")
+
+
+def _metric_worker(conn, metric_name: str, B_est: np.ndarray, B_true: np.ndarray) -> None:
+    payload: dict[str, Any]
+    try:
+        payload = {
+            "status": "ok",
+            "value": _compute_expensive_metric(metric_name, B_est, B_true),
+        }
+    except Exception as exc:
+        payload = {
+            "status": "error",
+            "error": f"{type(exc).__name__}: {exc}",
+            "traceback": traceback.format_exc(),
+        }
+    try:
+        conn.send(payload)
+    except Exception:
+        pass
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+def _run_metric_with_timeout(
+    metric_name: str,
+    *,
+    B_est: np.ndarray,
+    B_true: np.ndarray,
+    timeout_sec: float | None,
+) -> dict[str, Any]:
+    normalized_timeout = _normalize_metric_timeout(timeout_sec)
+    t0 = time.perf_counter()
+
+    if normalized_timeout is None:
+        try:
+            value = _compute_expensive_metric(metric_name, B_est, B_true)
+            return {
+                "status": "ok",
+                "value": value,
+                "elapsed_sec": float(time.perf_counter() - t0),
+                "timed_out": False,
+            }
+        except Exception as exc:
+            return {
+                "status": "error",
+                "value": None,
+                "elapsed_sec": float(time.perf_counter() - t0),
+                "timed_out": False,
+                "error": f"{type(exc).__name__}: {exc}",
+                "traceback": traceback.format_exc(),
+            }
+
+    ctx = _metric_process_context()
+    if ctx is None:
+        try:
+            value = _compute_expensive_metric(metric_name, B_est, B_true)
+            return {
+                "status": "ok",
+                "value": value,
+                "elapsed_sec": float(time.perf_counter() - t0),
+                "timed_out": False,
+                "timeout_disabled_reason": "fork_unavailable",
+            }
+        except Exception as exc:
+            return {
+                "status": "error",
+                "value": None,
+                "elapsed_sec": float(time.perf_counter() - t0),
+                "timed_out": False,
+                "error": f"{type(exc).__name__}: {exc}",
+                "traceback": traceback.format_exc(),
+                "timeout_disabled_reason": "fork_unavailable",
+            }
+
+    parent_conn, child_conn = ctx.Pipe(duplex=False)
+    proc = ctx.Process(
+        target=_metric_worker,
+        args=(child_conn, metric_name, np.asarray(B_est), np.asarray(B_true)),
+        daemon=True,
+    )
+    proc.start()
+    child_conn.close()
+    payload: dict[str, Any] | None = None
+    try:
+        if parent_conn.poll(normalized_timeout):
+            try:
+                payload = parent_conn.recv()
+            except EOFError:
+                payload = None
+        else:
+            try:
+                proc.terminate()
+            except Exception:
+                pass
+            proc.join(timeout=5.0)
+            if proc.is_alive():
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+                proc.join(timeout=5.0)
+            return {
+                "status": "timeout",
+                "value": None,
+                "elapsed_sec": float(time.perf_counter() - t0),
+                "timed_out": True,
+                "timeout_sec": float(normalized_timeout),
+            }
+    finally:
+        try:
+            parent_conn.close()
+        except Exception:
+            pass
+        try:
+            if proc.is_alive():
+                proc.join(timeout=0.1)
+        except Exception:
+            pass
+
+    elapsed_sec = float(time.perf_counter() - t0)
+    if not isinstance(payload, dict):
+        return {
+            "status": "error",
+            "value": None,
+            "elapsed_sec": elapsed_sec,
+            "timed_out": False,
+            "error": "Metric worker exited without returning a payload.",
+        }
+    payload.setdefault("elapsed_sec", elapsed_sec)
+    payload.setdefault("timed_out", False)
+    payload.setdefault("value", None)
+    return payload
 
 def model_to_adjacency_matrix(model:list, num_of_nodes:int)->np.ndarray:
     adj_mat = np.zeros((num_of_nodes,num_of_nodes))
@@ -342,7 +512,7 @@ class DAGMetrics(object):
         [d, d] ground truth graph, {0, 1}.
     """
 
-    def __init__(self, B_est, B_true, sid=True):
+    def __init__(self, B_est, B_true, sid=True, metric_timeout: float | None = None):
         
         if not isinstance(B_est, np.ndarray):
             raise TypeError("Input B_est is not numpy.ndarray!")
@@ -352,11 +522,16 @@ class DAGMetrics(object):
 
         self.B_est = deepcopy(B_est)
         self.B_true = deepcopy(B_true)
-
-        self.metrics = DAGMetrics._count_accuracy(self.B_est, self.B_true, sid)
+        self.metric_timeout = _normalize_metric_timeout(metric_timeout)
+        self.metrics, self.eval_status = DAGMetrics._count_accuracy(
+            self.B_est,
+            self.B_true,
+            sid,
+            metric_timeout=self.metric_timeout,
+        )
 
     @staticmethod
-    def _count_accuracy(B_est, B_true, sid=True, decimal_num=4):
+    def _count_accuracy(B_est, B_true, sid=True, decimal_num=4, metric_timeout: float | None = None):
         """
         Parameters
         ----------
@@ -461,10 +636,23 @@ class DAGMetrics(object):
         ### this, although standard in some packages,
         ### treats undirected edge as a present edge in the CPDAG 
         ### Replacing with SHD from cdt
+        eval_status: dict[str, dict[str, Any]] = {}
         if cpdag:
-            shd = DAGMetrics._cal_SHD_CPDAG(B_est, B_true)
+            shd_result = _run_metric_with_timeout(
+                "shd_cpdag",
+                B_est=B_est,
+                B_true=B_true,
+                timeout_sec=metric_timeout,
+            )
         else:
-            shd = SHD(B_true, B_est, False)
+            shd_result = _run_metric_with_timeout(
+                "shd_dag",
+                B_est=B_est,
+                B_true=B_true,
+                timeout_sec=metric_timeout,
+            )
+        eval_status["shd"] = {k: v for k, v in shd_result.items() if k != "value"}
+        shd = shd_result.get("value", np.nan) if shd_result.get("status") == "ok" else np.nan
 
         W_p = pd.DataFrame(B_est_unique)
         W_true = pd.DataFrame(B_true)
@@ -497,11 +685,25 @@ class DAGMetrics(object):
             mt[i] = round(mt[i], decimal_num)   
 
         if sid and not cpdag:
-            mt['sid'] = DAGMetrics._cal_SID(B_est, B_true)
+            sid_result = _run_metric_with_timeout(
+                "sid_dag",
+                B_est=B_est,
+                B_true=B_true,
+                timeout_sec=metric_timeout,
+            )
+            eval_status["sid"] = {k: v for k, v in sid_result.items() if k != "value"}
+            mt['sid'] = sid_result.get("value", np.nan) if sid_result.get("status") == "ok" else np.nan
         elif sid and cpdag:
-            mt['sid'] = DAGMetrics._cal_SID_CPDAG(B_est, B_true)
-       
-        return mt
+            sid_result = _run_metric_with_timeout(
+                "sid_cpdag",
+                B_est=B_est,
+                B_true=B_true,
+                timeout_sec=metric_timeout,
+            )
+            eval_status["sid"] = {k: v for k, v in sid_result.items() if k != "value"}
+            mt['sid'] = sid_result.get("value", np.nan) if sid_result.get("status") == "ok" else np.nan
+
+        return mt, eval_status
 
     @staticmethod
     def _cal_gscore(W_p, W_true):

@@ -392,9 +392,11 @@ def run_method(X,
         start = time.time()
 
         jm = pyc()
+        vm_started = False
         try:
             jm.start_vm()
-        except: 
+            vm_started = True
+        except Exception:
             pass
 
         from pycausal import search as s               
@@ -421,6 +423,12 @@ def run_method(X,
         except:
             logging.debug("FGES failed, returning None")
             W_est = None
+        finally:
+            if vm_started:
+                try:
+                    jm.stop_vm()
+                except Exception:
+                    logging.debug("FGES JVM shutdown failed", exc_info=True)
         elapsed = time.time() - start
 
         logging.info(f'Time taken for FGS: {round(elapsed,2)}s')

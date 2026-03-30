@@ -155,6 +155,7 @@ parser.add_argument('--adaptive_satcheck_threads', type=str_to_bool, default=Fal
 parser.add_argument('--satcheck_min_threads', type=int, default=1, help='ABAPC/CausalABA: lower bound for adaptive satcheck thread tuning')
 parser.add_argument('--satcheck_increase_step', type=int, default=2, help='ABAPC/CausalABA: additive thread increase used by the adaptive satcheck tuner after low-memory timeouts')
 parser.add_argument('--abapc_solver', choices=['incremental', 'baseline'], default='incremental', help='Use incremental or baseline CausalABA inside ABAPC')
+parser.add_argument('--eval_timeout', type=float, default=600.0, help='Maximum wall-time budget in seconds for each individual expensive evaluation metric (currently SHD and SID); use 0 to disable')
 
 # Bounded Causal ABA parameters
 parser.add_argument('--max_path_length', type=int, default=None, help='Bound: maximum simple path length |p| (lp)')
@@ -259,8 +260,10 @@ sz_ratio = args.sz_ratio
 lb_ratio = args.lb_ratio
 lcyc_ratio = args.lcyc_ratio
 abapc_solver = args.abapc_solver
+eval_timeout = None if args.eval_timeout is None or float(args.eval_timeout) <= 0 else float(args.eval_timeout)
 
 logging.info(f"ABAPC solver selection: {abapc_solver}")
+logging.info(f"Evaluation metric timeout: {eval_timeout if eval_timeout is not None else 'disabled'}")
 
 model_list = args.models
 names_dict = {
@@ -561,6 +564,8 @@ for dataset_name, src, info in datasets:
             B_est_binary = None
             B_est_cpdag_eval = None
             B_est_dag_eval = None
+            dag_eval_status = {}
+            cpdag_eval_status = {}
             if W_est is not None:
                 W_est = np.asarray(W_est)
                 graph_artifacts['graph_est_raw'] = W_est.copy()
@@ -569,10 +574,13 @@ for dataset_name, src, info in datasets:
                 try:
                     B_est_cpdag_eval = dag2cpdag(B_est_binary.copy())
                     graph_artifacts['graph_est_cpdag_eval'] = B_est_cpdag_eval.copy()
-                    mt_cpdag = DAGMetrics(B_est_cpdag_eval, B_true).metrics
+                    cpdag_metrics = DAGMetrics(B_est_cpdag_eval, B_true, metric_timeout=eval_timeout)
+                    mt_cpdag = cpdag_metrics.metrics
+                    cpdag_eval_status = getattr(cpdag_metrics, 'eval_status', {}) or {}
                 except Exception as e:
                     logging.error(f'DAGMetrics computation failed for CPDAG: {e}')
                     mt_cpdag = empty_metric_result()
+                    cpdag_eval_status = {'graph_eval': {'status': 'error', 'error': str(e), 'timed_out': False}}
 
                 B_est_dag_eval = (W_est > 0).astype(int)
                 bidirected_mask = (B_est_dag_eval == 1) & (B_est_dag_eval.T == 1)
@@ -582,16 +590,42 @@ for dataset_name, src, info in datasets:
                 graph_artifacts['graph_est_dag_eval'] = B_est_dag_eval.copy()
                 if is_dag(B_est_dag_eval):
                     try:
-                        mt_dag = DAGMetrics(B_est_dag_eval, B_true).metrics
+                        dag_metrics = DAGMetrics(B_est_dag_eval, B_true, metric_timeout=eval_timeout)
+                        mt_dag = dag_metrics.metrics
+                        dag_eval_status = getattr(dag_metrics, 'eval_status', {}) or {}
                     except Exception as e:
                         logging.error(f'DAGMetrics computation failed for DAG: {e}')
                         mt_dag = empty_metric_result()
+                        dag_eval_status = {'graph_eval': {'status': 'error', 'error': str(e), 'timed_out': False}}
                 else:
                     logging.warning('Estimated graph is not a DAG after bidirected edge removal; skipping DAG metrics for this run.')
                     mt_dag = empty_metric_result()
+                    dag_eval_status = {'graph_eval': {'status': 'skipped_non_dag', 'timed_out': False}}
             else:
                 mt_cpdag = empty_metric_result()
                 mt_dag = empty_metric_result()
+                dag_eval_status = {'graph_eval': {'status': 'skipped_no_estimate', 'timed_out': False}}
+                cpdag_eval_status = {'graph_eval': {'status': 'skipped_no_estimate', 'timed_out': False}}
+
+            for graph_kind, eval_status in (('dag', dag_eval_status), ('cpdag', cpdag_eval_status)):
+                for metric_name, status in (eval_status or {}).items():
+                    if not isinstance(status, dict):
+                        continue
+                    if status.get('status') == 'timeout':
+                        logging.warning(
+                            '[eval-timeout] graph=%s metric=%s timeout=%ss elapsed=%ss',
+                            graph_kind,
+                            metric_name,
+                            status.get('timeout_sec'),
+                            status.get('elapsed_sec'),
+                        )
+                    elif status.get('status') == 'error':
+                        logging.warning(
+                            '[eval-error] graph=%s metric=%s error=%s',
+                            graph_kind,
+                            metric_name,
+                            status.get('error'),
+                        )
 
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_dag})
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_cpdag})
@@ -627,6 +661,8 @@ for dataset_name, src, info in datasets:
                 run_details=run_details,
                 dag_metrics=dag_row,
                 cpdag_metrics=cpdag_row,
+                dag_eval_status=dag_eval_status,
+                cpdag_eval_status=cpdag_eval_status,
             )
             log_run_summary(run_summary)
             archived_run_dir = archive_run_artifacts(
