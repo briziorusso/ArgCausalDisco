@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import argparse
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -22,6 +24,7 @@ from utils.plotting import (  # noqa: E402
     main_purple,
     plot_runtime,
     sec_blue,
+    sec_green,
     sec_orange,
 )
 from utils.experiment_support import (  # noqa: E402
@@ -42,6 +45,30 @@ DAG_COLS = DAG_SUMMARY_COLUMNS
 CPDAG_COLS = CPDAG_SUMMARY_COLUMNS
 DAG_PROGRESS_METRICS = [column for column in DAG_BASE_COLUMNS if column not in {"dataset", "model"}]
 CPDAG_PROGRESS_METRICS = [column for column in CPDAG_BASE_COLUMNS if column not in {"dataset", "model"}]
+LEGACY_DAG_COLS = [
+    "dataset",
+    "model",
+    "elapsed_mean",
+    "elapsed_std",
+    "nnz_mean",
+    "nnz_std",
+    "fdr_mean",
+    "fdr_std",
+    "tpr_mean",
+    "tpr_std",
+    "fpr_mean",
+    "fpr_std",
+    "precision_mean",
+    "precision_std",
+    "recall_mean",
+    "recall_std",
+    "F1_mean",
+    "F1_std",
+    "shd_mean",
+    "shd_std",
+    "sid_mean",
+    "sid_std",
+]
 
 DATASET_ORDER = ["cancer", "earthquake", "survey", "asia", "sachs", "child"]
 NODES_MAP = {"asia": 8, "cancer": 5, "earthquake": 5, "sachs": 11, "survey": 6, "child": 20}
@@ -71,11 +98,11 @@ COLORS_DICT = {
     "random": "#7f7f7f",
     "fgs": sec_orange,
     "nt": sec_blue,
-    "mpc": main_green,
+    "mpc": main_purple,
     "abapc_orig": "#8c564b",
-    "abapc_nor": "#bcbd22",
-    "abapc_bb": main_purple,
-    "abapc_bb_nor": "#e377c2",
+    "abapc_nor": sec_green,
+    "abapc_bb": "#bcbd22",
+    "abapc_bb_nor": main_green,
 }
 SYMBOLS_DICT = {
     "random": "x",
@@ -242,11 +269,23 @@ def _metrics_available(frame: pd.DataFrame, metric_names: list[str]) -> bool:
 
 
 def _load_orig_runtime_fallback() -> pd.DataFrame:
-    for version in ["bnlearn_dag_v5_2000", "bnlearn_dag_v5"]:
+    frames: list[pd.DataFrame] = []
+    for version in ["abapc_orig_problem3_matched10_gsq", "bnlearn_dag_v5_2000", "bnlearn_dag_v5"]:
         path = RESULTS_DIR / f"stored_results_{version}.npy"
         if not path.exists():
             continue
-        frame = load_existing_summary(path, DAG_COLS)
+        frame: pd.DataFrame | None = None
+        try:
+            frame = load_existing_summary(path, DAG_COLS)
+        except Exception:
+            frame = None
+        if frame is None or frame.empty:
+            try:
+                frame = pd.DataFrame(np.load(path, allow_pickle=True), columns=LEGACY_DAG_COLS)
+                if "sid_mean" in frame.columns and "SID_mean" not in frame.columns:
+                    frame["SID_mean"] = frame["sid_mean"]
+            except Exception:
+                continue
         frame["dataset"] = frame["dataset"].astype(str).str.lower()
         frame["model"] = frame["model"].astype(str)
         frame = frame[
@@ -256,8 +295,14 @@ def _load_orig_runtime_fallback() -> pd.DataFrame:
         if frame.empty:
             continue
         frame["model"] = "ABAPC (orig)"
-        return _add_dataset_metadata(frame)
-    return pd.DataFrame()
+        frames.append(_add_dataset_metadata(frame))
+
+    if not frames:
+        return pd.DataFrame()
+
+    combined = pd.concat(frames, ignore_index=True)
+    combined = combined.drop_duplicates(subset=["base_dataset"], keep="first")
+    return _sort_by_dataset_order(combined)
 
 
 def _augment_runtime_with_orig_fallback(dag_df: pd.DataFrame) -> pd.DataFrame:
@@ -282,6 +327,235 @@ def _augment_runtime_with_orig_fallback(dag_df: pd.DataFrame) -> pd.DataFrame:
     runtime_df = pd.concat([runtime_df, fallback], ignore_index=True)
     runtime_df = _sort_by_dataset_order(runtime_df)
     return runtime_df
+
+
+def _find_png_browser(preferred: str | None) -> str | None:
+    if preferred:
+        return preferred
+    for candidate in ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"]:
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+    return None
+
+
+def _export_png_via_browser(
+    *,
+    browser_path: str,
+    html_path: Path,
+    png_path: Path,
+    width: int,
+    height: int,
+    wait_ms: int,
+    device_scale_factor: float,
+) -> bool:
+    png_path.parent.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        browser_path,
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--hide-scrollbars",
+        f"--window-size={int(width)},{int(height)}",
+        f"--virtual-time-budget={int(wait_ms)}",
+        f"--force-device-scale-factor={float(device_scale_factor)}",
+        f"--screenshot={str(png_path)}",
+        html_path.resolve().as_uri(),
+    ]
+    try:
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return png_path.exists()
+    except Exception:
+        return False
+
+
+def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) -> None:
+    figures = []
+    seen: set[str] = set()
+    for path in html_paths:
+        if path.suffix.lower() != ".html":
+            continue
+        name = path.name
+        if name in seen or not path.exists():
+            continue
+        seen.add(name)
+        figures.append(name)
+
+    if not figures:
+        return
+
+    nav_items = "\n".join(
+        f'<button class="nav-btn" data-target="{name}">{name}</button>'
+        for name in figures
+    )
+    first = figures[0]
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{title}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --line: #dbe3f0;
+      --text: #152033;
+      --muted: #506178;
+      --accent: #2358d3;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--text);
+    }}
+    .layout {{
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      min-height: 100vh;
+    }}
+    .sidebar {{
+      border-right: 1px solid var(--line);
+      background: linear-gradient(180deg, #f9fbff 0%, #eef3fb 100%);
+      padding: 20px 18px;
+      overflow: auto;
+    }}
+    h1 {{
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      line-height: 1.1;
+    }}
+    .hint {{
+      margin: 0 0 18px 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.4;
+    }}
+    .nav {{
+      display: grid;
+      gap: 10px;
+    }}
+    .nav-btn {{
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 15px;
+      cursor: pointer;
+    }}
+    .nav-btn:hover {{
+      border-color: var(--accent);
+    }}
+    .nav-btn.active {{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(35, 88, 211, 0.12);
+      background: #f3f7ff;
+    }}
+    .viewer {{
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 12px;
+      min-height: 100vh;
+    }}
+    .toolbar {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }}
+    .toolbar-title {{
+      font-size: 18px;
+      font-weight: 700;
+    }}
+    .toolbar-link {{
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+    }}
+    iframe {{
+      width: 100%;
+      height: calc(100vh - 110px);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }}
+    @media (max-width: 980px) {{
+      .layout {{
+        grid-template-columns: 1fr;
+      }}
+      .sidebar {{
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }}
+      iframe {{
+        height: 75vh;
+      }}
+    }}
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h1>{title}</h1>
+      <p class="hint">Open the interactive HTML plots here. The selected figure is shown on the right.</p>
+      <div class="nav">
+        {nav_items}
+      </div>
+    </aside>
+    <main class="viewer">
+      <div class="toolbar">
+        <div class="toolbar-title" id="viewer-title">{first}</div>
+        <a class="toolbar-link" id="open-link" href="{first}" target="_blank" rel="noopener">Open selected figure in a new tab</a>
+      </div>
+      <iframe id="viewer-frame" src="{first}" title="{title} viewer"></iframe>
+    </main>
+  </div>
+  <script>
+    const buttons = Array.from(document.querySelectorAll('.nav-btn'));
+    const frame = document.getElementById('viewer-frame');
+    const titleEl = document.getElementById('viewer-title');
+    const openLink = document.getElementById('open-link');
+
+    function setActive(target) {{
+      for (const btn of buttons) {{
+        const active = btn.dataset.target === target;
+        btn.classList.toggle('active', active);
+      }}
+      frame.src = target;
+      titleEl.textContent = target;
+      openLink.href = target;
+      if (window.location.hash !== '#' + target) {{
+        history.replaceState(null, '', '#' + target);
+      }}
+    }}
+
+    for (const btn of buttons) {{
+      btn.addEventListener('click', () => setActive(btn.dataset.target));
+    }}
+
+    const initial = decodeURIComponent(window.location.hash.slice(1));
+    const available = new Set(buttons.map((btn) => btn.dataset.target));
+    setActive(available.has(initial) ? initial : {first!r});
+  </script>
+</body>
+</html>
+"""
+    output_path.write_text(html, encoding="utf-8")
+
+
+def _apply_output_suffix(path: Path, suffix: str) -> Path:
+    if not suffix:
+        return path
+    return path.with_name(f"{path.stem}{suffix}{path.suffix}")
 
 
 def _series_color(pretty_name: str) -> str:
@@ -459,6 +733,41 @@ def main() -> None:
     parser.add_argument("--abapc-bb-child-version", default="child_abapc_bb_matched10_gsq_searchv3")
     parser.add_argument("--abapc-bb-nor-others-version", default="bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3")
     parser.add_argument("--abapc-bb-nor-child-version", default="child_abapc_bb_norapprox_matched10_gsq_searchv3")
+    parser.add_argument(
+        "--disable-orig",
+        action="store_true",
+        help="Do not include ABAPC (orig) in the DAG/CPDAG metric figures, even if fallback archives exist.",
+    )
+    parser.add_argument(
+        "--disable-runtime-orig",
+        action="store_true",
+        help="Do not include the fallback ABAPC (orig) trace in the runtime figure.",
+    )
+    parser.add_argument(
+        "--exclude-methods",
+        nargs="*",
+        default=[],
+        choices=METHOD_ORDER,
+        help="Pretty-name methods to remove from the DAG/CPDAG figures.",
+    )
+    parser.add_argument(
+        "--exclude-runtime-methods",
+        nargs="*",
+        default=[],
+        choices=METHOD_ORDER,
+        help="Pretty-name methods to remove from the runtime figure only.",
+    )
+    parser.add_argument(
+        "--output-suffix",
+        default="",
+        help="Suffix appended to generated figure filenames, for example '_no_nor'.",
+    )
+    parser.add_argument("--export-png", action="store_true", help="Export PNG companions for the generated HTML figures using a headless browser.")
+    parser.add_argument("--png-browser", default="", help="Explicit browser binary for PNG export; defaults to auto-detecting Chrome/Chromium.")
+    parser.add_argument("--png-width", type=int, default=1800, help="Viewport width used for browser-based PNG export.")
+    parser.add_argument("--png-height", type=int, default=900, help="Viewport height used for browser-based PNG export.")
+    parser.add_argument("--png-wait-ms", type=int, default=4000, help="Virtual-time budget for browser rendering before the screenshot is captured.")
+    parser.add_argument("--png-device-scale-factor", type=float, default=2.0, help="Browser device scale factor for higher-resolution PNG screenshots.")
     args = parser.parse_args()
 
     random_fgs_version = args.random_fgs_version or args.fgs_nt_version
@@ -478,20 +787,6 @@ def main() -> None:
         {"version": random_fgs_version, "kind": "dag", "include": ["Random", "FGS"]},
         {"version": nt_version, "kind": "dag", "include": ["NOTEARS-MLP"]},
         {"version": args.mpc_version, "kind": "dag", "include": ["MPC"]},
-        {
-            "version": abapc_orig_others_version,
-            "kind": "dag",
-            "include": ["ABAPC (Ours)"],
-            "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
-            "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
-        },
-        {
-            "version": abapc_orig_child_version,
-            "kind": "dag",
-            "include": ["ABAPC (Ours)"],
-            "include_datasets": ["child"],
-            "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
-        },
         {
             "version": args.abapc_nor_others_version,
             "kind": "dag",
@@ -538,20 +833,6 @@ def main() -> None:
         {"version": nt_version, "kind": "cpdag", "include": ["NOTEARS-MLP"]},
         {"version": args.mpc_version, "kind": "cpdag", "include": ["MPC"]},
         {
-            "version": abapc_orig_others_version,
-            "kind": "cpdag",
-            "include": ["ABAPC (Ours)"],
-            "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
-            "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
-        },
-        {
-            "version": abapc_orig_child_version,
-            "kind": "cpdag",
-            "include": ["ABAPC (Ours)"],
-            "include_datasets": ["child"],
-            "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
-        },
-        {
             "version": args.abapc_nor_others_version,
             "kind": "cpdag",
             "include": ["ABAPC (Ours)"],
@@ -595,78 +876,171 @@ def main() -> None:
         },
     ]
 
+    if not args.disable_orig:
+        run_specs.extend(
+            [
+                {
+                    "version": abapc_orig_others_version,
+                    "kind": "dag",
+                    "include": ["ABAPC (Ours)"],
+                    "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
+                    "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
+                },
+                {
+                    "version": abapc_orig_child_version,
+                    "kind": "dag",
+                    "include": ["ABAPC (Ours)"],
+                    "include_datasets": ["child"],
+                    "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
+                },
+                {
+                    "version": abapc_orig_others_version,
+                    "kind": "cpdag",
+                    "include": ["ABAPC (Ours)"],
+                    "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
+                    "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
+                },
+                {
+                    "version": abapc_orig_child_version,
+                    "kind": "cpdag",
+                    "include": ["ABAPC (Ours)"],
+                    "include_datasets": ["child"],
+                    "replace_models": {"ABAPC (Ours)": "ABAPC (orig)"},
+                },
+            ]
+        )
+
     dag_df = _sort_by_dataset_order(_add_normalised_dag(_add_dataset_metadata(_load_combined("dag", run_specs))))
     cpdag_df = _sort_by_dataset_order(_add_normalised_cpdag(_add_dataset_metadata(_load_combined("cpdag", run_specs))))
+
+    if args.exclude_methods:
+        exclude_methods = set(args.exclude_methods)
+        dag_df = dag_df[~dag_df["model"].isin(exclude_methods)].copy()
+        cpdag_df = cpdag_df[~cpdag_df["model"].isin(exclude_methods)].copy()
+    else:
+        exclude_methods = set()
 
     if dag_df.empty or cpdag_df.empty:
         raise SystemExit("No matched-10 summaries were found for the requested versions.")
 
     dag_methods = [method for method in METHOD_ORDER if method in dag_df["model"].unique()]
     cpdag_methods = [method for method in METHOD_ORDER if method in cpdag_df["model"].unique()]
-    runtime_df = _augment_runtime_with_orig_fallback(dag_df)
+    runtime_df = dag_df.copy()
+    if not args.disable_runtime_orig:
+        runtime_df = _augment_runtime_with_orig_fallback(runtime_df)
+    if args.exclude_runtime_methods:
+        runtime_df = runtime_df[~runtime_df["model"].isin(set(args.exclude_runtime_methods))].copy()
     runtime_method_keys = [
         method
         for method in ["random", "fgs", "nt", "mpc", "abapc_orig", "abapc_nor", "abapc_bb", "abapc_bb_nor"]
         if NAMES_DICT[method] in runtime_df["model"].unique()
     ]
 
+    generated_html_paths: list[Path] = []
+    output_suffix = args.output_suffix
+
     double_bar_chart_plotly(
         dag_df, ["p_shd", "F1"], NAMES_DICT, COLORS_DICT, dag_methods,
         save_figs=True, font_size=23,
-        output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_SHD_F1.html"),
+        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SHD_F1.html", output_suffix)),
         debug=False, range_y1=[0, 2.6], range_y2=[0, 5.6], rect_exp=0.01,
     )
+    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SHD_F1.html", output_suffix))
     bar_chart_plotly(
         dag_df, "p_SID", NAMES_DICT, COLORS_DICT, dag_methods,
         save_figs=True, font_size=23,
-        output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_SID.html"),
+        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SID.html", output_suffix)),
         debug=False,
     )
+    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SID.html", output_suffix))
     double_bar_chart_plotly(
         dag_df, ["precision", "recall"], NAMES_DICT, COLORS_DICT, dag_methods,
         save_figs=True, font_size=23,
-        output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html"),
+        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html", output_suffix)),
         debug=False,
     )
+    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html", output_suffix))
     if _metrics_available(dag_df, ["adjacency_F1", "arrowhead_F1"]):
         double_bar_chart_plotly(
             dag_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, dag_methods,
             save_figs=True, font_size=23,
-            output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_arrowhead_F1.html"),
+            output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_arrowhead_F1.html", output_suffix)),
             debug=False,
         )
+        generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_arrowhead_F1.html", output_suffix))
     else:
         print("Skipping Fig.bn_matched10_dag_skeleton_arrowhead_F1.html: skeleton/arrowhead F1 metrics are missing from the saved summaries.")
     if _metrics_available(dag_df, ["adjacency_precision", "adjacency_recall"]):
         double_bar_chart_plotly(
             dag_df, ["adjacency_precision", "adjacency_recall"], NAMES_DICT, COLORS_DICT, dag_methods,
             save_figs=True, font_size=23,
-            output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_prec_rec.html"),
+            output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_prec_rec.html", output_suffix)),
             debug=False,
         )
+        generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_prec_rec.html", output_suffix))
     else:
         print("Skipping Fig.bn_matched10_dag_skeleton_prec_rec.html: skeleton precision/recall metrics are missing from the saved summaries.")
     if _metrics_available(dag_df, ["arrowhead_precision", "arrowhead_recall"]):
         double_bar_chart_plotly(
             dag_df, ["arrowhead_precision", "arrowhead_recall"], NAMES_DICT, COLORS_DICT, dag_methods,
             save_figs=True, font_size=23,
-            output_name=str(FIGS_DIR / "Fig.bn_matched10_dag_arrowhead_prec_rec.html"),
+            output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_arrowhead_prec_rec.html", output_suffix)),
             debug=False,
         )
+        generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_arrowhead_prec_rec.html", output_suffix))
     else:
         print("Skipping Fig.bn_matched10_dag_arrowhead_prec_rec.html: arrowhead precision/recall metrics are missing from the saved summaries.")
     double_bar_chart_plotly(
         cpdag_df, ["p_SID_low", "p_SID_high"], NAMES_DICT, COLORS_DICT, cpdag_methods,
         save_figs=True, font_size=23,
-        output_name=str(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html"),
+        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix)),
         debug=False, range_y1=[0, 6], range_y2=[0, 6], rect_exp=0.01,
     )
+    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix))
     double_bar_chart_plotly(
         cpdag_df, ["p_shd", "F1"], NAMES_DICT, COLORS_DICT, cpdag_methods,
         save_figs=True, font_size=23,
-        output_name=str(FIGS_DIR / "Fig.bn_matched10_cpdag_SHD_F1.html"),
+        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_SHD_F1.html", output_suffix)),
         debug=False, range_y1=[0, 6], range_y2=[0, 6], rect_exp=0.01,
     )
+    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_SHD_F1.html", output_suffix))
+    double_bar_chart_plotly(
+        cpdag_df, ["precision", "recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+        save_figs=True, font_size=23,
+        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_prec_rec.html", output_suffix)),
+        debug=False,
+    )
+    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_prec_rec.html", output_suffix))
+    if _metrics_available(cpdag_df, ["adjacency_F1", "arrowhead_F1"]):
+        double_bar_chart_plotly(
+            cpdag_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+            save_figs=True, font_size=23,
+            output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html", output_suffix)),
+            debug=False,
+        )
+        generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html", output_suffix))
+    else:
+        print("Skipping Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html: skeleton/arrowhead F1 metrics are missing from the saved summaries.")
+    if _metrics_available(cpdag_df, ["adjacency_precision", "adjacency_recall"]):
+        double_bar_chart_plotly(
+            cpdag_df, ["adjacency_precision", "adjacency_recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+            save_figs=True, font_size=23,
+            output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_prec_rec.html", output_suffix)),
+            debug=False,
+        )
+        generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_prec_rec.html", output_suffix))
+    else:
+        print("Skipping Fig.bn_matched10_cpdag_skeleton_prec_rec.html: skeleton precision/recall metrics are missing from the saved summaries.")
+    if _metrics_available(cpdag_df, ["arrowhead_precision", "arrowhead_recall"]):
+        double_bar_chart_plotly(
+            cpdag_df, ["arrowhead_precision", "arrowhead_recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+            save_figs=True, font_size=23,
+            output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_arrowhead_prec_rec.html", output_suffix)),
+            debug=False,
+        )
+        generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_arrowhead_prec_rec.html", output_suffix))
+    else:
+        print("Skipping Fig.bn_matched10_cpdag_arrowhead_prec_rec.html: arrowhead precision/recall metrics are missing from the saved summaries.")
     plot_runtime(
         runtime_df,
         ["n_nodes"],
@@ -677,26 +1051,66 @@ def main() -> None:
         runtime_method_keys,
         share_y=False,
         save_figs=True,
-        output_name=str(FIGS_DIR / "Fig.3_runtime_matched10.html"),
+        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix)),
         debug=False,
         font_size=20,
         plot_height=370,
         plot_width=800,
         model_aliases=NAMES_DICT,
     )
+    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix))
 
     child_table = build_child_comparison_table(dag_df, cpdag_df)
-    child_table_path = FIGS_DIR / "bnlearn_matched10_child_table.csv"
+    child_table_path = _apply_output_suffix(FIGS_DIR / "bnlearn_matched10_child_table.csv", output_suffix)
     child_table.to_csv(child_table_path, index=False)
+    viewer_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_viewer.html", output_suffix)
+    _write_viewer_html(generated_html_paths, viewer_path, "Matched-10 Plot Viewer")
+
+    dag_shd_f1_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SHD_F1.html", output_suffix)
+    dag_sid_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SID.html", output_suffix)
+    dag_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html", output_suffix)
+    cpdag_sid_path = _apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix)
+    cpdag_shd_f1_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_SHD_F1.html", output_suffix)
+    cpdag_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_prec_rec.html", output_suffix)
+    cpdag_sk_ah_f1_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html", output_suffix)
+    cpdag_sk_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_prec_rec.html", output_suffix)
+    cpdag_ah_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_arrowhead_prec_rec.html", output_suffix)
+    runtime_path = _apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix)
 
     print(child_table.to_string(index=False))
-    print(f"Wrote {FIGS_DIR / 'Fig.bn_matched10_dag_SHD_F1.html'}")
-    print(f"Wrote {FIGS_DIR / 'Fig.bn_matched10_dag_SID.html'}")
-    print(f"Wrote {FIGS_DIR / 'Fig.bn_matched10_dag_prec_rec.html'}")
-    print(f"Wrote {FIGS_DIR / 'Fig.2_SID_cpdag_matched10.html'}")
-    print(f"Wrote {FIGS_DIR / 'Fig.bn_matched10_cpdag_SHD_F1.html'}")
-    print(f"Wrote {FIGS_DIR / 'Fig.3_runtime_matched10.html'}")
+    print(f"Wrote {dag_shd_f1_path}")
+    print(f"Wrote {dag_sid_path}")
+    print(f"Wrote {dag_prec_rec_path}")
+    print(f"Wrote {cpdag_sid_path}")
+    print(f"Wrote {cpdag_shd_f1_path}")
+    print(f"Wrote {cpdag_prec_rec_path}")
+    print(f"Wrote {cpdag_sk_ah_f1_path}")
+    print(f"Wrote {cpdag_sk_prec_rec_path}")
+    print(f"Wrote {cpdag_ah_prec_rec_path}")
+    print(f"Wrote {runtime_path}")
+    print(f"Wrote {viewer_path}")
     print(f"Wrote {child_table_path}")
+
+    if args.export_png:
+        browser_path = _find_png_browser(args.png_browser.strip() or None)
+        if browser_path is None:
+            print("PNG export requested, but no Chrome/Chromium browser was found.")
+        else:
+            for html_path in generated_html_paths:
+                png_path = html_path.with_suffix(".png")
+                ok = _export_png_via_browser(
+                    browser_path=browser_path,
+                    html_path=html_path,
+                    png_path=png_path,
+                    width=args.png_width,
+                    height=args.png_height,
+                    wait_ms=args.png_wait_ms,
+                    device_scale_factor=args.png_device_scale_factor,
+                )
+                if ok:
+                    print(f"Wrote {png_path}")
+                else:
+                    print(f"Failed to write {png_path}")
 
 
 if __name__ == "__main__":

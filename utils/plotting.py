@@ -336,7 +336,7 @@ def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, color
                                     ,error_y=dict(type='data', array=tab_grouped['std'])
                                     ,name=model_aliases[model], #legendgroup=f'group{i}{j}', 
                                     line=dict(color=colors_dict[model], width=2, simplify=True), mode='lines+markers', 
-                                    marker=dict(size=8, symbol=symbols_dict[model], color=colors_dict[model]), 
+                                    marker=dict(size=12, symbol=symbols_dict[model], color=colors_dict[model]), 
                                     showlegend=(j==1 and i==1)), j, i)
         i += 1 if i < cols else 0
 
