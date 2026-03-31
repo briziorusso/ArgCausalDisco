@@ -86,6 +86,8 @@
   ],
   "cwd": "/vol/bitbucket/fr920/ArgCausalDisco-1",
   "python": "/vol/bitbucket/fr920/miniconda3/envs/aba-env/bin/python",
+  "sample_size": 5000,
+  "n_runs": 10,
   "test_alpha": 0.05,
   "test_name": "gsq"
 }

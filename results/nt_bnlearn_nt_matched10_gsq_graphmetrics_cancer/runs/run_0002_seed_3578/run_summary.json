@@ -1,0 +1,102 @@
+{
+  "dataset": "cancer",
+  "model": "NOTEARS-MLP",
+  "run_idx": 1,
+  "run_total": 10,
+  "seed": 3578,
+  "elapsed_sec": 0.06055736541748047,
+  "scenario": "nt_bnlearn_nt_matched10_gsq_graphmetrics_cancer",
+  "dag": {
+    "precision": null,
+    "recall": 0.0,
+    "F1": null,
+    "adjacency_precision": 0.0,
+    "adjacency_recall": 0.0,
+    "adjacency_F1": 0.0,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 4.0,
+    "sid": 10.0
+  },
+  "cpdag": {
+    "precision": null,
+    "recall": 0.0,
+    "F1": null,
+    "adjacency_precision": 0.0,
+    "adjacency_recall": 0.0,
+    "adjacency_F1": 0.0,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 4.0,
+    "sid_low": 10.0,
+    "sid_high": 10.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.498237581923604,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.7217636201530695,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.5175703652203083,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.7234464790672064,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}

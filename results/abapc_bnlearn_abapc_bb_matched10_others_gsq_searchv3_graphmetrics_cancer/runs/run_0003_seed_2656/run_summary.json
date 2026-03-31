@@ -1,0 +1,168 @@
+{
+  "dataset": "cancer",
+  "model": "ABAPC (Ours)",
+  "run_idx": 2,
+  "run_total": 10,
+  "seed": 2656,
+  "elapsed_sec": 0.4430243968963623,
+  "scenario": "abapc_bnlearn_abapc_bb_matched10_others_gsq_searchv3_graphmetrics_cancer",
+  "dag": {
+    "precision": 0.5,
+    "recall": 0.5,
+    "F1": 0.5,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 1.0,
+    "arrowhead_precision": 0.5,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.5,
+    "shd": 2.0,
+    "sid": 10.0
+  },
+  "cpdag": {
+    "precision": 0.5,
+    "recall": 0.5,
+    "F1": 0.5,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 1.0,
+    "arrowhead_precision": 0.5,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.5,
+    "shd": 2.0,
+    "sid_low": 10.0,
+    "sid_high": 10.0
+  },
+  "remove_n": 4,
+  "best_unsat_removed": 3,
+  "best_sat_removed": 4,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.01845485530793667,
+  "build_breakdown": {
+    "compile_sec": 0.01354483887553215,
+    "gen_facts_sec": 0.00014418549835681915,
+    "load_encoding_sec": 0.0016888082027435303,
+    "load_facts_sec": 0.001467706635594368,
+    "load_wc_sec": 0.001475287601351738,
+    "add_bayesball_sec": 0.00013402849435806274
+  },
+  "ground_sec": 0.0024439971894025803,
+  "first_solve_sec": 0.00252600759267807,
+  "final_solve_sec": 0.001209532842040062,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 6,
+    "total_sec": 0.3225201014429331,
+    "avg_sec": 0.05375335024048885,
+    "min_sec": 0.01850004494190216,
+    "max_sec": 0.107297383248806,
+    "sat": 3,
+    "unsat": 3,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 5
+    }
+  },
+  "facts": {
+    "facts_total": 28,
+    "removed_fact_count": 4,
+    "kept_fact_count": 24,
+    "removed_indep_count": 4,
+    "removed_dep_count": 0,
+    "kept_indep_count": 6,
+    "kept_dep_count": 18,
+    "removed_truth_counts": {
+      "unknown": 4
+    },
+    "kept_truth_counts": {
+      "unknown": 24
+    },
+    "fully_released_pair_count": 0,
+    "fully_released_pairs": [],
+    "removed_fact_keys": [
+      "ext_indep(1,3,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,s0).",
+      "ext_indep(0,2,s4)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_indep(1,3,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,s0).",
+      "ext_indep(0,2,s4)."
+    ],
+    "removed_pair_counts": {
+      "0,2": 1,
+      "1,3": 1,
+      "1,4": 1,
+      "3,4": 1
+    },
+    "pair_fact_counts_total": {
+      "0,1": 5,
+      "0,2": 4,
+      "0,3": 5,
+      "0,4": 5,
+      "1,2": 1,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 1,
+      "2,4": 1,
+      "3,4": 2
+    }
+  },
+  "reground": {
+    "disable_reground": false,
+    "block_edge_mode": "dynamic"
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}

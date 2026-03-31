@@ -1,0 +1,178 @@
+{
+  "dataset": "cancer",
+  "model": "ABAPC (Ours)",
+  "run_idx": 0,
+  "run_total": 10,
+  "seed": 7816,
+  "elapsed_sec": 1.717853307723999,
+  "scenario": "abapc_bnlearn_abapc_bb_matched10_others_gsq_searchv3_graphmetrics_cancer",
+  "dag": {
+    "precision": 0.4,
+    "recall": 0.5,
+    "F1": 0.4444,
+    "adjacency_precision": 0.8,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 0.8889,
+    "arrowhead_precision": 0.4,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.4444,
+    "shd": 3.0,
+    "sid": 9.0
+  },
+  "cpdag": {
+    "precision": 0.4,
+    "recall": 0.5,
+    "F1": 0.4444,
+    "adjacency_precision": 0.8,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 0.8889,
+    "arrowhead_precision": 0.2,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.2857,
+    "shd": 3.0,
+    "sid_low": 5.0,
+    "sid_high": 15.0
+  },
+  "remove_n": 7,
+  "best_unsat_removed": 6,
+  "best_sat_removed": 7,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 1.1932324226945639,
+  "build_breakdown": {
+    "compile_sec": 1.0099264197051525,
+    "gen_facts_sec": 0.0011855121701955795,
+    "load_encoding_sec": 0.17340712808072567,
+    "load_facts_sec": 0.005370821803808212,
+    "load_wc_sec": 0.0031270962208509445,
+    "add_bayesball_sec": 0.00021544471383094788
+  },
+  "ground_sec": 0.014542162418365479,
+  "first_solve_sec": 0.007480893284082413,
+  "final_solve_sec": 0.003917353227734566,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 7,
+    "total_sec": 0.34048604406416416,
+    "avg_sec": 0.048640863437737734,
+    "min_sec": 0.017486637458205223,
+    "max_sec": 0.1933301743119955,
+    "sat": 5,
+    "unsat": 2,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 6
+    }
+  },
+  "facts": {
+    "facts_total": 44,
+    "removed_fact_count": 7,
+    "kept_fact_count": 37,
+    "removed_indep_count": 6,
+    "removed_dep_count": 1,
+    "kept_indep_count": 3,
+    "kept_dep_count": 34,
+    "removed_truth_counts": {
+      "unknown": 7
+    },
+    "kept_truth_counts": {
+      "unknown": 37
+    },
+    "fully_released_pair_count": 1,
+    "fully_released_pairs": [
+      "1,3"
+    ],
+    "removed_fact_keys": [
+      "ext_indep(2,4,empty).",
+      "ext_dep(1,3,s0).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(1,2,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(1,3,empty)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_indep(2,4,empty).",
+      "ext_dep(1,3,s0).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(1,2,s0).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(1,3,empty)."
+    ],
+    "removed_pair_counts": {
+      "1,2": 1,
+      "1,3": 2,
+      "1,4": 1,
+      "2,3": 1,
+      "2,4": 1,
+      "3,4": 1
+    },
+    "pair_fact_counts_total": {
+      "0,1": 8,
+      "0,2": 8,
+      "0,3": 8,
+      "0,4": 8,
+      "1,2": 2,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 2,
+      "2,4": 2,
+      "3,4": 2
+    }
+  },
+  "reground": {
+    "disable_reground": false,
+    "block_edge_mode": "dynamic"
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "dataset": "survey",
+  "model": "NOTEARS-MLP",
+  "run_idx": 4,
+  "run_total": 10,
+  "seed": 2494,
+  "elapsed_sec": 0.053839921951293945,
+  "scenario": "nt_bnlearn_nt_matched10_gsq_graphmetrics_survey",
+  "dag": {
+    "precision": null,
+    "recall": 0.0,
+    "F1": null,
+    "adjacency_precision": 0.0,
+    "adjacency_recall": 0.0,
+    "adjacency_F1": 0.0,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 6.0,
+    "sid": 17.0
+  },
+  "cpdag": {
+    "precision": null,
+    "recall": 0.0,
+    "F1": null,
+    "adjacency_precision": 0.0,
+    "adjacency_recall": 0.0,
+    "adjacency_F1": 0.0,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 6.0,
+    "sid_low": 17.0,
+    "sid_high": 17.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.5368838589638472,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.751296868547797,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.540152570232749,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.790875470265746,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    }
+  }
+}

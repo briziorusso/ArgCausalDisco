@@ -1,0 +1,392 @@
+{
+  "dataset": "cancer",
+  "model": "ABAPC (Ours)",
+  "run_idx": 3,
+  "run_total": 10,
+  "seed": 2688,
+  "elapsed_sec": 0.07916021347045898,
+  "scenario": "abapc_bnlearn_abapc_nor_matched10_others_gsq_graphmetrics_cancer",
+  "dag": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "F1": 1.0,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 1.0,
+    "arrowhead_precision": 1.0,
+    "arrowhead_recall": 1.0,
+    "arrowhead_F1": 1.0,
+    "shd": 0.0,
+    "sid": 0.0
+  },
+  "cpdag": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "F1": 1.0,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 1.0,
+    "arrowhead_precision": 0.5,
+    "arrowhead_recall": 1.0,
+    "arrowhead_F1": 0.6667,
+    "shd": 0.0,
+    "sid_low": 0.0,
+    "sid_high": 5.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.6875191498547792,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.4019420482218266,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.660483168438077,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.2052864469587803,
+      "timed_out": false
+    }
+  },
+  "remove_n": 12,
+  "best_unsat_removed": null,
+  "best_sat_removed": null,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "baseline",
+  "build_sec": 0.010407930240035057,
+  "build_breakdown": {
+    "compile_sec": 0.010407930240035057,
+    "gen_facts_sec": 0.0,
+    "load_encoding_sec": 0.0,
+    "load_facts_sec": 0.0,
+    "load_wc_sec": 0.0,
+    "add_bayesball_sec": 0.0
+  },
+  "ground_sec": 0.003288077190518379,
+  "first_solve_sec": 0.012815898284316063,
+  "final_solve_sec": 0.0,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": null,
+    "n_models": null
+  },
+  "satchecks": {
+    "calls": 0,
+    "total_sec": 0.0,
+    "avg_sec": 0.0,
+    "min_sec": 0.0,
+    "max_sec": 0.0,
+    "sat": 0,
+    "unsat": 0,
+    "unknown": 0,
+    "labels": {}
+  },
+  "facts": {
+    "facts_total": 44,
+    "removed_fact_count": 12,
+    "kept_fact_count": 32,
+    "removed_indep_count": 8,
+    "removed_dep_count": 4,
+    "kept_indep_count": 2,
+    "kept_dep_count": 30,
+    "removed_truth_counts": {
+      "unknown": 12
+    },
+    "kept_truth_counts": {
+      "unknown": 32
+    },
+    "fully_released_pair_count": 4,
+    "fully_released_pairs": [
+      "1,4",
+      "2,3",
+      "2,4",
+      "3,4"
+    ],
+    "removed_fact_keys": [
+      "ext_indep(1,2,empty).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(2,4,empty).",
+      "ext_dep(2,3,s0).",
+      "ext_dep(3,4,empty).",
+      "ext_dep(0,2,s1y4).",
+      "ext_dep(0,2,s1).",
+      "ext_indep(1,3,empty).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(1,4,s0).",
+      "ext_indep(2,4,s0)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_indep(1,2,empty).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(2,4,empty).",
+      "ext_dep(2,3,s0).",
+      "ext_dep(3,4,empty).",
+      "ext_dep(0,2,s1y4).",
+      "ext_dep(0,2,s1).",
+      "ext_indep(1,3,empty).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(1,4,s0).",
+      "ext_indep(2,4,s0)."
+    ],
+    "removed_pair_counts": {
+      "0,2": 2,
+      "1,2": 1,
+      "1,3": 1,
+      "1,4": 2,
+      "2,3": 2,
+      "2,4": 2,
+      "3,4": 2
+    },
+    "pair_fact_counts_total": {
+      "0,1": 8,
+      "0,2": 8,
+      "0,3": 8,
+      "0,4": 8,
+      "1,2": 2,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 2,
+      "2,4": 2,
+      "3,4": 2
+    }
+  },
+  "reground": {
+    "pre_grounding": true,
+    "disable_reground": true,
+    "skeleton_rules_reduction": true,
+    "release_event_count": 12,
+    "release_events": [
+      {
+        "remove_idx": 1,
+        "pair": "2,4",
+        "dep_type": "ext_indep",
+        "kind": "indep",
+        "fact_key": "ext_indep(2,4,s0).",
+        "truth": "na",
+        "last_of_kind": false,
+        "pair_fully_released": false,
+        "reground_eligible": false,
+        "reground_performed": false,
+        "reground_skipped": false
+      },
+      {
+        "remove_idx": 2,
+        "pair": "1,4",
+        "dep_type": "ext_indep",
+        "kind": "indep",
+        "fact_key": "ext_indep(1,4,s0).",
+        "truth": "na",
+        "last_of_kind": false,
+        "pair_fully_released": false,
+        "reground_eligible": false,
+        "reground_performed": false,
+        "reground_skipped": false
+      },
+      {
+        "remove_idx": 3,
+        "pair": "1,4",
+        "dep_type": "ext_indep",
+        "kind": "indep",
+        "fact_key": "ext_indep(1,4,empty).",
+        "truth": "na",
+        "last_of_kind": true,
+        "pair_fully_released": true,
+        "reground_eligible": true,
+        "reground_performed": false,
+        "reground_skipped": true
+      },
+      {
+        "remove_idx": 4,
+        "pair": "3,4",
+        "dep_type": "ext_indep",
+        "kind": "indep",
+        "fact_key": "ext_indep(3,4,s0).",
+        "truth": "na",
+        "last_of_kind": true,
+        "pair_fully_released": false,
+        "reground_eligible": true,
+        "reground_performed": false,
+        "reground_skipped": true
+      },
+      {
+        "remove_idx": 5,
+        "pair": "1,3",
+        "dep_type": "ext_indep",
+        "kind": "indep",
+        "fact_key": "ext_indep(1,3,empty).",
+        "truth": "na",
+        "last_of_kind": false,
+        "pair_fully_released": false,
+        "reground_eligible": false,
+        "reground_performed": false,
+        "reground_skipped": false
+      },
+      {
+        "remove_idx": 6,
+        "pair": "0,2",
+        "dep_type": "ext_dep",
+        "kind": "dep",
+        "fact_key": "ext_dep(0,2,s1).",
+        "truth": "na",
+        "last_of_kind": false,
+        "pair_fully_released": false,
+        "reground_eligible": false,
+        "reground_performed": false,
+        "reground_skipped": false
+      },
+      {
+        "remove_idx": 7,
+        "pair": "0,2",
+        "dep_type": "ext_dep",
+        "kind": "dep",
+        "fact_key": "ext_dep(0,2,s1y4).",
+        "truth": "na",
+        "last_of_kind": false,
+        "pair_fully_released": false,
+        "reground_eligible": false,
+        "reground_performed": false,
+        "reground_skipped": false
+      },
+      {
+        "remove_idx": 8,
+        "pair": "3,4",
+        "dep_type": "ext_dep",
+        "kind": "dep",
+        "fact_key": "ext_dep(3,4,empty).",
+        "truth": "na",
+        "last_of_kind": true,
+        "pair_fully_released": true,
+        "reground_eligible": false,
+        "reground_performed": false,
+        "reground_skipped": false
+      },
+      {
+        "remove_idx": 9,
+        "pair": "2,3",
+        "dep_type": "ext_dep",
+        "kind": "dep",
+        "fact_key": "ext_dep(2,3,s0).",
+        "truth": "na",
+        "last_of_kind": true,
+        "pair_fully_released": false,
+        "reground_eligible": false,
+        "reground_performed": false,
+        "reground_skipped": false
+      },
+      {
+        "remove_idx": 10,
+        "pair": "2,4",
+        "dep_type": "ext_indep",
+        "kind": "indep",
+        "fact_key": "ext_indep(2,4,empty).",
+        "truth": "na",
+        "last_of_kind": true,
+        "pair_fully_released": true,
+        "reground_eligible": true,
+        "reground_performed": false,
+        "reground_skipped": true
+      },
+      {
+        "remove_idx": 11,
+        "pair": "2,3",
+        "dep_type": "ext_indep",
+        "kind": "indep",
+        "fact_key": "ext_indep(2,3,empty).",
+        "truth": "na",
+        "last_of_kind": true,
+        "pair_fully_released": true,
+        "reground_eligible": true,
+        "reground_performed": false,
+        "reground_skipped": true
+      },
+      {
+        "remove_idx": 12,
+        "pair": "1,2",
+        "dep_type": "ext_indep",
+        "kind": "indep",
+        "fact_key": "ext_indep(1,2,empty).",
+        "truth": "na",
+        "last_of_kind": false,
+        "pair_fully_released": false,
+        "reground_eligible": false,
+        "reground_performed": false,
+        "reground_skipped": false
+      }
+    ],
+    "last_of_kind_release_count": 6,
+    "last_indep_release_count": 4,
+    "reground_eligible_count": 4,
+    "reground_performed_count": 0,
+    "reground_skipped_count": 4,
+    "reground_eligible_indep_count": 4,
+    "reground_performed_indep_count": 0,
+    "reground_skipped_indep_count": 4,
+    "reground_performed_pairs": [],
+    "reground_skipped_pairs": [
+      "1,4",
+      "2,3",
+      "2,4",
+      "3,4"
+    ],
+    "reground_compile_profiles": [],
+    "reground_compile_count": 0,
+    "paths_added_initial": 10,
+    "pairs_considered_initial": 10
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}

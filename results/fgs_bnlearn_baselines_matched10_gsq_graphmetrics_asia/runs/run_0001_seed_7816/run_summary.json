@@ -1,0 +1,102 @@
+{
+  "dataset": "asia",
+  "model": "FGS",
+  "run_idx": 0,
+  "run_total": 10,
+  "seed": 7816,
+  "elapsed_sec": 0.10779929161071777,
+  "scenario": "fgs_bnlearn_baselines_matched10_gsq_graphmetrics_asia",
+  "dag": {
+    "precision": 0.25,
+    "recall": 0.25,
+    "F1": 0.25,
+    "adjacency_precision": 0.375,
+    "adjacency_recall": 0.375,
+    "adjacency_F1": 0.375,
+    "arrowhead_precision": 0.25,
+    "arrowhead_recall": 0.25,
+    "arrowhead_F1": 0.25,
+    "shd": 11.0,
+    "sid": 38.0
+  },
+  "cpdag": {
+    "precision": 0.25,
+    "recall": 0.25,
+    "F1": 0.25,
+    "adjacency_precision": 0.375,
+    "adjacency_recall": 0.375,
+    "adjacency_F1": 0.375,
+    "arrowhead_precision": 0.25,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.3333,
+    "shd": 12.0,
+    "sid_low": 33.0,
+    "sid_high": 41.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.7850341796875,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.032104507088661,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.7836167849600315,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.307850355282426,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        8,
+        8
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        8,
+        8
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        8,
+        8
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        8,
+        8
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        8,
+        8
+      ],
+      "dtype": "int64"
+    }
+  }
+}

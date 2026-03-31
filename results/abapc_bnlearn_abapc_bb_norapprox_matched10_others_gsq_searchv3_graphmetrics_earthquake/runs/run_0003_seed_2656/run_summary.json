@@ -1,0 +1,190 @@
+{
+  "dataset": "earthquake",
+  "model": "ABAPC (Ours)",
+  "run_idx": 2,
+  "run_total": 10,
+  "seed": 2656,
+  "elapsed_sec": 0.2647101879119873,
+  "scenario": "abapc_bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_graphmetrics_earthquake",
+  "dag": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "F1": 1.0,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 1.0,
+    "arrowhead_precision": 1.0,
+    "arrowhead_recall": 1.0,
+    "arrowhead_F1": 1.0,
+    "shd": 0.0,
+    "sid": 0.0
+  },
+  "cpdag": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "F1": 1.0,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 1.0,
+    "arrowhead_precision": 0.5,
+    "arrowhead_recall": 1.0,
+    "arrowhead_F1": 0.6667,
+    "shd": 0.0,
+    "sid_low": 0.0,
+    "sid_high": 5.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.6507973279803991,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.863465027883649,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.6614110842347145,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.204680999740958,
+      "timed_out": false
+    }
+  },
+  "remove_n": 3,
+  "best_unsat_removed": 2,
+  "best_sat_removed": 3,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.01537628099322319,
+  "build_breakdown": {
+    "compile_sec": 0.009747304022312164,
+    "gen_facts_sec": 0.00029098615050315857,
+    "load_encoding_sec": 0.001825409010052681,
+    "load_facts_sec": 0.001628037542104721,
+    "load_wc_sec": 0.0016748495399951935,
+    "add_bayesball_sec": 0.0002096947282552719
+  },
+  "ground_sec": 0.004428913816809654,
+  "first_solve_sec": 0.004599405452609062,
+  "final_solve_sec": 0.0013421941548585892,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 7,
+    "total_sec": 0.1306913010776043,
+    "avg_sec": 0.018670185868229185,
+    "min_sec": 0.017155447974801064,
+    "max_sec": 0.0191227737814188,
+    "sat": 5,
+    "unsat": 2,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 6
+    }
+  },
+  "facts": {
+    "facts_total": 59,
+    "removed_fact_count": 3,
+    "kept_fact_count": 56,
+    "removed_indep_count": 2,
+    "removed_dep_count": 1,
+    "kept_indep_count": 7,
+    "kept_dep_count": 49,
+    "removed_truth_counts": {
+      "unknown": 3
+    },
+    "kept_truth_counts": {
+      "unknown": 56
+    },
+    "fully_released_pair_count": 0,
+    "fully_released_pairs": [],
+    "removed_fact_keys": [
+      "ext_dep(2,4,s0).",
+      "ext_indep(2,3,s4).",
+      "ext_indep(2,3,s0)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_dep(2,4,s0).",
+      "ext_indep(2,3,s4).",
+      "ext_indep(2,3,s0)."
+    ],
+    "removed_pair_counts": {
+      "2,3": 2,
+      "2,4": 1
+    },
+    "pair_fact_counts_total": {
+      "0,1": 8,
+      "0,2": 8,
+      "0,3": 8,
+      "0,4": 8,
+      "1,2": 4,
+      "1,3": 4,
+      "1,4": 5,
+      "2,3": 5,
+      "2,4": 4,
+      "3,4": 5
+    }
+  },
+  "reground": {
+    "disable_reground": true,
+    "block_edge_mode": "frozen_initial",
+    "block_edge_initial_true_count": 5,
+    "block_edge_frozen_pair_count": 5
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "dataset": "child",
+  "model": "NOTEARS-MLP",
+  "run_idx": 2,
+  "run_total": 10,
+  "seed": 2656,
+  "elapsed_sec": 4.131778001785278,
+  "scenario": "nt_bnlearn_nt_matched10_gsq_graphmetrics_child",
+  "dag": {
+    "precision": 0.65,
+    "recall": 0.52,
+    "F1": 0.5778,
+    "adjacency_precision": 0.75,
+    "adjacency_recall": 0.6,
+    "adjacency_F1": 0.6667,
+    "arrowhead_precision": 0.65,
+    "arrowhead_recall": 0.52,
+    "arrowhead_F1": 0.5778,
+    "shd": 17.0,
+    "sid": 155.0
+  },
+  "cpdag": {
+    "precision": 0.5,
+    "recall": 0.4,
+    "F1": 0.4444,
+    "adjacency_precision": 0.75,
+    "adjacency_recall": 0.6,
+    "adjacency_F1": 0.6667,
+    "arrowhead_precision": 0.15,
+    "arrowhead_recall": 0.3,
+    "arrowhead_F1": 0.2,
+    "shd": 22.0,
+    "sid_low": 153.0,
+    "sid_high": 347.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.5620315298438072,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.793629640713334,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.5711327604949474,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.237803742289543,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "int64"
+    }
+  }
+}

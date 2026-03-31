@@ -1,0 +1,102 @@
+{
+  "dataset": "cancer",
+  "model": "Random",
+  "run_idx": 0,
+  "run_total": 10,
+  "seed": 7816,
+  "elapsed_sec": 0.223988,
+  "scenario": "random_bnlearn_baselines_matched10_gsq_graphmetrics_cancer",
+  "dag": {
+    "precision": 0.4,
+    "recall": 0.5,
+    "F1": 0.4444,
+    "adjacency_precision": 0.6,
+    "adjacency_recall": 0.75,
+    "adjacency_F1": 0.6667,
+    "arrowhead_precision": 0.4,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.4444,
+    "shd": 4.0,
+    "sid": 6.0
+  },
+  "cpdag": {
+    "precision": 0.4,
+    "recall": 0.5,
+    "F1": 0.4444,
+    "adjacency_precision": 0.6,
+    "adjacency_recall": 0.75,
+    "adjacency_F1": 0.6667,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 4.0,
+    "sid_low": 1.0,
+    "sid_high": 11.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.6351683996617794,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.868759812787175,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.6617602109909058,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.176450463011861,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}
