@@ -47,14 +47,14 @@ METRIC_TITLE = {
     "F1": "F1",
     "shd": "SHD",
     "sid": "SID",
-    "sid_low": "SID (low)",
-    "sid_high": "SID (high)",
+    "sid_low": "SID (Low)",
+    "sid_high": "SID (High)",
     "adjacency_precision": "Skeleton Precision",
     "adjacency_recall": "Skeleton Recall",
-    "adjacency_F1": "Skeleton F1",
+    "adjacency_F1": "Sk-F1",
     "arrowhead_precision": "Arrowhead Precision",
     "arrowhead_recall": "Arrowhead Recall",
-    "arrowhead_F1": "Arrowhead F1",
+    "arrowhead_F1": "AH-F1",
 }
 
 
@@ -313,15 +313,29 @@ def _render_dataset_table(
     metrics: list[str],
     methods: list[str],
     aliases: dict[str, str],
+    comparison_mode: str,
+    target_methods: list[str],
+    baseline_methods: list[str],
 ) -> str:
     dataset_rows = frame[frame["dataset"] == dataset].copy()
     available_methods = [method for method in methods if method in dataset_rows["model"].unique()]
+
+    if comparison_mode == "targets-vs-baselines":
+        ordered_pairs = [
+            (target, baseline)
+            for target in target_methods
+            for baseline in baseline_methods
+            if target in available_methods and baseline in available_methods
+        ]
+    else:
+        ordered_pairs = list(combinations(available_methods, 2))
 
     lines = [
         r"\begin{table}[ht]",
         rf"    \caption{{t-tests for difference in means for {_dataset_title(dataset)} dataset. \\ Significance levels: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1.}}",
         rf"    \label{{tab:{dataset}_tests}}",
         r"    \centering",
+        r"    \small",
         r"    \begin{tabular}{rrl}",
         r"        \!\!\! Method (mean$\pm$std)  & \!\!\!t & \!\!\!p-value \\",
         r"        \hline",
@@ -333,7 +347,7 @@ def _render_dataset_table(
         lines.append(r"        \hline        \\[\dimexpr-\normalbaselineskip+2pt]")
 
         metric_rows_added = 0
-        for method1, method2 in combinations(available_methods, 2):
+        for method1, method2 in ordered_pairs:
             vals1 = pd.to_numeric(
                 dataset_rows.loc[dataset_rows["model"] == method1, metric],
                 errors="coerce",
@@ -392,17 +406,34 @@ def main() -> None:
     )
     parser.add_argument("--kind", choices=["dag", "cpdag"], default="cpdag")
     parser.add_argument("--datasets", nargs="+", default=["asia", "cancer", "earthquake", "survey", "sachs", "child"])
-    parser.add_argument("--metrics", nargs="+", default=["sid_low", "sid_high"])
+    parser.add_argument("--metrics", nargs="+", default=["sid_low", "sid_high", "adjacency_F1", "arrowhead_F1"])
+    parser.add_argument(
+        "--comparison-mode",
+        choices=["targets-vs-baselines", "all-pairs"],
+        default="targets-vs-baselines",
+    )
+    parser.add_argument(
+        "--target-methods",
+        nargs="+",
+        default=["ABAPC (bb)", "ABAPC (nor)"],
+        help="Methods placed on the left side when using targets-vs-baselines mode.",
+    )
+    parser.add_argument(
+        "--baseline-methods",
+        nargs="+",
+        default=["FGS", "MPC", "NOTEARS-MLP", "Random"],
+        help="Baseline methods compared against each target when using targets-vs-baselines mode.",
+    )
     parser.add_argument(
         "--methods",
         nargs="+",
-        default=["ABAPC (bb-nor)", "FGS", "MPC", "NOTEARS-MLP", "Random"],
-        help="Pretty-name methods to compare, in the order used for pairwise rows.",
+        default=["ABAPC (bb)", "ABAPC (nor)", "FGS", "MPC", "NOTEARS-MLP", "Random"],
+        help="Pretty-name methods available for comparisons. In targets-vs-baselines mode this is just the allow-list.",
     )
     parser.add_argument(
         "--method-alias",
         nargs="*",
-        default=["ABAPC (bb-nor)=APC", "NOTEARS-MLP=NT", "Random=RND"],
+        default=["ABAPC (bb)=APC-bb", "ABAPC (nor)=APC-nor", "NOTEARS-MLP=NT", "Random=RND"],
         help="Optional Pretty Name=Alias mappings used in the LaTeX rows.",
     )
     parser.add_argument("--out-dir", default=str(RESULTS_DIR / "tables" / "matched10_ttests"))
@@ -448,7 +479,7 @@ def main() -> None:
 
     aliases = _parse_aliases(args.method_alias)
     datasets = [d.lower() for d in args.datasets]
-    metrics = [m.lower() for m in args.metrics]
+    metrics = list(args.metrics)
     kind = args.kind
 
     run_specs = _build_run_specs(args)
@@ -463,7 +494,16 @@ def main() -> None:
     for dataset in DATASET_ORDER:
         if dataset not in datasets:
             continue
-        tex = _render_dataset_table(all_rows, dataset, metrics, args.methods, aliases)
+        tex = _render_dataset_table(
+            all_rows,
+            dataset,
+            metrics,
+            args.methods,
+            aliases,
+            comparison_mode=args.comparison_mode,
+            target_methods=args.target_methods,
+            baseline_methods=args.baseline_methods,
+        )
         out_path = out_dir / f"{dataset}_tests.tex"
         out_path.write_text(tex, encoding="utf-8")
         combined_parts.append(tex)
