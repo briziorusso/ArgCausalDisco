@@ -30,6 +30,8 @@ DATASET_TITLE = {
 
 METHOD_ORDER = [
     "Random",
+    "rnd-dir",
+    "Random (match |E|)",
     "FGS",
     "NOTEARS-MLP",
     "MPC",
@@ -174,7 +176,8 @@ def _build_run_specs(args: argparse.Namespace) -> list[dict[str, object]]:
     abapc_orig_child_version = _resolve_version(args.abapc_orig_child_version)
 
     run_specs = [
-        {"version": args.random_fgs_version, "kind": "dag", "include": ["Random", "FGS"]},
+        {"version": args.random_version or args.random_fgs_version, "kind": "dag", "include": ["Random"]},
+        {"version": args.fgs_version or args.random_fgs_version, "kind": "dag", "include": ["FGS"]},
         {"version": args.nt_version, "kind": "dag", "include": ["NOTEARS-MLP"]},
         {"version": args.mpc_version, "kind": "dag", "include": ["MPC"]},
         {
@@ -219,7 +222,8 @@ def _build_run_specs(args: argparse.Namespace) -> list[dict[str, object]]:
             "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb-nor)"},
         },
-        {"version": args.random_fgs_version, "kind": "cpdag", "include": ["Random", "FGS"]},
+        {"version": args.random_version or args.random_fgs_version, "kind": "cpdag", "include": ["Random"]},
+        {"version": args.fgs_version or args.random_fgs_version, "kind": "cpdag", "include": ["FGS"]},
         {"version": args.nt_version, "kind": "cpdag", "include": ["NOTEARS-MLP"]},
         {"version": args.mpc_version, "kind": "cpdag", "include": ["MPC"]},
         {
@@ -402,9 +406,11 @@ def main() -> None:
         help="Optional Pretty Name=Alias mappings used in the LaTeX rows.",
     )
     parser.add_argument("--out-dir", default=str(RESULTS_DIR / "tables" / "matched10_ttests"))
-    parser.add_argument("--random-fgs-version", default="bnlearn_baselines_matched10_gsq_graphmetrics")
+    parser.add_argument("--random-version", default="bnlearn_random_matched10_gsq_graphmetrics")
+    parser.add_argument("--fgs-version", default="bnlearn_fgs_matched10_gsq_graphmetrics")
+    parser.add_argument("--random-fgs-version", default=None)
     parser.add_argument("--nt-version", default="bnlearn_nt_matched10_gsq_graphmetrics")
-    parser.add_argument("--mpc-version", default="bnlearn_baselines_matched10_gsq_graphmetrics")
+    parser.add_argument("--mpc-version", default="bnlearn_mpc_matched10_gsq_graphmetrics")
     parser.add_argument("--abapc-orig-others-version", default="bnlearn_abapc_orig_matched10_others_gsq")
     parser.add_argument("--abapc-orig-child-version", default="child_abapc_orig_matched10_gsq")
     parser.add_argument("--abapc-nor-others-version", default="bnlearn_abapc_nor_matched10_others_gsq_graphmetrics")
@@ -415,6 +421,30 @@ def main() -> None:
     parser.add_argument("--abapc-bb-nor-child-version", default="child_abapc_bb_norapprox_matched10_gsq_searchv3_graphmetrics")
     parser.add_argument("--include-orig", action="store_true")
     args = parser.parse_args()
+
+    args.random_version = _resolve_version(
+        args.random_version or args.random_fgs_version,
+        "bnlearn_random_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq",
+    )
+    args.fgs_version = _resolve_version(
+        args.fgs_version or args.random_fgs_version,
+        "bnlearn_fgs_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq",
+    )
+    args.nt_version = _resolve_version(
+        args.nt_version,
+        "bnlearn_nt_matched10_gsq_graphmetrics",
+        "bnlearn_nt_matched10_gsq",
+    )
+    args.mpc_version = _resolve_version(
+        args.mpc_version,
+        "bnlearn_mpc_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq",
+    )
 
     aliases = _parse_aliases(args.method_alias)
     datasets = [d.lower() for d in args.datasets]

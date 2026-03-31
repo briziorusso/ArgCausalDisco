@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Matched-10 Plot Viewer</title>
+  <title>Plot Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {
@@ -67,10 +67,10 @@
       background: #f3f7ff;
     }
     .viewer {
-      padding: 18px;
+      padding: 10px 12px 12px 12px;
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
-      gap: 12px;
+      gap: 8px;
       min-height: 100vh;
     }
     .toolbar {
@@ -79,10 +79,20 @@
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
+      border-bottom: 1px solid var(--line);
+      padding: 0 2px 8px 2px;
     }
     .toolbar-title {
+      display: grid;
+      gap: 2px;
+    }
+    .toolbar-label {
       font-size: 18px;
       font-weight: 700;
+    }
+    .toolbar-file {
+      font-size: 13px;
+      color: var(--muted);
     }
     .toolbar-link {
       color: var(--accent);
@@ -91,7 +101,7 @@
     }
     iframe {
       width: 100%;
-      height: calc(100vh - 110px);
+      height: calc(100vh - 56px);
       border: 1px solid var(--line);
       border-radius: 16px;
       background: #fff;
@@ -113,36 +123,42 @@
 <body>
   <div class="layout">
     <aside class="sidebar">
-      <h1>Matched-10 Plot Viewer</h1>
-      <p class="hint">Open the interactive HTML plots here. The selected figure is shown on the right.</p>
+      <h1>Plot Viewer</h1>
+      <p class="hint">Chose the metrics to display.</p>
       <div class="nav">
-        <button class="nav-btn" data-target="Fig.bn_matched10_dag_SHD_F1.html">Fig.bn_matched10_dag_SHD_F1.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_dag_SID.html">Fig.bn_matched10_dag_SID.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_dag_prec_rec.html">Fig.bn_matched10_dag_prec_rec.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_dag_skeleton_arrowhead_F1.html">Fig.bn_matched10_dag_skeleton_arrowhead_F1.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_dag_skeleton_prec_rec.html">Fig.bn_matched10_dag_skeleton_prec_rec.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_dag_arrowhead_prec_rec.html">Fig.bn_matched10_dag_arrowhead_prec_rec.html</button>
-<button class="nav-btn" data-target="Fig.2_SID_cpdag_matched10.html">Fig.2_SID_cpdag_matched10.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_SHD_F1.html">Fig.bn_matched10_cpdag_SHD_F1.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_prec_rec.html">Fig.bn_matched10_cpdag_prec_rec.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html">Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_skeleton_prec_rec.html">Fig.bn_matched10_cpdag_skeleton_prec_rec.html</button>
-<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_arrowhead_prec_rec.html">Fig.bn_matched10_cpdag_arrowhead_prec_rec.html</button>
-<button class="nav-btn" data-target="Fig.3_runtime_matched10.html">Fig.3_runtime_matched10.html</button>
+        <button class="nav-btn" data-target="Fig.bn_matched10_dag_SHD_F1.html" data-label="DAG - SHD & F1">DAG - SHD & F1</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_SID.html" data-label="DAG - SID">DAG - SID</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_prec_rec.html" data-label="DAG - Precision & Recall">DAG - Precision & Recall</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_size.html" data-label="DAG - Size">DAG - Size</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_skeleton_arrowhead_F1.html" data-label="DAG - Sk-F1 & AH-F1">DAG - Sk-F1 & AH-F1</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_skeleton_prec_rec.html" data-label="DAG - Skeleton Prec & Rec">DAG - Skeleton Prec & Rec</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_arrowhead_prec_rec.html" data-label="DAG - Arrowhead Prec & Rec">DAG - Arrowhead Prec & Rec</button>
+<button class="nav-btn" data-target="Fig.2_SID_cpdag_matched10.html" data-label="CPDAG - SID Range">CPDAG - SID Range</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_SHD_F1.html" data-label="CPDAG - SHD & F1">CPDAG - SHD & F1</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_prec_rec.html" data-label="CPDAG - Precision & Recall">CPDAG - Precision & Recall</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_size.html" data-label="CPDAG - Size">CPDAG - Size</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html" data-label="CPDAG - Sk-F1 & AH-F1">CPDAG - Sk-F1 & AH-F1</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_skeleton_prec_rec.html" data-label="CPDAG - Skeleton Prec & Rec">CPDAG - Skeleton Prec & Rec</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_arrowhead_prec_rec.html" data-label="CPDAG - Arrowhead Prec & Rec">CPDAG - Arrowhead Prec & Rec</button>
+<button class="nav-btn" data-target="Fig.3_runtime_matched10.html" data-label="Runtime">Runtime</button>
       </div>
     </aside>
     <main class="viewer">
       <div class="toolbar">
-        <div class="toolbar-title" id="viewer-title">Fig.bn_matched10_dag_SHD_F1.html</div>
+        <div class="toolbar-title">
+          <div class="toolbar-label" id="viewer-label">DAG - SHD & F1</div>
+          <div class="toolbar-file" id="viewer-file">Fig.bn_matched10_dag_SHD_F1.html</div>
+        </div>
         <a class="toolbar-link" id="open-link" href="Fig.bn_matched10_dag_SHD_F1.html" target="_blank" rel="noopener">Open selected figure in a new tab</a>
       </div>
-      <iframe id="viewer-frame" src="Fig.bn_matched10_dag_SHD_F1.html" title="Matched-10 Plot Viewer viewer"></iframe>
+      <iframe id="viewer-frame" src="Fig.bn_matched10_dag_SHD_F1.html" title="Plot Viewer viewer"></iframe>
     </main>
   </div>
   <script>
     const buttons = Array.from(document.querySelectorAll('.nav-btn'));
     const frame = document.getElementById('viewer-frame');
-    const titleEl = document.getElementById('viewer-title');
+    const labelEl = document.getElementById('viewer-label');
+    const fileEl = document.getElementById('viewer-file');
     const openLink = document.getElementById('open-link');
 
     function setActive(target) {
@@ -150,8 +166,10 @@
         const active = btn.dataset.target === target;
         btn.classList.toggle('active', active);
       }
+      const activeButton = buttons.find((btn) => btn.dataset.target === target);
       frame.src = target;
-      titleEl.textContent = target;
+      labelEl.textContent = activeButton ? activeButton.dataset.label : target;
+      fileEl.textContent = target;
       openLink.href = target;
       if (window.location.hash !== '#' + target) {
         history.replaceState(null, '', '#' + target);

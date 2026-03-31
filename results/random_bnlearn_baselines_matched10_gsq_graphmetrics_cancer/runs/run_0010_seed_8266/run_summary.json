@@ -4,56 +4,56 @@
   "run_idx": 9,
   "run_total": 10,
   "seed": 8266,
-  "elapsed_sec": 0.000291,
+  "elapsed_sec": 0.000229,
   "scenario": "random_bnlearn_baselines_matched10_gsq_graphmetrics_cancer",
   "dag": {
-    "precision": 0.375,
+    "precision": 0.5,
     "recall": 0.75,
-    "F1": 0.5,
+    "F1": 0.6,
     "adjacency_precision": 0.5,
-    "adjacency_recall": 1.0,
-    "adjacency_F1": 0.6667,
-    "arrowhead_precision": 0.375,
+    "adjacency_recall": 0.75,
+    "adjacency_F1": 0.6,
+    "arrowhead_precision": 0.5,
     "arrowhead_recall": 0.75,
-    "arrowhead_F1": 0.5,
-    "shd": 5.0,
+    "arrowhead_F1": 0.6,
+    "shd": 4.0,
     "sid": 4.0
   },
   "cpdag": {
-    "precision": 0.25,
-    "recall": 0.5,
-    "F1": 0.3333,
+    "precision": 0.1667,
+    "recall": 0.25,
+    "F1": 0.2,
     "adjacency_precision": 0.5,
-    "adjacency_recall": 1.0,
-    "adjacency_F1": 0.6667,
+    "adjacency_recall": 0.75,
+    "adjacency_F1": 0.6,
     "arrowhead_precision": 0.0,
     "arrowhead_recall": 0.0,
     "arrowhead_F1": 0.0,
-    "shd": 6.0,
-    "sid_low": 0.0,
-    "sid_high": 18.0
+    "shd": 7.0,
+    "sid_low": 4.0,
+    "sid_high": 13.0
   },
   "dag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.6478913556784391,
+      "elapsed_sec": 0.6444511469453573,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 2.827391790226102,
+      "elapsed_sec": 2.792192554101348,
       "timed_out": false
     }
   },
   "cpdag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.6611659862101078,
+      "elapsed_sec": 0.6435856819152832,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.1896471958607435,
+      "elapsed_sec": 3.1608925741165876,
       "timed_out": false
     }
   },
@@ -72,7 +72,7 @@
         5,
         5
       ],
-      "dtype": "float64"
+      "dtype": "int64"
     },
     "graph_est_binary": {
       "file": "graph_est_binary.npy",

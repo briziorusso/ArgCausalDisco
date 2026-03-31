@@ -4,7 +4,7 @@
   "run_idx": 1,
   "run_total": 10,
   "seed": 3578,
-  "elapsed_sec": 0.008185148239135742,
+  "elapsed_sec": 0.008249998092651367,
   "scenario": "mpc_bnlearn_baselines_matched10_gsq_graphmetrics_cancer",
   "dag": {
     "precision": 1.0,
@@ -36,24 +36,24 @@
   "dag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.6724378615617752,
+      "elapsed_sec": 0.6663976479321718,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 2.9212852213531733,
+      "elapsed_sec": 2.896375432610512,
       "timed_out": false
     }
   },
   "cpdag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.6738924719393253,
+      "elapsed_sec": 0.6502175368368626,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.2061879001557827,
+      "elapsed_sec": 3.2980980779975653,
       "timed_out": false
     }
   },

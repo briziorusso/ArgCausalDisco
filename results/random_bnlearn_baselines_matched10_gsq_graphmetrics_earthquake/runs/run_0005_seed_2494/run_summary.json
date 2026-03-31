@@ -4,56 +4,56 @@
   "run_idx": 4,
   "run_total": 10,
   "seed": 2494,
-  "elapsed_sec": 0.000289,
+  "elapsed_sec": 0.000242,
   "scenario": "random_bnlearn_baselines_matched10_gsq_graphmetrics_earthquake",
   "dag": {
-    "precision": 0.3333,
-    "recall": 0.75,
-    "F1": 0.4615,
-    "adjacency_precision": 0.4444,
-    "adjacency_recall": 1.0,
-    "adjacency_F1": 0.6154,
-    "arrowhead_precision": 0.3333,
-    "arrowhead_recall": 0.75,
-    "arrowhead_F1": 0.4615,
+    "precision": 0.25,
+    "recall": 0.25,
+    "F1": 0.25,
+    "adjacency_precision": 0.25,
+    "adjacency_recall": 0.25,
+    "adjacency_F1": 0.25,
+    "arrowhead_precision": 0.25,
+    "arrowhead_recall": 0.25,
+    "arrowhead_F1": 0.25,
     "shd": 6.0,
-    "sid": 3.0
+    "sid": 11.0
   },
   "cpdag": {
-    "precision": 0.4444,
-    "recall": 1.0,
-    "F1": 0.6154,
-    "adjacency_precision": 0.4444,
-    "adjacency_recall": 1.0,
-    "adjacency_F1": 0.6154,
-    "arrowhead_precision": 0.2222,
-    "arrowhead_recall": 1.0,
-    "arrowhead_F1": 0.3636,
-    "shd": 5.0,
-    "sid_low": 0.0,
-    "sid_high": 5.0
+    "precision": 0.0,
+    "recall": 0.0,
+    "F1": null,
+    "adjacency_precision": 0.25,
+    "adjacency_recall": 0.25,
+    "adjacency_F1": 0.25,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 7.0,
+    "sid_low": 6.0,
+    "sid_high": 11.0
   },
   "dag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.6867045201361179,
+      "elapsed_sec": 0.6720002759248018,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 2.9153229407966137,
+      "elapsed_sec": 2.884381266310811,
       "timed_out": false
     }
   },
   "cpdag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.7037524823099375,
+      "elapsed_sec": 0.6810610946267843,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.2870420571416616,
+      "elapsed_sec": 3.1625804975628853,
       "timed_out": false
     }
   },
@@ -72,7 +72,7 @@
         5,
         5
       ],
-      "dtype": "float64"
+      "dtype": "int64"
     },
     "graph_est_binary": {
       "file": "graph_est_binary.npy",

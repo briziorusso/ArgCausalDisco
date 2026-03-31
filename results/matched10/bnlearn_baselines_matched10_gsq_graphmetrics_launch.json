@@ -53,8 +53,7 @@
     "--test_alpha",
     "0.05",
     "--test_name",
-    "gsq",
-    "--resume"
+    "gsq"
   ],
   "cwd": "/vol/bitbucket/fr920/ArgCausalDisco-1",
   "python": "/vol/bitbucket/fr920/miniconda3/envs/aba-env/bin/python",
@@ -63,5 +62,5 @@
   "device": 0,
   "test_alpha": 0.05,
   "test_name": "gsq",
-  "resume": true
+  "resume": false
 }

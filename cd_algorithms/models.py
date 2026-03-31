@@ -19,7 +19,12 @@ __copyright__ = "Copyright (c) 2024 Fabrizio Russo"
 import sys
 import os
 import time
+import json
+import subprocess
+import tempfile
+from pathlib import Path
 import networkx as nx
+import numpy as np
 import pandas as pd
 import logging
 import gc
@@ -86,6 +91,47 @@ def _import_cdt_cam():
         from cdt.causality.graph import CAM  # type: ignore
         os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
     return CAM
+
+
+def _run_fgs_in_subprocess(X) -> tuple[np.ndarray | None, float]:
+    helper_script = Path(__file__).resolve().parents[1] / "scripts" / "run_fgs_once.py"
+    with tempfile.TemporaryDirectory(prefix="fgs_run_") as tmpdir:
+        tmpdir_path = Path(tmpdir)
+        input_path = tmpdir_path / "X.npy"
+        output_path = tmpdir_path / "W_est.npy"
+        meta_path = tmpdir_path / "meta.json"
+        np.save(input_path, np.asarray(X))
+        try:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(helper_script),
+                    "--input",
+                    str(input_path),
+                    "--output",
+                    str(output_path),
+                    "--meta",
+                    str(meta_path),
+                ],
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            logging.debug("FGES subprocess failed", exc_info=True)
+            return None, np.nan
+
+        if not meta_path.exists():
+            logging.debug("FGES subprocess did not produce metadata")
+            return None, np.nan
+
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        elapsed = float(meta.get("elapsed", np.nan))
+        if not meta.get("ok", False):
+            logging.debug("FGES subprocess reported failure: %s", meta.get("error"))
+            return None, elapsed
+        if not output_path.exists():
+            logging.debug("FGES subprocess did not produce an adjacency matrix")
+            return None, elapsed
+        return np.load(output_path, allow_pickle=True), elapsed
 
 notears_from = 'notears' ## 'castle' or 'notears'
 
@@ -386,51 +432,8 @@ def run_method(X,
         logging.info(f'Time taken for GES: {round(elapsed,2)}s')
 
     elif method == 'fgs':
-        import pydot  # type: ignore
-        from pycausal.pycausal import pycausal as pyc
-        
-        start = time.time()
-
-        jm = pyc()
-        vm_started = False
-        try:
-            jm.start_vm()
-            vm_started = True
-        except Exception:
-            pass
-
-        from pycausal import search as s               
-        fitted = s.tetradrunner()
         random_stability(seed)
-        try:
-            fitted.run(algoId = 'fges', dfs = pd.DataFrame(X, columns=[f'X{c}' for c in range(1, X.shape[1]+1)]), scoreId = 'sem-bic', dataType = 'continuous',
-                    maxDegree = -1, faithfulnessAssumed = True, verbose = False)
-
-            graph = fitted.getTetradGraph()
-
-            dot_str = jm.tetradGraphToDot(graph)
-            graphs = pydot.graph_from_dot_data(dot_str)
-
-            W_est = nx.adjacency_matrix(nx.nx_pydot.from_pydot(graphs[0])).todense()
-
-            if W_est.shape[0] != X.shape[1]:
-                ### If the graph is not fully connected, we need to add edges to make it so
-                logging.debug('Graph is not fully connected, adding edges')
-                g = nx.nx_pydot.from_pydot(graphs[0])
-                g.add_nodes_from([f"X{d}" for d in range(1, X.shape[1]+1)])
-                W_est = nx.adjacency_matrix(g).todense()            
-
-        except:
-            logging.debug("FGES failed, returning None")
-            W_est = None
-        finally:
-            if vm_started:
-                try:
-                    jm.stop_vm()
-                except Exception:
-                    logging.debug("FGES JVM shutdown failed", exc_info=True)
-        elapsed = time.time() - start
-
+        W_est, elapsed = _run_fgs_in_subprocess(X)
         logging.info(f'Time taken for FGS: {round(elapsed,2)}s')
 
     elif method == 'cam':

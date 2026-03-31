@@ -4,56 +4,56 @@
   "run_idx": 2,
   "run_total": 10,
   "seed": 2656,
-  "elapsed_sec": 0.000305,
+  "elapsed_sec": 0.000233,
   "scenario": "random_bnlearn_baselines_matched10_gsq_graphmetrics_asia",
   "dag": {
-    "precision": 0.24,
-    "recall": 0.75,
-    "F1": 0.3636,
-    "adjacency_precision": 0.28,
+    "precision": 0.1765,
+    "recall": 0.375,
+    "F1": 0.24,
+    "adjacency_precision": 0.4118,
     "adjacency_recall": 0.875,
-    "adjacency_F1": 0.4242,
-    "arrowhead_precision": 0.24,
-    "arrowhead_recall": 0.75,
-    "arrowhead_F1": 0.3636,
-    "shd": 20.0,
-    "sid": 16.0
+    "adjacency_F1": 0.56,
+    "arrowhead_precision": 0.1765,
+    "arrowhead_recall": 0.375,
+    "arrowhead_F1": 0.24,
+    "shd": 15.0,
+    "sid": 27.0
   },
   "cpdag": {
-    "precision": 0.16,
-    "recall": 0.5,
-    "F1": 0.2424,
-    "adjacency_precision": 0.28,
+    "precision": 0.1765,
+    "recall": 0.375,
+    "F1": 0.24,
+    "adjacency_precision": 0.4118,
     "adjacency_recall": 0.875,
-    "adjacency_F1": 0.4242,
-    "arrowhead_precision": 0.08,
-    "arrowhead_recall": 0.5,
-    "arrowhead_F1": 0.1379,
-    "shd": 21.0,
-    "sid_low": 8.0,
-    "sid_high": 43.0
+    "adjacency_F1": 0.56,
+    "arrowhead_precision": 0.1765,
+    "arrowhead_recall": 0.375,
+    "arrowhead_F1": 0.24,
+    "shd": 15.0,
+    "sid_low": 27.0,
+    "sid_high": 27.0
   },
   "dag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.7637498490512371,
+      "elapsed_sec": 0.7537136543542147,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 2.97964021936059,
+      "elapsed_sec": 2.924170646816492,
       "timed_out": false
     }
   },
   "cpdag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.7659012153744698,
+      "elapsed_sec": 0.7258191760629416,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.334712754935026,
+      "elapsed_sec": 2.9177484549582005,
       "timed_out": false
     }
   },
@@ -72,7 +72,7 @@
         8,
         8
       ],
-      "dtype": "float64"
+      "dtype": "int64"
     },
     "graph_est_binary": {
       "file": "graph_est_binary.npy",

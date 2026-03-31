@@ -27,6 +27,15 @@ from utils.data_utils import load_bnlearn_data_dag, simulate_dag
 import warnings
 warnings.filterwarnings("ignore")
 
+
+def sample_uniform_random_dag(num_nodes: int, edge_prob: float = 0.5) -> np.ndarray:
+    if num_nodes <= 0:
+        return np.zeros((0, 0), dtype=int)
+    lower = (np.random.rand(num_nodes, num_nodes) < edge_prob).astype(int)
+    lower = np.tril(lower, k=-1)
+    perm = np.random.permutation(np.eye(num_nodes, dtype=int))
+    return (perm.T @ lower @ perm).astype(int, copy=False)
+
 version = 'bnlearn_50rep_test_reproducibility'
 logger_setup(f'results/log_{version}.log')
 data_path = 'datasets'
@@ -70,7 +79,7 @@ else:
     mt_res_cpdag = pd.DataFrame()
 
 for dataset_name in dataset_list:
-    names_dict = {'pc':'PC', 'pc_max':'Max-PC', 'fgs':'FGS', 'spc':'Shapley-PC', 'mpc':'MPC', 'cpc':'CPC', 'abapc':'ABAPC (Ours)', 'cam':'CAM', 'nt':'NOTEARS-MLP', 'mcsl':'MCSL-MLP', 'ges':'GES', 'random':'Random'}
+    names_dict = {'pc':'PC', 'pc_max':'Max-PC', 'fgs':'FGS', 'spc':'Shapley-PC', 'mpc':'MPC', 'cpc':'CPC', 'abapc':'ABAPC (Ours)', 'cam':'CAM', 'nt':'NOTEARS-MLP', 'mcsl':'MCSL-MLP', 'ges':'GES', 'random':'Random', 'rnd-dir':'rnd-dir', 'random_edge':'Random (match |E|)'}
     # B_true = nx.adjacency_matrix(true_causal_matrix).todense()
 
     for method in model_list:
@@ -85,10 +94,16 @@ for dataset_name in dataset_list:
         for seed in seeds_list:
             ##Load data
             X_s, B_true = load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=seed, print_info=True if seed == seeds_list[0] else False, standardise=True)
-            if method=='random':
+            if method in {'random', 'rnd-dir', 'random_edge'}:
                 random_stability(seed)
                 start = datetime.now()
-                B_est = simulate_dag(d=B_true.shape[1], s0=B_true.sum().astype(int), graph_type='ER')
+                if method == 'random':
+                    B_est = sample_uniform_random_dag(B_true.shape[1], edge_prob=0.5)
+                elif method == 'rnd-dir':
+                    s0 = np.random.randint(B_true.shape[1], (B_true.shape[1] * (B_true.shape[1] - 1)) // 2 + 1)
+                    B_est = simulate_dag(d=B_true.shape[1], s0=s0, graph_type='ER')
+                else:
+                    B_est = simulate_dag(d=B_true.shape[1], s0=B_true.sum().astype(int), graph_type='ER')
                 elapsed = (datetime.now()-start).total_seconds()
                 mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true).metrics
                 mt_dag = DAGMetrics(B_est, B_true).metrics

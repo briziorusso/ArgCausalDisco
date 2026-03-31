@@ -34,6 +34,7 @@ from utils.experiment_support import (  # noqa: E402
     DAG_SUMMARY_COLUMNS,
     load_existing_summary,
 )
+from utils.graph_utils import dag2cpdag  # noqa: E402
 
 
 RESULTS_DIR = REPO_ROOT / "results"
@@ -76,6 +77,7 @@ EDGES_MAP = {"asia": 8, "cancer": 4, "earthquake": 4, "sachs": 17, "survey": 6, 
 
 METHOD_ORDER = [
     "Random",
+    "rnd-dir",
     "FGS",
     "NOTEARS-MLP",
     "MPC",
@@ -86,6 +88,8 @@ METHOD_ORDER = [
 ]
 NAMES_DICT = {
     "random": "Random",
+    "rnd-dir": "rnd-dir",
+    "random_edge": "Random (match |E|)",
     "fgs": "FGS",
     "nt": "NOTEARS-MLP",
     "mpc": "MPC",
@@ -96,6 +100,8 @@ NAMES_DICT = {
 }
 COLORS_DICT = {
     "random": "#7f7f7f",
+    "rnd-dir": "#4d4d4d",
+    "random_edge": "#b3b3b3",
     "fgs": sec_orange,
     "nt": sec_blue,
     "mpc": main_purple,
@@ -106,6 +112,8 @@ COLORS_DICT = {
 }
 SYMBOLS_DICT = {
     "random": "x",
+    "rnd-dir": "x-thin-open",
+    "random_edge": "x-open",
     "fgs": "circle-open-dot",
     "nt": "x",
     "mpc": "diamond-dot",
@@ -114,6 +122,9 @@ SYMBOLS_DICT = {
     "abapc_bb": "triangle-up-dot",
     "abapc_bb_nor": "star",
 }
+
+TRUE_GRAPH_LABEL = "True Graph Size"
+TRUE_GRAPH_COLOR = "#7f7f7f"
 
 
 def _version_has_artifacts(version: str) -> bool:
@@ -132,6 +143,13 @@ def _resolve_version(primary: str, *fallbacks: str) -> str:
         if candidate and _version_has_artifacts(candidate):
             return candidate
     return primary
+
+
+def _pretty_to_key(pretty_name: str) -> str:
+    for key, label in NAMES_DICT.items():
+        if label == pretty_name:
+            return key
+    raise KeyError(pretty_name)
 
 
 def _load_summary(version: str, kind: str) -> pd.DataFrame:
@@ -233,6 +251,207 @@ def _sort_by_dataset_order(frame: pd.DataFrame) -> pd.DataFrame:
         out["_dataset_order"] = out["base_dataset"].map({name: i for i, name in enumerate(DATASET_ORDER)})
         out = out.sort_values(["_dataset_order", "model"]).drop(columns=["_dataset_order"])
     return out
+
+
+def _build_version_lookup(run_specs: list[dict[str, object]], kind: str = "dag") -> dict[tuple[str, str], str]:
+    lookup: dict[tuple[str, str], str] = {}
+    for spec in run_specs:
+        if spec["kind"] != kind:
+            continue
+        artifact_version = str(spec.get("artifact_version") or spec["version"])
+        include = list(spec.get("include") or [])
+        replace_models = dict(spec.get("replace_models") or {})
+        include_datasets = list(spec.get("include_datasets") or DATASET_ORDER)
+        for model in include:
+            pretty = replace_models.get(model, model)
+            for dataset in include_datasets:
+                lookup[(pretty, dataset)] = artifact_version
+    return lookup
+
+
+def _scenario_dir_for(version: str, pretty_name: str, dataset: str) -> Path:
+    key = _pretty_to_key(pretty_name)
+    if key.startswith("abapc_"):
+        return RESULTS_DIR / f"abapc_{version}_{dataset}"
+    return RESULTS_DIR / f"{key}_{version}_{dataset}"
+
+
+def _count_cpdag_edges(B: np.ndarray) -> tuple[int, int]:
+    directed = 0
+    undirected = 0
+    n = int(B.shape[0])
+    for i in range(n):
+        for j in range(i + 1, n):
+            left = float(B[i, j])
+            right = float(B[j, i])
+            is_undirected = (left == -1.0) or (right == -1.0) or ((left != 0.0) and (right != 0.0))
+            is_directed = (left != 0.0) ^ (right != 0.0)
+            if is_undirected:
+                undirected += 1
+            elif is_directed:
+                directed += 1
+    return directed, undirected
+
+
+def _mean_std(values: list[float]) -> tuple[float, float]:
+    arr = np.asarray(values, dtype=float)
+    if arr.size == 0:
+        return np.nan, np.nan
+    return float(arr.mean()), float(arr.std(ddof=1)) if arr.size > 1 else 0.0
+
+
+def _load_true_graphs(version_lookup: dict[tuple[str, str], str], datasets: list[str]) -> dict[str, np.ndarray]:
+    true_graphs: dict[str, np.ndarray] = {}
+    for dataset in datasets:
+        for method in METHOD_ORDER:
+            version = version_lookup.get((method, dataset))
+            if not version:
+                continue
+            runs_dir = _scenario_dir_for(version, method, dataset) / "runs"
+            if not runs_dir.exists():
+                continue
+            for run_dir in sorted(runs_dir.glob("run_*")):
+                graph_path = run_dir / "graph_true.npy"
+                if graph_path.exists():
+                    true_graphs[dataset] = np.load(graph_path)
+                    break
+            if dataset in true_graphs:
+                break
+    return true_graphs
+
+
+def _build_size_style_dicts() -> tuple[dict[str, str], dict[str, str]]:
+    names = dict(NAMES_DICT)
+    colors = dict(COLORS_DICT)
+    names["true_graph"] = TRUE_GRAPH_LABEL
+    colors["true_graph"] = TRUE_GRAPH_COLOR
+    return names, colors
+
+
+def _build_dag_size_frame(
+    dag_df: pd.DataFrame,
+    size_methods: list[str],
+    true_graphs: dict[str, np.ndarray],
+) -> pd.DataFrame:
+    rows = dag_df[dag_df["model"].isin([m for m in size_methods if m != TRUE_GRAPH_LABEL])].copy()
+    rows = rows[
+        [
+            "dataset",
+            "base_dataset",
+            "n_nodes",
+            "n_edges",
+            "model",
+            "nnz_mean",
+            "nnz_std",
+        ]
+    ].copy()
+
+    true_rows: list[dict[str, object]] = []
+    for dataset in DATASET_ORDER:
+        if dataset not in rows["base_dataset"].unique():
+            continue
+        B_true = true_graphs.get(dataset)
+        dag_edges = int(np.count_nonzero(B_true)) if B_true is not None else int(EDGES_MAP[dataset])
+        true_rows.append(
+            {
+                "dataset": f"{dataset.upper()}<br> |V|={NODES_MAP[dataset]}, |E|={EDGES_MAP[dataset]}",
+                "base_dataset": dataset,
+                "n_nodes": float(NODES_MAP[dataset]),
+                "n_edges": float(EDGES_MAP[dataset]),
+                "model": TRUE_GRAPH_LABEL,
+                "nnz_mean": float(dag_edges),
+                "nnz_std": 0.0,
+            }
+        )
+
+    out = pd.concat([pd.DataFrame(true_rows), rows], ignore_index=True)
+    return _sort_by_dataset_order(out)
+
+
+def _build_cpdag_size_frame(
+    cpdag_df: pd.DataFrame,
+    size_methods: list[str],
+    version_lookup: dict[tuple[str, str], str],
+    true_graphs: dict[str, np.ndarray],
+) -> pd.DataFrame:
+    rows: list[dict[str, object]] = []
+    datasets_present = [dataset for dataset in DATASET_ORDER if dataset in cpdag_df["base_dataset"].unique()]
+
+    for dataset in datasets_present:
+        B_true = true_graphs.get(dataset)
+        if B_true is not None:
+            C_true = dag2cpdag(B_true.copy())
+            true_directed, true_undirected = _count_cpdag_edges(C_true)
+            rows.append(
+                {
+                    "dataset": f"{dataset.upper()}<br> |V|={NODES_MAP[dataset]}, |E|={EDGES_MAP[dataset]}",
+                    "base_dataset": dataset,
+                    "n_nodes": float(NODES_MAP[dataset]),
+                    "n_edges": float(EDGES_MAP[dataset]),
+                    "model": TRUE_GRAPH_LABEL,
+                    "cpdag_directed_edges_mean": float(true_directed),
+                    "cpdag_directed_edges_std": 0.0,
+                    "cpdag_undirected_edges_mean": float(true_undirected),
+                    "cpdag_undirected_edges_std": 0.0,
+                }
+            )
+
+        for method in size_methods:
+            if method == TRUE_GRAPH_LABEL:
+                continue
+            version = version_lookup.get((method, dataset))
+            if not version:
+                continue
+            runs_dir = _scenario_dir_for(version, method, dataset) / "runs"
+            if not runs_dir.exists():
+                continue
+
+            directed_vals: list[float] = []
+            undirected_vals: list[float] = []
+            for run_dir in sorted(runs_dir.glob("run_*")):
+                cpdag_path = run_dir / "graph_est_cpdag_eval.npy"
+                if not cpdag_path.exists():
+                    continue
+                C_est = np.load(cpdag_path)
+                directed, undirected = _count_cpdag_edges(C_est)
+                directed_vals.append(float(directed))
+                undirected_vals.append(float(undirected))
+
+            if not directed_vals:
+                continue
+
+            directed_mean, directed_std = _mean_std(directed_vals)
+            undirected_mean, undirected_std = _mean_std(undirected_vals)
+            rows.append(
+                {
+                    "dataset": f"{dataset.upper()}<br> |V|={NODES_MAP[dataset]}, |E|={EDGES_MAP[dataset]}",
+                    "base_dataset": dataset,
+                    "n_nodes": float(NODES_MAP[dataset]),
+                    "n_edges": float(EDGES_MAP[dataset]),
+                    "model": method,
+                    "cpdag_directed_edges_mean": directed_mean,
+                    "cpdag_directed_edges_std": directed_std,
+                    "cpdag_undirected_edges_mean": undirected_mean,
+                    "cpdag_undirected_edges_std": undirected_std,
+                }
+            )
+
+    out = pd.DataFrame(rows)
+    if out.empty:
+        return pd.DataFrame(
+            columns=[
+                "dataset",
+                "base_dataset",
+                "n_nodes",
+                "n_edges",
+                "model",
+                "cpdag_directed_edges_mean",
+                "cpdag_directed_edges_std",
+                "cpdag_undirected_edges_mean",
+                "cpdag_undirected_edges_std",
+            ]
+        )
+    return _sort_by_dataset_order(out)
 
 
 def _add_normalised_dag(frame: pd.DataFrame) -> pd.DataFrame:
@@ -371,6 +590,29 @@ def _export_png_via_browser(
 
 
 def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) -> None:
+    def viewer_label(name: str) -> str:
+        stem = Path(name).stem
+        if stem.endswith("_no_nor"):
+            stem = stem[: -len("_no_nor")]
+        mapping = {
+            "Fig.bn_matched10_dag_SHD_F1": "DAG - SHD & F1",
+            "Fig.bn_matched10_dag_SID": "DAG - SID",
+            "Fig.bn_matched10_dag_prec_rec": "DAG - Precision & Recall",
+            "Fig.bn_matched10_dag_size": "DAG - Size",
+            "Fig.bn_matched10_dag_skeleton_arrowhead_F1": "DAG - Sk-F1 & AH-F1",
+            "Fig.bn_matched10_dag_skeleton_prec_rec": "DAG - Skeleton Prec & Rec",
+            "Fig.bn_matched10_dag_arrowhead_prec_rec": "DAG - Arrowhead Prec & Rec",
+            "Fig.2_SID_cpdag_matched10": "CPDAG - SID Range",
+            "Fig.bn_matched10_cpdag_SHD_F1": "CPDAG - SHD & F1",
+            "Fig.bn_matched10_cpdag_prec_rec": "CPDAG - Precision & Recall",
+            "Fig.bn_matched10_cpdag_size": "CPDAG - Size",
+            "Fig.bn_matched10_cpdag_skeleton_arrowhead_F1": "CPDAG - Sk-F1 & AH-F1",
+            "Fig.bn_matched10_cpdag_skeleton_prec_rec": "CPDAG - Skeleton Prec & Rec",
+            "Fig.bn_matched10_cpdag_arrowhead_prec_rec": "CPDAG - Arrowhead Prec & Rec",
+            "Fig.3_runtime_matched10": "Runtime",
+        }
+        return mapping.get(stem, name)
+
     figures = []
     seen: set[str] = set()
     for path in html_paths:
@@ -386,10 +628,11 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
         return
 
     nav_items = "\n".join(
-        f'<button class="nav-btn" data-target="{name}">{name}</button>'
+        f'<button class="nav-btn" data-target="{name}" data-label="{viewer_label(name)}">{viewer_label(name)}</button>'
         for name in figures
     )
     first = figures[0]
+    first_label = viewer_label(first)
     html = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -459,10 +702,10 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
       background: #f3f7ff;
     }}
     .viewer {{
-      padding: 18px;
+      padding: 10px 12px 12px 12px;
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
-      gap: 12px;
+      gap: 8px;
       min-height: 100vh;
     }}
     .toolbar {{
@@ -471,10 +714,20 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
+      border-bottom: 1px solid var(--line);
+      padding: 0 2px 8px 2px;
     }}
     .toolbar-title {{
+      display: grid;
+      gap: 2px;
+    }}
+    .toolbar-label {{
       font-size: 18px;
       font-weight: 700;
+    }}
+    .toolbar-file {{
+      font-size: 13px;
+      color: var(--muted);
     }}
     .toolbar-link {{
       color: var(--accent);
@@ -483,7 +736,7 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
     }}
     iframe {{
       width: 100%;
-      height: calc(100vh - 110px);
+      height: calc(100vh - 56px);
       border: 1px solid var(--line);
       border-radius: 16px;
       background: #fff;
@@ -506,14 +759,17 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
   <div class="layout">
     <aside class="sidebar">
       <h1>{title}</h1>
-      <p class="hint">Open the interactive HTML plots here. The selected figure is shown on the right.</p>
+      <p class="hint">Chose the metrics to display.</p>
       <div class="nav">
         {nav_items}
       </div>
     </aside>
     <main class="viewer">
       <div class="toolbar">
-        <div class="toolbar-title" id="viewer-title">{first}</div>
+        <div class="toolbar-title">
+          <div class="toolbar-label" id="viewer-label">{first_label}</div>
+          <div class="toolbar-file" id="viewer-file">{first}</div>
+        </div>
         <a class="toolbar-link" id="open-link" href="{first}" target="_blank" rel="noopener">Open selected figure in a new tab</a>
       </div>
       <iframe id="viewer-frame" src="{first}" title="{title} viewer"></iframe>
@@ -522,7 +778,8 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
   <script>
     const buttons = Array.from(document.querySelectorAll('.nav-btn'));
     const frame = document.getElementById('viewer-frame');
-    const titleEl = document.getElementById('viewer-title');
+    const labelEl = document.getElementById('viewer-label');
+    const fileEl = document.getElementById('viewer-file');
     const openLink = document.getElementById('open-link');
 
     function setActive(target) {{
@@ -530,8 +787,10 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
         const active = btn.dataset.target === target;
         btn.classList.toggle('active', active);
       }}
+      const activeButton = buttons.find((btn) => btn.dataset.target === target);
       frame.src = target;
-      titleEl.textContent = target;
+      labelEl.textContent = activeButton ? activeButton.dataset.label : target;
+      fileEl.textContent = target;
       openLink.href = target;
       if (window.location.hash !== '#' + target) {{
         history.replaceState(null, '', '#' + target);
@@ -546,6 +805,111 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
     const available = new Set(buttons.map((btn) => btn.dataset.target));
     setActive(available.has(initial) ? initial : {first!r});
   </script>
+</body>
+</html>
+"""
+    output_path.write_text(html, encoding="utf-8")
+
+
+def _write_links_html(html_paths: list[Path], output_path: Path, title: str) -> None:
+    figures = []
+    seen: set[str] = set()
+    for path in html_paths:
+        if path.suffix.lower() != ".html":
+            continue
+        name = path.name
+        if name in seen or not path.exists():
+            continue
+        seen.add(name)
+        figures.append(name)
+
+    if not figures:
+        return
+
+    links = "\n".join(
+        f'<li><a href="{name}" target="_blank" rel="noopener">{name}</a></li>'
+        for name in figures
+    )
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{title} Links</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --line: #dbe3f0;
+      --text: #152033;
+      --muted: #506178;
+      --accent: #2358d3;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      padding: 28px;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--text);
+    }}
+    .panel {{
+      max-width: 980px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px 28px;
+    }}
+    h1 {{
+      margin: 0 0 10px 0;
+      font-size: 30px;
+      line-height: 1.1;
+    }}
+    p {{
+      margin: 0 0 18px 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.45;
+    }}
+    ul {{
+      margin: 0;
+      padding-left: 22px;
+      columns: 2;
+      column-gap: 36px;
+    }}
+    li {{
+      break-inside: avoid;
+      margin: 0 0 10px 0;
+      padding-right: 10px;
+    }}
+    a {{
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 16px;
+    }}
+    a:hover {{
+      text-decoration: underline;
+    }}
+    @media (max-width: 900px) {{
+      body {{
+        padding: 16px;
+      }}
+      ul {{
+        columns: 1;
+      }}
+    }}
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>{title} Links</h1>
+    <p>Direct links to the interactive HTML plots. Use this page if the embedded iframe viewer is slow in your browser.</p>
+    <ul>
+      {links}
+    </ul>
+  </div>
 </body>
 </html>
 """
@@ -722,17 +1086,19 @@ def main() -> None:
         default=None,
         help="Legacy combined version containing Random/FGS/NOTEARS. Used as fallback when the split baseline version args are omitted.",
     )
-    parser.add_argument("--random-fgs-version", default="bnlearn_baselines_matched10_gsq")
-    parser.add_argument("--nt-version", default="bnlearn_nt_matched10_gsq")
-    parser.add_argument("--mpc-version", default="bnlearn_baselines_matched10_gsq")
+    parser.add_argument("--random-version", default="bnlearn_random_matched10_gsq_graphmetrics")
+    parser.add_argument("--fgs-version", default="bnlearn_fgs_matched10_gsq_graphmetrics")
+    parser.add_argument("--random-fgs-version", default=None)
+    parser.add_argument("--nt-version", default="bnlearn_nt_matched10_gsq_graphmetrics")
+    parser.add_argument("--mpc-version", default="bnlearn_mpc_matched10_gsq_graphmetrics")
     parser.add_argument("--abapc-orig-others-version", default="bnlearn_abapc_orig_matched10_others_gsq")
     parser.add_argument("--abapc-orig-child-version", default="child_abapc_orig_matched10_gsq")
-    parser.add_argument("--abapc-nor-others-version", default="bnlearn_abapc_nor_matched10_others_gsq")
-    parser.add_argument("--abapc-nor-child-version", default="child_abapc_nor_matched10_gsq")
-    parser.add_argument("--abapc-bb-others-version", default="bnlearn_abapc_bb_matched10_others_gsq_searchv3")
-    parser.add_argument("--abapc-bb-child-version", default="child_abapc_bb_matched10_gsq_searchv3")
-    parser.add_argument("--abapc-bb-nor-others-version", default="bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3")
-    parser.add_argument("--abapc-bb-nor-child-version", default="child_abapc_bb_norapprox_matched10_gsq_searchv3")
+    parser.add_argument("--abapc-nor-others-version", default="bnlearn_abapc_nor_matched10_others_gsq_graphmetrics")
+    parser.add_argument("--abapc-nor-child-version", default="child_abapc_nor_matched10_gsq_graphmetrics")
+    parser.add_argument("--abapc-bb-others-version", default="bnlearn_abapc_bb_matched10_others_gsq_searchv3_graphmetrics")
+    parser.add_argument("--abapc-bb-child-version", default="child_abapc_bb_matched10_gsq_searchv3_graphmetrics")
+    parser.add_argument("--abapc-bb-nor-others-version", default="bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_graphmetrics")
+    parser.add_argument("--abapc-bb-nor-child-version", default="child_abapc_bb_norapprox_matched10_gsq_searchv3_graphmetrics")
     parser.add_argument(
         "--disable-orig",
         action="store_true",
@@ -770,8 +1136,63 @@ def main() -> None:
     parser.add_argument("--png-device-scale-factor", type=float, default=2.0, help="Browser device scale factor for higher-resolution PNG screenshots.")
     args = parser.parse_args()
 
-    random_fgs_version = args.random_fgs_version or args.fgs_nt_version
-    nt_version = args.nt_version or args.fgs_nt_version
+    random_version = _resolve_version(
+        args.random_version or args.random_fgs_version or args.fgs_nt_version,
+        "bnlearn_random_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq",
+    )
+    fgs_version = _resolve_version(
+        args.fgs_version or args.random_fgs_version or args.fgs_nt_version,
+        "bnlearn_fgs_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq",
+    )
+    nt_version = _resolve_version(
+        args.nt_version or args.fgs_nt_version,
+        "bnlearn_nt_matched10_gsq_graphmetrics",
+        "bnlearn_nt_matched10_gsq",
+    )
+    baseline_artifact_version = _resolve_version(
+        "bnlearn_baselines_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq",
+    )
+    mpc_version = _resolve_version(
+        args.mpc_version,
+        "bnlearn_mpc_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq_graphmetrics",
+        "bnlearn_baselines_matched10_gsq",
+    )
+    abapc_nor_others_version = _resolve_version(
+        args.abapc_nor_others_version,
+        "bnlearn_abapc_nor_matched10_others_gsq_graphmetrics",
+        "bnlearn_abapc_nor_matched10_others_gsq",
+    )
+    abapc_nor_child_version = _resolve_version(
+        args.abapc_nor_child_version,
+        "child_abapc_nor_matched10_gsq_graphmetrics",
+        "child_abapc_nor_matched10_gsq",
+    )
+    abapc_bb_others_version = _resolve_version(
+        args.abapc_bb_others_version,
+        "bnlearn_abapc_bb_matched10_others_gsq_searchv3_graphmetrics",
+        "bnlearn_abapc_bb_matched10_others_gsq_searchv3",
+    )
+    abapc_bb_child_version = _resolve_version(
+        args.abapc_bb_child_version,
+        "child_abapc_bb_matched10_gsq_searchv3_graphmetrics",
+        "child_abapc_bb_matched10_gsq_searchv3",
+    )
+    abapc_bb_nor_others_version = _resolve_version(
+        args.abapc_bb_nor_others_version,
+        "bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_graphmetrics",
+        "bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3",
+    )
+    abapc_bb_nor_child_version = _resolve_version(
+        args.abapc_bb_nor_child_version,
+        "child_abapc_bb_norapprox_matched10_gsq_searchv3_graphmetrics",
+        "child_abapc_bb_norapprox_matched10_gsq_searchv3",
+    )
     abapc_orig_others_version = _resolve_version(
         args.abapc_orig_others_version,
         "abapc_orig_problem3_matched10_gsq",
@@ -784,91 +1205,93 @@ def main() -> None:
     go.Figure.write_image = lambda self, *args, **kwargs: None
 
     run_specs = [
-        {"version": random_fgs_version, "kind": "dag", "include": ["Random", "FGS"]},
+        {"version": random_version, "artifact_version": random_version, "kind": "dag", "include": ["Random"]},
+        {"version": fgs_version, "artifact_version": baseline_artifact_version, "kind": "dag", "include": ["FGS"]},
         {"version": nt_version, "kind": "dag", "include": ["NOTEARS-MLP"]},
-        {"version": args.mpc_version, "kind": "dag", "include": ["MPC"]},
+        {"version": mpc_version, "artifact_version": baseline_artifact_version, "kind": "dag", "include": ["MPC"]},
         {
-            "version": args.abapc_nor_others_version,
+            "version": abapc_nor_others_version,
             "kind": "dag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (nor)"},
         },
         {
-            "version": args.abapc_nor_child_version,
+            "version": abapc_nor_child_version,
             "kind": "dag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (nor)"},
         },
         {
-            "version": args.abapc_bb_others_version,
+            "version": abapc_bb_others_version,
             "kind": "dag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb)"},
         },
         {
-            "version": args.abapc_bb_child_version,
+            "version": abapc_bb_child_version,
             "kind": "dag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb)"},
         },
         {
-            "version": args.abapc_bb_nor_others_version,
+            "version": abapc_bb_nor_others_version,
             "kind": "dag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb-nor)"},
         },
         {
-            "version": args.abapc_bb_nor_child_version,
+            "version": abapc_bb_nor_child_version,
             "kind": "dag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb-nor)"},
         },
-        {"version": random_fgs_version, "kind": "cpdag", "include": ["Random", "FGS"]},
+        {"version": random_version, "artifact_version": random_version, "kind": "cpdag", "include": ["Random"]},
+        {"version": fgs_version, "artifact_version": baseline_artifact_version, "kind": "cpdag", "include": ["FGS"]},
         {"version": nt_version, "kind": "cpdag", "include": ["NOTEARS-MLP"]},
-        {"version": args.mpc_version, "kind": "cpdag", "include": ["MPC"]},
+        {"version": mpc_version, "artifact_version": baseline_artifact_version, "kind": "cpdag", "include": ["MPC"]},
         {
-            "version": args.abapc_nor_others_version,
+            "version": abapc_nor_others_version,
             "kind": "cpdag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (nor)"},
         },
         {
-            "version": args.abapc_nor_child_version,
+            "version": abapc_nor_child_version,
             "kind": "cpdag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (nor)"},
         },
         {
-            "version": args.abapc_bb_others_version,
+            "version": abapc_bb_others_version,
             "kind": "cpdag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb)"},
         },
         {
-            "version": args.abapc_bb_child_version,
+            "version": abapc_bb_child_version,
             "kind": "cpdag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["child"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb)"},
         },
         {
-            "version": args.abapc_bb_nor_others_version,
+            "version": abapc_bb_nor_others_version,
             "kind": "cpdag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["cancer", "earthquake", "survey", "asia", "sachs"],
             "replace_models": {"ABAPC (Ours)": "ABAPC (bb-nor)"},
         },
         {
-            "version": args.abapc_bb_nor_child_version,
+            "version": abapc_bb_nor_child_version,
             "kind": "cpdag",
             "include": ["ABAPC (Ours)"],
             "include_datasets": ["child"],
@@ -925,6 +1348,19 @@ def main() -> None:
 
     dag_methods = [method for method in METHOD_ORDER if method in dag_df["model"].unique()]
     cpdag_methods = [method for method in METHOD_ORDER if method in cpdag_df["model"].unique()]
+    artifact_version_lookup = _build_version_lookup(run_specs, kind="dag")
+    true_graphs = _load_true_graphs(artifact_version_lookup, DATASET_ORDER)
+    size_names_dict, size_colors_dict = _build_size_style_dicts()
+    size_methods = [
+        TRUE_GRAPH_LABEL,
+        *[
+            method
+            for method in METHOD_ORDER
+            if method in dag_df["model"].unique() and method not in {"Random", "ABAPC (orig)"}
+        ],
+    ]
+    dag_size_df = _build_dag_size_frame(dag_df, size_methods, true_graphs)
+    cpdag_size_df = _build_cpdag_size_frame(cpdag_df, size_methods, artifact_version_lookup, true_graphs)
     runtime_df = dag_df.copy()
     if not args.disable_runtime_orig:
         runtime_df = _augment_runtime_with_orig_fallback(runtime_df)
@@ -960,6 +1396,13 @@ def main() -> None:
         debug=False,
     )
     generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html", output_suffix))
+    bar_chart_plotly(
+        dag_size_df, "nnz", size_names_dict, size_colors_dict, size_methods,
+        save_figs=True, font_size=23,
+        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_size.html", output_suffix)),
+        debug=False,
+    )
+    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_size.html", output_suffix))
     if _metrics_available(dag_df, ["adjacency_F1", "arrowhead_F1"]):
         double_bar_chart_plotly(
             dag_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, dag_methods,
@@ -1011,6 +1454,24 @@ def main() -> None:
         debug=False,
     )
     generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_prec_rec.html", output_suffix))
+    if not cpdag_size_df.empty:
+        max_directed = float(np.nanmax(cpdag_size_df["cpdag_directed_edges_mean"].to_numpy(dtype=float)))
+        max_undirected = float(np.nanmax(cpdag_size_df["cpdag_undirected_edges_mean"].to_numpy(dtype=float)))
+        double_bar_chart_plotly(
+            cpdag_size_df,
+            ["cpdag_directed_edges", "cpdag_undirected_edges"],
+            size_names_dict,
+            size_colors_dict,
+            size_methods,
+            save_figs=True,
+            font_size=23,
+            output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_size.html", output_suffix)),
+            debug=False,
+            range_y1=[0, max_directed + 1.0],
+            range_y2=[0, max_undirected + 1.0],
+            rect_exp=0.008,
+        )
+        generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_size.html", output_suffix))
     if _metrics_available(cpdag_df, ["adjacency_F1", "arrowhead_F1"]):
         double_bar_chart_plotly(
             cpdag_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, cpdag_methods,
@@ -1063,15 +1524,21 @@ def main() -> None:
     child_table = build_child_comparison_table(dag_df, cpdag_df)
     child_table_path = _apply_output_suffix(FIGS_DIR / "bnlearn_matched10_child_table.csv", output_suffix)
     child_table.to_csv(child_table_path, index=False)
+    viewer_title = "Plot Viewer"
+    links_title = "Plot Links"
     viewer_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_viewer.html", output_suffix)
-    _write_viewer_html(generated_html_paths, viewer_path, "Matched-10 Plot Viewer")
+    _write_viewer_html(generated_html_paths, viewer_path, viewer_title)
+    links_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_links.html", output_suffix)
+    _write_links_html(generated_html_paths, links_path, links_title)
 
     dag_shd_f1_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SHD_F1.html", output_suffix)
     dag_sid_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SID.html", output_suffix)
     dag_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html", output_suffix)
+    dag_size_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_size.html", output_suffix)
     cpdag_sid_path = _apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix)
     cpdag_shd_f1_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_SHD_F1.html", output_suffix)
     cpdag_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_prec_rec.html", output_suffix)
+    cpdag_size_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_size.html", output_suffix)
     cpdag_sk_ah_f1_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html", output_suffix)
     cpdag_sk_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_prec_rec.html", output_suffix)
     cpdag_ah_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_arrowhead_prec_rec.html", output_suffix)
@@ -1081,14 +1548,17 @@ def main() -> None:
     print(f"Wrote {dag_shd_f1_path}")
     print(f"Wrote {dag_sid_path}")
     print(f"Wrote {dag_prec_rec_path}")
+    print(f"Wrote {dag_size_path}")
     print(f"Wrote {cpdag_sid_path}")
     print(f"Wrote {cpdag_shd_f1_path}")
     print(f"Wrote {cpdag_prec_rec_path}")
+    print(f"Wrote {cpdag_size_path}")
     print(f"Wrote {cpdag_sk_ah_f1_path}")
     print(f"Wrote {cpdag_sk_prec_rec_path}")
     print(f"Wrote {cpdag_ah_prec_rec_path}")
     print(f"Wrote {runtime_path}")
     print(f"Wrote {viewer_path}")
+    print(f"Wrote {links_path}")
     print(f"Wrote {child_table_path}")
 
     if args.export_png:

@@ -1,0 +1,102 @@
+{
+  "dataset": "sachs",
+  "model": "Random",
+  "run_idx": 2,
+  "run_total": 10,
+  "seed": 2656,
+  "elapsed_sec": 0.000223,
+  "scenario": "random_bnlearn_random_matched10_gsq_graphmetrics_sachs",
+  "dag": {
+    "precision": 0.2069,
+    "recall": 0.3529,
+    "F1": 0.2609,
+    "adjacency_precision": 0.3448,
+    "adjacency_recall": 0.5882,
+    "adjacency_F1": 0.4348,
+    "arrowhead_precision": 0.2069,
+    "arrowhead_recall": 0.3529,
+    "arrowhead_F1": 0.2609,
+    "shd": 30.0,
+    "sid": 47.0
+  },
+  "cpdag": {
+    "precision": 0.1724,
+    "recall": 0.2941,
+    "F1": 0.2174,
+    "adjacency_precision": 0.3448,
+    "adjacency_recall": 0.5882,
+    "adjacency_F1": 0.4348,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 34.0,
+    "sid_low": 46.0,
+    "sid_high": 51.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.6815685424953699,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.875660628080368,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.689558420330286,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.17300758138299,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        11,
+        11
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        11,
+        11
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        11,
+        11
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        11,
+        11
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        11,
+        11
+      ],
+      "dtype": "int64"
+    }
+  }
+}

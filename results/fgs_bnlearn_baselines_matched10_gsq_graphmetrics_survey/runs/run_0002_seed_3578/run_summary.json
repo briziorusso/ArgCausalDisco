@@ -4,7 +4,7 @@
   "run_idx": 1,
   "run_total": 10,
   "seed": 3578,
-  "elapsed_sec": 0.09046316146850586,
+  "elapsed_sec": 2.5949370861053467,
   "scenario": "fgs_bnlearn_baselines_matched10_gsq_graphmetrics_survey",
   "dag": {
     "precision": 1.0,
@@ -36,24 +36,24 @@
   "dag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.7448966819792986,
+      "elapsed_sec": 0.711341492831707,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.074161756783724,
+      "elapsed_sec": 3.028999360278249,
       "timed_out": false
     }
   },
   "cpdag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.7386230584233999,
+      "elapsed_sec": 1.1938554532825947,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.237749744206667,
+      "elapsed_sec": 3.3934399485588074,
       "timed_out": false
     }
   },

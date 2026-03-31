@@ -4,56 +4,56 @@
   "run_idx": 0,
   "run_total": 10,
   "seed": 7816,
-  "elapsed_sec": 0.223988,
+  "elapsed_sec": 0.000213,
   "scenario": "random_bnlearn_baselines_matched10_gsq_graphmetrics_cancer",
   "dag": {
-    "precision": 0.4,
+    "precision": 0.3333,
     "recall": 0.5,
-    "F1": 0.4444,
-    "adjacency_precision": 0.6,
-    "adjacency_recall": 0.75,
-    "adjacency_F1": 0.6667,
-    "arrowhead_precision": 0.4,
+    "F1": 0.4,
+    "adjacency_precision": 0.3333,
+    "adjacency_recall": 0.5,
+    "adjacency_F1": 0.4,
+    "arrowhead_precision": 0.3333,
     "arrowhead_recall": 0.5,
-    "arrowhead_F1": 0.4444,
-    "shd": 4.0,
-    "sid": 6.0
+    "arrowhead_F1": 0.4,
+    "shd": 6.0,
+    "sid": 4.0
   },
   "cpdag": {
-    "precision": 0.4,
-    "recall": 0.5,
-    "F1": 0.4444,
-    "adjacency_precision": 0.6,
-    "adjacency_recall": 0.75,
-    "adjacency_F1": 0.6667,
+    "precision": 0.1667,
+    "recall": 0.25,
+    "F1": 0.2,
+    "adjacency_precision": 0.3333,
+    "adjacency_recall": 0.5,
+    "adjacency_F1": 0.4,
     "arrowhead_precision": 0.0,
     "arrowhead_recall": 0.0,
     "arrowhead_F1": 0.0,
-    "shd": 4.0,
-    "sid_low": 1.0,
-    "sid_high": 11.0
+    "shd": 8.0,
+    "sid_low": 4.0,
+    "sid_high": 9.0
   },
   "dag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.6351683996617794,
+      "elapsed_sec": 0.6330929920077324,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 2.868759812787175,
+      "elapsed_sec": 2.839186619967222,
       "timed_out": false
     }
   },
   "cpdag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.6617602109909058,
+      "elapsed_sec": 1.245860056951642,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.176450463011861,
+      "elapsed_sec": 3.5197102446109056,
       "timed_out": false
     }
   },
@@ -72,7 +72,7 @@
         5,
         5
       ],
-      "dtype": "float64"
+      "dtype": "int64"
     },
     "graph_est_binary": {
       "file": "graph_est_binary.npy",

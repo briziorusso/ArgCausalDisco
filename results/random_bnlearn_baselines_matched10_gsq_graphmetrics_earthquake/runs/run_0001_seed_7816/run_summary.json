@@ -4,56 +4,56 @@
   "run_idx": 0,
   "run_total": 10,
   "seed": 7816,
-  "elapsed_sec": 0.000264,
+  "elapsed_sec": 0.000212,
   "scenario": "random_bnlearn_baselines_matched10_gsq_graphmetrics_earthquake",
   "dag": {
-    "precision": 0.2,
-    "recall": 0.25,
-    "F1": 0.2222,
-    "adjacency_precision": 0.6,
-    "adjacency_recall": 0.75,
-    "adjacency_F1": 0.6667,
-    "arrowhead_precision": 0.2,
-    "arrowhead_recall": 0.25,
-    "arrowhead_F1": 0.2222,
-    "shd": 5.0,
+    "precision": 0.3333,
+    "recall": 0.5,
+    "F1": 0.4,
+    "adjacency_precision": 0.3333,
+    "adjacency_recall": 0.5,
+    "adjacency_F1": 0.4,
+    "arrowhead_precision": 0.3333,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.4,
+    "shd": 6.0,
     "sid": 13.0
   },
   "cpdag": {
-    "precision": 0.2,
+    "precision": 0.1667,
     "recall": 0.25,
-    "F1": 0.2222,
-    "adjacency_precision": 0.6,
-    "adjacency_recall": 0.75,
-    "adjacency_F1": 0.6667,
+    "F1": 0.2,
+    "adjacency_precision": 0.3333,
+    "adjacency_recall": 0.5,
+    "adjacency_F1": 0.4,
     "arrowhead_precision": 0.0,
     "arrowhead_recall": 0.0,
     "arrowhead_F1": 0.0,
-    "shd": 5.0,
-    "sid_low": 4.0,
-    "sid_high": 18.0
+    "shd": 8.0,
+    "sid_low": 8.0,
+    "sid_high": 13.0
   },
   "dag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.6924735996872187,
+      "elapsed_sec": 0.668590409681201,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 2.9374718088656664,
+      "elapsed_sec": 2.8353367410600185,
       "timed_out": false
     }
   },
   "cpdag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.7333925552666187,
+      "elapsed_sec": 0.6698559317737818,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.2928535379469395,
+      "elapsed_sec": 3.1380415987223387,
       "timed_out": false
     }
   },
@@ -72,7 +72,7 @@
         5,
         5
       ],
-      "dtype": "float64"
+      "dtype": "int64"
     },
     "graph_est_binary": {
       "file": "graph_est_binary.npy",

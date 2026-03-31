@@ -85,6 +85,27 @@ except ImportError:  # pragma: no cover
 import warnings
 
 warnings.filterwarnings("ignore")
+
+
+def sample_uniform_random_dag(num_nodes: int, edge_prob: float = 0.5) -> np.ndarray:
+    """Sample a random DAG on a fixed node set.
+
+    The construction first samples a random topological order, then includes
+    each admissible forward edge independently with probability ``edge_prob``.
+    This keeps the baseline acyclic while avoiding any calibration to the
+    ground-truth edge count.
+    """
+
+    if num_nodes <= 0:
+        return np.zeros((0, 0), dtype=int)
+    lower = (np.random.rand(num_nodes, num_nodes) < edge_prob).astype(int)
+    lower = np.tril(lower, k=-1)
+    perm = np.random.permutation(np.eye(num_nodes, dtype=int))
+    dag = perm.T @ lower @ perm
+    assert is_dag(dag)
+    return dag.astype(int, copy=False)
+
+
 # CLI
 parser = argparse.ArgumentParser(
     description='Run causal discovery experiments on CauseNet or BNLearn datasets',
@@ -279,6 +300,7 @@ names_dict = {
     'mcsl': 'MCSL-MLP',
     'ges': 'GES',
     'random': 'Random',
+    'rnd-dir': 'rnd-dir',
     'random_edge': 'Random (match |E|)'
 }
 
@@ -490,19 +512,23 @@ for dataset_name, src, info in datasets:
                     standardise=std,
                 )
 
-            if 'random' in method.lower():
+            if method in {'random', 'rnd-dir', 'random_edge'}:
                 random_stability(seed)
                 start = datetime.now()
                 run_details = None
-                if method == 'random_edge':
-                    s0 = int(B_true.sum())
-                elif method == 'random':
-                    # Sample a random edge density
+                if method == 'random':
+                    W_est = sample_uniform_random_dag(B_true.shape[1], edge_prob=0.5)
+                    logging.info(f'Sampling uniform random DAG with {int(W_est.sum())} edges')
+                elif method == 'rnd-dir':
                     s0 = np.random.randint(B_true.shape[1], (B_true.shape[1] * (B_true.shape[1] - 1)) // 2 + 1)
-                    logging.info(f'Sampling random graph with {s0} edges')
+                    logging.info(f'Sampling random DAG with {s0} directed edges')
+                    W_est = simulate_dag(d=B_true.shape[1], s0=s0, graph_type='ER')
+                elif method == 'random_edge':
+                    s0 = int(B_true.sum())
+                    logging.info(f'Sampling random DAG matched to true |E|={s0}')
+                    W_est = simulate_dag(d=B_true.shape[1], s0=s0, graph_type='ER')
                 else:
                     raise ValueError(f'Unknown random method {method}')
-                W_est = simulate_dag(d=B_true.shape[1], s0=s0, graph_type='ER')
                 elapsed = (datetime.now() - start).total_seconds()
             else:
                 return_run_details = method == 'abapc'
@@ -631,7 +657,7 @@ for dataset_name, src, info in datasets:
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_cpdag})
 
             # Early validation: check for null SID on first run to catch config issues immediately
-            if idx == completed_runs and mt_cpdag.get('sid') is None and method not in ['random', 'random_edge']:
+            if idx == completed_runs and mt_cpdag.get('sid') is None and method not in ['random', 'rnd-dir', 'random_edge']:
                 logging.error(
                     f"SID is null for {display_name} on {dataset_name} (first run). "
                     f"This likely means R SID package is not installed or DAGMetrics is failing. "

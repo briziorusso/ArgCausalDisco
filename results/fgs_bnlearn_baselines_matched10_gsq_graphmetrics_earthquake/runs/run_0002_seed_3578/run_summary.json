@@ -4,7 +4,7 @@
   "run_idx": 1,
   "run_total": 10,
   "seed": 3578,
-  "elapsed_sec": 0.09508681297302246,
+  "elapsed_sec": 2.6097681522369385,
   "scenario": "fgs_bnlearn_baselines_matched10_gsq_graphmetrics_earthquake",
   "dag": {
     "precision": 0.4,
@@ -36,24 +36,24 @@
   "dag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.7035860754549503,
+      "elapsed_sec": 0.6743217725306749,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 2.976331265643239,
+      "elapsed_sec": 2.8569660410284996,
       "timed_out": false
     }
   },
   "cpdag_eval_status": {
     "shd": {
       "status": "ok",
-      "elapsed_sec": 0.7125366758555174,
+      "elapsed_sec": 0.6827305927872658,
       "timed_out": false
     },
     "sid": {
       "status": "ok",
-      "elapsed_sec": 3.2505656853318214,
+      "elapsed_sec": 3.155175879597664,
       "timed_out": false
     }
   },

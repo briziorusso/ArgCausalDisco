@@ -15,6 +15,15 @@ sec_purple='#441469'
 main_orange='#8a4500'
 sec_orange='#b85c00'
 
+
+def _write_html_fast(fig, output_name):
+    fig.write_html(
+        output_name,
+        include_plotlyjs="directory",
+        full_html=True,
+        auto_open=False,
+    )
+
 def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, font_size=20, save_figs=False, output_name="bar_chart.html", debug=False):
     fig = go.Figure()
     for method in methods:
@@ -76,13 +85,17 @@ def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, fon
         fig.update_yaxes(title={'text': var_to_plot.title(), 'font': {'size': font_size}})
 
     if save_figs:
-        fig.write_html(output_name)
+        _write_html_fast(fig, output_name)
         fig.write_image(output_name.replace('.html', '.jpeg'))
 
     fig.show()
 
 
 def _pretty_metric_name(metric_name):
+    if metric_name == 'cpdag_directed_edges':
+        return 'Number of Directed Edges'
+    if metric_name == 'cpdag_undirected_edges':
+        return 'Number of Undirected Edges'
     return metric_name.replace('_', ' ').title()
 
 
@@ -179,6 +192,8 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
                 fig.update_yaxes(title={'text': '', 'font': {'size': font_size}}, secondary_y=True, range=range_y, showticklabels=False)
         elif var_to_plot == 'nnz':
             fig.update_yaxes(title={'text': 'Number of Edges in DAG', 'font': {'size': font_size}}, secondary_y=n == 1, range=range_y)
+        elif var_to_plot in {'cpdag_directed_edges', 'cpdag_undirected_edges'}:
+            fig.update_yaxes(title={'text': _pretty_metric_name(var_to_plot), 'font': {'size': font_size}}, secondary_y=n == 1, range=range_y)
         elif range_y is not None:
             fig.update_yaxes(title={'text': _pretty_metric_name(var_to_plot), 'font': {'size': font_size}}, secondary_y=n == 1, range=range_y)
         else:
@@ -195,6 +210,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         ('p_shd', 'p_SID_high'): ('NSHD', 'NSID', 0.60, 0.12),
         ('p_SID_low', 'p_SID_high'): ('Best', 'Worst', 0.55, 0.18),
         ('p_shd', 'F1'): ('NSHD', 'F1', 0.63, 0.16),
+        ('cpdag_directed_edges', 'cpdag_undirected_edges'): ('Directed', 'Undirected', 0.70, 0.12),
     }
     key = tuple(vars_to_plot)
     name1, name2, total_width_frac, gap_frac = label_config.get(
@@ -232,6 +248,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         'Best': 9, 'Worst': 9,
         'F1': 11,
         'Sk-F1': 11, 'AH-F1': 11,
+        'Directed': 8, 'Undirected': 6,
     }
 
     for dataset_index in range(n_x_cat):
@@ -271,7 +288,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
             )
 
     if save_figs:
-        fig.write_html(output_name)
+        _write_html_fast(fig, output_name)
         fig.write_image(output_name.replace('.html', '.jpeg'))
 
     fig.show()
@@ -383,6 +400,6 @@ def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, color
     for dl in range(0,len(fig.data)):
         fig.data[dl].error_y.thickness = 2
     if save_figs:
-        fig.write_html(output_name)
+        _write_html_fast(fig, output_name)
         fig.write_image(output_name.replace('.html','.jpeg'))
     fig.show()
