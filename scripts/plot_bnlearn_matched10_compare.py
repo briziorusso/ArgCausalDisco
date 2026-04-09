@@ -75,6 +75,12 @@ LEGACY_DAG_COLS = [
 DATASET_ORDER = ["cancer", "earthquake", "survey", "asia", "sachs", "child"]
 NODES_MAP = {"asia": 8, "cancer": 5, "earthquake": 5, "sachs": 11, "survey": 6, "child": 20}
 EDGES_MAP = {"asia": 8, "cancer": 4, "earthquake": 4, "sachs": 17, "survey": 6, "child": 25}
+VARIANT_DATASETS = ["cancer", "earthquake", "survey"]
+PAPER_METHOD_ORDER = ["Random", "FGS", "NOTEARS-MLP", "MPC", "ABAPC (bb)", "ABAPC (bb-nor)"]
+ASPFORABA_BNLEARN_CSV_CANDIDATES = [
+    REPO_ROOT / "gradual-sem-causal-aba" / "results" / "extension_based_semantics" / "stored_results_bnlearn_50rep.csv",
+    REPO_ROOT / "semantics" / "results" / "extension_based_semantics" / "stored_results_bnlearn_50rep.csv",
+]
 
 METHOD_ORDER = [
     "Random",
@@ -502,10 +508,12 @@ def _load_orig_runtime_fallback() -> pd.DataFrame:
         if frame is None or frame.empty:
             try:
                 frame = pd.DataFrame(np.load(path, allow_pickle=True), columns=LEGACY_DAG_COLS)
-                if "sid_mean" in frame.columns and "SID_mean" not in frame.columns:
-                    frame["SID_mean"] = frame["sid_mean"]
             except Exception:
                 continue
+        if "sid_mean" in frame.columns and "SID_mean" not in frame.columns:
+            frame["SID_mean"] = frame["sid_mean"]
+        if "sid_std" in frame.columns and "SID_std" not in frame.columns:
+            frame["SID_std"] = frame["sid_std"]
         frame["dataset"] = frame["dataset"].astype(str).str.lower()
         frame["model"] = frame["model"].astype(str)
         frame = frame[
@@ -522,6 +530,7 @@ def _load_orig_runtime_fallback() -> pd.DataFrame:
 
     combined = pd.concat(frames, ignore_index=True)
     combined = combined.drop_duplicates(subset=["base_dataset"], keep="first")
+    combined = _add_normalised_dag(combined)
     return _sort_by_dataset_order(combined)
 
 
@@ -547,6 +556,62 @@ def _augment_runtime_with_orig_fallback(dag_df: pd.DataFrame) -> pd.DataFrame:
     runtime_df = pd.concat([runtime_df, fallback], ignore_index=True)
     runtime_df = _sort_by_dataset_order(runtime_df)
     return runtime_df
+
+
+def _load_aspforaba_runtime() -> pd.DataFrame:
+    csv_path = next((path for path in ASPFORABA_BNLEARN_CSV_CANDIDATES if path.exists()), None)
+    if csv_path is None:
+        return pd.DataFrame()
+    frame = pd.read_csv(csv_path)
+    frame = frame[frame["model"].astype(str) == "ABAPC (ASPforABA)"].copy()
+    if frame.empty:
+        return pd.DataFrame()
+    if "sid_mean" in frame.columns and "SID_mean" not in frame.columns:
+        frame["SID_mean"] = frame["sid_mean"]
+    if "sid_std" in frame.columns and "SID_std" not in frame.columns:
+        frame["SID_std"] = frame["sid_std"]
+    frame["dataset"] = frame["dataset"].astype(str).str.lower()
+    frame = _add_dataset_metadata(frame)
+    frame = _add_normalised_dag(frame)
+    frame["model"] = "ABAPC (ASPforABA)"
+    return _sort_by_dataset_order(frame)
+
+
+def _concat_aligned(left: pd.DataFrame, right: pd.DataFrame) -> pd.DataFrame:
+    if left.empty:
+        return right.copy()
+    if right.empty:
+        return left.copy()
+    out_left = left.copy()
+    out_right = right.copy()
+    for col in out_left.columns:
+        if col not in out_right.columns:
+            out_right[col] = np.nan
+    for col in out_right.columns:
+        if col not in out_left.columns:
+            out_left[col] = np.nan
+    return pd.concat([out_left, out_right[out_left.columns]], ignore_index=True)
+
+
+def _build_abapc_variant_sid_frame(dag_df: pd.DataFrame) -> pd.DataFrame:
+    frames: list[pd.DataFrame] = []
+    orig_df = _load_orig_runtime_fallback()
+    if not orig_df.empty:
+        frames.append(orig_df[orig_df["base_dataset"].isin(VARIANT_DATASETS)].copy())
+    asp_df = _load_aspforaba_runtime()
+    if not asp_df.empty:
+        frames.append(asp_df[asp_df["base_dataset"].isin(VARIANT_DATASETS)].copy())
+    variant_df = dag_df[
+        dag_df["model"].isin(["ABAPC (nor)", "ABAPC (bb)", "ABAPC (bb-nor)"])
+        & dag_df["base_dataset"].isin(VARIANT_DATASETS)
+    ].copy()
+    if not variant_df.empty:
+        frames.append(variant_df)
+    if not frames:
+        return pd.DataFrame()
+    combined = pd.concat(frames, ignore_index=True, sort=False)
+    combined = combined.drop_duplicates(subset=["dataset", "model"], keep="last")
+    return _sort_by_dataset_order(combined)
 
 
 def _find_png_browser(preferred: str | None) -> str | None:
@@ -792,16 +857,22 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
     const fileEl = document.getElementById('viewer-file');
     const openLink = document.getElementById('open-link');
 
+    function withCacheBust(target) {{
+      const separator = target.includes('?') ? '&' : '?';
+      return `${{target}}${{separator}}v=${{Date.now()}}`;
+    }}
+
     function setActive(target) {{
       for (const btn of buttons) {{
         const active = btn.dataset.target === target;
         btn.classList.toggle('active', active);
       }}
       const activeButton = buttons.find((btn) => btn.dataset.target === target);
-      frame.src = target;
+      const resolvedTarget = withCacheBust(target);
+      frame.src = resolvedTarget;
       labelEl.textContent = activeButton ? activeButton.dataset.label : target;
       fileEl.textContent = target;
-      openLink.href = target;
+      openLink.href = resolvedTarget;
       if (window.location.hash !== '#' + target) {{
         history.replaceState(null, '', '#' + target);
       }}
@@ -830,6 +901,11 @@ def _preferred_existing_path(*paths: Path) -> Path:
 
 def _write_bnlearn_experiments_viewer(generated_html_paths: list[Path], output_suffix: str) -> Path:
     notebook_paths = [
+        _apply_output_suffix(FIGS_DIR / "Fig.bn_abapc_variants_sid_with_aspforaba.html", output_suffix),
+        _preferred_existing_path(
+            _apply_output_suffix(FIGS_DIR / "Fig.2_runtime.html", output_suffix),
+            _apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix),
+        ),
         _preferred_existing_path(
             _apply_output_suffix(FIGS_DIR / "Fig.bn_dag_SHD_F1.html", output_suffix),
             _apply_output_suffix(FIGS_DIR / "Fig.bn_dag_SHD_SID.html", output_suffix),
@@ -841,14 +917,13 @@ def _write_bnlearn_experiments_viewer(generated_html_paths: list[Path], output_s
         _apply_output_suffix(FIGS_DIR / "Fig.bn_dag_prec_rec.html", output_suffix),
         _apply_output_suffix(FIGS_DIR / "Fig.bn_cpdag_SID_best_worst.html", output_suffix),
         _apply_output_suffix(FIGS_DIR / "Fig.bn_cpdag_SHD_F1.html", output_suffix),
-        _apply_output_suffix(FIGS_DIR / "Fig.bn_abapc_variants_sid_with_aspforaba.html", output_suffix),
-        _preferred_existing_path(
-            _apply_output_suffix(FIGS_DIR / "Fig.2_runtime.html", output_suffix),
-            _apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix),
-        ),
+    ]
+    filtered_generated_paths = [
+        path for path in generated_html_paths
+        if path.name not in {"Fig.2_runtime.html", "Fig.3_runtime_matched10.html", "Fig.bn_abapc_variants_sid_with_aspforaba.html"}
     ]
     viewer_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_experiments_viewer.html", output_suffix)
-    _write_viewer_html(notebook_paths + list(generated_html_paths), viewer_path, "BNLearn Plot Viewer")
+    _write_viewer_html(notebook_paths + filtered_generated_paths, viewer_path, "BNLearn Plot Viewer")
     return viewer_path
 
 
@@ -1387,51 +1462,94 @@ def main() -> None:
     if dag_df.empty or cpdag_df.empty:
         raise SystemExit("No matched-10 summaries were found for the requested versions.")
 
-    dag_methods = [method for method in METHOD_ORDER if method in dag_df["model"].unique()]
-    cpdag_methods = [method for method in METHOD_ORDER if method in cpdag_df["model"].unique()]
+    paper_methods = [method for method in PAPER_METHOD_ORDER if method not in exclude_methods]
+    dag_eval_df = dag_df[dag_df["model"].isin(paper_methods)].copy()
+    cpdag_eval_df = cpdag_df[cpdag_df["model"].isin(paper_methods)].copy()
+    dag_methods = [method for method in paper_methods if method in dag_eval_df["model"].unique()]
+    cpdag_methods = [method for method in paper_methods if method in cpdag_eval_df["model"].unique()]
     artifact_version_lookup = _build_version_lookup(run_specs, kind="dag")
     true_graphs = _load_true_graphs(artifact_version_lookup, DATASET_ORDER)
     size_names_dict, size_colors_dict = _build_size_style_dicts()
     size_methods = [
         TRUE_GRAPH_LABEL,
         *[
-            method
-            for method in METHOD_ORDER
-            if method in dag_df["model"].unique() and method not in {"Random", "ABAPC (orig)"}
+            method for method in paper_methods
+            if method in dag_eval_df["model"].unique() and method != "Random"
         ],
     ]
-    dag_size_df = _build_dag_size_frame(dag_df, size_methods, true_graphs)
-    cpdag_size_df = _build_cpdag_size_frame(cpdag_df, size_methods, artifact_version_lookup, true_graphs)
+    dag_size_df = _build_dag_size_frame(dag_eval_df, size_methods, true_graphs)
+    cpdag_size_df = _build_cpdag_size_frame(cpdag_eval_df, size_methods, artifact_version_lookup, true_graphs)
     runtime_df = dag_df.copy()
     if not args.disable_runtime_orig:
         runtime_df = _augment_runtime_with_orig_fallback(runtime_df)
+    runtime_df = _concat_aligned(runtime_df, _load_aspforaba_runtime())
     if args.exclude_runtime_methods:
         runtime_df = runtime_df[~runtime_df["model"].isin(set(args.exclude_runtime_methods))].copy()
+    variant_sid_df = _build_abapc_variant_sid_frame(dag_df)
+    comparison_names_dict = {
+        "abapc_orig": "ABAPC (orig)",
+        "pure_abapc": "ABAPC (ASPforABA)",
+        "abapc_nor": "ABAPC (nor)",
+        "abapc_bb": "ABAPC (bb)",
+        "abapc_bb_nor": "ABAPC (bb-nor)",
+    }
+    comparison_colors_dict = {
+        "abapc_orig": COLORS_DICT["abapc_orig"],
+        "pure_abapc": "black",
+        "abapc_nor": COLORS_DICT["abapc_nor"],
+        "abapc_bb": COLORS_DICT["abapc_bb"],
+        "abapc_bb_nor": COLORS_DICT["abapc_bb_nor"],
+    }
+    runtime_names_dict = dict(NAMES_DICT)
+    runtime_symbols_dict = dict(SYMBOLS_DICT)
+    runtime_colors_dict = dict(COLORS_DICT)
+    runtime_names_dict["pure_abapc"] = "ABAPC (ASPforABA)"
+    runtime_symbols_dict["pure_abapc"] = "hexagram"
+    runtime_colors_dict["pure_abapc"] = "black"
     runtime_method_keys = [
         method
-        for method in ["random", "fgs", "nt", "mpc", "abapc_orig", "abapc_nor", "abapc_bb", "abapc_bb_nor"]
-        if NAMES_DICT[method] in runtime_df["model"].unique()
+        for method in ["fgs", "nt", "mpc", "abapc_orig", "abapc_nor", "abapc_bb", "abapc_bb_nor", "pure_abapc"]
+        if runtime_names_dict[method] in runtime_df["model"].unique()
     ]
 
     generated_html_paths: list[Path] = []
     output_suffix = args.output_suffix
 
+    if not variant_sid_df.empty:
+        variant_methods = [
+            comparison_names_dict[method]
+            for method in ["abapc_orig", "pure_abapc", "abapc_nor", "abapc_bb", "abapc_bb_nor"]
+            if comparison_names_dict[method] in variant_sid_df["model"].unique()
+        ]
+        bar_chart_plotly(
+            variant_sid_df,
+            "p_SID",
+            comparison_names_dict,
+            comparison_colors_dict,
+            variant_methods,
+            save_figs=True,
+            font_size=23,
+            output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_abapc_variants_sid_with_aspforaba.html", output_suffix)),
+            debug=False,
+        )
+        generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_abapc_variants_sid_with_aspforaba.html", output_suffix))
+
     double_bar_chart_plotly(
-        dag_df, ["p_shd", "F1"], NAMES_DICT, COLORS_DICT, dag_methods,
+        dag_eval_df, ["p_shd", "F1"], NAMES_DICT, COLORS_DICT, dag_methods,
         save_figs=True, font_size=23,
         output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SHD_F1.html", output_suffix)),
         debug=False, range_y1=[0, 2.6], range_y2=[0, 5.6], rect_exp=0.01,
     )
     generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SHD_F1.html", output_suffix))
     bar_chart_plotly(
-        dag_df, "p_SID", NAMES_DICT, COLORS_DICT, dag_methods,
+        dag_eval_df, "p_SID", NAMES_DICT, COLORS_DICT, dag_methods,
         save_figs=True, font_size=23,
         output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SID.html", output_suffix)),
         debug=False,
     )
     generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SID.html", output_suffix))
     double_bar_chart_plotly(
-        dag_df, ["precision", "recall"], NAMES_DICT, COLORS_DICT, dag_methods,
+        dag_eval_df, ["precision", "recall"], NAMES_DICT, COLORS_DICT, dag_methods,
         save_figs=True, font_size=23,
         output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html", output_suffix)),
         debug=False,
@@ -1444,9 +1562,9 @@ def main() -> None:
         debug=False,
     )
     generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_size.html", output_suffix))
-    if _metrics_available(dag_df, ["adjacency_F1", "arrowhead_F1"]):
+    if _metrics_available(dag_eval_df, ["adjacency_F1", "arrowhead_F1"]):
         double_bar_chart_plotly(
-            dag_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, dag_methods,
+            dag_eval_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, dag_methods,
             save_figs=True, font_size=23,
             output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_arrowhead_F1.html", output_suffix)),
             debug=False,
@@ -1454,9 +1572,9 @@ def main() -> None:
         generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_arrowhead_F1.html", output_suffix))
     else:
         print("Skipping Fig.bn_matched10_dag_skeleton_arrowhead_F1.html: skeleton/arrowhead F1 metrics are missing from the saved summaries.")
-    if _metrics_available(dag_df, ["adjacency_precision", "adjacency_recall"]):
+    if _metrics_available(dag_eval_df, ["adjacency_precision", "adjacency_recall"]):
         double_bar_chart_plotly(
-            dag_df, ["adjacency_precision", "adjacency_recall"], NAMES_DICT, COLORS_DICT, dag_methods,
+            dag_eval_df, ["adjacency_precision", "adjacency_recall"], NAMES_DICT, COLORS_DICT, dag_methods,
             save_figs=True, font_size=23,
             output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_prec_rec.html", output_suffix)),
             debug=False,
@@ -1464,9 +1582,9 @@ def main() -> None:
         generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_skeleton_prec_rec.html", output_suffix))
     else:
         print("Skipping Fig.bn_matched10_dag_skeleton_prec_rec.html: skeleton precision/recall metrics are missing from the saved summaries.")
-    if _metrics_available(dag_df, ["arrowhead_precision", "arrowhead_recall"]):
+    if _metrics_available(dag_eval_df, ["arrowhead_precision", "arrowhead_recall"]):
         double_bar_chart_plotly(
-            dag_df, ["arrowhead_precision", "arrowhead_recall"], NAMES_DICT, COLORS_DICT, dag_methods,
+            dag_eval_df, ["arrowhead_precision", "arrowhead_recall"], NAMES_DICT, COLORS_DICT, dag_methods,
             save_figs=True, font_size=23,
             output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_arrowhead_prec_rec.html", output_suffix)),
             debug=False,
@@ -1475,21 +1593,21 @@ def main() -> None:
     else:
         print("Skipping Fig.bn_matched10_dag_arrowhead_prec_rec.html: arrowhead precision/recall metrics are missing from the saved summaries.")
     double_bar_chart_plotly(
-        cpdag_df, ["p_SID_low", "p_SID_high"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+        cpdag_eval_df, ["p_SID_low", "p_SID_high"], NAMES_DICT, COLORS_DICT, cpdag_methods,
         save_figs=True, font_size=23,
         output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix)),
         debug=False, range_y1=[0, 6], range_y2=[0, 6], rect_exp=0.01,
     )
     generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix))
     double_bar_chart_plotly(
-        cpdag_df, ["p_shd", "F1"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+        cpdag_eval_df, ["p_shd", "F1"], NAMES_DICT, COLORS_DICT, cpdag_methods,
         save_figs=True, font_size=23,
         output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_SHD_F1.html", output_suffix)),
         debug=False, range_y1=[0, 6], range_y2=[0, 6], rect_exp=0.01,
     )
     generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_SHD_F1.html", output_suffix))
     double_bar_chart_plotly(
-        cpdag_df, ["precision", "recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+        cpdag_eval_df, ["precision", "recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
         save_figs=True, font_size=23,
         output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_prec_rec.html", output_suffix)),
         debug=False,
@@ -1513,9 +1631,9 @@ def main() -> None:
             rect_exp=0.008,
         )
         generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_size.html", output_suffix))
-    if _metrics_available(cpdag_df, ["adjacency_F1", "arrowhead_F1"]):
+    if _metrics_available(cpdag_eval_df, ["adjacency_F1", "arrowhead_F1"]):
         double_bar_chart_plotly(
-            cpdag_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+            cpdag_eval_df, ["adjacency_F1", "arrowhead_F1"], NAMES_DICT, COLORS_DICT, cpdag_methods,
             save_figs=True, font_size=23,
             output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html", output_suffix)),
             debug=False,
@@ -1523,9 +1641,9 @@ def main() -> None:
         generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html", output_suffix))
     else:
         print("Skipping Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html: skeleton/arrowhead F1 metrics are missing from the saved summaries.")
-    if _metrics_available(cpdag_df, ["adjacency_precision", "adjacency_recall"]):
+    if _metrics_available(cpdag_eval_df, ["adjacency_precision", "adjacency_recall"]):
         double_bar_chart_plotly(
-            cpdag_df, ["adjacency_precision", "adjacency_recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+            cpdag_eval_df, ["adjacency_precision", "adjacency_recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
             save_figs=True, font_size=23,
             output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_prec_rec.html", output_suffix)),
             debug=False,
@@ -1533,9 +1651,9 @@ def main() -> None:
         generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_prec_rec.html", output_suffix))
     else:
         print("Skipping Fig.bn_matched10_cpdag_skeleton_prec_rec.html: skeleton precision/recall metrics are missing from the saved summaries.")
-    if _metrics_available(cpdag_df, ["arrowhead_precision", "arrowhead_recall"]):
+    if _metrics_available(cpdag_eval_df, ["arrowhead_precision", "arrowhead_recall"]):
         double_bar_chart_plotly(
-            cpdag_df, ["arrowhead_precision", "arrowhead_recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
+            cpdag_eval_df, ["arrowhead_precision", "arrowhead_recall"], NAMES_DICT, COLORS_DICT, cpdag_methods,
             save_figs=True, font_size=23,
             output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_arrowhead_prec_rec.html", output_suffix)),
             debug=False,
@@ -1543,26 +1661,34 @@ def main() -> None:
         generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_arrowhead_prec_rec.html", output_suffix))
     else:
         print("Skipping Fig.bn_matched10_cpdag_arrowhead_prec_rec.html: arrowhead precision/recall metrics are missing from the saved summaries.")
+    runtime_output_path = _apply_output_suffix(FIGS_DIR / "Fig.2_runtime.html", output_suffix)
     plot_runtime(
         runtime_df,
         ["n_nodes"],
         "",
-        NAMES_DICT,
-        SYMBOLS_DICT,
-        COLORS_DICT,
+        runtime_names_dict,
+        runtime_symbols_dict,
+        runtime_colors_dict,
         runtime_method_keys,
         share_y=False,
         save_figs=True,
-        output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix)),
+        output_name=str(runtime_output_path),
         debug=False,
         font_size=20,
-        plot_height=370,
-        plot_width=800,
-        model_aliases=NAMES_DICT,
+        plot_height=440,
+        plot_width=900,
+        model_aliases=runtime_names_dict,
     )
-    generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix))
+    generated_html_paths.append(runtime_output_path)
+    legacy_runtime_path = _apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix)
+    if runtime_output_path.exists():
+        shutil.copyfile(runtime_output_path, legacy_runtime_path)
+    runtime_jpeg_path = runtime_output_path.with_suffix(".jpeg")
+    legacy_runtime_jpeg_path = legacy_runtime_path.with_suffix(".jpeg")
+    if runtime_jpeg_path.exists():
+        shutil.copyfile(runtime_jpeg_path, legacy_runtime_jpeg_path)
 
-    child_table = build_child_comparison_table(dag_df, cpdag_df)
+    child_table = build_child_comparison_table(dag_eval_df, cpdag_eval_df)
     child_table_path = _apply_output_suffix(FIGS_DIR / "bnlearn_matched10_child_table.csv", output_suffix)
     child_table.to_csv(child_table_path, index=False)
     viewer_title = "Plot Viewer"
@@ -1577,6 +1703,7 @@ def main() -> None:
     dag_sid_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_SID.html", output_suffix)
     dag_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_prec_rec.html", output_suffix)
     dag_size_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_dag_size.html", output_suffix)
+    variant_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_abapc_variants_sid_with_aspforaba.html", output_suffix)
     cpdag_sid_path = _apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix)
     cpdag_shd_f1_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_SHD_F1.html", output_suffix)
     cpdag_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_prec_rec.html", output_suffix)
@@ -1584,9 +1711,11 @@ def main() -> None:
     cpdag_sk_ah_f1_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_arrowhead_F1.html", output_suffix)
     cpdag_sk_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_skeleton_prec_rec.html", output_suffix)
     cpdag_ah_prec_rec_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_cpdag_arrowhead_prec_rec.html", output_suffix)
-    runtime_path = _apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix)
+    runtime_path = _apply_output_suffix(FIGS_DIR / "Fig.2_runtime.html", output_suffix)
 
     print(child_table.to_string(index=False))
+    if variant_path.exists():
+        print(f"Wrote {variant_path}")
     print(f"Wrote {dag_shd_f1_path}")
     print(f"Wrote {dag_sid_path}")
     print(f"Wrote {dag_prec_rec_path}")

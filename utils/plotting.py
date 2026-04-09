@@ -9,9 +9,11 @@ sec_gray = '#595959'
 main_blue = '#005383'
 sec_blue = '#0085CA'
 main_green = '#379f9f' 
-water_green = '#63c7b2'
-leaf_green = '#2ca02c'
-sand_yellow = '#c9b36b'
+# Paper palette for the matched BNLearn ABAPC variants:
+# keep bb as the older olive tone and bb-nor as the softer teal.
+water_green = '#bcbd22'
+leaf_green = main_green
+sand_yellow = '#cc79a7'
 sec_green = '#196363' 
 main_purple='#9454c4'
 sec_purple='#441469'

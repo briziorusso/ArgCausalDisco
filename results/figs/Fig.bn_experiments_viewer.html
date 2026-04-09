@@ -126,7 +126,8 @@
       <h1>BNLearn Plot Viewer</h1>
       <p class="hint">Chose the metrics to display.</p>
       <div class="nav">
-        <button class="nav-btn" data-target="Fig.3_runtime_matched10.html" data-label="Runtime">Runtime</button>
+        <button class="nav-btn" data-target="Fig.bn_abapc_variants_sid_with_aspforaba.html" data-label="ABAPC Variants - SID">ABAPC Variants - SID</button>
+<button class="nav-btn" data-target="Fig.2_runtime.html" data-label="Runtime">Runtime</button>
 <button class="nav-btn" data-target="Fig.bn_matched10_dag_SHD_F1.html" data-label="DAG - SHD & F1">DAG - SHD & F1</button>
 <button class="nav-btn" data-target="Fig.bn_matched10_dag_SID.html" data-label="DAG - SID">DAG - SID</button>
 <button class="nav-btn" data-target="Fig.bn_matched10_dag_prec_rec.html" data-label="DAG - Precision & Recall">DAG - Precision & Recall</button>
@@ -146,12 +147,12 @@
     <main class="viewer">
       <div class="toolbar">
         <div class="toolbar-title">
-          <div class="toolbar-label" id="viewer-label">Runtime</div>
-          <div class="toolbar-file" id="viewer-file">Fig.3_runtime_matched10.html</div>
+          <div class="toolbar-label" id="viewer-label">ABAPC Variants - SID</div>
+          <div class="toolbar-file" id="viewer-file">Fig.bn_abapc_variants_sid_with_aspforaba.html</div>
         </div>
-        <a class="toolbar-link" id="open-link" href="Fig.3_runtime_matched10.html" target="_blank" rel="noopener">Open selected figure in a new tab</a>
+        <a class="toolbar-link" id="open-link" href="Fig.bn_abapc_variants_sid_with_aspforaba.html" target="_blank" rel="noopener">Open selected figure in a new tab</a>
       </div>
-      <iframe id="viewer-frame" src="Fig.3_runtime_matched10.html" title="BNLearn Plot Viewer viewer"></iframe>
+      <iframe id="viewer-frame" src="Fig.bn_abapc_variants_sid_with_aspforaba.html" title="BNLearn Plot Viewer viewer"></iframe>
     </main>
   </div>
   <script>
@@ -161,16 +162,22 @@
     const fileEl = document.getElementById('viewer-file');
     const openLink = document.getElementById('open-link');
 
+    function withCacheBust(target) {
+      const separator = target.includes('?') ? '&' : '?';
+      return `${target}${separator}v=${Date.now()}`;
+    }
+
     function setActive(target) {
       for (const btn of buttons) {
         const active = btn.dataset.target === target;
         btn.classList.toggle('active', active);
       }
       const activeButton = buttons.find((btn) => btn.dataset.target === target);
-      frame.src = target;
+      const resolvedTarget = withCacheBust(target);
+      frame.src = resolvedTarget;
       labelEl.textContent = activeButton ? activeButton.dataset.label : target;
       fileEl.textContent = target;
-      openLink.href = target;
+      openLink.href = resolvedTarget;
       if (window.location.hash !== '#' + target) {
         history.replaceState(null, '', '#' + target);
       }
@@ -182,7 +189,7 @@
 
     const initial = decodeURIComponent(window.location.hash.slice(1));
     const available = new Set(buttons.map((btn) => btn.dataset.target));
-    setActive(available.has(initial) ? initial : 'Fig.3_runtime_matched10.html');
+    setActive(available.has(initial) ? initial : 'Fig.bn_abapc_variants_sid_with_aspforaba.html');
   </script>
 </body>
 </html>
