@@ -1,0 +1,229 @@
+{
+  "dataset": "cancer",
+  "model": "ABAPC (Ours)",
+  "run_idx": 6,
+  "run_total": 10,
+  "seed": 7977,
+  "elapsed_sec": 0.2174515724182129,
+  "scenario": "abapc_bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_alpha001_cancer",
+  "dag": {
+    "precision": 0.3333,
+    "recall": 0.25,
+    "F1": 0.2857,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 0.75,
+    "adjacency_F1": 0.8571,
+    "arrowhead_precision": 0.3333,
+    "arrowhead_recall": 0.25,
+    "arrowhead_F1": 0.2857,
+    "shd": 3.0,
+    "sid": 11.0
+  },
+  "cpdag": {
+    "precision": 0.6667,
+    "recall": 0.5,
+    "F1": 0.5714,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 0.75,
+    "adjacency_F1": 0.8571,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 2.0,
+    "sid_low": 1.0,
+    "sid_high": 11.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.5282846111804247,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.5703101437538862,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.532105827704072,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.8190492410212755,
+      "timed_out": false
+    }
+  },
+  "remove_n": 16,
+  "best_unsat_removed": 15,
+  "best_sat_removed": 16,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.016133345663547516,
+  "build_breakdown": {
+    "compile_sec": 0.011774202808737755,
+    "gen_facts_sec": 0.00018763169646263123,
+    "load_encoding_sec": 0.0015049949288368225,
+    "load_facts_sec": 0.0012041274458169937,
+    "load_wc_sec": 0.0012453235685825348,
+    "add_bayesball_sec": 0.0002170652151107788
+  },
+  "ground_sec": 0.003475634381175041,
+  "first_solve_sec": 0.003171175718307495,
+  "final_solve_sec": 0.0011969245970249176,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 6,
+    "total_sec": 0.10268671810626984,
+    "avg_sec": 0.01711445301771164,
+    "min_sec": 0.013340087607502937,
+    "max_sec": 0.02730879746377468,
+    "sat": 3,
+    "unsat": 3,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 5
+    }
+  },
+  "facts": {
+    "facts_total": 37,
+    "removed_fact_count": 16,
+    "kept_fact_count": 21,
+    "removed_indep_count": 9,
+    "removed_dep_count": 7,
+    "kept_indep_count": 0,
+    "kept_dep_count": 21,
+    "removed_truth_counts": {
+      "unknown": 16
+    },
+    "kept_truth_counts": {
+      "unknown": 21
+    },
+    "fully_released_pair_count": 7,
+    "fully_released_pairs": [
+      "0,2",
+      "1,2",
+      "1,3",
+      "1,4",
+      "2,3",
+      "2,4",
+      "3,4"
+    ],
+    "removed_fact_keys": [
+      "ext_dep(0,2,s3).",
+      "ext_dep(0,2,s1y3).",
+      "ext_dep(0,2,empty).",
+      "ext_dep(0,2,s3y4).",
+      "ext_dep(3,4,empty).",
+      "ext_dep(0,2,s1).",
+      "ext_indep(1,3,s0).",
+      "ext_indep(1,3,empty).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(1,4,s0).",
+      "ext_dep(0,2,s4).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(1,2,empty).",
+      "ext_indep(0,2,s1y4).",
+      "ext_indep(2,4,empty)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_dep(0,2,s3).",
+      "ext_dep(0,2,s1y3).",
+      "ext_dep(0,2,empty).",
+      "ext_dep(0,2,s3y4).",
+      "ext_dep(3,4,empty).",
+      "ext_dep(0,2,s1).",
+      "ext_indep(1,3,s0).",
+      "ext_indep(1,3,empty).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(1,4,s0).",
+      "ext_dep(0,2,s4).",
+      "ext_indep(3,4,s0).",
+      "ext_indep(1,4,empty).",
+      "ext_indep(1,2,empty).",
+      "ext_indep(0,2,s1y4).",
+      "ext_indep(2,4,empty)."
+    ],
+    "removed_pair_counts": {
+      "0,2": 7,
+      "1,2": 1,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 1,
+      "2,4": 1,
+      "3,4": 2
+    },
+    "pair_fact_counts_total": {
+      "0,1": 7,
+      "0,2": 7,
+      "0,3": 7,
+      "0,4": 7,
+      "1,2": 1,
+      "1,3": 2,
+      "1,4": 2,
+      "2,3": 1,
+      "2,4": 1,
+      "3,4": 2
+    }
+  },
+  "reground": {
+    "disable_reground": true,
+    "block_edge_mode": "frozen_initial",
+    "block_edge_initial_true_count": 7,
+    "block_edge_frozen_pair_count": 7
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}

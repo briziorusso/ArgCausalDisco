@@ -120,6 +120,12 @@ def _compute_expensive_metric(metric_name: str, B_est: np.ndarray, B_true: np.nd
     if metric_name == "sid_dag":
         return SID(B_true, B_est).flat[0]
     if metric_name == "shd_cpdag":
+        # CDT's SHD only accepts binary adjacency matrices. For CPDAGs we use the
+        # standard binary adjacency encoding: i-j is represented as 1 in both
+        # directions, while i->j is represented as (1, 0). Under this encoding,
+        # binarization preserves the distinction between directed, undirected,
+        # and absent edges at the pair level, so SHD still penalizes both
+        # missing/extra adjacencies and orientation mismatches.
         return SHD(dag2cpdag(B_true, True), (B_est != 0).astype(int), False)
     if metric_name == "sid_cpdag":
         sid_low, sid_high = [a.flat[0] for a in SID_CPDAG(B_true, (B_est != 0).astype(int))]
@@ -802,8 +808,11 @@ class DAGMetrics(object):
             Structural Hamming Distance of CPDAG
         """
         assert is_dag(B_true), 'B_true should be a DAG'
-        ### treat undirected edge as a present edge in the CPDAG
-        ### the difference will be in the missed immoralities
+        # CDT's SHD operates on binary adjacency matrices. For CPDAGs, the
+        # binary encoding still distinguishes the three relevant pair states:
+        # absent edge -> (0, 0), directed edge -> (1, 0) or (0, 1), undirected
+        # edge -> (1, 1). So binarizing here does not collapse CPDAG structure;
+        # it simply converts it to the representation expected by CDT.
         return SHD(dag2cpdag(B_true,True), (B_est != 0).astype(int), False)
 
     @staticmethod

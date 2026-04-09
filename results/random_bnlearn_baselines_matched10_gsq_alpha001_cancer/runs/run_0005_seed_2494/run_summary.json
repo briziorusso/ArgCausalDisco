@@ -1,0 +1,102 @@
+{
+  "dataset": "cancer",
+  "model": "Random",
+  "run_idx": 4,
+  "run_total": 10,
+  "seed": 2494,
+  "elapsed_sec": 0.000236,
+  "scenario": "random_bnlearn_baselines_matched10_gsq_alpha001_cancer",
+  "dag": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "F1": null,
+    "adjacency_precision": 0.25,
+    "adjacency_recall": 0.25,
+    "adjacency_F1": 0.25,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 7.0,
+    "sid": 8.0
+  },
+  "cpdag": {
+    "precision": 0.25,
+    "recall": 0.25,
+    "F1": 0.25,
+    "adjacency_precision": 0.25,
+    "adjacency_recall": 0.25,
+    "adjacency_F1": 0.25,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 6.0,
+    "sid_low": 8.0,
+    "sid_high": 13.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 1.1491514146327972,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.976110056042671,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.652642983943224,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.1218440886586905,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}

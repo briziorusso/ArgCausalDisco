@@ -1,0 +1,102 @@
+{
+  "dataset": "earthquake",
+  "model": "Random",
+  "run_idx": 9,
+  "run_total": 10,
+  "seed": 8266,
+  "elapsed_sec": 0.000213,
+  "scenario": "random_bnlearn_baselines_matched10_gsq_alpha001_earthquake",
+  "dag": {
+    "precision": 0.1667,
+    "recall": 0.25,
+    "F1": 0.2,
+    "adjacency_precision": 0.5,
+    "adjacency_recall": 0.75,
+    "adjacency_F1": 0.6,
+    "arrowhead_precision": 0.1667,
+    "arrowhead_recall": 0.25,
+    "arrowhead_F1": 0.2,
+    "shd": 6.0,
+    "sid": 12.0
+  },
+  "cpdag": {
+    "precision": 0.1667,
+    "recall": 0.25,
+    "F1": 0.2,
+    "adjacency_precision": 0.5,
+    "adjacency_recall": 0.75,
+    "adjacency_F1": 0.6,
+    "arrowhead_precision": 0.0,
+    "arrowhead_recall": 0.0,
+    "arrowhead_F1": 0.0,
+    "shd": 6.0,
+    "sid_low": 8.0,
+    "sid_high": 18.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.6833155043423176,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.8961748220026493,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.6931149531155825,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.142601480707526,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        5,
+        5
+      ],
+      "dtype": "int64"
+    }
+  }
+}
