@@ -9,6 +9,8 @@ sec_gray = '#595959'
 main_blue = '#005383'
 sec_blue = '#0085CA'
 main_green = '#379f9f' 
+water_green = '#63c7b2'
+leaf_green = '#2ca02c'
 sec_green = '#196363' 
 main_purple='#9454c4'
 sec_purple='#441469'
@@ -24,30 +26,45 @@ def _write_html_fast(fig, output_name):
         auto_open=False,
     )
 
+
+def _resolve_method_key_label(method, names_dict):
+    if method in names_dict:
+        return method, names_dict[method]
+    for key, label in names_dict.items():
+        if label == method:
+            return key, label
+    return method, method
+
+
+def _resolve_method_color(method_key, method_label, colors_dict):
+    return colors_dict.get(method_key, colors_dict.get(method_label, 'grey'))
+
 def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, font_size=20, save_figs=False, output_name="bar_chart.html", debug=False):
     fig = go.Figure()
     for method in methods:
-        trace_name = 'True Graph Size' if var_to_plot == 'nnz' and method == 'Random' else method
+        method_key, method_label = _resolve_method_key_label(method, names_dict)
+        trace_name = 'True Graph Size' if var_to_plot == 'nnz' and method_label == 'Random' else method_label
+        method_rows = all_sum[(all_sum.model == method_label)]
         if 'log' in var_to_plot:
             metric_name = var_to_plot.replace('log_', '')
             display_name = "log(Elapsed Time)" if "lapsed" in metric_name else f"log({metric_name})"
             trace_name = f"Log {trace_name}"
             fig.add_trace(go.Bar(
-                x=all_sum[(all_sum.model == method)]['dataset'],
-                y=all_sum[(all_sum.model == method)][metric_name + '_mean'],
-                error_y=dict(type='data', array=all_sum[(all_sum.model == method)][metric_name + '_std'], visible=True),
+                x=method_rows['dataset'],
+                y=method_rows[metric_name + '_mean'],
+                error_y=dict(type='data', array=method_rows[metric_name + '_std'], visible=True),
                 name=trace_name,
-                marker_color=colors_dict[list(names_dict.keys())[list(names_dict.values()).index(method)]],
+                marker_color=_resolve_method_color(method_key, method_label, colors_dict),
                 opacity=0.6,
             ))
             fig.update_yaxes(type='log')
         else:
             fig.add_trace(go.Bar(
-                x=all_sum[(all_sum.model == method)]['dataset'],
-                y=all_sum[(all_sum.model == method)][var_to_plot + '_mean'],
-                error_y=dict(type='data', array=all_sum[(all_sum.model == method)][var_to_plot + '_std'], visible=True),
+                x=method_rows['dataset'],
+                y=method_rows[var_to_plot + '_mean'],
+                error_y=dict(type='data', array=method_rows[var_to_plot + '_std'], visible=True),
                 name=trace_name,
-                marker_color=colors_dict[list(names_dict.keys())[list(names_dict.values()).index(method)]],
+                marker_color=_resolve_method_color(method_key, method_label, colors_dict),
                 opacity=0.6,
             ))
 
@@ -55,7 +72,15 @@ def bar_chart_plotly(all_sum, var_to_plot, names_dict, colors_dict, methods, fon
         barmode='group',
         bargap=0.15,
         bargroupgap=0.1,
-        legend=dict(orientation='h', xanchor='center', x=0.5, yanchor='top', y=1),
+        legend=dict(
+            orientation='h',
+            xanchor='center',
+            x=0.5,
+            yanchor='top',
+            y=1,
+            bgcolor='rgba(255,255,255,0)',
+            bordercolor='rgba(255,255,255,0)',
+        ),
         template='plotly_white',
         width=1600,
         height=700,
@@ -101,7 +126,7 @@ def _pretty_metric_name(metric_name):
 
 
 def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict, 
-                            methods=['Random', 'FGS', 'NOTEARS-MLP', 'Shapley-PC', 'ABAPC (Ours)'],
+                            methods=['Random', 'FGS', 'NOTEARS-MLP', 'Shapley-PC', 'ABAPC (orig)'],
                             range_y1=None, range_y2=None, font_size=20,
                             save_figs=False, output_name="bar_chart.html", rect_exp=0.02, debug=False):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -109,22 +134,24 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
 
     for n, var_to_plot in enumerate(vars_to_plot):
         for m, method in enumerate(methods):
-            trace_name = 'True Graph Size' if var_to_plot == 'nnz' and method == 'Random' else method
+            method_key, method_label = _resolve_method_key_label(method, names_dict)
+            trace_name = 'True Graph Size' if var_to_plot == 'nnz' and method_label == 'Random' else method_label
+            method_rows = all_sum[(all_sum.model == method_label)]
             fig.add_trace(go.Bar(
-                x=all_sum[(all_sum.model == method)]['dataset'],
+                x=method_rows['dataset'],
                 yaxis=f"y{n+1}",
                 offsetgroup=m + len(methods) * n + (1 * n),
-                y=all_sum[(all_sum.model == method)][var_to_plot + '_mean'],
-                error_y=dict(type='data', array=all_sum[(all_sum.model == method)][var_to_plot + '_std'], visible=True),
+                y=method_rows[var_to_plot + '_mean'],
+                error_y=dict(type='data', array=method_rows[var_to_plot + '_std'], visible=True),
                 name=trace_name,
-                marker_color=colors_dict[list(names_dict.keys())[list(names_dict.values()).index(method)]],
+                marker_color=_resolve_method_color(method_key, method_label, colors_dict),
                 opacity=0.6,
                 showlegend=n == 0
             ))
         if n == 0:
             fig.add_trace(go.Bar(
-                x=all_sum[(all_sum.model == method)]['dataset'],
-                y=np.zeros(len(all_sum[(all_sum.model == method)]['dataset'])),
+                x=method_rows['dataset'],
+                y=np.zeros(len(method_rows['dataset'])),
                 name='',
                 offsetgroup=m + 1,
                 marker_color='white',
@@ -138,7 +165,15 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         barmode='group',
         bargap=0.08,
         bargroupgap=0.05,
-        legend=dict(orientation='h', xanchor='center', x=0.5, yanchor='top', y=legend_y),
+        legend=dict(
+            orientation='h',
+            xanchor='center',
+            x=0.5,
+            yanchor='top',
+            y=legend_y,
+            bgcolor='rgba(255,255,255,0)',
+            bordercolor='rgba(255,255,255,0)',
+        ),
         template='plotly_white',
         width=1600,
         height=700,
@@ -384,7 +419,15 @@ def plot_runtime(df, x_var_list, general_filter, names_dict, symbols_dict, color
         this_xaxis.update(title=n,title_standoff=0)
 
     fig.update_layout(
-        legend=dict(orientation="h", xanchor="center", x=0.5, yanchor="top", y=1.1),
+        legend=dict(
+            orientation="h",
+            xanchor="center",
+            x=0.5,
+            yanchor="top",
+            y=1.1,
+            bgcolor='rgba(255,255,255,0)',
+            bordercolor='rgba(255,255,255,0)',
+        ),
         template='plotly_white',
         # autosize=True,
         width=plot_width, 

@@ -20,12 +20,12 @@ if str(REPO_ROOT) not in sys.path:
 from utils.plotting import (  # noqa: E402
     bar_chart_plotly,
     double_bar_chart_plotly,
-    main_green,
+    leaf_green,
     main_purple,
     plot_runtime,
     sec_blue,
-    sec_green,
     sec_orange,
+    water_green,
 )
 from utils.experiment_support import (  # noqa: E402
     CPDAG_BASE_COLUMNS,
@@ -106,9 +106,9 @@ COLORS_DICT = {
     "nt": sec_blue,
     "mpc": main_purple,
     "abapc_orig": "#8c564b",
-    "abapc_nor": sec_green,
-    "abapc_bb": "#bcbd22",
-    "abapc_bb_nor": main_green,
+    "abapc_nor": "#bcbd22",
+    "abapc_bb": water_green,
+    "abapc_bb_nor": leaf_green,
 }
 SYMBOLS_DICT = {
     "random": "x",
@@ -595,6 +595,15 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
         if stem.endswith("_no_nor"):
             stem = stem[: -len("_no_nor")]
         mapping = {
+            "Fig.bn_dag_SHD_F1": "Original DAG - SHD & F1",
+            "Fig.bn_dag_SHD_SID": "Original DAG - SHD & F1",
+            "Fig.bn_dag_SID": "Original DAG - SID",
+            "Fig.bn_dag_F1": "Original DAG - SID",
+            "Fig.bn_dag_prec_rec": "Original DAG - Precision & Recall",
+            "Fig.bn_cpdag_SID_best_worst": "Original CPDAG - SID Range",
+            "Fig.bn_cpdag_SHD_F1": "Original CPDAG - SHD & F1",
+            "Fig.bn_abapc_variants_sid_with_aspforaba": "ABAPC Variants - SID",
+            "Fig.2_runtime": "Runtime",
             "Fig.bn_matched10_dag_SHD_F1": "DAG - SHD & F1",
             "Fig.bn_matched10_dag_SID": "DAG - SID",
             "Fig.bn_matched10_dag_prec_rec": "DAG - Precision & Recall",
@@ -809,6 +818,37 @@ def _write_viewer_html(html_paths: list[Path], output_path: Path, title: str) ->
 </html>
 """
     output_path.write_text(html, encoding="utf-8")
+
+
+def _preferred_existing_path(*paths: Path) -> Path:
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
+
+def _write_bnlearn_experiments_viewer(generated_html_paths: list[Path], output_suffix: str) -> Path:
+    notebook_paths = [
+        _preferred_existing_path(
+            _apply_output_suffix(FIGS_DIR / "Fig.bn_dag_SHD_F1.html", output_suffix),
+            _apply_output_suffix(FIGS_DIR / "Fig.bn_dag_SHD_SID.html", output_suffix),
+        ),
+        _preferred_existing_path(
+            _apply_output_suffix(FIGS_DIR / "Fig.bn_dag_SID.html", output_suffix),
+            _apply_output_suffix(FIGS_DIR / "Fig.bn_dag_F1.html", output_suffix),
+        ),
+        _apply_output_suffix(FIGS_DIR / "Fig.bn_dag_prec_rec.html", output_suffix),
+        _apply_output_suffix(FIGS_DIR / "Fig.bn_cpdag_SID_best_worst.html", output_suffix),
+        _apply_output_suffix(FIGS_DIR / "Fig.bn_cpdag_SHD_F1.html", output_suffix),
+        _apply_output_suffix(FIGS_DIR / "Fig.bn_abapc_variants_sid_with_aspforaba.html", output_suffix),
+        _preferred_existing_path(
+            _apply_output_suffix(FIGS_DIR / "Fig.2_runtime.html", output_suffix),
+            _apply_output_suffix(FIGS_DIR / "Fig.3_runtime_matched10.html", output_suffix),
+        ),
+    ]
+    viewer_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_experiments_viewer.html", output_suffix)
+    _write_viewer_html(notebook_paths + list(generated_html_paths), viewer_path, "BNLearn Plot Viewer")
+    return viewer_path
 
 
 def _write_links_html(html_paths: list[Path], output_path: Path, title: str) -> None:
@@ -1528,6 +1568,7 @@ def main() -> None:
     links_title = "Plot Links"
     viewer_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_viewer.html", output_suffix)
     _write_viewer_html(generated_html_paths, viewer_path, viewer_title)
+    experiments_viewer_path = _write_bnlearn_experiments_viewer(generated_html_paths, output_suffix)
     links_path = _apply_output_suffix(FIGS_DIR / "Fig.bn_matched10_links.html", output_suffix)
     _write_links_html(generated_html_paths, links_path, links_title)
 
@@ -1558,6 +1599,7 @@ def main() -> None:
     print(f"Wrote {cpdag_ah_prec_rec_path}")
     print(f"Wrote {runtime_path}")
     print(f"Wrote {viewer_path}")
+    print(f"Wrote {experiments_viewer_path}")
     print(f"Wrote {links_path}")
     print(f"Wrote {child_table_path}")
 

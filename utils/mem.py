@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import os
-import resource
 from typing import Optional
+
+try:
+    import resource
+except ImportError:  # pragma: no cover
+    resource = None
 
 
 def _read_proc_meminfo_value_kib(key: str) -> Optional[int]:
@@ -54,6 +58,8 @@ def data_kib() -> Optional[int]:
 def maxrss_kib() -> Optional[int]:
     """Peak RSS (ru_maxrss) in KiB on Linux, None on failure."""
     try:
+        if resource is None:
+            return None
         ru = resource.getrusage(resource.RUSAGE_SELF)
         v = getattr(ru, "ru_maxrss", None)
         if v is None:

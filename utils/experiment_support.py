@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import re
-import resource
 import signal
 import socket
 import shutil
@@ -17,6 +16,11 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+
+try:
+    import resource
+except ImportError:  # pragma: no cover
+    resource = None
 
 
 DAG_BASE_COLUMNS = [
@@ -660,8 +664,11 @@ def install_signal_breadcrumbs(*, results_path: Path, version: str) -> Path:
 
     def _write_signal_breadcrumb(sig_name: str) -> None:
         try:
-            ru = resource.getrusage(resource.RUSAGE_SELF)
-            maxrss_kib = getattr(ru, "ru_maxrss", None)
+            if resource is None:
+                maxrss_kib = None
+            else:
+                ru = resource.getrusage(resource.RUSAGE_SELF)
+                maxrss_kib = getattr(ru, "ru_maxrss", None)
         except Exception:
             maxrss_kib = None
         try:
