@@ -23,6 +23,7 @@ from utils.plotting import (  # noqa: E402
     leaf_green,
     main_purple,
     plot_runtime,
+    sand_yellow,
     sec_blue,
     sec_orange,
     water_green,
@@ -106,7 +107,7 @@ COLORS_DICT = {
     "nt": sec_blue,
     "mpc": main_purple,
     "abapc_orig": "#8c564b",
-    "abapc_nor": "#bcbd22",
+    "abapc_nor": sand_yellow,
     "abapc_bb": water_green,
     "abapc_bb_nor": leaf_green,
 }
