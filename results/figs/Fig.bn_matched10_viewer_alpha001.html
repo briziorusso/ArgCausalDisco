@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plot Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --line: #dbe3f0;
+      --text: #152033;
+      --muted: #506178;
+      --accent: #2358d3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: linear-gradient(180deg, #f9fbff 0%, #eef3fb 100%);
+      padding: 20px 18px;
+      overflow: auto;
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+    .hint {
+      margin: 0 0 18px 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.4;
+    }
+    .nav {
+      display: grid;
+      gap: 10px;
+    }
+    .nav-btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .nav-btn:hover {
+      border-color: var(--accent);
+    }
+    .nav-btn.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(35, 88, 211, 0.12);
+      background: #f3f7ff;
+    }
+    .viewer {
+      padding: 10px 12px 12px 12px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 8px;
+      min-height: 100vh;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--line);
+      padding: 0 2px 8px 2px;
+    }
+    .toolbar-title {
+      display: grid;
+      gap: 2px;
+    }
+    .toolbar-label {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .toolbar-file {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .toolbar-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    iframe {
+      width: 100%;
+      height: calc(100vh - 56px);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      iframe {
+        height: 75vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h1>Plot Viewer</h1>
+      <p class="hint">Chose the metrics to display.</p>
+      <div class="nav">
+        <button class="nav-btn" data-target="Fig.bn_matched10_dag_SHD_F1_alpha001.html" data-label="Fig.bn_matched10_dag_SHD_F1_alpha001.html">Fig.bn_matched10_dag_SHD_F1_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_SID_alpha001.html" data-label="Fig.bn_matched10_dag_SID_alpha001.html">Fig.bn_matched10_dag_SID_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_prec_rec_alpha001.html" data-label="Fig.bn_matched10_dag_prec_rec_alpha001.html">Fig.bn_matched10_dag_prec_rec_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_size_alpha001.html" data-label="Fig.bn_matched10_dag_size_alpha001.html">Fig.bn_matched10_dag_size_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_skeleton_arrowhead_F1_alpha001.html" data-label="Fig.bn_matched10_dag_skeleton_arrowhead_F1_alpha001.html">Fig.bn_matched10_dag_skeleton_arrowhead_F1_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_skeleton_prec_rec_alpha001.html" data-label="Fig.bn_matched10_dag_skeleton_prec_rec_alpha001.html">Fig.bn_matched10_dag_skeleton_prec_rec_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_dag_arrowhead_prec_rec_alpha001.html" data-label="Fig.bn_matched10_dag_arrowhead_prec_rec_alpha001.html">Fig.bn_matched10_dag_arrowhead_prec_rec_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.2_SID_cpdag_matched10_alpha001.html" data-label="Fig.2_SID_cpdag_matched10_alpha001.html">Fig.2_SID_cpdag_matched10_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_SHD_F1_alpha001.html" data-label="Fig.bn_matched10_cpdag_SHD_F1_alpha001.html">Fig.bn_matched10_cpdag_SHD_F1_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_prec_rec_alpha001.html" data-label="Fig.bn_matched10_cpdag_prec_rec_alpha001.html">Fig.bn_matched10_cpdag_prec_rec_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_size_alpha001.html" data-label="Fig.bn_matched10_cpdag_size_alpha001.html">Fig.bn_matched10_cpdag_size_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_skeleton_arrowhead_F1_alpha001.html" data-label="Fig.bn_matched10_cpdag_skeleton_arrowhead_F1_alpha001.html">Fig.bn_matched10_cpdag_skeleton_arrowhead_F1_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_skeleton_prec_rec_alpha001.html" data-label="Fig.bn_matched10_cpdag_skeleton_prec_rec_alpha001.html">Fig.bn_matched10_cpdag_skeleton_prec_rec_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.bn_matched10_cpdag_arrowhead_prec_rec_alpha001.html" data-label="Fig.bn_matched10_cpdag_arrowhead_prec_rec_alpha001.html">Fig.bn_matched10_cpdag_arrowhead_prec_rec_alpha001.html</button>
+<button class="nav-btn" data-target="Fig.3_runtime_matched10_alpha001.html" data-label="Fig.3_runtime_matched10_alpha001.html">Fig.3_runtime_matched10_alpha001.html</button>
+      </div>
+    </aside>
+    <main class="viewer">
+      <div class="toolbar">
+        <div class="toolbar-title">
+          <div class="toolbar-label" id="viewer-label">Fig.bn_matched10_dag_SHD_F1_alpha001.html</div>
+          <div class="toolbar-file" id="viewer-file">Fig.bn_matched10_dag_SHD_F1_alpha001.html</div>
+        </div>
+        <a class="toolbar-link" id="open-link" href="Fig.bn_matched10_dag_SHD_F1_alpha001.html" target="_blank" rel="noopener">Open selected figure in a new tab</a>
+      </div>
+      <iframe id="viewer-frame" src="Fig.bn_matched10_dag_SHD_F1_alpha001.html" title="Plot Viewer viewer"></iframe>
+    </main>
+  </div>
+  <script>
+    const buttons = Array.from(document.querySelectorAll('.nav-btn'));
+    const frame = document.getElementById('viewer-frame');
+    const labelEl = document.getElementById('viewer-label');
+    const fileEl = document.getElementById('viewer-file');
+    const openLink = document.getElementById('open-link');
+
+    function setActive(target) {
+      for (const btn of buttons) {
+        const active = btn.dataset.target === target;
+        btn.classList.toggle('active', active);
+      }
+      const activeButton = buttons.find((btn) => btn.dataset.target === target);
+      frame.src = target;
+      labelEl.textContent = activeButton ? activeButton.dataset.label : target;
+      fileEl.textContent = target;
+      openLink.href = target;
+      if (window.location.hash !== '#' + target) {
+        history.replaceState(null, '', '#' + target);
+      }
+    }
+
+    for (const btn of buttons) {
+      btn.addEventListener('click', () => setActive(btn.dataset.target));
+    }
+
+    const initial = decodeURIComponent(window.location.hash.slice(1));
+    const available = new Set(buttons.map((btn) => btn.dataset.target));
+    setActive(available.has(initial) ? initial : 'Fig.bn_matched10_dag_SHD_F1_alpha001.html');
+  </script>
+</body>
+</html>

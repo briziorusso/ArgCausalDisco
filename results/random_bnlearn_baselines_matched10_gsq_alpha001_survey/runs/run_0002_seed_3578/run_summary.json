@@ -1,0 +1,102 @@
+{
+  "dataset": "survey",
+  "model": "Random",
+  "run_idx": 1,
+  "run_total": 10,
+  "seed": 3578,
+  "elapsed_sec": 0.000222,
+  "scenario": "random_bnlearn_baselines_matched10_gsq_alpha001_survey",
+  "dag": {
+    "precision": 0.25,
+    "recall": 0.3333,
+    "F1": 0.2857,
+    "adjacency_precision": 0.375,
+    "adjacency_recall": 0.5,
+    "adjacency_F1": 0.4286,
+    "arrowhead_precision": 0.25,
+    "arrowhead_recall": 0.3333,
+    "arrowhead_F1": 0.2857,
+    "shd": 9.0,
+    "sid": 17.0
+  },
+  "cpdag": {
+    "precision": 0.375,
+    "recall": 0.5,
+    "F1": 0.4286,
+    "adjacency_precision": 0.375,
+    "adjacency_recall": 0.5,
+    "adjacency_F1": 0.4286,
+    "arrowhead_precision": 0.125,
+    "arrowhead_recall": 0.25,
+    "arrowhead_F1": 0.1667,
+    "shd": 9.0,
+    "sid_low": 10.0,
+    "sid_high": 17.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.7200396917760372,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.891764536499977,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.7247462403029203,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.2648228146135807,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    }
+  }
+}

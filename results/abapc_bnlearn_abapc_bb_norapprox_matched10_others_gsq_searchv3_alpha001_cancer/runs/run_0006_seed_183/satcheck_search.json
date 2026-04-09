@@ -1,0 +1,100 @@
+{
+  "approximate_remove_search": false,
+  "best_sat_removed": 6,
+  "best_unsat_removed": 5,
+  "cache": {
+    "0": {
+      "label": "initial",
+      "sec": 0.013399975374341011,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "11": {
+      "label": "mid",
+      "sec": 0.014369424432516098,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    "3": {
+      "label": "mid",
+      "sec": 0.014621656388044357,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "5": {
+      "label": "mid",
+      "sec": 0.026689384132623672,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    "6": {
+      "label": "mid",
+      "sec": 0.01461980864405632,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    }
+  },
+  "fingerprint": "d932885da344f5590451fbf4a77b31c22f94bfc1544d54ef0d6b5f99c8ac930a",
+  "remove_n": 6,
+  "satcheck_records": [
+    {
+      "call": 1,
+      "hi": 22,
+      "label": "initial",
+      "lo": 0,
+      "mid": 0,
+      "removed": 0,
+      "sec": 0.013399975374341011,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 2,
+      "hi": 22,
+      "label": "mid",
+      "lo": 1,
+      "mid": 11,
+      "removed": 11,
+      "sec": 0.014369424432516098,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 3,
+      "hi": 11,
+      "label": "mid",
+      "lo": 1,
+      "mid": 6,
+      "removed": 6,
+      "sec": 0.01461980864405632,
+      "status": "sat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 4,
+      "hi": 6,
+      "label": "mid",
+      "lo": 1,
+      "mid": 3,
+      "removed": 3,
+      "sec": 0.014621656388044357,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    },
+    {
+      "call": 5,
+      "hi": 6,
+      "label": "mid",
+      "lo": 4,
+      "mid": 5,
+      "removed": 5,
+      "sec": 0.026689384132623672,
+      "status": "unsat",
+      "timeout_budget_sec": 600.0
+    }
+  ],
+  "satcheck_timeout": 600.0,
+  "search_complete": true,
+  "updated_at": 1775295313.5941184,
+  "version": 1
+}

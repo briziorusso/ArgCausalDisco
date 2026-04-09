@@ -1,0 +1,102 @@
+{
+  "dataset": "child",
+  "model": "MPC",
+  "run_idx": 8,
+  "run_total": 10,
+  "seed": 316,
+  "elapsed_sec": 0.9231455326080322,
+  "scenario": "mpc_bnlearn_baselines_matched10_gsq_alpha001_child",
+  "dag": {
+    "precision": 0.8462,
+    "recall": 0.44,
+    "F1": 0.5789,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 0.52,
+    "adjacency_F1": 0.6842,
+    "arrowhead_precision": 0.8462,
+    "arrowhead_recall": 0.44,
+    "arrowhead_F1": 0.5789,
+    "shd": 14.0,
+    "sid": 241.0
+  },
+  "cpdag": {
+    "precision": 0.64,
+    "recall": 0.64,
+    "F1": 0.64,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 1.0,
+    "adjacency_F1": 1.0,
+    "arrowhead_precision": 0.2,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.2857,
+    "shd": 10.0,
+    "sid_low": 0.0,
+    "sid_high": 380.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.8569468762725592,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.096172409132123,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.8440378084778786,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 3.72615784406662,
+      "timed_out": false
+    }
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        20,
+        20
+      ],
+      "dtype": "int64"
+    }
+  }
+}

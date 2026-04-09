@@ -1,0 +1,253 @@
+{
+  "dataset": "survey",
+  "model": "ABAPC (Ours)",
+  "run_idx": 1,
+  "run_total": 10,
+  "seed": 3578,
+  "elapsed_sec": 0.22897958755493164,
+  "scenario": "abapc_bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_alpha001_survey",
+  "dag": {
+    "precision": 0.3333,
+    "recall": 0.1667,
+    "F1": 0.2222,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 0.5,
+    "adjacency_F1": 0.6667,
+    "arrowhead_precision": 0.3333,
+    "arrowhead_recall": 0.1667,
+    "arrowhead_F1": 0.2222,
+    "shd": 5.0,
+    "sid": 19.0
+  },
+  "cpdag": {
+    "precision": 0.6667,
+    "recall": 0.3333,
+    "F1": 0.4444,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 0.5,
+    "adjacency_F1": 0.6667,
+    "arrowhead_precision": 0.3333,
+    "arrowhead_recall": 0.25,
+    "arrowhead_F1": 0.2857,
+    "shd": 6.0,
+    "sid_low": 13.0,
+    "sid_high": 19.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.550204323604703,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.6033248342573643,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.540092334151268,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.8086431361734867,
+      "timed_out": false
+    }
+  },
+  "remove_n": 23,
+  "best_unsat_removed": 22,
+  "best_sat_removed": 23,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.0161123126745224,
+  "build_breakdown": {
+    "compile_sec": 0.011808624491095543,
+    "gen_facts_sec": 0.00015024282038211823,
+    "load_encoding_sec": 0.0014703813940286636,
+    "load_facts_sec": 0.0012107249349355698,
+    "load_wc_sec": 0.0012567099183797836,
+    "add_bayesball_sec": 0.00021562911570072174
+  },
+  "ground_sec": 0.004537578672170639,
+  "first_solve_sec": 0.005390932783484459,
+  "final_solve_sec": 0.0015063751488924026,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 6,
+    "total_sec": 0.10149502381682396,
+    "avg_sec": 0.016915837302803993,
+    "min_sec": 0.014331571757793427,
+    "max_sec": 0.025921480730175972,
+    "sat": 3,
+    "unsat": 3,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 5
+    }
+  },
+  "facts": {
+    "facts_total": 39,
+    "removed_fact_count": 23,
+    "kept_fact_count": 16,
+    "removed_indep_count": 17,
+    "removed_dep_count": 6,
+    "kept_indep_count": 4,
+    "kept_dep_count": 12,
+    "removed_truth_counts": {
+      "unknown": 23
+    },
+    "kept_truth_counts": {
+      "unknown": 16
+    },
+    "fully_released_pair_count": 9,
+    "fully_released_pairs": [
+      "0,2",
+      "0,3",
+      "0,5",
+      "1,2",
+      "1,4",
+      "2,3",
+      "2,4",
+      "2,5",
+      "3,4"
+    ],
+    "removed_fact_keys": [
+      "ext_dep(1,4,s3).",
+      "ext_indep(0,5,empty).",
+      "ext_indep(0,2,empty).",
+      "ext_dep(2,5,s3).",
+      "ext_indep(0,3,s1y5).",
+      "ext_dep(1,4,s0).",
+      "ext_indep(0,3,s1).",
+      "ext_indep(0,3,s5).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(1,5,s0y3).",
+      "ext_dep(2,5,empty).",
+      "ext_dep(1,2,empty).",
+      "ext_indep(1,5,s3).",
+      "ext_indep(0,3,empty).",
+      "ext_indep(2,4,empty).",
+      "ext_dep(1,4,empty).",
+      "ext_indep(1,2,s0).",
+      "ext_indep(1,4,s2).",
+      "ext_indep(1,2,s3).",
+      "ext_indep(3,4,empty).",
+      "ext_indep(1,2,s4).",
+      "ext_indep(1,2,s5).",
+      "ext_indep(2,5,s1)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_dep(1,4,s3).",
+      "ext_indep(0,5,empty).",
+      "ext_indep(0,2,empty).",
+      "ext_dep(2,5,s3).",
+      "ext_indep(0,3,s1y5).",
+      "ext_dep(1,4,s0).",
+      "ext_indep(0,3,s1).",
+      "ext_indep(0,3,s5).",
+      "ext_indep(2,3,empty).",
+      "ext_indep(1,5,s0y3).",
+      "ext_dep(2,5,empty).",
+      "ext_dep(1,2,empty).",
+      "ext_indep(1,5,s3).",
+      "ext_indep(0,3,empty).",
+      "ext_indep(2,4,empty).",
+      "ext_dep(1,4,empty).",
+      "ext_indep(1,2,s0).",
+      "ext_indep(1,4,s2).",
+      "ext_indep(1,2,s3).",
+      "ext_indep(3,4,empty).",
+      "ext_indep(1,2,s4).",
+      "ext_indep(1,2,s5).",
+      "ext_indep(2,5,s1)."
+    ],
+    "removed_pair_counts": {
+      "0,2": 1,
+      "0,3": 4,
+      "0,5": 1,
+      "1,2": 5,
+      "1,4": 4,
+      "1,5": 2,
+      "2,3": 1,
+      "2,4": 1,
+      "2,5": 3,
+      "3,4": 1
+    },
+    "pair_fact_counts_total": {
+      "0,1": 4,
+      "0,2": 1,
+      "0,3": 4,
+      "0,4": 1,
+      "0,5": 1,
+      "1,2": 5,
+      "1,3": 5,
+      "1,4": 4,
+      "1,5": 4,
+      "2,3": 1,
+      "2,4": 1,
+      "2,5": 3,
+      "3,4": 1,
+      "3,5": 3,
+      "4,5": 1
+    }
+  },
+  "reground": {
+    "disable_reground": true,
+    "block_edge_mode": "frozen_initial",
+    "block_edge_initial_true_count": 12,
+    "block_edge_frozen_pair_count": 12
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    }
+  }
+}

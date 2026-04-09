@@ -1,0 +1,273 @@
+{
+  "dataset": "survey",
+  "model": "ABAPC (Ours)",
+  "run_idx": 0,
+  "run_total": 10,
+  "seed": 7816,
+  "elapsed_sec": 0.26680827140808105,
+  "scenario": "abapc_bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_alpha001_survey",
+  "dag": {
+    "precision": 0.6,
+    "recall": 0.5,
+    "F1": 0.5455,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 0.8333,
+    "adjacency_F1": 0.9091,
+    "arrowhead_precision": 0.6,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.5455,
+    "shd": 3.0,
+    "sid": 14.0
+  },
+  "cpdag": {
+    "precision": 0.6,
+    "recall": 0.5,
+    "F1": 0.5455,
+    "adjacency_precision": 1.0,
+    "adjacency_recall": 0.8333,
+    "adjacency_F1": 0.9091,
+    "arrowhead_precision": 0.4,
+    "arrowhead_recall": 0.5,
+    "arrowhead_F1": 0.4444,
+    "shd": 5.0,
+    "sid_low": 14.0,
+    "sid_high": 15.0
+  },
+  "dag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.5358393341302872,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.5689655542373657,
+      "timed_out": false
+    }
+  },
+  "cpdag_eval_status": {
+    "shd": {
+      "status": "ok",
+      "elapsed_sec": 0.543444313108921,
+      "timed_out": false
+    },
+    "sid": {
+      "status": "ok",
+      "elapsed_sec": 2.896614570170641,
+      "timed_out": false
+    }
+  },
+  "remove_n": 32,
+  "best_unsat_removed": 31,
+  "best_sat_removed": 32,
+  "approximate_remove_search": false,
+  "satcheck_resume": false,
+  "solver_backend": "incremental",
+  "build_sec": 0.019496561959385872,
+  "build_breakdown": {
+    "compile_sec": 0.013095563277602196,
+    "gen_facts_sec": 0.00016660615801811218,
+    "load_encoding_sec": 0.0014349110424518585,
+    "load_facts_sec": 0.002255728468298912,
+    "load_wc_sec": 0.0023228954523801804,
+    "add_bayesball_sec": 0.00022085756063461304
+  },
+  "ground_sec": 0.00547989085316658,
+  "first_solve_sec": 0.00667700357735157,
+  "final_solve_sec": 0.0025062523782253265,
+  "final_solve_config": {
+    "timeout_sec": null,
+    "opt_mode": "opt",
+    "n_models": 1
+  },
+  "satchecks": {
+    "calls": 7,
+    "total_sec": 0.11356422863900661,
+    "avg_sec": 0.016223461234143803,
+    "min_sec": 0.01532011479139328,
+    "max_sec": 0.01793430745601654,
+    "sat": 3,
+    "unsat": 4,
+    "unknown": 0,
+    "labels": {
+      "initial": 1,
+      "mid": 6
+    }
+  },
+  "facts": {
+    "facts_total": 52,
+    "removed_fact_count": 32,
+    "kept_fact_count": 20,
+    "removed_indep_count": 26,
+    "removed_dep_count": 6,
+    "kept_indep_count": 1,
+    "kept_dep_count": 19,
+    "removed_truth_counts": {
+      "unknown": 32
+    },
+    "kept_truth_counts": {
+      "unknown": 20
+    },
+    "fully_released_pair_count": 9,
+    "fully_released_pairs": [
+      "0,2",
+      "0,3",
+      "0,4",
+      "0,5",
+      "1,4",
+      "2,3",
+      "2,4",
+      "3,4",
+      "4,5"
+    ],
+    "removed_fact_keys": [
+      "ext_indep(2,3,empty).",
+      "ext_dep(2,5,s3).",
+      "ext_dep(2,5,s1).",
+      "ext_dep(1,3,s5).",
+      "ext_dep(1,4,s0).",
+      "ext_indep(1,5,s2).",
+      "ext_indep(1,5,s0).",
+      "ext_indep(2,3,s1).",
+      "ext_dep(1,3,s0y2).",
+      "ext_indep(2,3,s5).",
+      "ext_indep(0,2,s1y5).",
+      "ext_indep(1,5,s3).",
+      "ext_indep(1,5,s0y2y3).",
+      "ext_indep(1,5,empty).",
+      "ext_indep(1,5,s0y3).",
+      "ext_indep(4,5,empty).",
+      "ext_indep(1,5,s2y3).",
+      "ext_indep(2,3,s1y5).",
+      "ext_indep(0,5,empty).",
+      "ext_indep(2,4,empty).",
+      "ext_indep(0,2,s1).",
+      "ext_indep(0,4,empty).",
+      "ext_indep(3,4,empty).",
+      "ext_indep(0,2,s5).",
+      "ext_indep(0,3,s5).",
+      "ext_indep(0,2,empty).",
+      "ext_indep(0,3,s1y5).",
+      "ext_dep(1,4,empty).",
+      "ext_indep(1,4,s2).",
+      "ext_indep(1,4,s3).",
+      "ext_indep(0,3,empty).",
+      "ext_indep(0,3,s1)."
+    ],
+    "removed_true_fact_keys": [],
+    "removed_false_fact_keys": [],
+    "removed_unknown_fact_keys": [
+      "ext_indep(2,3,empty).",
+      "ext_dep(2,5,s3).",
+      "ext_dep(2,5,s1).",
+      "ext_dep(1,3,s5).",
+      "ext_dep(1,4,s0).",
+      "ext_indep(1,5,s2).",
+      "ext_indep(1,5,s0).",
+      "ext_indep(2,3,s1).",
+      "ext_dep(1,3,s0y2).",
+      "ext_indep(2,3,s5).",
+      "ext_indep(0,2,s1y5).",
+      "ext_indep(1,5,s3).",
+      "ext_indep(1,5,s0y2y3).",
+      "ext_indep(1,5,empty).",
+      "ext_indep(1,5,s0y3).",
+      "ext_indep(4,5,empty).",
+      "ext_indep(1,5,s2y3).",
+      "ext_indep(2,3,s1y5).",
+      "ext_indep(0,5,empty).",
+      "ext_indep(2,4,empty).",
+      "ext_indep(0,2,s1).",
+      "ext_indep(0,4,empty).",
+      "ext_indep(3,4,empty).",
+      "ext_indep(0,2,s5).",
+      "ext_indep(0,3,s5).",
+      "ext_indep(0,2,empty).",
+      "ext_indep(0,3,s1y5).",
+      "ext_dep(1,4,empty).",
+      "ext_indep(1,4,s2).",
+      "ext_indep(1,4,s3).",
+      "ext_indep(0,3,empty).",
+      "ext_indep(0,3,s1)."
+    ],
+    "removed_pair_counts": {
+      "0,2": 4,
+      "0,3": 4,
+      "0,4": 1,
+      "0,5": 1,
+      "1,3": 2,
+      "1,4": 4,
+      "1,5": 7,
+      "2,3": 4,
+      "2,4": 1,
+      "2,5": 2,
+      "3,4": 1,
+      "4,5": 1
+    },
+    "pair_fact_counts_total": {
+      "0,1": 5,
+      "0,2": 4,
+      "0,3": 4,
+      "0,4": 1,
+      "0,5": 1,
+      "1,2": 6,
+      "1,3": 6,
+      "1,4": 4,
+      "1,5": 8,
+      "2,3": 4,
+      "2,4": 1,
+      "2,5": 3,
+      "3,4": 1,
+      "3,5": 3,
+      "4,5": 1
+    }
+  },
+  "reground": {
+    "disable_reground": true,
+    "block_edge_mode": "frozen_initial",
+    "block_edge_initial_true_count": 10,
+    "block_edge_frozen_pair_count": 10
+  },
+  "graph_artifacts": {
+    "graph_true": {
+      "file": "graph_true.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_raw": {
+      "file": "graph_est_raw.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_binary": {
+      "file": "graph_est_binary.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    },
+    "graph_est_cpdag_eval": {
+      "file": "graph_est_cpdag_eval.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "float64"
+    },
+    "graph_est_dag_eval": {
+      "file": "graph_est_dag_eval.npy",
+      "shape": [
+        6,
+        6
+      ],
+      "dtype": "int64"
+    }
+  }
+}
