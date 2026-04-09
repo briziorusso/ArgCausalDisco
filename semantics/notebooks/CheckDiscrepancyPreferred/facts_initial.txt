@@ -1,0 +1,1 @@
+Fact(relation=<RelationEnum.indep: 'indep'>, node1=0, node2=2, node_set=(), score=np.float64(0.6027633760716439))

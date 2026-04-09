@@ -1,0 +1,10 @@
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch1.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch2.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch3.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch4.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch5.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch6.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch7.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch8.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch9.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/child/child_batch10.sh

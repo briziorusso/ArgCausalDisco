@@ -1,0 +1,12 @@
+diff --git a/src/aspforaba/encoder.py b/src/aspforaba/encoder.py
+index a866c76..261c297 100644
+--- a/src/aspforaba/encoder.py
++++ b/src/aspforaba/encoder.py
+@@ -28,6 +28,7 @@ class Encoder:
+         triggered_by_in(R) :- head(R,_), supported(X) : body(R,X).
+         :- in(X), contrary(X,Y), supported(Y).
+         defeated(X) :- supported(Y), contrary(X,Y).
++        :- assumption(X), supported(X), not in(X).
+         """
+ 
+     ADMISSIBLE_ADD = """

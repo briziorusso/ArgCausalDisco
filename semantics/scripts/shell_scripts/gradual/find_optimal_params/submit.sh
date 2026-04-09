@@ -1,0 +1,15 @@
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_8_neigh_6_cset_6.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_8_neigh_8_cset_0.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_11_neigh_4_cset_9.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_11_neigh_5_cset_1.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_11_neigh_7_cset_0.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_11_neigh_8_cset_0.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_20_neigh_3_cset_3.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_20_neigh_3_cset_4.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_20_neigh_4_cset_1.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_20_neigh_5_cset_0.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_27_neigh_3_cset_2.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_27_neigh_4_cset_1.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_27_neigh_5_cset_0.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_32_neigh_3_cset_2.sh
+qsub scripts/shell_scripts/gradual/find_optimal_params/nodes_32_neigh_4_cset_0.sh

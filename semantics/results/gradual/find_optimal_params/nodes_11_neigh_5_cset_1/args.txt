@@ -1,0 +1,1 @@
+Namespace(path='./results/gradual/find_optimal_params/nodes_11_neigh_5_cset_1', search_depth=10, n_nodes=11, n_edges=11, neighbourhood_n_nodes=5, c_set_size=1, use_collider_arguments='true', n_runs=10)

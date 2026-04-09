@@ -1,0 +1,10 @@
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch1.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch2.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch3.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch4.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch5.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch6.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch7.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch8.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch9.sh
+qsub scripts/shell_scripts/gradual/v2_run_for_bnlearn/sachs/sachs_batch10.sh

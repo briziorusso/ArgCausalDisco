@@ -1,0 +1,21 @@
+diff --git a/abapc.py b/abapc.py
+index 6a008d6..9a90b6d 100644
+--- a/abapc.py
++++ b/abapc.py
+@@ -121,6 +121,7 @@ def ABAPC(data,
+         logging.info(f"Number of solutions found: {len(set_of_model_sets)}")
+     
+     model_ranking = []
++    all_models = models
+     if len(models) > 50000:
+         logging.info("Pick the first 50,000 models for I calculation")
+         models = set(list(models)[:50000]) ## Limit the number of models to 30,000
+@@ -165,7 +166,7 @@ def ABAPC(data,
+     if out_mode == "opt":
+         del models, model_ranking, model_sets, MECs, facts, I_from_data
+         gc.collect()
+-        return B_est
++        return B_est, best_model[0][1], all_models
+     elif out_mode == "optN":
+         return models, best_model
+     else:
