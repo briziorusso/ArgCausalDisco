@@ -86,6 +86,20 @@ def _parse_aliases(items: list[str]) -> dict[str, str]:
     return aliases
 
 
+def _parse_method_pairs(items: list[str], option_name: str) -> list[tuple[str, str]]:
+    pairs: list[tuple[str, str]] = []
+    for item in items:
+        if "=" not in item:
+            raise ValueError(f"Invalid {option_name} entry {item!r}; expected Left Method=Right Method")
+        left, right = item.split("=", 1)
+        left = left.strip()
+        right = right.strip()
+        if not left or not right:
+            raise ValueError(f"Invalid {option_name} entry {item!r}; both sides must be non-empty")
+        pairs.append((left, right))
+    return pairs
+
+
 def _significance_suffix(p_value: float) -> str:
     if np.isnan(p_value):
         return ""
@@ -316,19 +330,34 @@ def _render_dataset_table(
     comparison_mode: str,
     target_methods: list[str],
     baseline_methods: list[str],
+    extra_comparisons: list[tuple[str, str]],
 ) -> str:
     dataset_rows = frame[frame["dataset"] == dataset].copy()
     available_methods = [method for method in methods if method in dataset_rows["model"].unique()]
+    ordered_pairs: list[tuple[str, str]] = []
+    seen_pairs: set[tuple[str, str]] = set()
+
+    def append_pair(method1: str, method2: str) -> None:
+        if method1 == method2:
+            return
+        if method1 not in available_methods or method2 not in available_methods:
+            return
+        key = tuple(sorted((method1, method2)))
+        if key in seen_pairs:
+            return
+        seen_pairs.add(key)
+        ordered_pairs.append((method1, method2))
 
     if comparison_mode == "targets-vs-baselines":
-        ordered_pairs = [
-            (target, baseline)
-            for target in target_methods
-            for baseline in baseline_methods
-            if target in available_methods and baseline in available_methods
-        ]
+        for target in target_methods:
+            for baseline in baseline_methods:
+                append_pair(target, baseline)
     else:
-        ordered_pairs = list(combinations(available_methods, 2))
+        for method1, method2 in combinations(available_methods, 2):
+            append_pair(method1, method2)
+
+    for method1, method2 in extra_comparisons:
+        append_pair(method1, method2)
 
     lines = [
         r"\begin{table}[ht]",
@@ -415,7 +444,7 @@ def main() -> None:
     parser.add_argument(
         "--target-methods",
         nargs="+",
-        default=["ABAPC (bb)", "ABAPC (nor)"],
+        default=["ABAPC (bb)", "ABAPC (bb-nor)"],
         help="Methods placed on the left side when using targets-vs-baselines mode.",
     )
     parser.add_argument(
@@ -427,14 +456,20 @@ def main() -> None:
     parser.add_argument(
         "--methods",
         nargs="+",
-        default=["ABAPC (bb)", "ABAPC (nor)", "FGS", "MPC", "NOTEARS-MLP", "Random"],
+        default=["ABAPC (bb)", "ABAPC (bb-nor)", "FGS", "MPC", "NOTEARS-MLP", "Random"],
         help="Pretty-name methods available for comparisons. In targets-vs-baselines mode this is just the allow-list.",
     )
     parser.add_argument(
         "--method-alias",
         nargs="*",
-        default=["ABAPC (bb)=APC-bb", "ABAPC (nor)=APC-nor", "NOTEARS-MLP=NT", "Random=RND"],
+        default=["ABAPC (bb)=APC-bb", "ABAPC (bb-nor)=APC-bb-nor", "NOTEARS-MLP=NT", "Random=RND"],
         help="Optional Pretty Name=Alias mappings used in the LaTeX rows.",
+    )
+    parser.add_argument(
+        "--extra-comparison",
+        nargs="*",
+        default=["ABAPC (bb)=ABAPC (bb-nor)"],
+        help="Optional additional method pairs (Left Method=Right Method) appended to each metric block.",
     )
     parser.add_argument("--out-dir", default=str(RESULTS_DIR / "tables" / "matched10_ttests"))
     parser.add_argument("--random-version", default="bnlearn_random_matched10_gsq_graphmetrics")
@@ -478,6 +513,7 @@ def main() -> None:
     )
 
     aliases = _parse_aliases(args.method_alias)
+    extra_comparisons = _parse_method_pairs(args.extra_comparison, "--extra-comparison")
     datasets = [d.lower() for d in args.datasets]
     metrics = list(args.metrics)
     kind = args.kind
@@ -503,6 +539,7 @@ def main() -> None:
             comparison_mode=args.comparison_mode,
             target_methods=args.target_methods,
             baseline_methods=args.baseline_methods,
+            extra_comparisons=extra_comparisons,
         )
         out_path = out_dir / f"{dataset}_tests.tex"
         out_path.write_text(tex, encoding="utf-8")
