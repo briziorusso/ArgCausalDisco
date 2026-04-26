@@ -245,8 +245,13 @@ def simulate_discrete_data(
         sample_size,
         truth_DAG_directed_edges,
         random_seed=None):
-    # from pgmpy.models.BayesianNetwork import BayesianNetwork
-    from pgmpy.models.DiscreteBayesianNetwork import DiscreteBayesianNetwork
+    try:
+        from pgmpy.models import DiscreteBayesianNetwork as BayesianNetworkModel
+    except ImportError:
+        try:
+            from pgmpy.models.DiscreteBayesianNetwork import DiscreteBayesianNetwork as BayesianNetworkModel
+        except ImportError:
+            from pgmpy.models import BayesianNetwork as BayesianNetworkModel
     from pgmpy.factors.discrete import TabularCPD
     from pgmpy.sampling import BayesianModelSampling
 
@@ -277,6 +282,42 @@ def simulate_discrete_data(
         DIRICHLET_ALPHA_LOWER, DIRICHLET_ALPHA_UPPER = 1., 5.
         return np.random.uniform(DIRICHLET_ALPHA_LOWER, DIRICHLET_ALPHA_UPPER)
 
+    def _manual_forward_sample(cpd_specs):
+        parents_by_node = {
+            node: set(spec["parents"]) for node, spec in cpd_specs.items()
+        }
+        remaining = set(range(num_of_nodes))
+        topological_order = []
+        while remaining:
+            ready = sorted(
+                node for node in remaining
+                if parents_by_node[node].isdisjoint(remaining)
+            )
+            if not ready:
+                raise ValueError("Cannot sample from a cyclic graph.")
+            topological_order.extend(ready)
+            remaining.difference_update(ready)
+
+        data = np.zeros((sample_size, num_of_nodes), dtype=np.int64)
+        for node in topological_order:
+            spec = cpd_specs[node]
+            parents = spec["parents"]
+            probs = spec["probs"]
+            if not parents:
+                data[:, node] = np.random.choice(cards[node], size=sample_size, p=probs[:, 0])
+                continue
+
+            parent_values = data[:, parents].astype(np.int64)
+            parent_index = np.ravel_multi_index(parent_values.T, spec["parents_card"])
+            for col in np.unique(parent_index):
+                row_mask = parent_index == col
+                data[row_mask, node] = np.random.choice(
+                    cards[node],
+                    size=int(row_mask.sum()),
+                    p=probs[:, col],
+                )
+        return data
+
     if random_seed is not None:
         state = np.random.get_state() # save the current random state
         np.random.seed(random_seed)  # set the random state to 42 temporarily, just for the following lines
@@ -285,10 +326,8 @@ def simulate_discrete_data(
     adjacency_matrix = adjacency_matrix.T
 
     cards = _simulate_cards()
-    try:
-        bn = BayesianNetwork(truth_DAG_directed_edges)  # so isolating nodes will echo error
-    except:
-        bn = DiscreteBayesianNetwork(truth_DAG_directed_edges)
+    bn = BayesianNetworkModel(truth_DAG_directed_edges)
+    cpd_specs = {}
     for node in range(num_of_nodes):
         if node not in bn.nodes(): bn.add_node(node) # add node if it is isolated
         parents = np.where(adjacency_matrix[node])[0].tolist()
@@ -304,14 +343,23 @@ def simulate_discrete_data(
         column_sums[column_sums == 0] = 1
         rand_ps = rand_ps / column_sums
 
+        cpd_specs[node] = {
+            "parents": parents,
+            "parents_card": parents_card,
+            "probs": rand_ps,
+        }
         cpd = TabularCPD(node, cards[node], rand_ps.tolist(), evidence=parents, evidence_card=parents_card)
         bn.add_cpds(cpd)
-    inference = BayesianModelSampling(bn)
-    df = inference.forward_sample(size=sample_size, show_progress=False)
-    topo_order = list(map(int, df.columns))
-    topo_index = [-1] * len(topo_order)
-    for ind, node in enumerate(topo_order): topo_index[node] = ind
-    data = df.to_numpy()[:, topo_index].astype(np.int64)
+    try:
+        inference = BayesianModelSampling(bn)
+        df = inference.forward_sample(size=sample_size, show_progress=False)
+        topo_order = list(map(int, df.columns))
+        topo_index = [-1] * len(topo_order)
+        for ind, node in enumerate(topo_order): topo_index[node] = ind
+        data = df.to_numpy()[:, topo_index].astype(np.int64)
+    except Exception as e:
+        logging.info(f"pgmpy sampling failed ({e}); using internal forward sampler.")
+        data = _manual_forward_sample(cpd_specs)
 
     if random_seed is not None: np.random.set_state(state) # restore the random state
     return data

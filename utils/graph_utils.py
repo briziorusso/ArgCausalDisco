@@ -380,10 +380,15 @@ class DAGMetrics(object):
         for i in mt:
             mt[i] = round(mt[i], decimal_num)   
 
-        if sid and not cpdag:
-            mt['sid'] = DAGMetrics._cal_SID(B_est, B_true)
-        elif sid and cpdag:
-            mt['sid'] = DAGMetrics._cal_SID_CPDAG(B_est, B_true)
+        if sid:
+            try:
+                if not cpdag:
+                    mt['sid'] = DAGMetrics._cal_SID(B_est, B_true)
+                else:
+                    mt['sid'] = DAGMetrics._cal_SID_CPDAG(B_est, B_true)
+            except Exception as e:
+                logging.warning(f"SID computation failed ({e}); storing NaN.")
+                mt['sid'] = (np.nan, np.nan) if cpdag else np.nan
        
         return mt
 
