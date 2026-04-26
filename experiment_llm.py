@@ -3,6 +3,7 @@
 
 # %%
 
+import argparse
 import logging
 import re
 from pathlib import Path
@@ -425,7 +426,7 @@ abapc.tqdm = tqdm  # Avoid using progress bar widgets
 causalaba.tqdm = tqdm  # Avoid using progress bar widgets
 
 def retained_facts_score(df_ranked: pd.DataFrame, remove_n: int) -> dict[str, float]:
-    df_retained = df_ranked.iloc[:-remove_n]
+    df_retained = df_ranked if remove_n == 0 else df_ranked.iloc[:-remove_n]
     precision = df_retained["correct"].sum() / len(df_retained)
     recall = df_retained["correct"].sum() / df_ranked["correct"].sum()
     f1 = 2 * precision * recall / (precision + recall)
@@ -573,9 +574,15 @@ def get_sorted_adjacency(bn: gum.BayesNet) -> np.ndarray:
     adj = bn.adjacencyMatrix()
     return adj[np.ix_(alphabetical_order, alphabetical_order)]
 
-def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
+def run_experiment(
+    prior_df: pd.DataFrame | None,
+    datasets: Iterable[Path],
+    sample_size: int = 5000,
+    n_repeats: int | None = None,
+):
     all_runs = []
     skipped = []
+    repeat_count = repeats if n_repeats is None else n_repeats
 
     for random_graph_path in tqdm(datasets):
         filename = random_graph_path.stem
@@ -596,9 +603,9 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
             impl2_return,
         ) = compare_performance(
             bif_path=random_graph_path,
-            sample_size=5000,
+            sample_size=sample_size,
             prior_df=prior_df,
-            repeats=repeats,
+            repeats=repeat_count,
         )
 
         # Flatten results; each 'run' already carries its seed and run_id
@@ -666,7 +673,16 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
 
 # %%
 
-def run_dataset_experiment(type_):
+def run_dataset_experiment(
+    type_,
+    prior_json: str | Path | None = None,
+    dataset_dir: str | Path | None = None,
+    results_path: str | Path | None = None,
+    report_path: str | Path | None = None,
+    sample_size: int = 5000,
+    n_repeats: int | None = None,
+    names: list[str] | None = None,
+):
     """Run experiment for a specific dataset type.
     
     Args:
@@ -679,52 +695,42 @@ def run_dataset_experiment(type_):
     base_name = type_.split('-')[0]  # 'bnlearn' or 'synthetic'
     
     # Set up paths based on dataset type
-    dataset_path = Path(f"{base_name}/")
-    datasets = list(dataset_path.glob("*.bifxml"))
+    dataset_path = Path(dataset_dir) if dataset_dir is not None else Path(f"{base_name}/")
+    datasets = sorted(dataset_path.glob("*.bifxml"))
+    if names:
+        wanted = {Path(name).stem for name in names}
+        datasets = [path for path in datasets if path.stem in wanted]
+        missing = sorted(wanted - {path.stem for path in datasets})
+        if missing:
+            raise SystemExit(f"Requested BIFXML names not found in {dataset_path}: {missing}")
     
     # Load appropriate prior constraints
-    prior_json = f"results/llm_constraints/{type_}-consensus.json"
+    prior_json = Path(prior_json) if prior_json is not None else Path(f"results/llm_constraints/{type_}-consensus.json")
     prior_df = pd.read_json(prior_json)
     
     # Run experiment
     res_df, skipped = run_experiment(
         prior_df=prior_df, 
-        datasets=datasets
+        datasets=datasets,
+        sample_size=sample_size,
+        n_repeats=n_repeats,
     )
     
     # Save results
-    results_path = f"results/ABAPC-LLM/{type_}-results.csv"
+    results_path = Path(results_path) if results_path is not None else Path(f"results/ABAPC-LLM/{type_}-results.csv")
+    results_path.parent.mkdir(parents=True, exist_ok=True)
     res_df.to_csv(results_path, index=False)
     
     # Generate and save report
     report = show_report(res_df)
-    report_path = f"results/ABAPC-LLM/{type_}-report.csv"
+    report_path = Path(report_path) if report_path is not None else Path(f"results/ABAPC-LLM/{type_}-report.csv")
+    report_path.parent.mkdir(parents=True, exist_ok=True)
     report.to_csv(report_path)
     
     print(f"Results saved to {results_path}")
     print(f"Report saved to {report_path}")
     
     return res_df, skipped
-
-# %%
-
-# Run experiments for different dataset types
-all_skipped = []
-
-for type_ in [
-    "bnlearn-desc",
-    # "bnlearn",
-    "synthetic",
-    # "synthetic-desc",
-]:
-    print(f"\n{'='*60}")
-    print(f"Running experiment for: {type_}")
-    print(f"{'='*60}\n")
-    
-    res_df, skipped = run_dataset_experiment(type_)
-    all_skipped.extend(skipped)
-
-print(f"\nTotal skipped files: {all_skipped}")
 
 # %%
 def join_results(json_path, csv_path):
@@ -762,17 +768,48 @@ def join_results(json_path, csv_path):
 
     return merged
 
-for type_ in [
-    "bnlearn-desc",
-    # "bnlearn",
-    "synthetic",
-    # "synthetic-desc",
-]:
-    # aggregated LLM constraints
-    json_path = f"results/llm_constraints/{type_}-consensus.json" 
-    # ABAPC-LLM experiment results
-    csv_path = f"results/ABAPC-LLM/{type_}-results.csv"
-    merged_df = join_results(json_path, csv_path)
-    output_path = f"results/ABAPC-LLM/merged_{type_}.csv"
-    merged_df.to_csv(output_path, index=False)
-    print(f"Joined results saved to {output_path}")
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run ABAPC with and without LLM prior knowledge for one dataset group."
+    )
+    parser.add_argument("--type", default="synthetic-desc-gpt55")
+    parser.add_argument("--prior_json")
+    parser.add_argument("--dataset_dir", default="synthetic")
+    parser.add_argument("--results_path")
+    parser.add_argument("--report_path")
+    parser.add_argument("--merged_path")
+    parser.add_argument("--sample_size", type=int, default=5000)
+    parser.add_argument("--n_runs", type=int, default=50)
+    parser.add_argument("--names", nargs="*", help="Optional BIFXML stems or filenames for smoke runs.")
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    prior_json = args.prior_json or f"results/llm_constraints/{args.type}-consensus.json"
+    results_path = args.results_path or f"results/ABAPC-LLM/{args.type}-results.csv"
+    report_path = args.report_path or f"results/ABAPC-LLM/{args.type}-report.csv"
+    merged_path = args.merged_path or f"results/ABAPC-LLM/merged_{args.type}.csv"
+
+    res_df, skipped = run_dataset_experiment(
+        type_=args.type,
+        prior_json=prior_json,
+        dataset_dir=args.dataset_dir,
+        results_path=results_path,
+        report_path=report_path,
+        sample_size=args.sample_size,
+        n_repeats=args.n_runs,
+        names=args.names,
+    )
+    print(f"Skipped files: {skipped}")
+
+    merged_df = join_results(prior_json, results_path)
+    Path(merged_path).parent.mkdir(parents=True, exist_ok=True)
+    merged_df.to_csv(merged_path, index=False)
+    print(f"Joined results saved to {merged_path}")
+    print(f"Rows written: {len(res_df)}")
+
+
+if __name__ == "__main__":
+    main()
