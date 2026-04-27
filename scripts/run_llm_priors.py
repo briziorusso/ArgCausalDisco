@@ -5,7 +5,7 @@ import asyncio
 import re
 import sys
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Callable
 
 import pandas as pd
 import pyagrum as gum
@@ -106,8 +106,11 @@ async def evaluate_priors(
     parse_model: str,
     exclude_descriptions: bool,
     max_concurrent: int,
+    row_context: dict | None = None,
+    row_callback: Callable[[dict], None] | None = None,
 ) -> pd.DataFrame:
     semaphore = asyncio.Semaphore(max_concurrent)
+    row_context = row_context or {}
 
     async def process_one(bif_path: Path) -> dict:
         async with semaphore:
@@ -133,9 +136,24 @@ async def evaluate_priors(
                     parse_model=parse_model,
                 )
             )
+            row.update(row_context)
             return row
 
-    return pd.DataFrame(await tqdm.gather(*(process_one(path) for path in bif_paths)))
+    rows = []
+    tasks = [asyncio.create_task(process_one(path)) for path in bif_paths]
+    for future in tqdm(asyncio.as_completed(tasks), total=len(tasks)):
+        row = await future
+        rows.append(row)
+        if row_callback is not None:
+            row_callback(row)
+    return pd.DataFrame(rows)
+
+
+def write_json_atomic(df: pd.DataFrame, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(f"{path.name}.tmp")
+    df.to_json(tmp_path, orient="records", indent=4)
+    tmp_path.replace(path)
 
 
 async def run_repeated_priors(
@@ -145,20 +163,55 @@ async def run_repeated_priors(
     parse_model: str,
     exclude_descriptions: bool,
     max_concurrent: int,
+    checkpoint_path: Path | None = None,
+    resume: bool = True,
 ) -> pd.DataFrame:
-    frames = []
+    all_rows = []
+    completed: set[tuple[int, str]] = set()
+
+    if checkpoint_path is not None and resume and checkpoint_path.exists():
+        checkpoint_df = pd.read_json(checkpoint_path)
+        all_rows = checkpoint_df.to_dict("records")
+        completed = {
+            (int(row["run_id"]), str(row["filename"]))
+            for row in all_rows
+            if "run_id" in row and "filename" in row
+        }
+        print(f"Loaded checkpoint with {len(all_rows)} rows from {checkpoint_path}")
+
+    def checkpoint_row(row: dict) -> None:
+        all_rows.append(row)
+        completed.add((int(row["run_id"]), str(row["filename"])))
+        if checkpoint_path is not None:
+            checkpoint_df = pd.DataFrame(all_rows).sort_values(["run_id", "filename"])
+            write_json_atomic(checkpoint_df, checkpoint_path)
+            print(
+                f"Checkpointed {len(all_rows)} rows to {checkpoint_path}",
+                flush=True,
+            )
+
     for run_id in range(repeats):
+        pending_paths = [
+            path for path in bif_paths if (run_id, path.stem) not in completed
+        ]
+        if not pending_paths:
+            print(f"Prior run {run_id + 1}/{repeats} already complete; skipping.")
+            continue
         print(f"Prior run {run_id + 1}/{repeats}")
-        df = await evaluate_priors(
-            bif_paths=bif_paths,
+        await evaluate_priors(
+            bif_paths=pending_paths,
             prior_model=prior_model,
             parse_model=parse_model,
             exclude_descriptions=exclude_descriptions,
             max_concurrent=max_concurrent,
+            row_context={"run_id": run_id},
+            row_callback=checkpoint_row,
         )
-        df["run_id"] = run_id
-        frames.append(df)
-    return pd.concat(frames, ignore_index=True)
+    if not all_rows:
+        return pd.DataFrame()
+    return pd.DataFrame(all_rows).sort_values(["run_id", "filename"]).reset_index(
+        drop=True
+    )
 
 
 def aggregate_priors(priors_path: Path, bifs_path: Path) -> pd.DataFrame:
@@ -214,6 +267,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max_concurrent", type=int, default=8)
     parser.add_argument("--results_dir", default="results/llm_constraints")
     parser.add_argument("--exclude_descriptions", action="store_true")
+    parser.add_argument("--no_resume", action="store_true")
     parser.add_argument("--names", nargs="*", help="Optional BIFXML stems or filenames for smoke runs.")
     return parser.parse_args()
 
@@ -230,6 +284,7 @@ async def main() -> None:
 
     raw_path = output_dir / f"{args.output_prefix}.json"
     consensus_path = output_dir / f"{args.output_prefix}-consensus.json"
+    checkpoint_path = output_dir / f"{args.output_prefix}.partial.json"
 
     raw_df = await run_repeated_priors(
         bif_paths=bif_paths,
@@ -238,6 +293,8 @@ async def main() -> None:
         parse_model=args.parse_model,
         exclude_descriptions=args.exclude_descriptions,
         max_concurrent=args.max_concurrent,
+        checkpoint_path=checkpoint_path,
+        resume=not args.no_resume,
     )
     raw_df.to_json(raw_path, orient="records", indent=4)
 
