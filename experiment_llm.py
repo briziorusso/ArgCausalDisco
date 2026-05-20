@@ -1,0 +1,836 @@
+# %% [markdown]
+# ## Experimental Setup
+
+# %%
+
+import argparse
+import logging
+import re
+from pathlib import Path
+from typing import Callable
+
+import numpy as np
+import pandas as pd
+import pyagrum as gum
+from tqdm import tqdm
+
+from abapc import ABAPC
+from utils.helpers import random_stability
+from priors.schema import Constraints, PriorKnowledge
+
+
+def load_dataset(
+    bif_path: Path, sample_size: int, seed: int
+) -> tuple[gum.BayesNet, np.ndarray]:
+    bn = gum.loadBN(str(bif_path))
+    bn.name = bif_path.stem
+
+    gum.initRandom(seed=seed)
+    df = gum.generateSample(bn, sample_size, with_labels=False, random_order=False)[0]
+    sorted_vars = sorted(df.columns)
+    data = df[sorted_vars].to_numpy().astype(float)
+
+    return bn, data
+
+def extract_facts(string: str) -> list[dict]:
+    pattern = re.compile(r"ext_((in)?dep)\((.+)\). I=([01].\d+), NA\n")
+    matches = pattern.findall(string)
+    facts = []
+    for match in matches:
+        cit_type, _, triple, score = match
+        X, Y, S = triple.split(",")
+        facts.append(
+            {
+                "cit_type": cit_type,
+                "X": int(X),
+                "Y": int(Y),
+                "S": set() if S == "empty" else {int(var) for var in S[1:].split("y")},
+                "score": float(score),
+            }
+        )
+    return pd.DataFrame(facts).sort_values(
+        by="score", ascending=False, ignore_index=True
+    )
+
+# %% [markdown]
+# ### Define Causal ABA Interface to call both implementations
+
+# %%
+import os
+from datetime import datetime
+from itertools import combinations
+
+import rustworkx as rx
+from clingo import Control, Function, Number
+
+from utils.graph_utils import extract_test_elements_from_symbol, powerset, set_of_models_to_set_of_graphs
+
+def compile_and_ground(n_nodes:int, facts_location:str="",
+                skeleton_rules_reduction:bool=False,
+                weak_constraints:bool=False,
+                indep_facts:dict[tuple[int, int], set[tuple]]=dict(),
+                dep_facts:dict[tuple[int, int], set[tuple]]=dict(),
+                opt_mode:str='optN',
+                show:list=['arrow'],
+                pre_grounding:bool=False,
+                ext_flag: bool = False,
+                prior_knowledge: PriorKnowledge | None = None,
+                )->Control:
+
+    logging.info("Compiling the program")
+    ### Create Control
+    cpu_count = min(os.cpu_count() or 1, 64)
+    ctl = Control(['-t %d' % cpu_count])
+    ctl.configuration.solve.parallel_mode = cpu_count
+    ctl.configuration.solve.models=5
+    ctl.configuration.solver.seed="2024"
+    ctl.configuration.solve.opt_mode = opt_mode
+
+    ### Add set definition
+    condition_sets = (
+        set().union(*indep_facts.values(), *dep_facts.values())
+        if skeleton_rules_reduction
+        else powerset(range(n_nodes))
+    )
+    for S in tqdm(condition_sets):
+        for s in S:
+            set_str = f"in({s},{'s' + 'y'.join([str(i) for i in S])})."
+            ctl.add("specific", [], set_str)
+            logging.debug(f"   {set_str}")
+
+    ### Load main program and facts
+    ctl.load(str(Path(__file__).resolve().parent / 'encodings' / 'causalaba.lp'))
+    if facts_location != "":
+        ctl.load(facts_location)
+        if weak_constraints:
+            ctl.load(facts_location.replace(".lp","_wc.lp"))
+
+    ctl.add("specific", [], "indep(X,Y,S) :- ext_indep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+    ctl.add("specific", [], "dep(X,Y,S) :- ext_dep(X,Y,S), var(X), var(Y), set(S), X!=Y.")
+    ### add nonblocker rules
+    logging.info("   Adding Specific Rules...")
+
+    ### Active paths rules
+    n_p = 0
+    G = rx.generators.complete_graph(n_nodes)
+    if skeleton_rules_reduction:
+        forbidden_edges = indep_facts.keys()
+        G.remove_edges_from(set(G.edge_list()) & forbidden_edges)
+        for (X, Y) in forbidden_edges:
+            ctl.add("specific", [], f":- edge({X},{Y}).")
+    if prior_knowledge is not None:
+        for (X, Y) in prior_knowledge.forbidden:
+            if not skeleton_rules_reduction or ((X, Y) not in forbidden_edges and (Y, X) not in forbidden_edges):
+                ctl.add("specific", [], f":- arrow({X},{Y}).")
+        for (X, Y) in prior_knowledge.required:
+            if not skeleton_rules_reduction or ((X, Y) not in forbidden_edges and (Y, X) not in forbidden_edges):
+                ctl.add("specific", [], f"arrow({X},{Y}).")
+            else:
+                logging.warning(f"Required edge ({X},{Y}) is in the forbidden edges set.")
+
+    node_pairs = tuple(dep_facts | indep_facts if skeleton_rules_reduction else combinations(range(n_nodes),2))
+    logging.info(f"{len(node_pairs) / (n_nodes*(n_nodes-1)/2):.2%} of all node pairs will be considered for active paths.")
+
+    if skeleton_rules_reduction is False:
+        pre_grounding = False
+    for (X, Y) in tqdm(node_pairs):
+        for path in rx.all_simple_paths(G, X, Y):
+            n_p += 1
+            ### add path rule
+            path_edges = [f"edge({path[idx]},{path[idx+1]})" for idx in range(len(path)-1)]
+            ctl.add("specific", [], f"p{n_p} :- {','.join(path_edges)}.")
+            logging.debug(f"   p{n_p} :- {','.join(path_edges)}.")
+
+            ### add active path rule
+            if pre_grounding:
+                condition_sets = set()
+                if (X,Y) in dep_facts:
+                    condition_sets.update(dep_facts[(X,Y)])
+                if (X,Y) in indep_facts:
+                    condition_sets.update(indep_facts[(X,Y)])
+                for S in condition_sets:
+                    s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
+                    nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},{s_str})" for idx in range(1,len(path)-1)]
+                    nbs_str = ", " + ','.join(nbs) if len(nbs) > 0 else ""
+                    ctl.add("specific", [], f"ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
+                    logging.debug(f"   ap({X},{Y},p{n_p},{s_str}) :- p{n_p}{nbs_str}.")
+
+                    if S in indep_facts.get((X,Y), set()):
+                        ext_premise = f"ext_indep({X},{Y},{s_str}), " if ext_flag else ""
+                        ctl.add("specific", [], f"dep({X},{Y},{s_str}) :- {ext_premise}ap({X},{Y},p{n_p},{s_str}).")
+            else:
+                nbs = [f"nb({path[idx]},{path[idx-1]},{path[idx+1]},S)" for idx in range(1,len(path)-1)]
+                nbs_str = ','.join(nbs)+"," if len(nbs) > 0 else ""
+                ctl.add("specific", [], f"ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+                logging.debug(f"   ap({X},{Y},p{n_p},S) :- p{n_p}, {nbs_str} not in({X},S), not in({Y},S), set(S).")
+
+        if (X, Y) in dep_facts:
+            if pre_grounding:
+                for S in dep_facts[(X, Y)]:
+                    s_str = 'empty' if not S else 's'+'y'.join([str(i) for i in S])
+                    ext_premise = f"ext_dep({X},{Y},{s_str}), " if ext_flag else ""
+                    ctl.add("specific", [], f"indep({X},{Y},{s_str}) :- {ext_premise}not ap({X},{Y},_,{s_str}).")
+            else:
+                ext_premise = f"ext_dep({X},{Y},S), " if ext_flag else ""
+                ctl.add("specific", [], f"indep({X},{Y},S) :- {ext_premise}not ap({X},{Y},_,S), set(S).")
+        if (X, Y) in indep_facts and pre_grounding is False:
+            ext_premise = f"ext_indep({X},{Y},S), " if ext_flag else ""
+            ctl.add("specific", [], f"dep({X},{Y},S) :- {ext_premise}ap({X},{Y},_,S), set(S).")
+
+    logging.info(f"{n_p} active paths added.")
+
+    ### add show statements
+    if 'arrow' in show:
+        ctl.add("base", [], "#show arrow/2.")
+    if 'indep' in show:
+        ctl.add("base", [], "#show indep/3.")
+    if 'dep' in show:
+        ctl.add("base", [], "#show dep/3.")
+    if 'collider' in show:
+        ctl.add("base", [], "#show collider/3.")
+    if 'collider_desc' in show:
+        ctl.add("base", [], "#show collider_desc/4.")
+    if 'nb' in show:
+        ctl.add("base", [], "#show nb/4.")
+    if 'ap' in show:
+        ctl.add("base", [], "#show ap/4.")
+    if 'dpath' in show:
+        ctl.add("base", [], "#show dpath/2.")
+
+    ### Ground
+    logging.info("   Grounding...")
+    start_ground = datetime.now()
+    ctl.ground([("base", []), ("facts", []), ("specific", []), ("main", [Number(n_nodes-1)])])
+    logging.info(f"   Grounding time: {str(datetime.now()-start_ground)}")
+
+    return ctl
+
+
+def CausalABA(
+    n_nodes: int,
+    compile_and_ground: Callable,
+    facts_location: str = "",
+    print_models: bool = True,
+    skeleton_rules_reduction: bool = False,
+    weak_constraints: bool = False,
+    opt_mode: str = "optN",
+    show: list = ["arrow"],
+    pre_grounding: bool = False,
+    disable_reground: bool = False,
+    prior_knowledge: PriorKnowledge | None = None,
+) -> list:
+    """
+    CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.
+
+    """
+    # (X, Y) -> their condition sets S
+    indep_facts: dict[tuple, set[tuple]] = {}
+    dep_facts: dict[tuple, set[tuple]] = {}
+    facts = []
+    ext_flag = False
+    if facts_location:
+        facts_loc = (
+            facts_location.replace(".lp", "_I.lp")
+            if weak_constraints
+            else facts_location
+        )
+        logging.debug(f"   Loading facts from {facts_location}")
+        with open(facts_loc, "r") as file:
+            for line in file:
+                if "dep" not in line or line.startswith("%"):
+                    continue
+                line_clean = line.replace("#external ", "").replace("\n", "")
+                if "ext_" in line_clean:
+                    ext_flag = True
+                if weak_constraints:
+                    statement, Is = line_clean.split(" I=")
+                    I, truth = Is.split(",")
+                    X, S, Y, dep_type = extract_test_elements_from_symbol(statement)
+                    facts.append((X, S, Y, dep_type, statement, float(I), truth))
+                else:
+                    X, S, Y, dep_type = extract_test_elements_from_symbol(line_clean)
+                    facts.append((X, S, Y, dep_type, line_clean, np.nan, "unknown"))
+
+                assert (X not in S) and (Y not in S), f"X or Y in S: {line_clean}"
+                condition_set = tuple(S)
+
+                facts_group = indep_facts if "indep" in line_clean else dep_facts
+                if (X, Y) not in facts_group:
+                    facts_group[(X, Y)] = set()
+                assert condition_set not in facts_group[(X, Y)], (
+                    f"Redundant external fact: {line_clean}"
+                )
+                facts_group[(X, Y)].add(condition_set)
+
+    facts = sorted(facts, key=lambda x: x[5], reverse=True)
+    ctl = compile_and_ground(
+        n_nodes,
+        facts_location,
+        skeleton_rules_reduction,
+        weak_constraints,
+        indep_facts,
+        dep_facts,
+        opt_mode,
+        show,
+        pre_grounding,
+        ext_flag,
+        prior_knowledge,
+    )
+
+    for fact in facts:
+        ctl.assign_external(
+            Function(
+                fact[3],
+                [
+                    Number(fact[0]),
+                    Number(fact[2]),
+                    Function(fact[4].replace(").", "").split(",")[-1]),
+                ],
+            ),
+            True,
+        )
+        logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+    models = []
+    logging.info("   Solving...")
+    with ctl.solve(yield_=True) as handle:
+        for model in handle:
+            models.append(model.symbols(shown=True))
+            if print_models:
+                logging.info(f"Answer {len(models)}: {model}")
+    n_models = int(ctl.statistics["summary"]["models"]["enumerated"])
+    logging.info(f"Number of models: {n_models}")
+    times = {
+        key: ctl.statistics["summary"]["times"][key]
+        for key in ["total", "cpu", "solve"]
+    }
+    logging.info(f"Times: {times}")
+    remove_n = 0
+    logging.info(f"Number of facts removed: {remove_n}")
+
+    ## start removing facts if no models are found
+    while n_models == 0 and remove_n < len(facts):
+        remove_n += 1
+        logging.info(f"Number of facts removed: {remove_n}")
+
+        reground = False
+        fact_to_remove = facts[-remove_n]
+        X, S, Y, dep_type, fact_str = fact_to_remove[:5]
+        logging.debug(f"Removing fact {fact_str}")
+
+        facts_group = indep_facts if dep_type == "ext_indep" else dep_facts
+        facts_group[(X, Y)].remove(tuple(S))
+        if not facts_group[(X, Y)]:
+            del facts_group[(X, Y)]
+            reground = (
+                disable_reground is False
+                and skeleton_rules_reduction
+                and (ext_flag is False or dep_type == "ext_indep")
+            )
+        else:
+            logging.debug(
+                f"   Not removing fact {fact_str} because there are multiple facts with the same X and Y"
+            )
+        ctl.assign_external(
+            Function(
+                dep_type,
+                [
+                    Number(X),
+                    Number(Y),
+                    Function(fact_str.replace(").", "").split(",")[-1]),
+                ],
+            ),
+            None,
+        )
+
+        if reground:
+            ### Save external statements
+            logging.info("Recompiling and regrounding...")
+            ctl = compile_and_ground(
+                n_nodes,
+                facts_location,
+                skeleton_rules_reduction,
+                weak_constraints,
+                indep_facts,
+                dep_facts,
+                opt_mode,
+                show,
+                pre_grounding=pre_grounding,
+                ext_flag=ext_flag,
+                prior_knowledge=prior_knowledge,
+            )
+            for fact in facts[:-remove_n]:
+                ctl.assign_external(
+                    Function(
+                        fact[3],
+                        [
+                            Number(fact[0]),
+                            Number(fact[2]),
+                            Function(fact[4].replace(").", "").split(",")[-1]),
+                        ],
+                    ),
+                    True,
+                )
+                logging.debug(f"   True fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+            for fact in facts[-remove_n:]:
+                ctl.assign_external(
+                    Function(
+                        fact[3],
+                        [
+                            Number(fact[0]),
+                            Number(fact[2]),
+                            Function(fact[4].replace(").", "").split(",")[-1]),
+                        ],
+                    ),
+                    None,
+                )
+                logging.debug(f"   False fact: {fact[4]} I={fact[5]}, truth={fact[6]}")
+        models = []
+        logging.info("   Solving...")
+        with ctl.solve(yield_=True) as handle:
+            for model in handle:
+                if model.optimality_proven:
+                    models.append(model.symbols(shown=True))
+                if print_models:
+                    logging.info(f"Answer {len(models)}: {model}")
+        n_models = int(ctl.statistics["summary"]["models"]["enumerated"])
+        logging.info(f"Number of models: {n_models}")
+        times = {
+            key: ctl.statistics["summary"]["times"][key]
+            for key in ["total", "cpu", "solve"]
+        }
+        logging.info(f"Times: {times}")
+
+    models, _ = set_of_models_to_set_of_graphs(models, n_nodes, False)
+    return {
+        "remove_n": remove_n,
+        "statistics": ctl.statistics,
+        "models": models,
+    }
+
+
+# %% [markdown]
+# ### Define the evaluation function to compare performance of two different implementations
+
+# %%
+import timeit
+from typing import Any
+
+from tqdm import tqdm
+from sklearn.metrics import average_precision_score
+
+import abapc
+import causalaba
+import causalaba_increm
+from causalaba_increm import CausalABA as FastCausalABA
+
+abapc.tqdm = tqdm  # Avoid using progress bar widgets
+causalaba.tqdm = tqdm  # Avoid using progress bar widgets
+causalaba_increm.tqdm = tqdm  # Avoid using progress bar widgets
+
+def retained_facts_score(df_ranked: pd.DataFrame, remove_n: int) -> dict[str, float]:
+    df_retained = df_ranked if remove_n == 0 else df_ranked.iloc[:-remove_n]
+    precision = df_retained["correct"].sum() / len(df_retained)
+    recall = df_retained["correct"].sum() / df_ranked["correct"].sum()
+    f1 = 2 * precision * recall / (precision + recall)
+    return {"CIT_Precision": precision, "CIT_Recall": recall, "CIT_F1": f1}
+
+
+def compare_performance(
+    bif_path: str | Path,
+    sample_size: int,
+    prior_df: pd.DataFrame | None,
+    repeats: int = 1,
+) -> tuple[str, int, float, float, list, list, np.ndarray, Any]:
+    random_stability(2024)
+    seeds = np.random.randint(0, 10000, size=repeats).tolist()
+
+    if isinstance(bif_path, str):
+        bif_path = Path(bif_path)
+
+    impl1_return = []
+    impl2_return = []
+    impl1 = with_optional_prior(prior_df=prior_df)
+    impl2 = with_optional_prior(prior_df=None)
+
+    for seed in seeds:
+        bn_true, data = load_dataset(bif_path, sample_size=sample_size, seed=seed)
+        facts_I_path, _ = ABAPC(
+            data,
+            seed=seed,
+            alpha=0.01,
+            indep_test="gsq",
+            S_weight=False,
+            out_mode="facts_only",
+            scenario="prior_comparison",
+        )
+        facts_path = facts_I_path.replace("_I.lp", ".lp")
+        
+        sorted_vars = sorted(bn_true.names())
+        df = extract_facts(Path(facts_I_path).read_text())
+        df["X"] = df["X"].apply(lambda x: sorted_vars[x])
+        df["Y"] = df["Y"].apply(lambda y: sorted_vars[y])
+        df["S"] = df["S"].apply(lambda s: {sorted_vars[i] for i in s})
+        df["correct"] = df.apply(
+            lambda row: (
+                row["cit_type"] == "indep"
+                if bn_true.isIndependent(row["X"], row["Y"], row["S"])
+                else (row["cit_type"] == "dep")
+            ),
+            axis=1,
+        )
+        average_precision = average_precision_score(
+            df["correct"], df["score"]
+        )
+        df_ranked = df.sort_values(by="score", ascending=False).reset_index(drop=True)
+
+        timer = timeit.timeit(impl1(bn_true, facts_path, impl1_return), number=1)
+        impl1_return[-1]["time"] = timer
+        impl1_return[-1]["seed"] = seed
+        impl1_return[-1]["AP"] = average_precision
+        impl1_return[-1].update(retained_facts_score(df_ranked, remove_n=impl1_return[-1]["remove_n"]))
+
+        timer = timeit.timeit(impl2(bn_true, facts_path, impl2_return), number=1)
+        impl2_return[-1]["time"] = timer
+        impl2_return[-1]["seed"] = seed
+        impl2_return[-1]["AP"] = average_precision
+        impl2_return[-1].update(retained_facts_score(df_ranked, remove_n=impl2_return[-1]["remove_n"]))
+
+    return bif_path.stem, impl1_return, impl2_return
+
+# %% [markdown]
+# ## Compare Causal ABA performance with/without prior knowledge
+
+# %%
+def with_optional_prior(prior_df: pd.DataFrame | None = None):
+    def impl_wrapper(bn: gum.BayesNet, facts_path: str, return_ref: list) -> Callable:
+        prior_knowledge = None
+        if prior_df is not None:
+            filename = bn.property("name")
+            prior_knowledge = PriorKnowledge(
+                variables=bn.names(),
+                constraints=Constraints(
+                    **prior_df[prior_df["filename"] == filename]["priors"].iloc[
+                        0
+                    ],
+                ),
+            )
+
+        def helper():
+            solver_result = FastCausalABA(
+                n_nodes=bn.size(),
+                facts_location=facts_path,
+                print_models=False,
+                skeleton_rules_reduction=True,
+                weak_constraints=True,
+                opt_mode="optN",
+                search_for_models="first",
+                pre_grounding=True,  # Accepted for compatibility; incremental solver uses compact grounding.
+                prior_knowledge=prior_knowledge,
+                disable_reground=True,
+                return_statistics=True,
+            )
+            model_sets, multiple_solutions, statistics, remove_n, profile = solver_result[:5]
+            if multiple_solutions:
+                models = set()
+                for model_set in model_sets:
+                    converted, _ = set_of_models_to_set_of_graphs(
+                        model_set, bn.size(), False
+                    )
+                    models.update(converted)
+            else:
+                models, _ = set_of_models_to_set_of_graphs(
+                    model_sets, bn.size(), False
+                )
+            return_ref.append(
+                {
+                    "remove_n": remove_n,
+                    "statistics": statistics,
+                    "models": models,
+                    "profile": profile,
+                }
+            )
+
+        return helper
+
+    return impl_wrapper
+
+# %%
+from typing import Iterable
+
+import abapc
+from utils.graph_utils import DAGMetrics, dag2cpdag
+
+
+repeats = 50
+MAX_NODES = 20  # Skip graphs larger than this for performance reasons
+report_cols = [
+    "time",
+    "remove_n",
+    "dag_F1",
+    "dag_shd",
+    "dag_sid",
+    "AP",
+    "CIT_Precision",
+    "CIT_F1",
+]
+report_stats = {col: ["mean", "std"] for col in report_cols}
+Path("logs").mkdir(exist_ok=True)
+
+
+def show_report(df: pd.DataFrame):
+    groups = df.groupby(["dataset", "impl"])
+    stats = groups.agg(report_stats)
+    meta = groups.agg({"num_nodes": "first", "num_edges": "first"})
+    meta["repeats"] = groups.size()
+    meta.columns = pd.MultiIndex.from_product([["meta"], meta.columns])
+    index = (
+        groups["num_nodes"].first().reset_index().sort_values(["num_nodes", "dataset", "impl"]).set_index(["dataset", "impl"]).index
+    )
+    return pd.concat([meta, stats], axis=1).loc[index]
+
+
+def get_sorted_adjacency(bn: gum.BayesNet) -> np.ndarray:
+    """Get the adjacency matrix of the Bayesian network sorted by variable names."""
+    alphabetical_order = [bn.idFromName(var) for var in sorted(bn.names())]
+    adj = bn.adjacencyMatrix()
+    return adj[np.ix_(alphabetical_order, alphabetical_order)]
+
+def run_experiment(
+    prior_df: pd.DataFrame | None,
+    datasets: Iterable[Path],
+    sample_size: int = 5000,
+    n_repeats: int | None = None,
+):
+    all_runs = []
+    skipped = []
+    repeat_count = repeats if n_repeats is None else n_repeats
+
+    for random_graph_path in tqdm(datasets):
+        filename = random_graph_path.stem
+        priors_row = prior_df[prior_df["filename"] == filename]["priors"]
+        if priors_row.empty or not (priors_row.iloc[0]["forbidden"] or priors_row.iloc[0]["required"]):
+            skipped.append(filename)
+            continue
+
+        bn = gum.loadBN(str(random_graph_path))
+        B_true = get_sorted_adjacency(bn)
+        if bn.size() > MAX_NODES:
+            continue
+
+        print(f"Processing {random_graph_path.name}...")
+        (
+            bif_name,
+            impl1_return,
+            impl2_return,
+        ) = compare_performance(
+            bif_path=random_graph_path,
+            sample_size=sample_size,
+            prior_df=prior_df,
+            repeats=repeat_count,
+        )
+
+        # Flatten results; each 'run' already carries its seed and run_id
+        for impl_name, results in [("org", impl2_return), ("new", impl1_return)]:
+            for run in results:
+                models = run["models"]
+                n_dag_models = len(models)
+                n_models_enumerated = int(run["statistics"]["summary"]["models"]["enumerated"])
+                cd_metrics = []
+                cpdag_hashes = set()
+                for model in models:
+                    B_est = np.zeros((bn.size(), bn.size()))
+                    for edge in model:
+                        B_est[edge[0], edge[1]] = 1
+                    model = B_est
+                    # DAG metrics
+                    B_est_dag = (model > 0).astype(int)
+                    mt_dag = DAGMetrics(B_est_dag, B_true).metrics
+
+                    # CPDAG metrics
+                    B_est_cpdag = (model != 0).astype(int)
+                    cpdag = dag2cpdag(B_est_cpdag)
+                    cpdag_hashes.add(cpdag.tobytes())
+                    mt_cpdag = DAGMetrics(cpdag, B_true).metrics
+                    cpdag_sid = mt_cpdag.pop("sid")
+                    if not isinstance(cpdag_sid, tuple):
+                        cpdag_sid = (cpdag_sid, cpdag_sid)
+                    mt_cpdag["sid_low"], mt_cpdag["sid_high"] = cpdag_sid
+                    cd_metrics.append({
+                        **{f"dag_{k}": v for k, v in mt_dag.items()},
+                        **{f"cpdag_{k}": v for k, v in mt_cpdag.items()},
+                    })
+                cd_metrics_df = pd.DataFrame(cd_metrics)
+                n_cpdag_models = len(cpdag_hashes)
+                if len(cd_metrics_df) > 10:
+                    cd_metrics_df.to_csv("logs/example.csv", index=False)
+
+                # Save this run's results in a flat dict
+                all_runs.append(
+                    {
+                        "dataset": bif_name,
+                        "num_nodes": bn.size(),
+                        "num_edges": bn.sizeArcs(),
+                        "impl": impl_name,
+                        "seed": run["seed"],
+                        "time": run["time"],
+                        "remove_n": run["remove_n"],
+                        "n_models_enumerated": n_models_enumerated,
+                        "n_dag_models": n_dag_models,
+                        "n_cpdag_models": n_cpdag_models,
+                        # **{f"dag_{k}": v for k, v in mt_dag.items()},
+                        # **{f"cpdag_{k}": v for k, v in mt_cpdag.items()},
+                        **cd_metrics_df.mean().to_dict(),
+                        "AP": run["AP"],
+                        "CIT_Precision": run["CIT_Precision"],
+                        "CIT_Recall": run["CIT_Recall"],
+                        "CIT_F1": run["CIT_F1"],
+                    }
+                )
+
+    return pd.DataFrame(all_runs), skipped
+
+# %% [markdown]
+# ### Run experiments for different dataset types
+
+# %%
+
+def run_dataset_experiment(
+    type_,
+    prior_json: str | Path | None = None,
+    dataset_dir: str | Path | None = None,
+    results_path: str | Path | None = None,
+    report_path: str | Path | None = None,
+    sample_size: int = 5000,
+    n_repeats: int | None = None,
+    names: list[str] | None = None,
+):
+    """Run experiment for a specific dataset type.
+    
+    Args:
+        type_ (str): Dataset type identifier (e.g., 'bnlearn-desc', 'synthetic')
+    
+    Returns:
+        tuple: (results_df, skipped_files)
+    """
+    # Parse dataset type to get base name
+    base_name = type_.split('-')[0]  # 'bnlearn' or 'synthetic'
+    
+    # Set up paths based on dataset type
+    dataset_path = Path(dataset_dir) if dataset_dir is not None else Path(f"{base_name}/")
+    datasets = sorted(dataset_path.glob("*.bifxml"))
+    if names:
+        wanted = {Path(name).stem for name in names}
+        datasets = [path for path in datasets if path.stem in wanted]
+        missing = sorted(wanted - {path.stem for path in datasets})
+        if missing:
+            raise SystemExit(f"Requested BIFXML names not found in {dataset_path}: {missing}")
+    
+    # Load appropriate prior constraints
+    prior_json = Path(prior_json) if prior_json is not None else Path(f"results/llm_constraints/{type_}-consensus.json")
+    prior_df = pd.read_json(prior_json)
+    
+    # Run experiment
+    res_df, skipped = run_experiment(
+        prior_df=prior_df, 
+        datasets=datasets,
+        sample_size=sample_size,
+        n_repeats=n_repeats,
+    )
+    
+    # Save results
+    results_path = Path(results_path) if results_path is not None else Path(f"results/ABAPC-LLM/{type_}-results.csv")
+    results_path.parent.mkdir(parents=True, exist_ok=True)
+    res_df.to_csv(results_path, index=False)
+    
+    # Generate and save report
+    report = show_report(res_df)
+    report_path = Path(report_path) if report_path is not None else Path(f"results/ABAPC-LLM/{type_}-report.csv")
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report.to_csv(report_path)
+    
+    print(f"Results saved to {results_path}")
+    print(f"Report saved to {report_path}")
+    
+    return res_df, skipped
+
+# %%
+def join_results(json_path, csv_path):
+    """Join the prior JSON and ABAPC-LLM CSV results.
+
+    Args:
+        json_path (str): Path to the JSON file containing prior results.
+        csv_path (str): Path to the CSV file containing ABAPC-LLM results.
+
+    Returns:
+        pd.DataFrame: Merged DataFrame containing results from both sources.
+    """
+    json_df = pd.read_json(json_path)
+    prior_metrics = ["length", "Precision", "Recall", "F1"]
+    forbidden_metrics = [f"forbidden_{m}" for m in prior_metrics]
+    required_metrics = [f"required_{m}" for m in prior_metrics]
+    json_metrics = ['filename', *forbidden_metrics, *required_metrics]
+    json_df = json_df[json_metrics]
+    json_df = json_df.rename(columns={
+        k: f"prior_{k}" for k in json_df.columns
+    })
+
+    csv_df = pd.read_csv(csv_path)
+    merged = pd.merge(
+        csv_df,
+        json_df,
+        left_on=["dataset"],
+        right_on=["prior_filename"],
+        how="left"
+    )
+
+    prior_cols = [col for col in merged.columns if col.startswith("prior_") and col != "prior_filename"]
+    if "impl" in merged.columns:
+        merged.loc[merged["impl"] != "new", prior_cols] = float('nan')
+
+    return merged
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run ABAPC with and without LLM prior knowledge for one dataset group."
+    )
+    parser.add_argument("--type", default="synthetic-desc-gpt55")
+    parser.add_argument("--prior_json")
+    parser.add_argument("--dataset_dir", default="synthetic")
+    parser.add_argument("--results_path")
+    parser.add_argument("--report_path")
+    parser.add_argument("--merged_path")
+    parser.add_argument("--sample_size", type=int, default=5000)
+    parser.add_argument("--n_runs", type=int, default=50)
+    parser.add_argument("--names", nargs="*", help="Optional BIFXML stems or filenames for smoke runs.")
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    prior_json = args.prior_json or f"results/llm_constraints/{args.type}-consensus.json"
+    results_path = args.results_path or f"results/ABAPC-LLM/{args.type}-results.csv"
+    report_path = args.report_path or f"results/ABAPC-LLM/{args.type}-report.csv"
+    merged_path = args.merged_path or f"results/ABAPC-LLM/merged_{args.type}.csv"
+
+    res_df, skipped = run_dataset_experiment(
+        type_=args.type,
+        prior_json=prior_json,
+        dataset_dir=args.dataset_dir,
+        results_path=results_path,
+        report_path=report_path,
+        sample_size=args.sample_size,
+        n_repeats=args.n_runs,
+        names=args.names,
+    )
+    print(f"Skipped files: {skipped}")
+
+    merged_df = join_results(prior_json, results_path)
+    Path(merged_path).parent.mkdir(parents=True, exist_ok=True)
+    merged_df.to_csv(merged_path, index=False)
+    print(f"Joined results saved to {merged_path}")
+    print(f"Rows written: {len(res_df)}")
+
+
+if __name__ == "__main__":
+    main()

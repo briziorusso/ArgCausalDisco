@@ -1,0 +1,20 @@
+model_list:
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      model: gemini/gemini-2.5-pro
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+  - model_name: gemini-2.5-flash-lite
+    litellm_params:
+      model: gemini/gemini-2.5-flash-lite-preview-06-17
+  # - model_name: gpt55
+  #   litellm_params:
+  #     model: openai/gpt-5.5
+  #     api_key: os.environ/OPENAI_API_KEY
+  - model_name: gpt5mini
+    litellm_params:
+      model: openai/gpt-5-mini
+      api_key: os.environ/OPENAI_API_KEY
+litellm_settings:
+    drop_params: true

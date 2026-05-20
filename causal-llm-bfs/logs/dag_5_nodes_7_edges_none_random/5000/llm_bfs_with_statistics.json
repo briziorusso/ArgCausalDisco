@@ -1,0 +1,1 @@
+{"precision": 0.7777777777777778, "recall": 1.0, "Number of predicted edges": 9, "Number of true edges": 7, "F_score": 0.8750000000000001, "SID": "Not a DAG", "Is true graph a DAG?": true, "Is estimated graph a DAG?": true, "NHD": 0.08, "REFERENCE NHD": 0.64, "RATIO": 0.125, "accuracy": 0.7777777777777778}

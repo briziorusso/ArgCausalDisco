@@ -1,0 +1,120 @@
+<?xml version="1.0" ?>
+
+<BIF VERSION="0.3">
+<NETWORK>
+<NAME>survey</NAME>
+<PROPERTY>software aGrUM</PROPERTY>
+
+<!-- Variables -->
+<VARIABLE TYPE="nature">
+	<NAME>A</NAME>
+	<PROPERTY>description = Age: the age, recorded as young (young) for individuals below 30 years old, adult (adult) for individuals between 30 and 60 years old, and old (old) for people older than 60.</PROPERTY>
+	<PROPERTY>fast = A{young|adult|old}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>young</OUTCOME>
+	<OUTCOME>adult</OUTCOME>
+	<OUTCOME>old</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>S</NAME>
+	<PROPERTY>description = Sex: the biological sex, recorded as male (M) or female (F).</PROPERTY>
+	<PROPERTY>fast = S{M|F}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>M</OUTCOME>
+	<OUTCOME>F</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>E</NAME>
+	<PROPERTY>description = Education: the highest level of education or training successfully completed, recorded as up to high school (high) or university degree (uni).</PROPERTY>
+	<PROPERTY>fast = E{high|uni}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>high</OUTCOME>
+	<OUTCOME>uni</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>O</NAME>
+	<PROPERTY>description = Occupation: whether the individual is an employee (emp) or a self-employed (self) worker.</PROPERTY>
+	<PROPERTY>fast = O{emp|self}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>emp</OUTCOME>
+	<OUTCOME>self</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>R</NAME>
+	<PROPERTY>description = Residence: the size of the city the individual lives in, recorded as either small (small) or big (big).</PROPERTY>
+	<PROPERTY>fast = R{small|big}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>small</OUTCOME>
+	<OUTCOME>big</OUTCOME>
+</VARIABLE>
+
+<VARIABLE TYPE="nature">
+	<NAME>T</NAME>
+	<PROPERTY>description = Travel: the means of transport favoured by the individual, recorded either as car (car), train (train) or other (other).</PROPERTY>
+	<PROPERTY>fast = T{car|train|other}</PROPERTY>
+<!- OUTCOME are not used in pyAgrum BIFXML (see fast property) but are kept for compatibility->
+	<OUTCOME>car</OUTCOME>
+	<OUTCOME>train</OUTCOME>
+	<OUTCOME>other</OUTCOME>
+</VARIABLE>
+
+<!-- Probability distributions -->
+<DEFINITION>
+	<FOR>A</FOR>
+	<TABLE>
+		0.3 0.5 0.2
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>S</FOR>
+	<TABLE>
+		0.6 0.4
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>E</FOR>
+	<GIVEN>A</GIVEN>
+	<GIVEN>S</GIVEN>
+	<TABLE>
+		0.75 0.25
+		0.64 0.36
+		0.72 0.28
+		0.7 0.3
+		0.88 0.12
+		0.9 0.1
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>O</FOR>
+	<GIVEN>E</GIVEN>
+	<TABLE>
+		0.96 0.04
+		0.92 0.08
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>R</FOR>
+	<GIVEN>E</GIVEN>
+	<TABLE>
+		0.25 0.75
+		0.2 0.8
+	</TABLE>
+</DEFINITION>
+<DEFINITION>
+	<FOR>T</FOR>
+	<GIVEN>O</GIVEN>
+	<GIVEN>R</GIVEN>
+	<TABLE>
+		0.48 0.42 0.1
+		0.58 0.24 0.18
+		0.56 0.36 0.08
+		0.7 0.21 0.09
+	</TABLE>
+</DEFINITION>
+
+</NETWORK>
+</BIF>

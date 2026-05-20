@@ -5,21 +5,27 @@ numpy
 scikit-learn
 tqdm
 ipykernel
+plotly
 igraph
 pydot
 clingo
 pgmpy
 nbformat
 pmlb
-pgmpy
 python-javabridge
 pyparsing
 pydantic
 torch
 causal-learn
+litellm
+instructor
 gcastle 
-git+git://github.com/xunzheng/notears
+pyagrum
+cdt
+bnlearn
+dagma
+git+https://github.com/xunzheng/notears
 ### the below has to be run in the terminal
-#>>> pip install git+git://github.com/bd2kccd/py-causal --no-deps --no-dependencies
+#>>> pip install git+https://github.com/bd2kccd/py-causal --no-deps --no-dependencies
 #>>> conda create -n potassco -c conda-forge clingo
 #>>> conda activate potassco
