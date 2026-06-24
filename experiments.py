@@ -46,6 +46,7 @@ try:
         simulate_linear_continuous_data,
         BIF_FOLDER_MAP,
     )
+    from .priors.schema import Constraints, build_mpc_background_knowledge
 except ImportError:  # pragma: no cover
     from cd_algorithms.models import run_method
     from utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
@@ -82,6 +83,7 @@ except ImportError:  # pragma: no cover
         simulate_linear_continuous_data,
         BIF_FOLDER_MAP,
     )
+    from priors.schema import Constraints, build_mpc_background_knowledge
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -115,6 +117,7 @@ parser.add_argument('--source', choices=['causenet', 'bnlearn'], required=True, 
 parser.add_argument('--version', required=True, help='Version name for this experiment run')
 parser.add_argument('--models', nargs='*', default=['random'], help='List of models to run')
 parser.add_argument('--results_dir', default='results')
+parser.add_argument('--prior_json', help='Consensus prior JSON used by prior-aware baselines such as mpc_llm')
 
 # CauseNet specific
 parser.add_argument('--bifxml_dir', default=os.path.join('datasets', 'causenet_generator', 'bifxmls'), help='Folder with .bifxml graphs (for source=causenet)')
@@ -293,6 +296,7 @@ names_dict = {
     'fgs': 'FGS',
     'spc': 'Shapley-PC',
     'mpc': 'MPC',
+    'mpc_llm': 'MPC-LLM',
     'cpc': 'CPC',
     'abapc': 'ABAPC (Ours)',
     'cam': 'CAM',
@@ -303,6 +307,68 @@ names_dict = {
     'rnd-dir': 'rnd-dir',
     'random_edge': 'Random (match |E|)'
 }
+
+prior_lookup = {}
+if args.prior_json:
+    prior_json_path = Path(args.prior_json)
+    if not prior_json_path.exists():
+        raise SystemExit(f'Prior JSON not found: {prior_json_path}')
+    prior_df = pd.read_json(prior_json_path)
+    required_prior_cols = {'filename', 'priors', 'variable_descriptions'}
+    missing_prior_cols = required_prior_cols - set(prior_df.columns)
+    if missing_prior_cols:
+        raise SystemExit(
+            f'Prior JSON {prior_json_path} is missing required columns: {sorted(missing_prior_cols)}'
+        )
+    for record in prior_df.to_dict('records'):
+        filename = record.get('filename')
+        if filename in prior_lookup:
+            logging.warning(f'Duplicate prior row for {filename}; keeping the last one.')
+        prior_lookup[filename] = record
+    logging.info(f'Loaded {len(prior_lookup)} prior rows from {prior_json_path}')
+elif 'mpc_llm' in model_list:
+    logging.warning('mpc_llm requested without --prior_json; running plain MPC under the MPC-LLM label.')
+
+mpc_llm_prior_cache = {}
+
+
+def get_mpc_llm_background(dataset_name: str):
+    if dataset_name in mpc_llm_prior_cache:
+        return mpc_llm_prior_cache[dataset_name]
+    if not prior_lookup:
+        mpc_llm_prior_cache[dataset_name] = None
+        return None
+
+    record = prior_lookup.get(dataset_name)
+    if record is None:
+        logging.warning(f'No prior row found for {dataset_name}; mpc_llm will fall back to plain MPC.')
+        mpc_llm_prior_cache[dataset_name] = None
+        return None
+
+    constraints = Constraints(**(record.get('priors') or {}))
+    if not constraints.forbidden and not constraints.required:
+        logging.info(f'Prior row for {dataset_name} has no constraints; mpc_llm will fall back to plain MPC.')
+        mpc_llm_prior_cache[dataset_name] = None
+        return None
+
+    variable_descriptions = record.get('variable_descriptions') or {}
+    if not isinstance(variable_descriptions, dict) or not variable_descriptions:
+        raise SystemExit(f'Prior row for {dataset_name} has no variable_descriptions for MPC node ordering.')
+
+    try:
+        background_knowledge, node_names = build_mpc_background_knowledge(
+            variable_descriptions.keys(),
+            constraints,
+        )
+    except ValueError as exc:
+        raise SystemExit(f'Invalid MPC prior row for {dataset_name}: {exc}') from exc
+
+    logging.info(
+        f'Using MPC-LLM priors for {dataset_name}: '
+        f'{len(constraints.forbidden)} forbidden, {len(constraints.required)} required.'
+    )
+    mpc_llm_prior_cache[dataset_name] = (background_knowledge, node_names)
+    return mpc_llm_prior_cache[dataset_name]
 
 load_existing = load_res or resume
 if load_existing:
@@ -531,6 +597,13 @@ for dataset_name, src, info in datasets:
                     raise ValueError(f'Unknown random method {method}')
                 elapsed = (datetime.now() - start).total_seconds()
             else:
+                method_background_knowledge = None
+                method_node_names = None
+                if method == 'mpc_llm':
+                    mpc_llm_prior = get_mpc_llm_background(dataset_name)
+                    if mpc_llm_prior is not None:
+                        method_background_knowledge, method_node_names = mpc_llm_prior
+
                 return_run_details = method == 'abapc'
                 run_output = run_method(
                     X_s, method, seed, test_alpha=test_alpha, test_name=test_name,
@@ -576,6 +649,8 @@ for dataset_name, src, info in datasets:
                     satcheck_increase_step=satcheck_increase_step,
                     abapc_solver=abapc_solver,
                     return_run_details=return_run_details,
+                    background_knowledge=method_background_knowledge,
+                    node_names=method_node_names,
                 )
                 if return_run_details:
                     W_est, elapsed, run_details = run_output
@@ -604,9 +679,7 @@ for dataset_name, src, info in datasets:
                     mt_cpdag = cpdag_metrics.metrics
                     cpdag_eval_status = getattr(cpdag_metrics, 'eval_status', {}) or {}
                 except Exception as e:
-                    logging.error(f'DAGMetrics computation failed for CPDAG: {e}')
-                    mt_cpdag = empty_metric_result()
-                    cpdag_eval_status = {'graph_eval': {'status': 'error', 'error': str(e), 'timed_out': False}}
+                    raise RuntimeError(f'DAGMetrics computation failed for CPDAG: {e}') from e
 
                 B_est_dag_eval = (W_est > 0).astype(int)
                 bidirected_mask = (B_est_dag_eval == 1) & (B_est_dag_eval.T == 1)
@@ -620,9 +693,7 @@ for dataset_name, src, info in datasets:
                         mt_dag = dag_metrics.metrics
                         dag_eval_status = getattr(dag_metrics, 'eval_status', {}) or {}
                     except Exception as e:
-                        logging.error(f'DAGMetrics computation failed for DAG: {e}')
-                        mt_dag = empty_metric_result()
-                        dag_eval_status = {'graph_eval': {'status': 'error', 'error': str(e), 'timed_out': False}}
+                        raise RuntimeError(f'DAGMetrics computation failed for DAG: {e}') from e
                 else:
                     logging.warning('Estimated graph is not a DAG after bidirected edge removal; skipping DAG metrics for this run.')
                     mt_dag = empty_metric_result()

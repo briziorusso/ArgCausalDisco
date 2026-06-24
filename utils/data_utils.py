@@ -68,7 +68,31 @@ def load_bnlearn_data_dag(dataset_name, data_path, sample_size, seed=1, standard
     random_stability(seed)
     bn = load_bn_from_BIF(main_data_path=data_path, dataset_name=dataset_name, seed=seed)
     ##Simulate data from BN
-    df = bn.simulate(sample_size, seed=seed)
+    try:
+        df = bn.simulate(sample_size, seed=seed)
+    except TypeError as exc:
+        if "DataFrame.from_records" not in str(exc):
+            raise
+        # pgmpy versions that predate recent pandas releases may pass a
+        # DataFrame back into pandas.DataFrame.from_records during sampling.
+        import pgmpy.sampling.base as sampling_base
+        import pgmpy.sampling.Sampling as sampling_mod
+
+        original_base_return = sampling_base._return_samples
+        original_sampling_return = sampling_mod._return_samples
+
+        def _return_samples_compat(samples, state_names_map):
+            if isinstance(samples, pd.DataFrame):
+                return samples
+            return original_base_return(samples, state_names_map)
+
+        sampling_base._return_samples = _return_samples_compat
+        sampling_mod._return_samples = _return_samples_compat
+        try:
+            df = bn.simulate(sample_size, seed=seed)
+        finally:
+            sampling_base._return_samples = original_base_return
+            sampling_mod._return_samples = original_sampling_return
     ##Preprocess categorical data
     df = df[np.sort(df.columns)] ##Sort columns alphabetically to match DAG
     enc = LabelEncoder()

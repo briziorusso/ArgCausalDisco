@@ -66,8 +66,17 @@ def _ensure_cdt_loaded() -> None:
 
     from cdt.metrics import SHD as _SHD, SID as _SID, SID_CPDAG as _SID_CPDAG  # type: ignore
 
+    rscript_path = R_BIN_PATH / "Rscript.exe"
+    if not rscript_path.exists():
+        rscript_path = R_BIN_PATH / "Rscript"
+    if not rscript_path.exists():
+        raise FileNotFoundError(
+            "SID evaluation requires Rscript, but none was found at "
+            f"{R_BIN_PATH}. Set R_HOME to an R installation or install R in the active environment."
+        )
+
     try:
-        cdt.SETTINGS.rpath = str(R_BIN_PATH / "Rscript")
+        cdt.SETTINGS.rpath = str(rscript_path)
     except Exception:
         pass
 
@@ -698,7 +707,9 @@ class DAGMetrics(object):
                 timeout_sec=metric_timeout,
             )
             eval_status["sid"] = {k: v for k, v in sid_result.items() if k != "value"}
-            mt['sid'] = sid_result.get("value", np.nan) if sid_result.get("status") == "ok" else np.nan
+            if sid_result.get("status") != "ok":
+                raise RuntimeError(f"SID computation failed: {sid_result.get('error')}")
+            mt['sid'] = sid_result["value"]
         elif sid and cpdag:
             sid_result = _run_metric_with_timeout(
                 "sid_cpdag",
@@ -707,7 +718,9 @@ class DAGMetrics(object):
                 timeout_sec=metric_timeout,
             )
             eval_status["sid"] = {k: v for k, v in sid_result.items() if k != "value"}
-            mt['sid'] = sid_result.get("value", np.nan) if sid_result.get("status") == "ok" else np.nan
+            if sid_result.get("status") != "ok":
+                raise RuntimeError(f"SID computation failed: {sid_result.get('error')}")
+            mt['sid'] = sid_result["value"]
 
         return mt, eval_status
 

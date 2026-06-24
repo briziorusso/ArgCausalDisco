@@ -194,6 +194,8 @@ def run_method(X,
                satcheck_increase_step:int=2,
                abapc_solver:str='incremental',
                return_run_details:bool=False,
+               background_knowledge=None,
+               node_names=None,
                ):
     """
     Runs the causal discovery method specified by method on the data X
@@ -335,6 +337,16 @@ def run_method(X,
         W_est = fitted.G.graph.T
         elapsed = fitted.PC_elapsed
         logging.info(f'Time taken for MPC: {round(elapsed,2)}s')
+
+    elif method == 'mpc_llm':
+        random_stability(seed)
+        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=5, uc_priority=priority,
+                    selection=selection, show_progress=False, verbose=debug,
+                    background_knowledge=background_knowledge, node_names=node_names)
+        # fitted.draw_pydot_graph()
+        W_est = fitted.G.graph.T
+        elapsed = fitted.PC_elapsed
+        logging.info(f'Time taken for MPC-LLM: {round(elapsed,2)}s')
 
     elif method == 'pc_max':
         random_stability(seed)
