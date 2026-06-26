@@ -21,45 +21,66 @@ import os
 import time
 import networkx as nx
 import pandas as pd
-import torch
-import pydot
 import logging
 import gc
 gc.set_threshold(0,0,0)
 from abapc import ABAPC
 from cd_algorithms.PC import pc
 from utils.helpers import random_stability, get_freer_gpu
-from causallearn.search.PermutationBased.GRaSP import grasp
-from causallearn.search.PermutationBased.BOSS import boss
-
-try:
-    from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
-except:
-    logging.info('Castle not installed')
-    sys.path.append('../trustworthyAI/gcastle/')
-    from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
 
 notears_from = 'notears' ## 'castle' or 'notears'
-try:
-    from notears.nonlinear import NotearsMLP, notears_nonlinear
-except:
-    sys.path.append('../notears/')
-    from notears.nonlinear import NotearsMLP, notears_nonlinear
-  
-try:
-    import cdt
-    # cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
-    from cdt.causality.graph import CAM
-    # os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
-except:
-    logging.info('CDT or R components not installed')
-    sys.path.append('../CausalDiscoveryToolbox/')
-    import cdt
-    # cdt.SETTINGS.rpath = '../R/R-4.1.2/bin/Rscript'
-    # os.environ['R_HOME'] = '../R/R-4.1.2/bin/'
-
 import warnings
 warnings.filterwarnings("ignore")
+
+
+def _import_torch():
+    try:
+        import torch
+    except Exception as exc:
+        raise ImportError(
+            "PyTorch is required for this method but is not installed."
+        ) from exc
+    return torch
+
+
+def _import_castle_algorithms():
+    try:
+        from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
+    except Exception:
+        logging.info('Castle not installed')
+        sys.path.append('../trustworthyAI/gcastle/')
+        from castle.algorithms import MCSL, GraNDAG, NotearsNonlinear, Notears
+    return MCSL, GraNDAG, NotearsNonlinear, Notears
+
+
+def _import_notears():
+    try:
+        from notears.nonlinear import NotearsMLP, notears_nonlinear
+    except Exception:
+        sys.path.append('../notears/')
+        from notears.nonlinear import NotearsMLP, notears_nonlinear
+    return NotearsMLP, notears_nonlinear
+
+
+def _import_cdt_cam():
+    try:
+        from cdt.causality.graph import CAM
+    except Exception:
+        logging.info('CDT or R components not installed')
+        sys.path.append('../CausalDiscoveryToolbox/')
+        from cdt.causality.graph import CAM
+    return CAM
+
+
+def _import_causallearn_permutation():
+    try:
+        from causallearn.search.PermutationBased.GRaSP import grasp
+        from causallearn.search.PermutationBased.BOSS import boss
+    except Exception as exc:
+        raise ImportError(
+            "causallearn permutation search is required for GRaSP/BOSS."
+        ) from exc
+    return grasp, boss
 
 def run_method(X, 
                method:str, 
@@ -76,7 +97,9 @@ def run_method(X,
                S_weight:bool=True,
                skeleton_rules_reduction:bool=True,
                pre_grounding:bool=True,
-               device:str=''
+               device:str='',
+               background_knowledge=None,
+               node_names=None,
                ):
     """
     Runs the causal discovery method specified by method on the data X
@@ -104,6 +127,9 @@ def run_method(X,
 
     ##---------MODELS--------------
     if method == 'nt':
+        torch = _import_torch()
+        MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
+        NotearsMLP, notears_nonlinear = _import_notears()
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
         logging.info(f"Running on: {device}")
@@ -124,6 +150,7 @@ def run_method(X,
         logging.info(f'Time taken for Notears: {round(elapsed,2)}s')
 
     elif method == 'nt_lin':
+        MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
         start = time.time()
         random_stability(seed)
         fitted = Notears()
@@ -134,6 +161,8 @@ def run_method(X,
         logging.info(f'Time taken for Notears: {round(elapsed,2)}s')
 
     elif method == 'mcsl':
+        torch = _import_torch()
+        MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
         logging.info(f"Running on: {device}")
@@ -159,6 +188,8 @@ def run_method(X,
         logging.info(f'Time taken for MCSL: {round(elapsed,2)}s')
 
     elif method == 'grandag':
+        torch = _import_torch()
+        MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
         if device == '':
             device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
         logging.info(f"Running on: {device}")
@@ -203,6 +234,16 @@ def run_method(X,
         elapsed = fitted.PC_elapsed
         logging.info(f'Time taken for MPC: {round(elapsed,2)}s')
 
+    elif method == 'mpc_llm':
+        random_stability(seed)
+        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=5, uc_priority=priority,
+                    selection=selection, show_progress=False, verbose=debug,
+                    background_knowledge=background_knowledge, node_names=node_names)
+        # fitted.draw_pydot_graph()
+        W_est = fitted.G.graph.T
+        elapsed = fitted.PC_elapsed
+        logging.info(f'Time taken for MPC-LLM: {round(elapsed,2)}s')
+
     elif method == 'pc_max':
         random_stability(seed)
         fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=1, uc_priority=3, show_progress=False, 
@@ -243,6 +284,7 @@ def run_method(X,
         logging.info(f'Time taken for GES: {round(elapsed,2)}s')
 
     elif method == 'fgs':
+        import pydot
         from pycausal.pycausal import pycausal as pyc
         
         start = time.time()
@@ -282,6 +324,7 @@ def run_method(X,
         logging.info(f'Time taken for FGS: {round(elapsed,2)}s')
 
     elif method == 'cam':
+        CAM = _import_cdt_cam()
         random_stability(seed)
         start = time.time()
         fitted = CAM()
@@ -294,6 +337,7 @@ def run_method(X,
         logging.info(f'Time taken for CAM: {round(elapsed,2)}s')
 
     elif method == 'grasp':
+        grasp, boss = _import_causallearn_permutation()
         random_stability(seed)
         start = time.time()
 
@@ -304,6 +348,7 @@ def run_method(X,
         logging.info(f'Time taken for GRaSP: {round(elapsed,2)}s')
     
     elif method == 'boss':
+        grasp, boss = _import_causallearn_permutation()
         random_stability(seed)
         start = time.time()
 

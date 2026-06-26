@@ -13,6 +13,7 @@ from cd_algorithms.models import run_method
 from utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
 from utils.helpers import random_stability, logger_setup
 from utils.data_utils import load_causenet_data_dag, load_bnlearn_data_dag, simulate_dag, BIF_FOLDER_MAP
+from priors.schema import Constraints, build_mpc_background_knowledge
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -155,6 +156,7 @@ parser.add_argument('--source', choices=['causenet', 'bnlearn'], default='causen
 parser.add_argument('--version', default='exp_unified_50rep')
 parser.add_argument('--models', nargs='*', default=['random'], help='List of models to run')
 parser.add_argument('--results_dir', default='results')
+parser.add_argument('--prior_json', help='Consensus prior JSON used by prior-aware baselines such as mpc_llm')
 
 # CausaNet specific
 parser.add_argument('--bifxml_dir', default='synthetic', help='Folder with .bifxml graphs (for source=causenet)')
@@ -174,7 +176,12 @@ parser.add_argument('--standardise', dest='standardise', action='store_true', he
 parser.add_argument('--no-standardise', dest='standardise', action='store_false', help='Do not standardise data')
 parser.set_defaults(standardise=None)
 parser.add_argument('--test_alpha', type=float, default=0.01, help='Significance level for conditional independence tests')
-parser.add_argument('--test_name', choices=['fisherz', 'chi2', 'g2', 'kci'], default='fisherz', help='Independence test to use')
+parser.add_argument(
+    '--test_name',
+    choices=['fisherz', 'chi2', 'chisq', 'g2', 'gsq', 'kci'],
+    default='fisherz',
+    help='Independence test to use',
+)
 
 # ABAPC-specific options used by the MPC-LLM bnlearn run hook.
 parser.add_argument('--s_weight', type=str_to_bool, default=True, metavar='{true,false}', help='ABAPC: use S_weight')
@@ -210,7 +217,7 @@ save_res = args.save_res
 simulate_with = args.simulate_with
 standardise = args.standardise
 test_alpha = args.test_alpha
-test_name = args.test_name
+test_name = {'chi2': 'chisq', 'g2': 'gsq'}.get(args.test_name, args.test_name)
 s_weight = args.s_weight
 pre_grounding = args.pre_grounding
 skeleton_rules_reduction = args.skeleton_rules_reduction
@@ -224,6 +231,7 @@ names_dict = {
     'fgs': 'FGS',
     'spc': 'Shapley-PC',
     'mpc': 'MPC',
+    'mpc_llm': 'MPC-LLM',
     'cpc': 'CPC',
     'abapc': 'ABAPC (Ours)',
     'cam': 'CAM',
@@ -235,6 +243,68 @@ names_dict = {
     'random': 'Random',
     'random_edge': 'Random (match |E|)'
 }
+
+prior_lookup = {}
+if args.prior_json:
+    prior_json_path = Path(args.prior_json)
+    if not prior_json_path.exists():
+        raise SystemExit(f'Prior JSON not found: {prior_json_path}')
+    prior_df = pd.read_json(prior_json_path)
+    required_prior_cols = {'filename', 'priors', 'variable_descriptions'}
+    missing_prior_cols = required_prior_cols - set(prior_df.columns)
+    if missing_prior_cols:
+        raise SystemExit(
+            f'Prior JSON {prior_json_path} is missing required columns: {sorted(missing_prior_cols)}'
+        )
+    for record in prior_df.to_dict('records'):
+        filename = record.get('filename')
+        if filename in prior_lookup:
+            logging.warning(f'Duplicate prior row for {filename}; keeping the last one.')
+        prior_lookup[filename] = record
+    logging.info(f'Loaded {len(prior_lookup)} prior rows from {prior_json_path}')
+elif 'mpc_llm' in model_list:
+    logging.warning('mpc_llm requested without --prior_json; running plain MPC under the MPC-LLM label.')
+
+mpc_llm_prior_cache = {}
+
+
+def get_mpc_llm_background(dataset_name: str):
+    if dataset_name in mpc_llm_prior_cache:
+        return mpc_llm_prior_cache[dataset_name]
+    if not prior_lookup:
+        mpc_llm_prior_cache[dataset_name] = None
+        return None
+
+    record = prior_lookup.get(dataset_name)
+    if record is None:
+        logging.warning(f'No prior row found for {dataset_name}; mpc_llm will fall back to plain MPC.')
+        mpc_llm_prior_cache[dataset_name] = None
+        return None
+
+    constraints = Constraints(**(record.get('priors') or {}))
+    if not constraints.forbidden and not constraints.required:
+        logging.info(f'Prior row for {dataset_name} has no constraints; mpc_llm will fall back to plain MPC.')
+        mpc_llm_prior_cache[dataset_name] = None
+        return None
+
+    variable_descriptions = record.get('variable_descriptions') or {}
+    if not isinstance(variable_descriptions, dict) or not variable_descriptions:
+        raise SystemExit(f'Prior row for {dataset_name} has no variable_descriptions for MPC node ordering.')
+
+    try:
+        background_knowledge, node_names = build_mpc_background_knowledge(
+            variable_descriptions.keys(),
+            constraints,
+        )
+    except ValueError as exc:
+        raise SystemExit(f'Invalid MPC prior row for {dataset_name}: {exc}') from exc
+
+    logging.info(
+        f'Using MPC-LLM priors for {dataset_name}: '
+        f'{len(constraints.forbidden)} forbidden, {len(constraints.required)} required.'
+    )
+    mpc_llm_prior_cache[dataset_name] = (background_knowledge, node_names)
+    return mpc_llm_prior_cache[dataset_name]
 
 load_existing = load_res or resume
 if load_existing:
@@ -420,6 +490,13 @@ for dataset_name, src, info in datasets:
                 mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true).metrics
                 mt_dag = DAGMetrics(B_est, B_true).metrics
             else:
+                method_background_knowledge = None
+                method_node_names = None
+                if method == 'mpc_llm':
+                    mpc_llm_prior = get_mpc_llm_background(dataset_name)
+                    if mpc_llm_prior is not None:
+                        method_background_knowledge, method_node_names = mpc_llm_prior
+
                 W_est, elapsed = run_method(
                     X_s, method, seed, test_alpha=test_alpha, test_name=test_name,
                     device=device, scenario=f"{method}_{version}_{dataset_name}",
@@ -428,6 +505,8 @@ for dataset_name, src, info in datasets:
                     skeleton_rules_reduction=skeleton_rules_reduction,
                     disable_reground=disable_reground,
                     return_statistics=return_statistics,
+                    background_knowledge=method_background_knowledge,
+                    node_names=method_node_names,
                 )
                 if 'Tensor' in str(type(W_est)):
                     W_est = np.asarray([list(i) for i in W_est])
