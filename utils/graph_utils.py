@@ -11,12 +11,41 @@ from itertools import combinations, chain
 from copy import deepcopy
 import warnings
 warnings.filterwarnings("ignore")
-r_candidate = Path(__file__).resolve().parents[1] / 'R' / 'R-4.1.2'
-bin_candidate = r_candidate / 'bin'
-if bin_candidate.exists():
-    os.environ['R_HOME'] = str(bin_candidate)
+
+def _normalise_r_home(path):
+    if not path:
+        return None
+    candidate = Path(path).expanduser()
+    if candidate.name == "bin" and (candidate / "Rscript").exists():
+        candidate = candidate.parent
+    return candidate if candidate.exists() else None
+
+
+r_candidate = None
+for parent in Path(__file__).resolve().parents:
+    candidate = parent / "R" / "R-4.1.2"
+    if (candidate / "bin" / "Rscript").exists():
+        r_candidate = candidate
+        break
+if r_candidate is None:
+    r_candidate = _normalise_r_home(os.environ.get("R_HOME"))
+
+if r_candidate is not None:
+    os.environ["R_HOME"] = str(r_candidate)
+    bin_candidate = r_candidate / "bin"
+    path_entries = [str(bin_candidate)]
+    if os.environ.get("PATH"):
+        path_entries.append(os.environ["PATH"])
+    os.environ["PATH"] = os.pathsep.join(path_entries)
+    python_lib_path = Path(sys.prefix) / "lib"
+    ld_paths = [r_candidate / "lib", python_lib_path]
+    existing_ld = os.environ.get("LD_LIBRARY_PATH")
+    if existing_ld:
+        ld_paths.extend(existing_ld.split(os.pathsep))
+    os.environ["LD_LIBRARY_PATH"] = os.pathsep.join(str(path) for path in ld_paths)
 else:
-    os.environ.pop('R_HOME', None)
+    bin_candidate = None
+    os.environ.pop("R_HOME", None)
 ### To not have the WARNING: ignoring environment value of R_HOME 
 ### set the verbose to False in the launch_R_script function in:
 ### CausalDiscoveryToolbox/cdt/utils/R.py#L155
@@ -28,8 +57,8 @@ except:
     import cdt
 from cdt.metrics import SHD, SID, SID_CPDAG
 
-rscript_candidate = bin_candidate / 'Rscript'
-if rscript_candidate.exists():
+rscript_candidate = bin_candidate / 'Rscript' if bin_candidate is not None else None
+if rscript_candidate is not None and rscript_candidate.exists():
     cdt.SETTINGS.rpath = str(rscript_candidate)
 else:
     default_rscript = shutil.which('Rscript')
