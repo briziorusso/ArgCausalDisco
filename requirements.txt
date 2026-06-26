@@ -5,7 +5,6 @@ numpy
 scikit-learn
 tqdm
 ipykernel
-plotly
 igraph
 pydot
 clingo

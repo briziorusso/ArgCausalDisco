@@ -13,7 +13,6 @@ File: `experiments.py`
 
 - CausaNet graphs (default):
   - `python experiments.py --source causenet --models mpc fgs nt --n_runs 5`
-  - `python experiments.py --source causenet --models mpc_llm --prior_json results/llm_constraints/synthetic-desc-consensus.json --n_runs 5`
 - BNLearn datasets:
   - `python experiments.py --source bnlearn --names child asia --models mpc fgs --n_runs 5`
 - Show options:
@@ -47,9 +46,6 @@ Examples:
 - Filename-based filters:
   - `--names dag_10_nodes_10_edges_none_er.bifxml`
   - `--include nodes_10` `--glob 'dag_*_nodes_*_edges_*.bifxml'` `--regex 'nodes_10.*edges'`
-- Prior-aware MPC:
-  - `--models mpc_llm --prior_json results/llm_constraints/synthetic-desc-consensus.json`
-  - Missing or empty priors fall back to ordinary MPC under the `MPC-LLM` label.
 
 ## BNLearn Mode
 
@@ -71,10 +67,9 @@ Directory structure expected (example for `child`):
 ## Models
 
 Pass one or more with `--models`:
-- `pc`, `pc_max`, `fgs`, `spc`, `mpc`, `mpc_llm`, `cpc`, `abapc`, `cam`, `nt`, `mcsl`, `ges`, `random`, `random_edge`
+- `pc`, `pc_max`, `fgs`, `spc`, `mpc`, `cpc`, `abapc`, `cam`, `nt`, `mcsl`, `ges`, `random`, `random_edge`
 - `random`: uniform random DAG with random edge count
 - `random_edge`: random DAG matching the true |E|
-- `mpc_llm`: Majority PC with causal-learn background knowledge from a consensus prior JSON.
 
 Notes:
 - Some models require optional deps (e.g., CDT for `cam`, castle/notears for `nt`/`mcsl`, R setup for CAM). See `cd_algorithms/models.py`.
@@ -87,7 +82,6 @@ Notes:
 
 - `--version <name>`: tag for log/progress/summary files
 - `--results_dir <dir>`: output location (default: `results`)
-- `--prior_json <path>`: consensus prior JSON for prior-aware baselines such as `mpc_llm`
 - `--sample_size <int>`: per-run sample size (default: 5000)
 - `--n_runs <int>`: repetitions per dataset/method
 - `--device <idx>`: device index forwarded to methods like NOTEARS-MLP

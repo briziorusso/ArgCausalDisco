@@ -71,9 +71,12 @@ def run_method(X,
                scenario:str='',
                test_alpha:float=0.01,
                extra_tests:bool=False,
-               device:str='',
-               background_knowledge=None,
-               node_names=None,
+               disable_reground:bool=False,
+               return_statistics:bool=False,
+               S_weight:bool=True,
+               skeleton_rules_reduction:bool=True,
+               pre_grounding:bool=True,
+               device:str=''
                ):
     """
     Runs the causal discovery method specified by method on the data X
@@ -89,8 +92,6 @@ def run_method(X,
     test_name : str Name of the independence test to use for PC
     test_alpha : float Significance level for independence test (default: 0.01)
     device : str Device to run Notears on
-    background_knowledge : optional causal-learn BackgroundKnowledge object for prior-aware PC variants
-    node_names : optional node names matching the data column order
 
     Returns
     -------
@@ -202,16 +203,6 @@ def run_method(X,
         elapsed = fitted.PC_elapsed
         logging.info(f'Time taken for MPC: {round(elapsed,2)}s')
 
-    elif method == 'mpc_llm':
-        random_stability(seed)
-        fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=5, uc_priority=priority,
-                    selection=selection, show_progress=False, verbose=debug,
-                    background_knowledge=background_knowledge, node_names=node_names)
-        # fitted.draw_pydot_graph()
-        W_est = fitted.G.graph.T
-        elapsed = fitted.PC_elapsed
-        logging.info(f'Time taken for MPC-LLM: {round(elapsed,2)}s')
-
     elif method == 'pc_max':
         random_stability(seed)
         fitted = pc(data=X, alpha=test_alpha, indep_test=test_name, uc_rule=1, uc_priority=3, show_progress=False, 
@@ -234,7 +225,11 @@ def run_method(X,
         random_stability(seed)
         start = time.time()
         W_est = ABAPC(data=X, alpha=test_alpha, indep_test=test_name,
-                      scenario=scenario, S_weight=True, pre_grounding=True)
+                      scenario=scenario, S_weight=S_weight,
+                      pre_grounding=pre_grounding,
+                      skeleton_rules_reduction=skeleton_rules_reduction,
+                      disable_reground=disable_reground,
+                      return_statistics=return_statistics)
         elapsed = time.time() - start
         logging.info(f'Time taken for ABAPC: {round(elapsed,2)}s')
 

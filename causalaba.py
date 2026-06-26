@@ -182,6 +182,7 @@ def CausalABA(n_nodes:int, facts_location:str="", print_models:bool=True,
                 pre_grounding: bool=False,
                 disable_reground: bool=False,
                 prior_knowledge: PriorKnowledge | None = None,
+                return_statistics: bool=False,
                 )->list:
     """
     CausalABA, a function that takes in the number of nodes in a graph and a string of facts and returns a list of compatible causal graphs.

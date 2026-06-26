@@ -37,7 +37,8 @@ def ABAPC(data,
           out_mode="opt" , print_models=False,
           sepsets = None, smoothing_k=0, S_weight=True,
           skeleton_rules_reduction=True, pre_grounding=False,
-          prior_knowledge=None):
+          disable_reground=False, prior_knowledge=None,
+          return_statistics=False):
     """
     Args:
     data: np.array
@@ -134,7 +135,9 @@ def ABAPC(data,
         print_models=print_models,
         set_indep_facts=set_indep_facts,
         pre_grounding=pre_grounding,
+        disable_reground=disable_reground,
         prior_knowledge=prior_knowledge,
+        return_statistics=return_statistics,
     )
 
     if multiple_solutions:
