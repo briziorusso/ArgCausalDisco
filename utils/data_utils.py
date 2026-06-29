@@ -125,7 +125,10 @@ def load_causenet_data_dag(file_path, sample_size, seed=1, standardise=True, pri
 
     # Try pyAgrum for parsing
     try:
-        import pyAgrum as gum
+        try:
+            import pyagrum as gum
+        except ImportError:
+            import pyAgrum as gum
         bn_pyagrum = gum.loadBN(file_path)
         var_names = sorted(bn_pyagrum.names())
         name_to_idx = {n: i for i, n in enumerate(var_names)}
@@ -165,11 +168,17 @@ def load_causenet_data_dag(file_path, sample_size, seed=1, standardise=True, pri
     X = None
     if simulate_with == 'pyagrum' and bn_pyagrum is not None:
         try:
-            import pyAgrum as gum
-            # Use pyAgrum database generator to sample
-            gen = gum.BNDatabaseGenerator(bn_pyagrum)
-            gen.generate(sample_size, seed)
-            df = gen.toPandas()
+            try:
+                import pyagrum as gum
+            except ImportError:
+                import pyAgrum as gum
+            gum.initRandom(seed=seed)
+            df = gum.generateSample(
+                bn_pyagrum,
+                sample_size,
+                with_labels=False,
+                random_order=False,
+            )[0]
             # Align columns to alphabetical var_names
             df = df[var_names]
             # Label-encode to integers to match internal expectations
