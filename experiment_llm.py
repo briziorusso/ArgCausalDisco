@@ -3,10 +3,12 @@
 
 # %%
 
+import argparse
 import logging
+import os
 import re
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable, Iterable
 
 import numpy as np
 import pandas as pd
@@ -437,6 +439,9 @@ def compare_performance(
     sample_size: int,
     prior_df: pd.DataFrame | None,
     repeats: int = 1,
+    test_alpha: float = 0.01,
+    test_name: str = "gsq",
+    scenario_prefix: str = "prior_comparison",
 ) -> tuple[str, int, float, float, list, list, np.ndarray, Any]:
     random_stability(2024)
     seeds = np.random.randint(0, 10000, size=repeats).tolist()
@@ -454,11 +459,11 @@ def compare_performance(
         facts_I_path, _ = ABAPC(
             data,
             seed=seed,
-            alpha=0.01,
-            indep_test="gsq",
+            alpha=test_alpha,
+            indep_test=test_name,
             S_weight=False,
             out_mode="facts_only",
-            scenario="prior_comparison",
+            scenario=f"{scenario_prefix}_{os.getpid()}",
         )
         facts_path = facts_I_path.replace("_I.lp", ".lp")
         
@@ -532,15 +537,12 @@ def with_optional_prior(prior_df: pd.DataFrame | None = None):
 
     return impl_wrapper
 
-# %%
-from typing import Iterable
-
 import abapc
 from utils.graph_utils import DAGMetrics, dag2cpdag
 
 
-repeats = 50
-MAX_NODES = 20  # Skip graphs larger than this for performance reasons
+DEFAULT_REPEATS = 50
+DEFAULT_MAX_NODES = 20  # Skip graphs larger than this for performance reasons
 report_cols = [
     "time",
     "remove_n",
@@ -573,7 +575,16 @@ def get_sorted_adjacency(bn: gum.BayesNet) -> np.ndarray:
     adj = bn.adjacencyMatrix()
     return adj[np.ix_(alphabetical_order, alphabetical_order)]
 
-def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
+def run_experiment(
+    prior_df: pd.DataFrame | None,
+    datasets: Iterable[Path],
+    sample_size: int,
+    repeats: int,
+    max_nodes: int,
+    test_alpha: float,
+    test_name: str,
+    scenario_prefix: str,
+):
     all_runs = []
     skipped = []
 
@@ -586,7 +597,7 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
 
         bn = gum.loadBN(str(random_graph_path))
         B_true = get_sorted_adjacency(bn)
-        if bn.size() > MAX_NODES:
+        if bn.size() > max_nodes:
             continue
 
         print(f"Processing {random_graph_path.name}...")
@@ -596,9 +607,12 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
             impl2_return,
         ) = compare_performance(
             bif_path=random_graph_path,
-            sample_size=5000,
+            sample_size=sample_size,
             prior_df=prior_df,
             repeats=repeats,
+            test_alpha=test_alpha,
+            test_name=test_name,
+            scenario_prefix=scenario_prefix,
         )
 
         # Flatten results; each 'run' already carries its seed and run_id
@@ -628,7 +642,7 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
                     })
                 cd_metrics_df = pd.DataFrame(cd_metrics)
                 if len(cd_metrics_df) > 10:
-                    cd_metrics_df.to_csv("logs/example.csv", index=False)
+                    cd_metrics_df.to_csv(f"logs/example_{os.getpid()}.csv", index=False)
 
                 # Save this run's results in a flat dict
                 all_runs.append(
@@ -657,7 +671,15 @@ def run_experiment(prior_df: pd.DataFrame | None, datasets: Iterable[Path]):
 
 # %%
 
-def run_dataset_experiment(type_):
+def run_dataset_experiment(
+    type_: str,
+    sample_size: int,
+    repeats: int,
+    max_nodes: int,
+    test_alpha: float,
+    test_name: str,
+    output_suffix: str = "",
+):
     """Run experiment for a specific dataset type.
     
     Args:
@@ -680,16 +702,23 @@ def run_dataset_experiment(type_):
     # Run experiment
     res_df, skipped = run_experiment(
         prior_df=prior_df, 
-        datasets=datasets
+        datasets=datasets,
+        sample_size=sample_size,
+        repeats=repeats,
+        max_nodes=max_nodes,
+        test_alpha=test_alpha,
+        test_name=test_name,
+        scenario_prefix=f"prior_comparison_{type_.replace('-', '_')}",
     )
     
     # Save results
-    results_path = f"results/ABAPC-LLM/{type_}-results.csv"
+    suffix = f"-{output_suffix}" if output_suffix else ""
+    results_path = f"results/ABAPC-LLM/{type_}{suffix}-results.csv"
     res_df.to_csv(results_path, index=False)
     
     # Generate and save report
     report = show_report(res_df)
-    report_path = f"results/ABAPC-LLM/{type_}-report.csv"
+    report_path = f"results/ABAPC-LLM/{type_}{suffix}-report.csv"
     report.to_csv(report_path)
     
     print(f"Results saved to {results_path}")
@@ -697,27 +726,6 @@ def run_dataset_experiment(type_):
     
     return res_df, skipped
 
-# %%
-
-# Run experiments for different dataset types
-all_skipped = []
-
-for type_ in [
-    "bnlearn-desc",
-    # "bnlearn",
-    "synthetic",
-    # "synthetic-desc",
-]:
-    print(f"\n{'='*60}")
-    print(f"Running experiment for: {type_}")
-    print(f"{'='*60}\n")
-    
-    res_df, skipped = run_dataset_experiment(type_)
-    all_skipped.extend(skipped)
-
-print(f"\nTotal skipped files: {all_skipped}")
-
-# %%
 def join_results(json_path, csv_path):
     """Join the prior JSON and ABAPC-LLM CSV results.
 
@@ -753,17 +761,71 @@ def join_results(json_path, csv_path):
 
     return merged
 
-for type_ in [
-    "bnlearn-desc",
-    # "bnlearn",
-    "synthetic",
-    # "synthetic-desc",
-]:
-    # aggregated LLM constraints
-    json_path = f"results/llm_constraints/{type_}-consensus.json" 
-    # ABAPC-LLM experiment results
-    csv_path = f"results/ABAPC-LLM/{type_}-results.csv"
-    merged_df = join_results(json_path, csv_path)
-    output_path = f"results/ABAPC-LLM/merged_{type_}.csv"
-    merged_df.to_csv(output_path, index=False)
-    print(f"Joined results saved to {output_path}")
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run ABAPC/ABAPC-LLM prior comparison experiments.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "--types",
+        nargs="+",
+        default=["bnlearn-desc", "synthetic"],
+        help="Dataset/prior prefixes such as bnlearn-desc, synthetic-desc, synthetic-desc-gpt5mini.",
+    )
+    parser.add_argument("--sample_size", type=int, default=5000)
+    parser.add_argument("--repeats", type=int, default=DEFAULT_REPEATS)
+    parser.add_argument("--max_nodes", type=int, default=DEFAULT_MAX_NODES)
+    parser.add_argument("--test_alpha", type=float, default=0.01)
+    parser.add_argument(
+        "--output_suffix",
+        default="",
+        help="Optional suffix inserted before -results/-report and appended to merged_<type>.",
+    )
+    parser.add_argument(
+        "--test_name",
+        choices=["fisherz", "chi2", "chisq", "g2", "gsq", "kci"],
+        default="gsq",
+        help="Conditional independence test passed to ABAPC.",
+    )
+    args = parser.parse_args()
+    args.test_name = {"chi2": "chisq", "g2": "gsq"}.get(args.test_name, args.test_name)
+    return args
+
+
+def main() -> None:
+    args = parse_args()
+    all_skipped = []
+    print(f"CI test config: test_name={args.test_name}, test_alpha={args.test_alpha}")
+
+    for type_ in args.types:
+        print(f"\n{'='*60}")
+        print(f"Running experiment for: {type_}")
+        print(f"{'='*60}\n")
+
+        _, skipped = run_dataset_experiment(
+            type_=type_,
+            sample_size=args.sample_size,
+            repeats=args.repeats,
+            max_nodes=args.max_nodes,
+            test_alpha=args.test_alpha,
+            test_name=args.test_name,
+            output_suffix=args.output_suffix,
+        )
+        all_skipped.extend(skipped)
+
+    print(f"\nTotal skipped files: {all_skipped}")
+
+    for type_ in args.types:
+        suffix = f"-{args.output_suffix}" if args.output_suffix else ""
+        merged_suffix = f"_{args.output_suffix}" if args.output_suffix else ""
+        json_path = f"results/llm_constraints/{type_}-consensus.json"
+        csv_path = f"results/ABAPC-LLM/{type_}{suffix}-results.csv"
+        merged_df = join_results(json_path, csv_path)
+        output_path = f"results/ABAPC-LLM/merged_{type_}{merged_suffix}.csv"
+        merged_df.to_csv(output_path, index=False)
+        print(f"Joined results saved to {output_path}")
+
+
+if __name__ == "__main__":
+    main()
