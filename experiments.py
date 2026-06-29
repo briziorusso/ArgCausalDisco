@@ -218,6 +218,7 @@ simulate_with = args.simulate_with
 standardise = args.standardise
 test_alpha = args.test_alpha
 test_name = {'chi2': 'chisq', 'g2': 'gsq'}.get(args.test_name, args.test_name)
+logging.info(f'CI test config: test_name={test_name}, test_alpha={test_alpha}')
 s_weight = args.s_weight
 pre_grounding = args.pre_grounding
 skeleton_rules_reduction = args.skeleton_rules_reduction
