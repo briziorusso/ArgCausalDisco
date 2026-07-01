@@ -1,0 +1,31 @@
+artifact,path,status
+gemini_abapc_csv,results/ABAPC-LLM/merged_synthetic-desc_g2a01.csv,found
+gpt_abapc_csv,results/ABAPC-LLM/merged_synthetic-desc-gpt5mini_g2a01.csv,missing
+plain_abapc_fallback_csv,results/ABAPC-LLM/merged_synthetic_g2a01.csv,missing
+gemini_consensus,results/llm_constraints/synthetic-desc-consensus.json,found
+gpt_consensus,results/llm_constraints/synthetic-desc-gpt5mini-consensus.json,found
+mpc_mpc_llm_summary,results/stored_results_causenet_mpc_desc_g2a01.npy,found
+gpt_mpc_llm_summary,results/stored_results_causenet_mpc_llm_gpt5mini_desc_g2a01.npy,missing
+"constraints_('bnlearn', 'Average', 'w/o desc')",results/llm_constraints/bnlearn.json,found
+"constraints_('bnlearn', 'Average', 'with desc')",results/llm_constraints/bnlearn-desc.json,found
+"constraints_('bnlearn', 'Consensus', 'w/o desc')",results/llm_constraints/bnlearn-consensus.json,found
+"constraints_('bnlearn', 'Consensus', 'with desc')",results/llm_constraints/bnlearn-desc-consensus.json,found
+"constraints_('CauseNet', 'Average', 'w/o desc')",results/llm_constraints/synthetic.json,found
+"constraints_('CauseNet', 'Average', 'with desc')",results/llm_constraints/synthetic-desc.json,found
+"constraints_('CauseNet', 'Consensus', 'w/o desc')",results/llm_constraints/synthetic-consensus.json,found
+"constraints_('CauseNet', 'Consensus', 'with desc')",results/llm_constraints/synthetic-desc-consensus.json,found
+"constraints_('bnlearn', 'Average', 'w/o desc')",results/llm_constraints/bnlearn.json,found
+"constraints_('bnlearn', 'Average', 'with desc')",results/llm_constraints/bnlearn-desc.json,found
+"constraints_('bnlearn', 'Consensus', 'w/o desc')",results/llm_constraints/bnlearn-consensus.json,found
+"constraints_('bnlearn', 'Consensus', 'with desc')",results/llm_constraints/bnlearn-desc-consensus.json,found
+"constraints_('CauseNet', 'Average', 'w/o desc')",results/llm_constraints/synthetic.json,found
+"constraints_('CauseNet', 'Average', 'with desc')",results/llm_constraints/synthetic-desc.json,found
+"constraints_('CauseNet', 'Consensus', 'w/o desc')",results/llm_constraints/synthetic-consensus.json,found
+"constraints_('CauseNet', 'Consensus', 'with desc')",results/llm_constraints/synthetic-desc-consensus.json,found
+random_summary,results/stored_results_test_rnd_spc.npy,found
+fgs_notears_summary,results/stored_results_causenet_base.npy,found
+boss_grasp_summary,results/stored_results_causenet_boss_grasp.npy,found
+mpc_mpc_llm_summary,results/stored_results_causenet_mpc_desc_g2a01.npy,found
+abapc_csv,results/ABAPC-LLM/merged_synthetic-desc_g2a01.csv,found
+abapc_fallback_csv,results/ABAPC-LLM/merged_synthetic_g2a01.csv,missing
+abapc_consensus,results/llm_constraints/synthetic-desc-consensus.json,found

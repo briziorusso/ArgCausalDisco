@@ -1,0 +1,22 @@
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{4}{c}{\textbf{bnlearn}} & \multicolumn{4}{c}{\textbf{CauseNet}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+Metric & \multicolumn{2}{c}{Average} & \multicolumn{2}{c}{Consensus} & \multicolumn{2}{c}{Average} & \multicolumn{2}{c}{Consensus} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+ & w/o desc & with desc & w/o desc & with desc & w/o desc & with desc & w/o desc & with desc \\
+\midrule
+\multicolumn{9}{c}{\textbf{Forbidden constraints}} \\
+\midrule
+# constraints & \num{20.483+-13.627} & \num{25.467+-24.387} & \num{9.600+-5.941} & \num{8.167+-1.722} & \num{17.857+-12.937} & \num{20.795+-16.569} & \num{5.574+-4.777} & \num{4.583+-3.293} \\
+Precision & \num{0.959+-0.062} & \num{0.973+-0.041} & \num{1.000+-0.000} & \num{0.948+-0.085} & \num{0.966+-0.061} & \num{0.949+-0.132} & \num{0.982+-0.069} & \num{0.986+-0.053} \\
+Recall & \num{0.423+-0.225} & \num{0.472+-0.219} & \num{0.289+-0.234} & \num{0.275+-0.216} & \num{0.297+-0.215} & \num{0.314+-0.220} & \num{0.141+-0.168} & \num{0.129+-0.172} \\
+F1 & \num{0.551+-0.244} & \num{0.606+-0.224} & \num{0.405+-0.300} & \num{0.392+-0.281} & \num{0.415+-0.228} & \num{0.434+-0.231} & \num{0.217+-0.218} & \num{0.196+-0.222} \\
+\multicolumn{9}{c}{\textbf{Required constraints}} \\
+\midrule
+# constraints & \num{9.920+-6.448} & \num{11.172+-11.738} & \num{6.750+-1.708} & \num{5.500+-3.873} & \num{12.664+-9.571} & \num{14.664+-11.499} & \num{4.531+-3.170} & \num{5.020+-3.216} \\
+Precision & \num{0.562+-0.213} & \num{0.618+-0.210} & \num{0.562+-0.195} & \num{0.757+-0.206} & \num{0.491+-0.247} & \num{0.468+-0.227} & \num{0.626+-0.317} & \num{0.544+-0.320} \\
+Recall & \num{0.535+-0.316} & \num{0.632+-0.312} & \num{0.454+-0.399} & \num{0.422+-0.394} & \num{0.490+-0.252} & \num{0.520+-0.239} & \num{0.269+-0.204} & \num{0.294+-0.241} \\
+F1 & \num{0.482+-0.172} & \num{0.574+-0.211} & \num{0.426+-0.233} & \num{0.481+-0.294} & \num{0.454+-0.203} & \num{0.457+-0.187} & \num{0.346+-0.214} & \num{0.354+-0.242} \\
+\bottomrule
+\end{tabular}

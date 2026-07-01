@@ -134,5 +134,10 @@ dmypy.json
 *.pkl
 outputs/
 
+# Experiment refresh scratch/progress. Keep compact summaries/tables instead.
+results/progress/
+results/prior_comparison_*/
+logs/example_*.csv
+
 .DS_Store
 concept_embeddings.npy
