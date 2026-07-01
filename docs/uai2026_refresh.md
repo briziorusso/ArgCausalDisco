@@ -82,6 +82,26 @@ python scripts/comparison_table.py --tag g2a01
 
 ## Refresh Order
 
+Long ABAPC/ABAPC-LLM runs checkpoint after each completed graph under:
+
+```text
+results/ABAPC-LLM/checkpoints/
+```
+
+Use `--resume` for any restarted `experiment_llm.py` job. If a job finished the
+checkpoint but failed while writing the final CSV/report/merged files, rebuild
+the final artifacts without rerunning experiments:
+
+```bash
+python experiment_llm.py --types synthetic bnlearn --test_name g2 --test_alpha 0.01 --output_suffix g2a01 --finalize_only
+```
+
+The non-description ABAPC refresh can be run/restarted with:
+
+```bash
+python experiment_llm.py --types synthetic bnlearn --test_name g2 --test_alpha 0.01 --output_suffix g2a01 --resume
+```
+
 After all experiment jobs finish:
 
 ```bash

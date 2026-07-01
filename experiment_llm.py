@@ -555,6 +555,60 @@ report_cols = [
 ]
 report_stats = {col: ["mean", "std"] for col in report_cols}
 Path("logs").mkdir(exist_ok=True)
+Path("results/ABAPC-LLM").mkdir(parents=True, exist_ok=True)
+
+
+def _suffixes(output_suffix: str) -> tuple[str, str]:
+    file_suffix = f"-{output_suffix}" if output_suffix else ""
+    merged_suffix = f"_{output_suffix}" if output_suffix else ""
+    return file_suffix, merged_suffix
+
+
+def dataset_output_paths(type_: str, output_suffix: str = "") -> dict[str, Path]:
+    file_suffix, merged_suffix = _suffixes(output_suffix)
+    base_dir = Path("results/ABAPC-LLM")
+    checkpoint_dir = base_dir / "checkpoints"
+    return {
+        "results": base_dir / f"{type_}{file_suffix}-results.csv",
+        "report": base_dir / f"{type_}{file_suffix}-report.csv",
+        "merged": base_dir / f"merged_{type_}{merged_suffix}.csv",
+        "checkpoint": checkpoint_dir / f"{type_}{file_suffix}-checkpoint.csv",
+        "skipped": checkpoint_dir / f"{type_}{file_suffix}-skipped.csv",
+    }
+
+
+def atomic_write_csv(df: pd.DataFrame, path: Path, **to_csv_kwargs) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        df.to_csv(tmp_path, **to_csv_kwargs)
+        os.replace(tmp_path, path)
+    finally:
+        if tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except OSError:
+                pass
+
+
+def load_checkpoint(path: Path) -> pd.DataFrame:
+    if not path.exists() or path.stat().st_size == 0:
+        return pd.DataFrame()
+    return pd.read_csv(path)
+
+
+def load_skipped(path: Path) -> list[str]:
+    if not path.exists() or path.stat().st_size == 0:
+        return []
+    skipped_df = pd.read_csv(path)
+    if "filename" not in skipped_df.columns:
+        return []
+    return skipped_df["filename"].dropna().astype(str).tolist()
+
+
+def save_skipped(skipped: Iterable[str], path: Path) -> None:
+    skipped_df = pd.DataFrame({"filename": sorted(set(skipped))})
+    atomic_write_csv(skipped_df, path, index=False)
 
 
 def show_report(df: pd.DataFrame):
@@ -584,15 +638,41 @@ def run_experiment(
     test_alpha: float,
     test_name: str,
     scenario_prefix: str,
+    checkpoint_path: Path | None = None,
+    skipped_path: Path | None = None,
+    resume: bool = False,
 ):
     all_runs = []
     skipped = []
+    completed_datasets: set[str] = set()
+
+    if resume and checkpoint_path is not None:
+        checkpoint_df = load_checkpoint(checkpoint_path)
+        if not checkpoint_df.empty:
+            all_runs = checkpoint_df.to_dict("records")
+            completed_datasets = set(checkpoint_df["dataset"].dropna().astype(str))
+            print(
+                f"Loaded checkpoint {checkpoint_path}: "
+                f"{len(checkpoint_df)} rows across {len(completed_datasets)} datasets."
+            )
+
+    if resume and skipped_path is not None:
+        skipped = load_skipped(skipped_path)
+        if skipped:
+            print(f"Loaded skipped list {skipped_path}: {len(skipped)} datasets.")
 
     for random_graph_path in tqdm(datasets):
         filename = random_graph_path.stem
+        if filename in completed_datasets:
+            continue
+        if filename in skipped:
+            continue
+
         priors_row = prior_df[prior_df["filename"] == filename]["priors"]
         if priors_row.empty or not (priors_row.iloc[0]["forbidden"] or priors_row.iloc[0]["required"]):
             skipped.append(filename)
+            if skipped_path is not None:
+                save_skipped(skipped, skipped_path)
             continue
 
         bn = gum.loadBN(str(random_graph_path))
@@ -615,6 +695,7 @@ def run_experiment(
             scenario_prefix=scenario_prefix,
         )
 
+        dataset_runs = []
         # Flatten results; each 'run' already carries its seed and run_id
         for impl_name, results in [("org", impl2_return), ("new", impl1_return)]:
             for run in results:
@@ -645,7 +726,7 @@ def run_experiment(
                     cd_metrics_df.to_csv(f"logs/example_{os.getpid()}.csv", index=False)
 
                 # Save this run's results in a flat dict
-                all_runs.append(
+                dataset_runs.append(
                     {
                         "dataset": bif_name,
                         "num_nodes": bn.size(),
@@ -664,6 +745,14 @@ def run_experiment(
                     }
                 )
 
+        all_runs.extend(dataset_runs)
+        if checkpoint_path is not None:
+            atomic_write_csv(pd.DataFrame(all_runs), checkpoint_path, index=False)
+            print(
+                f"Checkpoint saved to {checkpoint_path} "
+                f"({len(all_runs)} rows; latest dataset: {bif_name})."
+            )
+
     return pd.DataFrame(all_runs), skipped
 
 # %% [markdown]
@@ -679,6 +768,8 @@ def run_dataset_experiment(
     test_alpha: float,
     test_name: str,
     output_suffix: str = "",
+    resume: bool = False,
+    finalize_only: bool = False,
 ):
     """Run experiment for a specific dataset type.
     
@@ -688,41 +779,64 @@ def run_dataset_experiment(
     Returns:
         tuple: (results_df, skipped_files)
     """
-    # Parse dataset type to get base name
-    base_name = type_.split('-')[0]  # 'bnlearn' or 'synthetic'
-    
-    # Set up paths based on dataset type
-    dataset_path = Path(f"{base_name}/")
-    datasets = list(dataset_path.glob("*.bifxml"))
-    
-    # Load appropriate prior constraints
-    prior_json = f"results/llm_constraints/{type_}-consensus.json"
-    prior_df = pd.read_json(prior_json)
-    
-    # Run experiment
-    res_df, skipped = run_experiment(
-        prior_df=prior_df, 
-        datasets=datasets,
-        sample_size=sample_size,
-        repeats=repeats,
-        max_nodes=max_nodes,
-        test_alpha=test_alpha,
-        test_name=test_name,
-        scenario_prefix=f"prior_comparison_{type_.replace('-', '_')}",
-    )
-    
+    paths = dataset_output_paths(type_, output_suffix)
+
+    if finalize_only:
+        if paths["checkpoint"].exists():
+            res_df = load_checkpoint(paths["checkpoint"])
+            print(f"Loaded results from checkpoint {paths['checkpoint']}")
+        elif paths["results"].exists():
+            res_df = pd.read_csv(paths["results"])
+            print(f"Loaded results from existing file {paths['results']}")
+        else:
+            raise FileNotFoundError(
+                f"No checkpoint or results file found for {type_} with suffix {output_suffix!r}"
+            )
+        skipped = load_skipped(paths["skipped"])
+    else:
+        # Parse dataset type to get base name
+        base_name = type_.split('-')[0]  # 'bnlearn' or 'synthetic'
+
+        # Set up paths based on dataset type
+        dataset_path = Path(f"{base_name}/")
+        datasets = sorted(dataset_path.glob("*.bifxml"))
+
+        # Load appropriate prior constraints
+        prior_json = f"results/llm_constraints/{type_}-consensus.json"
+        prior_df = pd.read_json(prior_json)
+
+        if resume and not paths["checkpoint"].exists() and paths["results"].exists():
+            existing_df = pd.read_csv(paths["results"])
+            atomic_write_csv(existing_df, paths["checkpoint"], index=False)
+            print(
+                f"Seeded checkpoint {paths['checkpoint']} from existing results "
+                f"{paths['results']}."
+            )
+
+        # Run experiment
+        res_df, skipped = run_experiment(
+            prior_df=prior_df,
+            datasets=datasets,
+            sample_size=sample_size,
+            repeats=repeats,
+            max_nodes=max_nodes,
+            test_alpha=test_alpha,
+            test_name=test_name,
+            scenario_prefix=f"prior_comparison_{type_.replace('-', '_')}",
+            checkpoint_path=paths["checkpoint"],
+            skipped_path=paths["skipped"],
+            resume=resume,
+        )
+
     # Save results
-    suffix = f"-{output_suffix}" if output_suffix else ""
-    results_path = f"results/ABAPC-LLM/{type_}{suffix}-results.csv"
-    res_df.to_csv(results_path, index=False)
+    atomic_write_csv(res_df, paths["results"], index=False)
     
     # Generate and save report
-    report = show_report(res_df)
-    report_path = f"results/ABAPC-LLM/{type_}{suffix}-report.csv"
-    report.to_csv(report_path)
+    report = show_report(res_df) if not res_df.empty else pd.DataFrame()
+    atomic_write_csv(report, paths["report"])
     
-    print(f"Results saved to {results_path}")
-    print(f"Report saved to {report_path}")
+    print(f"Results saved to {paths['results']}")
+    print(f"Report saved to {paths['report']}")
     
     return res_df, skipped
 
@@ -783,6 +897,17 @@ def parse_args() -> argparse.Namespace:
         help="Optional suffix inserted before -results/-report and appended to merged_<type>.",
     )
     parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from per-dataset checkpoints and skip completed/skipped datasets.",
+    )
+    parser.add_argument(
+        "--finalize_only",
+        "--finalize-only",
+        action="store_true",
+        help="Do not run experiments; rebuild results, reports, and merged files from checkpoints or existing results.",
+    )
+    parser.add_argument(
         "--test_name",
         choices=["fisherz", "chi2", "chisq", "g2", "gsq", "kci"],
         default="gsq",
@@ -811,20 +936,19 @@ def main() -> None:
             test_alpha=args.test_alpha,
             test_name=args.test_name,
             output_suffix=args.output_suffix,
+            resume=args.resume,
+            finalize_only=args.finalize_only,
         )
         all_skipped.extend(skipped)
 
     print(f"\nTotal skipped files: {all_skipped}")
 
     for type_ in args.types:
-        suffix = f"-{args.output_suffix}" if args.output_suffix else ""
-        merged_suffix = f"_{args.output_suffix}" if args.output_suffix else ""
+        paths = dataset_output_paths(type_, args.output_suffix)
         json_path = f"results/llm_constraints/{type_}-consensus.json"
-        csv_path = f"results/ABAPC-LLM/{type_}{suffix}-results.csv"
-        merged_df = join_results(json_path, csv_path)
-        output_path = f"results/ABAPC-LLM/merged_{type_}{merged_suffix}.csv"
-        merged_df.to_csv(output_path, index=False)
-        print(f"Joined results saved to {output_path}")
+        merged_df = join_results(json_path, paths["results"])
+        atomic_write_csv(merged_df, paths["merged"], index=False)
+        print(f"Joined results saved to {paths['merged']}")
 
 
 if __name__ == "__main__":
