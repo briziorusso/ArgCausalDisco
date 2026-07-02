@@ -178,26 +178,24 @@ python experiments.py --source causenet --models mpc_llm --prior_json results/ll
 
 #### BNLearn
 
-The paper notebooks use the five small `bnlearn` graphs plus `child`. The split between the five small graphs and `child` is retained for compatibility with the stored notebook inputs.
-
 Run the five small-graph baseline summaries:
 
 ```bash
-python experiments.py --source bnlearn --names asia cancer earthquake sachs survey --models fgs nt --version bnlearn_big_fgs_nt --test_name g2 --test_alpha 0.01 --n_runs 50 --resume
+python experiments.py --source bnlearn --names asia cancer earthquake sachs survey --models fgs nt --version bnlearn_big_fgs_nt --n_runs 50 --resume
 python experiments.py --source bnlearn --names asia cancer earthquake sachs survey --models random mpc --version bnlearn_big_rnd_mpc --test_name g2 --test_alpha 0.01 --n_runs 50 --resume
 ```
 
 Run the `child` baseline summaries:
 
 ```bash
-python experiments.py --source bnlearn --names child --models random --version bnlearn_child_base --test_name g2 --test_alpha 0.01 --n_runs 50 --resume
-python experiments.py --source bnlearn --names child --models fgs nt mpc --version bnlearn_child_base2 --test_name g2 --test_alpha 0.01 --n_runs 50 --resume
+python experiments.py --source bnlearn --names child --models random --version bnlearn_child_base --n_runs 50 --resume
+python experiments.py --source bnlearn --names child --models fgs nt mpc --version bnlearn_child_base2 --n_runs 50 --resume
 ```
 
 Run GRaSP and BOSS on the six paper `bnlearn` graphs:
 
 ```bash
-python experiments.py --source bnlearn --names asia cancer earthquake sachs survey child --models grasp boss --version bnlearn_boss_grasp --test_name g2 --test_alpha 0.01 --n_runs 50 --resume
+python experiments.py --source bnlearn --names asia cancer earthquake sachs survey child --models grasp boss --version bnlearn_boss_grasp --n_runs 50 --resume
 ```
 
 Run the final BNLearn MPC/MPC-LLM baseline with the same consensus Gemini constraints used by ABAPC-LLM:
