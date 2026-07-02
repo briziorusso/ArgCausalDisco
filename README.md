@@ -1,68 +1,112 @@
-# ArgCausalDisco
+# ArgCausalDisco: LLM-Augmented Causal ABA
 
-## Overview
+This branch provides the code and reproducibility artifacts for the UAI 2026 paper:
 
-- Causal discovery with ABAPC/Causal ABA + LLM priors.
-- Datasets: `bnlearn/*.bifxml`, `synthetic/*.bifxml`.
+**Leveraging Large Language Models for Causal Discovery: a Constraint-based, Argumentation-driven Approach**
+Zihao Li and Fabrizio Russo, Imperial College London.
 
-## Key scripts
+The paper extends Causal Assumption-Based Argumentation (Causal ABA) with semantic constraints elicited from large language models. The resulting ABAPC-LLM pipeline treats LLMs as imperfect experts: variable names and optional descriptions are used to elicit required and forbidden causal directions, repeated LLM calls are consensus-filtered for precision, and the surviving constraints are integrated with data-derived conditional-independence evidence through Causal ABA.
 
-- `priors_assessments.ipynb`: generates raw LLM priors and aggregates them.
-- `experiment_llm.py`: runs Causal ABA with/without priors and saves CSVs/reports.
-- `abapc.py`: runs PC → encodes facts → calls `CausalABA`.
-- `causalaba.py`: ASP solver pipeline (clingo) with optional `PriorKnowledge`.
-- `causal-llm-bfs/run_heuristic_batch.py`: runs the Causal-LLM-BFS experiment.
-- `export_bfs_result.py`: exports results from `causal-llm-bfs` to `results/causal-bfs-*.csv`.
+## LLM Integration
 
-## Results files
+![LLM integration pipeline](docs/figures/llm_pipeline.png)
 
-- Raw LLM priors (per-run): `results/llm_constraints/synthetic.json`, `results/llm_constraints/bnlearn-desc.json`.
-- Aggregated priors (per-dataset): `results/llm_constraints/synthetic-consensus.json`, `results/llm_constraints/bnlearn-desc-consensus.json`.
-- ABAPC-LLM Experiment outputs: `results/ABAPC-LLM/synthetic-results.csv`, `results/ABAPC-LLM/bnlearn-desc-results.csv`.
-- Summaries: `results/ABAPC-LLM/synthetic-report.csv`, `results/ABAPC-LLM/bnlearn-desc-report.csv`.
-- Merged analytics: `results/ABAPC-LLM/merged_synthetic.csv`, `results/ABAPC-LLM/merged_bnlearn-desc.csv`.
-- Causal-LLM-BFS results: `results/causal-bfs-bnlearn-results.csv`, `results/causal-bfs-synthetic-results.csv`.
+The LLM pipeline is implemented around the `priors/` package and the experiment runners. LLM responses are parsed into structured `required` and `forbidden` arrow constraints, aggregated into consensus priors, and supplied to the prior-aware Causal ABA and MPC variants.
 
-## Reproduce
+The statistical side of the UAI experiments uses Wilks G2 conditional-independence tests with `alpha=0.01`.
 
-### Setup
+The baselines analysed in the paper are Random, FGS, NOTEARS-MLP, GRaSP, BOSS, MPC, MPC-LLM, ABAPC, LLM-BFS, and ABAPC-LLM.
 
-1. Clone the repo and `cd` into it.
-2. Create and activate a Python virtual environment (optional but recommended):
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-    ```
-3. Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4. Install `clingo` (ASP solver):
-    - Follow instructions at https://potassco.org/clingo/ to install `clingo`.
-    - Ensure `clingo` is in your system PATH (you can check by running `clingo --version` in your terminal).
+## CauseNet Synthetic Data
 
-### LLM configuration
+![CauseNet synthetic graph generation](docs/figures/synthetic_pipeline.png)
 
-Set environment variables for Gemini API key and activate LiteLLM proxy:
-```bash
-export GEMINI_API_KEY="your_api_key"
-litellm --config priors/litellm.yaml --detailed_debug
+The synthetic benchmark grounds randomly generated DAG structures in `CauseNet`, producing semantically meaningful variables while avoiding direct reuse of standard public benchmark graphs. The local generator app is in:
+
+```text
+synthetic_graph_demo/
 ```
 
-### Run experiments
+Run it locally with:
 
-1. **ABAPC-LLM**:
-    1. Generate/refresh priors in `priors_assessments.ipynb`.
-    2. Run `experiment_llm.py` to create results, reports and produce `results/ABAPC-LLM/merged_*.csv`.
-2. **Causal-LLM-BFS**:
-    1. `cd` to `causal-llm-bfs/`.
-    2. Run `run_heuristic_batch.py` with arguments. Specify the dataset containing llm constraints (generated from `priors_assessments.ipynb`) using `--heuristic_dir`. The script will check for already run results in the log and skip those. It will only stop until causal-bfs produce an DAG prediction. To exclude variable descriptions from the prompts, add the `--exclude_desc` flag. E.g.
-        ```bash
-        python run_heuristic_batch.py --heuristic_dir ../bnlearn --alg llm_bfs_with_statistics --n_samples 5000 --logdir logs
-        python run_heuristic_batch.py --heuristic_dir ../synthetic --alg llm_bfs_with_statistics --n_samples 5000 --logdir logs --exclude_desc
-        ```
-    3. `cd` back to the project root and run `python export_bfs_result.py` to produce `results/causal-bfs-*.csv`.
-3. **Other Baselines**:
-    Run `experiments.py` to produce `results/*.npy`. See [README_experiment.md](README_experiment.md) for details.
-4. **Analysis**:
-    Run `notebooks/experiments_bnlearn.ipynb`, `notebooks/experiments_causenet.ipynb`, `notebooks/constraints_comparsion.ipynb` for the final analysis and plots.
+```bash
+cd synthetic_graph_demo
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+The hosted version is available at: https://clarg-group.github.io/CauseNet-graph-generator/
+
+## Repository Layout
+
+- `causalaba.py`: Python wrapper around the ASP encoding in `encodings/causalaba.lp`.
+- `abapc.py`: ABAPC wrapper that obtains CI facts, ranks them, and calls Causal ABA.
+- `experiment_llm.py`: ABAPC/ABAPC-LLM experiment runner with per-dataset checkpointing.
+- `experiments.py`: unified runner for MPC, MPC-LLM, BOSS, GRaSP, NOTEARS, FGS, random baselines, and other models.
+- `priors/`: prompts, schemas, LLM parsing, and prior utilities.
+- `scripts/run_llm_priors.py`: scripted LLM prior generation and consensus aggregation.
+- `scripts/paper_tables.py`: paper-table formatter for collected result files.
+- `scripts/export_bfs_result.py`: exports Causal-LLM-BFS results into paper CSV format.
+- `notebooks/`: analysis notebooks for priors, plots, ablations, and paper figures.
+- `synthetic/`, `bnlearn/`, `datasets/bayesian/`: BIFXML/BIF datasets used by the experiments.
+- `results/`: compact summaries, consensus priors, tables, and tracked paper artifacts.
+
+## Reproducing The Paper
+
+Detailed commands for the UAI 2026 experiments are in:
+
+```text
+docs/uai26_experiments.md
+```
+
+The guide for collecting final plots and tables after the runs is in:
+
+```text
+docs/uai26_collect_results.md
+```
+
+At a high level:
+
+1. Configure the LLM provider and generate consensus priors with `scripts/run_llm_priors.py` or `notebooks/priors_assessments.ipynb`.
+2. Run statistical and prior-aware baselines with `experiments.py`.
+3. Run ABAPC and ABAPC-LLM with `experiment_llm.py`.
+4. Export Causal-LLM-BFS outputs with `scripts/export_bfs_result.py`.
+5. Generate tables with `scripts/paper_tables.py`.
+6. Execute the notebooks in `notebooks/` to produce figures.
+
+## Environment
+
+The branch was developed in the `aba-env` environment used for the experiments. Install the Python dependencies from:
+
+```bash
+pip install -r requirements.txt
+```
+
+The Causal ABA solver requires `clingo`. Some baselines require optional dependencies, including `causal-learn`, `pyAgrum`, NOTEARS/Castle tooling, CDT, and R packages for SID/CAM-related functionality.
+
+## Reference
+
+If you use this branch, please cite:
+
+```bibtex
+@inproceedings{li2026llmcausalaba,
+  title     = {Leveraging Large Language Models for Causal Discovery: a Constraint-based, Argumentation-driven Approach},
+  author    = {Li, Zihao and Russo, Fabrizio},
+  booktitle = {Proceedings of the Conference on Uncertainty in Artificial Intelligence (UAI)},
+  year      = {2026}
+}
+```
+
+This work builds on the original Causal ABA framework:
+
+```bibtex
+@inproceedings{KR2024-88,
+  title     = {{Argumentative Causal Discovery}},
+  author    = {Russo, Fabrizio and Rapberger, Anna and Toni, Francesca},
+  booktitle = {{Proceedings of the 21st International Conference on Principles of Knowledge Representation and Reasoning}},
+  pages     = {938--949},
+  year      = {2024},
+  doi       = {10.24963/kr.2024/88},
+  url       = {https://doi.org/10.24963/kr.2024/88}
+}
+```

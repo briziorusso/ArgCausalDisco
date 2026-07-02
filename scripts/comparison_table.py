@@ -1,6 +1,6 @@
 """Compatibility entry point for the Gemini/GPT-5-mini structural table.
 
-The main UAI table refresh logic now lives in ``scripts/paper_tables.py`` so the
+The main UAI table-generation logic now lives in ``scripts/paper_tables.py`` so the
 same source paths and formatting are used by the paper tables and notebooks.
 """
 

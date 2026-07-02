@@ -1,7 +1,7 @@
-"""Generate UAI paper tables from refreshed experiment artifacts.
+"""Generate UAI paper tables from collected experiment artifacts.
 
 This script is intentionally file-based: after the long experiment runs finish,
-rerun it to regenerate CSV, Markdown, LaTeX snippets, and a source manifest under
+run it to generate CSV, Markdown, LaTeX snippets, and a source manifest under
 ``results/tables``.  It does not run experiments.
 """
 
@@ -71,7 +71,7 @@ class SourceLog:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Regenerate UAI table artifacts from refreshed g2/alpha results.",
+        description="Generate UAI table artifacts from collected g2/alpha results.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--tag", default="g2a01", help="Result suffix/tag to use.")
@@ -80,7 +80,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--allow-missing",
         action="store_true",
-        help="Skip tables whose refreshed inputs are still missing.",
+        help="Skip tables whose required inputs are still missing.",
     )
     return parser.parse_args()
 
@@ -291,7 +291,7 @@ def complete_empty_prior_abapc_rows(
 
     When consensus priors are empty, ABAPC-LLM should reduce to the same solver
     without semantic constraints.  Some experiment files skip those datasets
-    entirely, so we materialise explicit fallback rows for table/plot refreshes.
+    entirely, so we materialise explicit fallback rows for paper tables and plots.
     """
 
     frames = [primary.copy()]
@@ -461,7 +461,7 @@ def build_gpt_tables(args: argparse.Namespace, source_log: SourceLog) -> None:
         ("gpt_mpc_llm_summary", gpt_mpc_path),
     ]
     if not require_all(required, source_log, allow_missing):
-        print("Skipping GPT structural table because refreshed inputs are incomplete.")
+        print("Skipping GPT structural table because required inputs are incomplete.")
         return
 
     gemini = load_abapc_csv(gemini_csv, consensus_path=gemini_consensus, fallback_paths=[fallback_csv])
