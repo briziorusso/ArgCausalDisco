@@ -136,8 +136,19 @@ outputs/
 
 # Experiment refresh scratch/progress. Keep compact summaries/tables instead.
 results/progress/
+results/estimated_graphs/
+results/ABAPC-LLM/estimated_graphs/
+results/blocked_req_audit*/
+results/debug_blocked_required*/
 results/prior_comparison_*/
 results/ABAPC-LLM/checkpoints/
+results/figs/
+results/tables/archive/
+results/tables/final/archive/
+results/**/*.log
+results/**/*.out
+results/**/*_bkp.npy
+results/stored_results_causenet_base_cp*.npy
 logs/example_*.csv
 
 .DS_Store

@@ -1,8 +1,0 @@
-artifact,path,status
-gemini_abapc_csv,results/ABAPC-LLM/merged_synthetic-desc_g2a01.csv,found
-gpt_abapc_csv,results/ABAPC-LLM/merged_synthetic-desc-gpt5mini_g2a01.csv,missing
-plain_abapc_fallback_csv,results/ABAPC-LLM/merged_synthetic_g2a01.csv,missing
-gemini_consensus,results/llm_constraints/synthetic-desc-consensus.json,found
-gpt_consensus,results/llm_constraints/synthetic-desc-gpt5mini-consensus.json,found
-mpc_mpc_llm_summary,results/stored_results_causenet_mpc_desc_g2a01.npy,found
-gpt_mpc_llm_summary,results/stored_results_causenet_mpc_llm_gpt5mini_desc_g2a01.npy,missing
