@@ -4,9 +4,11 @@
 # %%
 
 import argparse
+import json
 import logging
 import os
 import re
+import shutil
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
@@ -538,7 +540,7 @@ def with_optional_prior(prior_df: pd.DataFrame | None = None):
     return impl_wrapper
 
 import abapc
-from utils.graph_utils import DAGMetrics, dag2cpdag
+from utils.graph_utils import DAGMetrics, dag2cpdag, estimate_to_cpdag_for_metrics
 
 
 DEFAULT_REPEATS = 50
@@ -564,6 +566,10 @@ def _suffixes(output_suffix: str) -> tuple[str, str]:
     return file_suffix, merged_suffix
 
 
+def safe_filename(value: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", value)
+
+
 def dataset_output_paths(type_: str, output_suffix: str = "") -> dict[str, Path]:
     file_suffix, merged_suffix = _suffixes(output_suffix)
     base_dir = Path("results/ABAPC-LLM")
@@ -574,6 +580,7 @@ def dataset_output_paths(type_: str, output_suffix: str = "") -> dict[str, Path]
         "merged": base_dir / f"merged_{type_}{merged_suffix}.csv",
         "checkpoint": checkpoint_dir / f"{type_}{file_suffix}-checkpoint.csv",
         "skipped": checkpoint_dir / f"{type_}{file_suffix}-skipped.csv",
+        "graphs": base_dir / "estimated_graphs" / f"{type_}{file_suffix}",
     }
 
 
@@ -589,6 +596,45 @@ def atomic_write_csv(df: pd.DataFrame, path: Path, **to_csv_kwargs) -> None:
                 tmp_path.unlink()
             except OSError:
                 pass
+
+
+def edge_model_to_adjacency(model, n_nodes: int) -> np.ndarray:
+    B_est = np.zeros((n_nodes, n_nodes))
+    for edge in model:
+        B_est[edge[0], edge[1]] = 1
+    return B_est
+
+
+def graph_stack_from_models(models, n_nodes: int) -> np.ndarray:
+    matrices = [edge_model_to_adjacency(model, n_nodes) for model in models]
+    if not matrices:
+        return np.zeros((0, n_nodes, n_nodes))
+    return np.asarray(matrices)
+
+
+def save_raw_graphs(
+    graph_dir: Path,
+    dataset_name: str,
+    impl_name: str,
+    run_idx: int,
+    seed: int,
+    W_est: np.ndarray,
+    B_true: np.ndarray,
+    metadata: dict | None = None,
+) -> None:
+    path = (
+        graph_dir
+        / safe_filename(dataset_name)
+        / safe_filename(impl_name)
+        / f"run_{run_idx:04d}_seed_{seed}.npz"
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        path,
+        W_est=np.asarray(W_est),
+        B_true=np.asarray(B_true),
+        metadata=np.array(json.dumps(metadata or {}, sort_keys=True)),
+    )
 
 
 def load_checkpoint(path: Path) -> pd.DataFrame:
@@ -640,6 +686,8 @@ def run_experiment(
     scenario_prefix: str,
     checkpoint_path: Path | None = None,
     skipped_path: Path | None = None,
+    graph_dir: Path | None = None,
+    save_graphs: bool = True,
     resume: bool = False,
 ):
     all_runs = []
@@ -655,6 +703,11 @@ def run_experiment(
                 f"Loaded checkpoint {checkpoint_path}: "
                 f"{len(checkpoint_df)} rows across {len(completed_datasets)} datasets."
             )
+            if save_graphs:
+                print(
+                    "Completed checkpoint rows will not be backfilled with raw graph artifacts. "
+                    "Rerun without --resume if raw graphs are needed for those rows."
+                )
 
     if resume and skipped_path is not None:
         skipped = load_skipped(skipped_path)
@@ -698,21 +751,39 @@ def run_experiment(
         dataset_runs = []
         # Flatten results; each 'run' already carries its seed and run_id
         for impl_name, results in [("org", impl2_return), ("new", impl1_return)]:
-            for run in results:
+            for run_idx, run in enumerate(results):
                 models = run["models"]
+                model_matrices = graph_stack_from_models(models, bn.size())
+                if save_graphs and graph_dir is not None:
+                    save_raw_graphs(
+                        graph_dir,
+                        bif_name,
+                        impl_name,
+                        run_idx,
+                        run["seed"],
+                        model_matrices,
+                        B_true,
+                        {
+                            "artifact_kind": "estimated_graph_stack",
+                            "dataset": bif_name,
+                            "impl": impl_name,
+                            "run_idx": run_idx,
+                            "seed": run["seed"],
+                            "sample_size": sample_size,
+                            "test_name": test_name,
+                            "test_alpha": test_alpha,
+                            "scenario_prefix": scenario_prefix,
+                            "model_count": int(model_matrices.shape[0]),
+                        },
+                    )
                 cd_metrics = []
-                for model in models:
-                    B_est = np.zeros((bn.size(), bn.size()))
-                    for edge in model:
-                        B_est[edge[0], edge[1]] = 1
-                    model = B_est
+                for model in model_matrices:
                     # DAG metrics
                     B_est_dag = (model > 0).astype(int)
                     mt_dag = DAGMetrics(B_est_dag, B_true).metrics
 
                     # CPDAG metrics
-                    B_est_cpdag = (model != 0).astype(int)
-                    mt_cpdag = DAGMetrics(dag2cpdag(B_est_cpdag), B_true).metrics
+                    mt_cpdag = DAGMetrics(estimate_to_cpdag_for_metrics(model), B_true).metrics
                     cpdag_sid = mt_cpdag.pop("sid")
                     if not isinstance(cpdag_sid, tuple):
                         cpdag_sid = (cpdag_sid, cpdag_sid)
@@ -732,6 +803,7 @@ def run_experiment(
                         "num_nodes": bn.size(),
                         "num_edges": bn.sizeArcs(),
                         "impl": impl_name,
+                        "run_idx": run_idx,
                         "seed": run["seed"],
                         "time": run["time"],
                         "remove_n": run["remove_n"],
@@ -770,6 +842,7 @@ def run_dataset_experiment(
     output_suffix: str = "",
     resume: bool = False,
     finalize_only: bool = False,
+    save_graphs: bool = True,
 ):
     """Run experiment for a specific dataset type.
     
@@ -794,6 +867,9 @@ def run_dataset_experiment(
             )
         skipped = load_skipped(paths["skipped"])
     else:
+        if save_graphs and not resume and paths["graphs"].exists():
+            shutil.rmtree(paths["graphs"])
+
         # Parse dataset type to get base name
         base_name = type_.split('-')[0]  # 'bnlearn' or 'synthetic'
 
@@ -825,6 +901,8 @@ def run_dataset_experiment(
             scenario_prefix=f"prior_comparison_{type_.replace('-', '_')}",
             checkpoint_path=paths["checkpoint"],
             skipped_path=paths["skipped"],
+            graph_dir=paths["graphs"],
+            save_graphs=save_graphs,
             resume=resume,
         )
 
@@ -876,6 +954,17 @@ def join_results(json_path, csv_path):
     return merged
 
 
+def str_to_bool(value):
+    if isinstance(value, bool):
+        return value
+    value = value.lower()
+    if value in {"true", "1", "yes", "y"}:
+        return True
+    if value in {"false", "0", "no", "n"}:
+        return False
+    raise argparse.ArgumentTypeError("Boolean value expected.")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run ABAPC/ABAPC-LLM prior comparison experiments.",
@@ -913,6 +1002,13 @@ def parse_args() -> argparse.Namespace:
         default="gsq",
         help="Conditional independence test passed to ABAPC.",
     )
+    parser.add_argument(
+        "--save_graphs",
+        type=str_to_bool,
+        default=True,
+        metavar="{true,false}",
+        help="Save per-run raw estimated graphs for future metric recomputation.",
+    )
     args = parser.parse_args()
     args.test_name = {"chi2": "chisq", "g2": "gsq"}.get(args.test_name, args.test_name)
     return args
@@ -938,6 +1034,7 @@ def main() -> None:
             output_suffix=args.output_suffix,
             resume=args.resume,
             finalize_only=args.finalize_only,
+            save_graphs=args.save_graphs,
         )
         all_skipped.extend(skipped)
 

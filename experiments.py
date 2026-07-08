@@ -3,6 +3,7 @@ import logging
 import re
 import fnmatch
 import argparse
+import json
 from pathlib import Path
 import shutil
 
@@ -10,7 +11,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from cd_algorithms.models import run_method
-from utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
+from utils.graph_utils import DAGMetrics, dag2cpdag, estimate_to_cpdag_for_metrics, is_dag
 from utils.helpers import random_stability, logger_setup
 from utils.data_utils import load_causenet_data_dag, load_bnlearn_data_dag, simulate_dag, BIF_FOLDER_MAP
 from priors.schema import Constraints, build_mpc_background_knowledge
@@ -125,6 +126,45 @@ def append_progress_row(path: Path, row: dict, columns):
     df_row.to_csv(path, mode='a', header=not path.exists(), index=False)
 
 
+def empty_graph_metrics():
+    return {
+        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
+        'precision': np.nan, 'recall': np.nan, 'F1': np.nan,
+        'shd': np.nan, 'sid': np.nan
+    }
+
+
+def raw_graph_path(raw_graph_dir: Path, dataset_name: str, model_name: str, run_idx: int, seed: int) -> Path:
+    return (
+        raw_graph_dir
+        / safe_filename(dataset_name)
+        / safe_filename(model_name)
+        / f"run_{run_idx:04d}_seed_{seed}.npz"
+    )
+
+
+def save_raw_graph(
+    raw_graph_dir: Path,
+    dataset_name: str,
+    model_name: str,
+    run_idx: int,
+    seed: int,
+    W_est,
+    B_true,
+    metadata: dict | None = None,
+) -> None:
+    if W_est is None:
+        return
+    path = raw_graph_path(raw_graph_dir, dataset_name, model_name, run_idx, seed)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        path,
+        W_est=np.asarray(W_est),
+        B_true=np.asarray(B_true),
+        metadata=np.array(json.dumps(metadata or {}, sort_keys=True)),
+    )
+
+
 def summarise_results(df: pd.DataFrame, metric_pairs):
     if df.empty:
         return pd.DataFrame(columns=['dataset', 'model'] + [
@@ -172,6 +212,13 @@ parser.add_argument('--device', type=int, default=0)
 parser.add_argument('--load_res', action='store_true')
 parser.add_argument('--save_res', action='store_true', default=True)
 parser.add_argument('--resume', action='store_true', help='Resume from saved progress and summaries')
+parser.add_argument(
+    '--save_graphs',
+    type=str_to_bool,
+    default=True,
+    metavar='{true,false}',
+    help='Save per-run raw estimated graphs for future metric recomputation',
+)
 parser.add_argument('--standardise', dest='standardise', action='store_true', help='Standardise data (z-score) after label encoding')
 parser.add_argument('--no-standardise', dest='standardise', action='store_false', help='Do not standardise data')
 parser.set_defaults(standardise=None)
@@ -214,6 +261,7 @@ device = args.device
 load_res = args.load_res
 resume = args.resume
 save_res = args.save_res
+save_graphs = args.save_graphs
 simulate_with = args.simulate_with
 standardise = args.standardise
 test_alpha = args.test_alpha
@@ -326,6 +374,12 @@ progress_dir = results_path / 'progress' / version
 if not resume and progress_dir.exists():
     shutil.rmtree(progress_dir)
 progress_dir.mkdir(parents=True, exist_ok=True)
+
+raw_graph_dir = results_path / 'estimated_graphs' / version
+if save_graphs and not resume and raw_graph_dir.exists():
+    shutil.rmtree(raw_graph_dir)
+if save_graphs:
+    raw_graph_dir.mkdir(parents=True, exist_ok=True)
 
 if load_existing and save_res:
     np.save(results_path / f'stored_results_{version}_bkp.npy', mt_res.reindex(columns=DAG_SUMMARY_COLUMNS).to_numpy())
@@ -450,6 +504,17 @@ for dataset_name, src, info in datasets:
 
         if completed_runs:
             logging.info(f"Resuming {method} on {dataset_name}: {completed_runs}/{n_runs} runs already completed.")
+            if save_graphs:
+                missing_raw_graphs = [
+                    idx
+                    for idx in range(completed_runs)
+                    if not raw_graph_path(raw_graph_dir, dataset_name, display_name, idx, seeds_list[idx]).exists()
+                ]
+                if missing_raw_graphs:
+                    logging.warning(
+                        f'{len(missing_raw_graphs)} completed runs for {display_name} on {dataset_name} '
+                        f'do not have raw graph artifacts. Rerun without --resume to regenerate them.'
+                    )
 
         logging.info(f"Running {method} on {dataset_name}")
 
@@ -488,6 +553,31 @@ for dataset_name, src, info in datasets:
                     raise ValueError(f'Unknown random method {method}')
                 B_est = simulate_dag(d=B_true.shape[1], s0=s0, graph_type='ER')
                 elapsed = (datetime.now() - start).total_seconds()
+                if save_graphs:
+                    save_raw_graph(
+                        raw_graph_dir,
+                        dataset_name,
+                        display_name,
+                        idx,
+                        seed,
+                        B_est,
+                        B_true,
+                        {
+                            'source': src,
+                            'version': version,
+                            'method_key': method,
+                            'model': display_name,
+                            'run_idx': idx,
+                            'seed': seed,
+                            'test_name': test_name,
+                            'test_alpha': test_alpha,
+                            'sample_size': sample_size,
+                            'standardise': standardise,
+                            'simulate_with': simulate_with if src == 'causenet' else None,
+                            'prior_json': str(args.prior_json) if args.prior_json else None,
+                            'artifact_kind': 'estimated_graph',
+                        },
+                    )
                 mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true).metrics
                 mt_dag = DAGMetrics(B_est, B_true).metrics
             else:
@@ -512,18 +602,44 @@ for dataset_name, src, info in datasets:
                 if 'Tensor' in str(type(W_est)):
                     W_est = np.asarray([list(i) for i in W_est])
                 logger_setup(str(results_path / f'log_{version}.log'), continue_logging=True)
+                if save_graphs:
+                    save_raw_graph(
+                        raw_graph_dir,
+                        dataset_name,
+                        display_name,
+                        idx,
+                        seed,
+                        W_est,
+                        B_true,
+                        {
+                            'source': src,
+                            'version': version,
+                            'method_key': method,
+                            'model': display_name,
+                            'run_idx': idx,
+                            'seed': seed,
+                            'test_name': test_name,
+                            'test_alpha': test_alpha,
+                            'sample_size': sample_size,
+                            'standardise': standardise,
+                            'simulate_with': simulate_with if src == 'causenet' else None,
+                            'prior_json': str(args.prior_json) if args.prior_json else None,
+                            'artifact_kind': 'estimated_graph',
+                            'has_background_knowledge': method_background_knowledge is not None,
+                        },
+                    )
                 if W_est is None:
-                    mt_cpdag = {
-                        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                        'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                    }
-                    mt_dag = {
-                        'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                        'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                    }
+                    mt_cpdag = empty_graph_metrics()
+                    mt_dag = empty_graph_metrics()
                 else:
-                    B_est_binary = (W_est != 0).astype(int)
-                    mt_cpdag = DAGMetrics(dag2cpdag(B_est_binary.copy()), B_true).metrics
+                    try:
+                        mt_cpdag = DAGMetrics(estimate_to_cpdag_for_metrics(W_est), B_true).metrics
+                    except (AssertionError, ValueError) as exc:
+                        logging.warning(
+                            f'Unable to compute CPDAG metrics for {display_name} on '
+                            f'{dataset_name}, run {idx}: {exc}; skipping CPDAG metrics for this run.'
+                        )
+                        mt_cpdag = empty_graph_metrics()
                     B_est = (W_est > 0).astype(int)
                     bidirected_mask = (B_est == 1) & (B_est.T == 1)
                     if bidirected_mask.any():
@@ -533,10 +649,7 @@ for dataset_name, src, info in datasets:
                         mt_dag = DAGMetrics(B_est, B_true).metrics
                     else:
                         logging.warning('Estimated graph is not a DAG after bidirected edge removal; skipping DAG metrics for this run.')
-                        mt_dag = {
-                            'nnz': np.nan, 'fdr': np.nan, 'tpr': np.nan, 'fpr': np.nan,
-                            'precision': np.nan, 'recall': np.nan, 'F1': np.nan, 'shd': np.nan, 'sid': np.nan
-                        }
+                        mt_dag = empty_graph_metrics()
 
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_dag})
             logging.info({'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_cpdag})

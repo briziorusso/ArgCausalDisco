@@ -23,6 +23,7 @@ import networkx as nx
 import pandas as pd
 import logging
 import gc
+from pathlib import Path
 gc.set_threshold(0,0,0)
 from abapc import ABAPC
 from cd_algorithms.PC import pc
@@ -57,9 +58,27 @@ def _import_notears():
     try:
         from notears.nonlinear import NotearsMLP, notears_nonlinear
     except Exception:
-        sys.path.append('../notears/')
+        candidates = [
+            Path(__file__).resolve().parents[3] / 'notears',
+            Path(__file__).resolve().parents[2] / 'notears',
+            Path.cwd().parent / 'notears',
+        ]
+        for candidate in candidates:
+            if (candidate / 'notears' / 'nonlinear.py').exists():
+                sys.path.insert(0, str(candidate))
+                break
         from notears.nonlinear import NotearsMLP, notears_nonlinear
     return NotearsMLP, notears_nonlinear
+
+
+def _torch_device(torch, device):
+    if device == '' or device is None:
+        return torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
+    if isinstance(device, torch.device):
+        return device
+    if isinstance(device, int) or (isinstance(device, str) and device.isdigit()):
+        return torch.device(f"cuda:{int(device)}" if torch.cuda.is_available() else "cpu")
+    return torch.device(device)
 
 
 def _import_cdt_cam():
@@ -130,8 +149,7 @@ def run_method(X,
         torch = _import_torch()
         MCSL, GraNDAG, NotearsNonlinear, Notears = _import_castle_algorithms()
         NotearsMLP, notears_nonlinear = _import_notears()
-        if device == '':
-            device = torch.device(f"cuda:{get_freer_gpu()}" if torch.cuda.is_available() else "cpu")
+        device = _torch_device(torch, device)
         logging.info(f"Running on: {device}")
         if notears_from == 'castle':
             start = time.time()
@@ -143,7 +161,11 @@ def run_method(X,
         else:
             start = time.time()
             random_stability(seed)
-            fitted = NotearsMLP(dims=[X.shape[1], 10, 1], bias=True)#, device=device)
+            try:
+                fitted = NotearsMLP(dims=[X.shape[1], 10, 1], device=device, bias=True)
+            except TypeError:
+                fitted = NotearsMLP(dims=[X.shape[1], 10, 1], bias=True).to(device)
+                fitted.device = device
             W_est = notears_nonlinear(fitted, X, lambda1=0.01, lambda2=0.01)
 
         elapsed = time.time() - start
@@ -292,7 +314,7 @@ def run_method(X,
         jm = pyc()
         try:
             jm.start_vm()
-        except: 
+        except:
             pass
 
         from pycausal import search as s               

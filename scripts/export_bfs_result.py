@@ -9,7 +9,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from utils.graph_utils import DAGMetrics, dag2cpdag
+from utils.graph_utils import DAGMetrics, estimate_to_cpdag_for_metrics
 
 
 def dataset_names(source_dir: Path) -> set[str]:
@@ -52,8 +52,7 @@ def export_source(
 
         mt_dag = DAGMetrics((B_est > 0).astype(int), B_true).metrics
 
-        B_est_cpdag = (B_est != 0).astype(int)
-        mt_cpdag = DAGMetrics(dag2cpdag(B_est_cpdag), B_true).metrics
+        mt_cpdag = DAGMetrics(estimate_to_cpdag_for_metrics(B_est), B_true).metrics
         cpdag_sid = mt_cpdag.pop("sid")
         if not isinstance(cpdag_sid, tuple):
             cpdag_sid = (cpdag_sid, cpdag_sid)

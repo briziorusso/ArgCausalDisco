@@ -244,6 +244,56 @@ def dag2cpdag(G, cdt_method=False):
         C = (C != 0).astype(int)
     return C
 
+
+def estimate_to_cpdag_for_metrics(W_est):
+    """Convert an estimated graph to the CPDAG representation used by DAGMetrics.
+
+    Causal-learn stores endpoint marks as -1/1 pairs: an edge i -> j appears as
+    W[i, j] = 1, W[j, i] = -1 after the transpose used in this project, while
+    an undirected edge appears as -1 in both directions.  Collapsing this with
+    ``W != 0`` loses the distinction between oriented and unoriented endpoints.
+    """
+    W = np.asarray(W_est)
+    if W.ndim != 2 or W.shape[0] != W.shape[1]:
+        raise ValueError("Estimated graph must be a square matrix.")
+
+    if not ((W == 0) | (W == 1) | (W == -1)).all():
+        return dag2cpdag((W > 0).astype(int))
+
+    if not (W == -1).any():
+        B = (W > 0).astype(int)
+        if is_dag(B):
+            return dag2cpdag(B)
+        return B
+
+    C = np.zeros(W.shape, dtype=int)
+    d = W.shape[0]
+    for i in range(d):
+        for j in range(i + 1, d):
+            left = W[i, j]
+            right = W[j, i]
+            if left == 0 and right == 0:
+                continue
+            if left == 1 and right == -1:
+                C[i, j] = 1
+            elif left == -1 and right == 1:
+                C[j, i] = 1
+            elif left == -1 and right == -1:
+                C[i, j] = -1
+                C[j, i] = -1
+            elif left == 1 and right == 1:
+                C[i, j] = 1
+                C[j, i] = 1
+            elif left == 1 and right == 0:
+                C[i, j] = 1
+            elif left == 0 and right == 1:
+                C[j, i] = 1
+            elif left == -1 and right == 0:
+                C[i, j] = -1
+            elif left == 0 and right == -1:
+                C[j, i] = -1
+    return C
+
 ### Largely from TrustworthyAI repo, with some modifications and the addition of SID from cdt.metrics
 class DAGMetrics(object):
     """
