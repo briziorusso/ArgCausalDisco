@@ -1,0 +1,46 @@
+\begin{table*}[t]
+    \caption{Non-significant best-vs-comparator tests that justify additional bolded methods in Tables~\ref{tab:causenet_dag_full_metrics}, \ref{tab:causenet_dag_v_graph_type}, \ref{tab:alpha_ablation_dag}, and \ref{tab:gpt_model_ablation_dag}. Significance levels for both reported $p$-values are: \textnormal{***} $p<0.001$, \textnormal{**} $p<0.01$, \textnormal{*} $p<0.05$, \textnormal{.} $p<0.1$.}
+    \label{tab:structural_tied_bolding_tests}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{cll l|c|r|rl|rl}
+    \toprule
+    \textbf{Table} & \textbf{Group} & \textbf{Metric} & \textbf{Methods} & \textbf{Means$\pm$Std} & \textbf{t} & \multicolumn{2}{c|}{\textbf{p-value}} & \multicolumn{2}{c}{\textbf{$p_{\mathrm{BH}}$}} \\
+    \midrule
+    \ref{tab:causenet_dag_full_metrics} & $|\nodeSet|=15$ & Precision & MPC vs MPC-LLM & \num{0.936 +- 0.071} vs \num{0.929 +- 0.061} & $1.91$ & $0.056$ & \!\!\!. & $0.056$ & \!\!\!. \\
+    \midrule
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{SF\\$|\nodeSet|=5$} & F1 & ABAPC-LLM vs MPC-LLM & \num{0.734 +- 0.046} vs \num{0.697 +- 0.055} & $1.81$ & $0.071$ & \!\!\!. & $0.071$ & \!\!\!. \\
+    \midrule
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{LT\\$|\nodeSet|=5$} & SHD & MPC-LLM vs ABAPC-LLM & \num{1.217 +- 0.345} vs \num{1.335 +- 0.457} & $-1.20$ & $0.231$ & \!\!\!ns & $0.231$ & \!\!\!ns \\
+    \midrule
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{ER\\$|\nodeSet|=10$} & F1 & MPC-LLM vs ABAPC-LLM & \num{0.663 +- 0.057} vs \num{0.656 +- 0.057} & $0.57$ & $0.570$ & \!\!\!ns & $0.570$ & \!\!\!ns \\
+    \midrule
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{SF\\$|\nodeSet|=10$} & SHD & ABAPC-LLM vs MPC-LLM & \num{5.711 +- 1.302} vs \num{6.112 +- 1.198} & $-1.95$ & $0.051$ & \!\!\!. & $0.051$ & \!\!\!. \\
+    \midrule
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{LT\\$|\nodeSet|=10$} & F1 & BOSS vs ABAPC-LLM & \num{0.638 +- 0.192} vs \num{0.623 +- 0.111} & $1.67$ & $0.095$ & \!\!\!. & $0.095$ & \!\!\!. \\
+    \midrule
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{SF\\$|\nodeSet|=15$} & SHD & ABAPC vs ABAPC-LLM & \num{7.103 +- 1.144} vs \num{7.226 +- 1.151} & $-1.71$ & $0.087$ & \!\!\!. & $0.087$ & \!\!\!. \\
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{SF\\$|\nodeSet|=15$} & F1 & ABAPC vs ABAPC-LLM & \num{0.601 +- 0.080} vs \num{0.590 +- 0.077} & $1.84$ & $0.065$ & \!\!\!. & $0.065$ & \!\!\!. \\
+    \midrule
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{ER\\Avg.} & F1 & ABAPC-LLM vs MPC-LLM & \num{0.720 +- 0.056} vs \num{0.715 +- 0.048} & $0.70$ & $0.481$ & \!\!\!ns & $0.481$ & \!\!\!ns \\
+    \midrule
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{LT\\Avg.} & SHD & ABAPC-LLM vs MPC-LLM & \num{4.868 +- 1.114} vs \num{4.912 +- 0.816} & $-0.27$ & $0.784$ & \!\!\!ns & $0.784$ & \!\!\!ns \\
+    \ref{tab:causenet_dag_v_graph_type} & \shortstack[l]{LT\\Avg.} & F1 & MPC-LLM vs ABAPC-LLM & \num{0.739 +- 0.052} vs \num{0.731 +- 0.079} & $1.14$ & $0.253$ & \!\!\!ns & $0.253$ & \!\!\!ns \\
+    \midrule
+    \ref{tab:alpha_ablation_dag} & \shortstack[l]{$\alpha=0.05$\\$|\nodeSet|=5$} & SHD & MPC-LLM vs ABAPC-LLM & \num{1.170 +- 0.583} vs \num{1.233 +- 0.514} & $-1.45$ & $0.146$ & \!\!\!ns & $0.146$ & \!\!\!ns \\
+    \midrule
+    \ref{tab:gpt_model_ablation_dag} & $|\nodeSet|=5$ & F1 & ABAPC-LLM (Gemini) vs MPC-LLM (Gemini) & \num{0.828 +- 0.048} vs \num{0.822 +- 0.041} & $0.67$ & $0.506$ & \!\!\!ns & $0.506$ & \!\!\!ns \\
+    \midrule
+    \ref{tab:gpt_model_ablation_dag} & $|\nodeSet|=10$ & SHD & ABAPC-LLM (GPT) vs ABAPC-LLM (Gemini) & \num{5.755 +- 1.417} vs \num{5.984 +- 1.257} & $-1.95$ & $0.051$ & \!\!\!. & $0.051$ & \!\!\!. \\
+    \midrule
+    \ref{tab:gpt_model_ablation_dag} & $|\nodeSet|=15$ & SHD & ABAPC-LLM (Gemini) vs MPC-LLM (Gemini) & \num{7.508 +- 1.292} vs \num{7.616 +- 1.052} & $-0.84$ & $0.400$ & \!\!\!ns & $0.444$ & \!\!\!ns \\
+    \ref{tab:gpt_model_ablation_dag} & $|\nodeSet|=15$ & SHD & ABAPC-LLM (Gemini) vs ABAPC-LLM (GPT) & \num{7.508 +- 1.292} vs \num{7.575 +- 1.513} & $-0.52$ & $0.604$ & \!\!\!ns & $0.604$ & \!\!\!ns \\
+    \ref{tab:gpt_model_ablation_dag} & $|\nodeSet|=15$ & Precision & MPC-LLM (GPT) vs MPC & \num{0.941 +- 0.064} vs \num{0.934 +- 0.068} & $1.67$ & $0.094$ & \!\!\!. & $0.094$ & \!\!\!. \\
+    \ref{tab:gpt_model_ablation_dag} & $|\nodeSet|=15$ & Precision & MPC-LLM (GPT) vs MPC-LLM (Gemini) & \num{0.941 +- 0.064} vs \num{0.934 +- 0.049} & $1.69$ & $0.092$ & \!\!\!. & $0.094$ & \!\!\!. \\
+    \ref{tab:gpt_model_ablation_dag} & $|\nodeSet|=15$ & Recall & ABAPC-LLM (Gemini) vs ABAPC-LLM (GPT) & \num{0.573 +- 0.073} vs \num{0.570 +- 0.086} & $0.78$ & $0.435$ & \!\!\!ns & $0.435$ & \!\!\!ns \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}

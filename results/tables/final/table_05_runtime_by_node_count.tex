@@ -1,0 +1,22 @@
+\begin{table*}[t]
+    \caption{Runtime in seconds on \texttt{CauseNet} synthetic datasets (mean$\pm$std; LLM API latency excluded).}
+    \label{tab:runtime_scaling_final}
+    \centering
+    \normalsize
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{lccc}
+    \toprule
+    \textbf{Method} & \textbf{$|\nodeSet|=5$} & \textbf{$|\nodeSet|=10$} & \textbf{$|\nodeSet|=15$} \\
+    \midrule
+    Random & \num{0.00 +- 0.00} & \num{0.00 +- 0.00} & \num{0.00 +- 0.00} \\
+    FGS & \num{0.11 +- 0.03} & \num{0.14 +- 0.04} & \num{0.15 +- 0.04} \\
+    NOTEARS-MLP & \num{0.19 +- 0.10} & \num{0.64 +- 0.25} & \num{1.20 +- 0.77} \\
+    GRaSP & \num{1.10 +- 0.27} & \num{5.45 +- 2.88} & \num{14.06 +- 5.69} \\
+    BOSS & \num{1.29 +- 0.32} & \num{7.22 +- 3.41} & \num{18.63 +- 7.64} \\
+    MPC & \num{0.01 +- 0.00} & \num{0.04 +- 0.03} & \num{0.05 +- 0.03} \\
+    MPC-LLM & \num{0.01 +- 0.00} & \num{0.04 +- 0.03} & \num{0.05 +- 0.03} \\
+    ABAPC & \num{0.05 +- 0.03} & \num{1.96 +- 2.88} & \num{4.42 +- 4.06} \\
+    ABAPC-LLM & \num{0.06 +- 0.05} & \num{1.81 +- 2.54} & \num{4.33 +- 3.97} \\
+    \bottomrule
+    \end{tabular}
+\end{table*}

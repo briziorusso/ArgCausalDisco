@@ -1,0 +1,56 @@
+\begin{table*}[t]
+    \caption{Non-significant best-vs-comparator tests that justify additional bolded methods in Table~\ref{tab:bnlearn_dag_all_metrics}. Significance levels for both reported $p$-values are: \textnormal{***} $p<0.001$, \textnormal{**} $p<0.01$, \textnormal{*} $p<0.05$, \textnormal{.} $p<0.1$.}
+    \label{tab:bnlearn_tied_bolding_tests}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{ll l|c|r|rl|rl}
+    \toprule
+    \textbf{Group} & \textbf{Metric} & \textbf{Methods} & \textbf{Means$\pm$Std} & \textbf{t} & \multicolumn{2}{c|}{\textbf{p-value}} & \multicolumn{2}{c}{\textbf{$p_{\mathrm{BH}}$}} \\
+    \midrule
+    asia & Precision & ABAPC-LLM vs MPC & \num{0.992 +- 0.040} vs \num{0.980 +- 0.080} & $0.95$ & $0.342$ & \!\!\!ns & $0.391$ & \!\!\!ns \\
+    asia & Precision & ABAPC-LLM vs MPC-LLM & \num{0.992 +- 0.040} vs \num{0.990 +- 0.030} & $0.28$ & $0.776$ & \!\!\!ns & $0.776$ & \!\!\!ns \\
+    \midrule
+    cancer & SHD & MPC-LLM vs ABAPC-LLM & \num{0.680 +- 0.590} vs \num{0.680 +- 0.587} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    cancer & Precision & ABAPC-LLM vs MPC-LLM & \num{0.996 +- 0.028} vs \num{0.990 +- 0.050} & $0.74$ & $0.460$ & \!\!\!ns & $0.460$ & \!\!\!ns \\
+    cancer & Recall & MPC-LLM vs ABAPC-LLM & \num{0.840 +- 0.130} vs \num{0.835 +- 0.148} & $0.18$ & $0.858$ & \!\!\!ns & $0.858$ & \!\!\!ns \\
+    cancer & F1 & MPC vs MPC-LLM & \num{0.940 +- 0.180} vs \num{0.900 +- 0.080} & $1.44$ & $0.151$ & \!\!\!ns & $0.167$ & \!\!\!ns \\
+    cancer & F1 & MPC vs ABAPC-LLM & \num{0.940 +- 0.180} vs \num{0.901 +- 0.091} & $1.38$ & $0.167$ & \!\!\!ns & $0.167$ & \!\!\!ns \\
+    cancer & SID & MPC-LLM vs ABAPC-LLM & \num{0.780 +- 1.000} vs \num{0.960 +- 1.324} & $-0.77$ & $0.443$ & \!\!\!ns & $0.443$ & \!\!\!ns \\
+    \midrule
+    earthquake & SHD & MPC vs GRaSP & \num{0.040 +- 0.200} vs \num{0.160 +- 0.790} & $-1.04$ & $0.298$ & \!\!\!ns & $0.476$ & \!\!\!ns \\
+    earthquake & SHD & MPC vs BOSS & \num{0.040 +- 0.200} vs \num{0.400 +- 1.210} & $-2.08$ & $0.038$ & \!\!\!* & $0.076$ & \!\!\!. \\
+    earthquake & SHD & MPC vs MPC-LLM & \num{0.040 +- 0.200} vs \num{0.040 +- 0.200} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    earthquake & SHD & MPC vs ABAPC & \num{0.040 +- 0.200} vs \num{0.100 +- 0.463} & $-0.84$ & $0.400$ & \!\!\!ns & $0.534$ & \!\!\!ns \\
+    earthquake & SHD & MPC vs ABAPC-LLM & \num{0.040 +- 0.200} vs \num{0.080 +- 0.340} & $-0.72$ & $0.474$ & \!\!\!ns & $0.541$ & \!\!\!ns \\
+    earthquake & Precision & GRaSP vs BOSS & \num{1.000 +- 0.000} vs \num{1.000 +- 0.000} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    earthquake & Precision & GRaSP vs MPC & \num{1.000 +- 0.000} vs \num{0.990 +- 0.040} & $1.77$ & $0.077$ & \!\!\!. & $0.105$ & \!\!\!ns \\
+    earthquake & Precision & GRaSP vs MPC-LLM & \num{1.000 +- 0.000} vs \num{0.990 +- 0.040} & $1.77$ & $0.077$ & \!\!\!. & $0.105$ & \!\!\!ns \\
+    earthquake & Precision & GRaSP vs ABAPC & \num{1.000 +- 0.000} vs \num{0.982 +- 0.080} & $1.59$ & $0.112$ & \!\!\!ns & $0.128$ & \!\!\!ns \\
+    earthquake & Precision & GRaSP vs ABAPC-LLM & \num{1.000 +- 0.000} vs \num{0.987 +- 0.052} & $1.76$ & $0.079$ & \!\!\!. & $0.105$ & \!\!\!ns \\
+    earthquake & Recall & MPC vs GRaSP & \num{1.000 +- 0.000} vs \num{0.960 +- 0.200} & $1.41$ & $0.157$ & \!\!\!ns & $0.252$ & \!\!\!ns \\
+    earthquake & Recall & MPC vs MPC-LLM & \num{1.000 +- 0.000} vs \num{1.000 +- 0.000} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    earthquake & Recall & MPC vs ABAPC & \num{1.000 +- 0.000} vs \num{0.990 +- 0.071} & $1.00$ & $0.317$ & \!\!\!ns & $0.363$ & \!\!\!ns \\
+    earthquake & Recall & MPC vs ABAPC-LLM & \num{1.000 +- 0.000} vs \num{0.995 +- 0.035} & $1.00$ & $0.317$ & \!\!\!ns & $0.363$ & \!\!\!ns \\
+    earthquake & F1 & GRaSP vs BOSS & \num{1.000 +- 0.000} vs \num{1.000 +- 0.000} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    earthquake & F1 & GRaSP vs MPC & \num{1.000 +- 0.000} vs \num{1.000 +- 0.020} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    earthquake & F1 & GRaSP vs MPC-LLM & \num{1.000 +- 0.000} vs \num{1.000 +- 0.020} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    earthquake & F1 & GRaSP vs ABAPC & \num{1.000 +- 0.000} vs \num{0.986 +- 0.073} & $1.39$ & $0.164$ & \!\!\!ns & $0.263$ & \!\!\!ns \\
+    earthquake & F1 & GRaSP vs ABAPC-LLM & \num{1.000 +- 0.000} vs \num{0.991 +- 0.041} & $1.63$ & $0.104$ & \!\!\!ns & $0.208$ & \!\!\!ns \\
+    earthquake & SID & MPC vs GRaSP & \num{0.000 +- 0.000} vs \num{0.400 +- 1.980} & $-1.43$ & $0.153$ & \!\!\!ns & $0.245$ & \!\!\!ns \\
+    earthquake & SID & MPC vs MPC-LLM & \num{0.000 +- 0.000} vs \num{0.000 +- 0.000} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    earthquake & SID & MPC vs ABAPC & \num{0.000 +- 0.000} vs \num{0.160 +- 1.131} & $-1.00$ & $0.317$ & \!\!\!ns & $0.363$ & \!\!\!ns \\
+    earthquake & SID & MPC vs ABAPC-LLM & \num{0.000 +- 0.000} vs \num{0.080 +- 0.566} & $-1.00$ & $0.317$ & \!\!\!ns & $0.363$ & \!\!\!ns \\
+    \midrule
+    survey & Precision & GRaSP vs BOSS & \num{1.000 +- 0.000} vs \num{1.000 +- 0.000} & $0.00$ & $1.000$ & \!\!\!ns & $1.000$ & \!\!\!ns \\
+    \midrule
+    child & SHD & ABAPC-LLM vs MPC-LLM & \num{4.417 +- 2.009} vs \num{5.060 +- 1.800} & $-1.69$ & $0.092$ & \!\!\!. & $0.092$ & \!\!\!. \\
+    child & SHD & ABAPC-LLM vs ABAPC & \num{4.417 +- 2.009} vs \num{5.372 +- 3.250} & $-1.77$ & $0.077$ & \!\!\!. & $0.088$ & \!\!\!. \\
+    child & Recall & ABAPC-LLM vs MPC-LLM & \num{0.824 +- 0.080} vs \num{0.800 +- 0.070} & $1.61$ & $0.107$ & \!\!\!ns & $0.107$ & \!\!\!ns \\
+    child & Recall & ABAPC-LLM vs ABAPC & \num{0.824 +- 0.080} vs \num{0.786 +- 0.129} & $1.78$ & $0.075$ & \!\!\!. & $0.085$ & \!\!\!. \\
+    child & SID & ABAPC-LLM vs ABAPC & \num{72.653 +- 24.836} vs \num{84.833 +- 45.226} & $-1.67$ & $0.095$ & \!\!\!. & $0.095$ & \!\!\!. \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}

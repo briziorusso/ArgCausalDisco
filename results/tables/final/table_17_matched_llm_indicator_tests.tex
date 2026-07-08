@@ -1,0 +1,36 @@
+\begin{table*}[t]
+    \caption{Welch tests for Table~\ref{tab:gpt_model_ablation_dag}. Significance levels for both reported $p$-values are: \textnormal{***} $p<0.001$, \textnormal{**} $p<0.01$, \textnormal{*} $p<0.05$, \textnormal{.} $p<0.1$.}
+    \label{tab:matched_llm_indicator_tests}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{ll l|c|r|rl|rl}
+    \toprule
+    \textbf{Group} & \textbf{Metric} & \textbf{Methods} & \textbf{Means$\pm$Std} & \textbf{t} & \multicolumn{2}{c|}{\textbf{p-value}} & \multicolumn{2}{c}{\textbf{$p_{\mathrm{BH}}$}} \\
+    \midrule
+    $|\nodeSet|=5$ & SHD & ABAPC-LLM (Gemini) vs MPC-LLM (Gemini) & \num{1.186 +- 0.375} vs \num{1.328 +- 0.331} & $-2.57$ & $0.010$ & \!\!\!* & $0.010$ & \!\!\!* \\
+    $|\nodeSet|=5$ & Precision & MPC-LLM (Gemini) vs ABAPC-LLM (Gemini) & \num{0.952 +- 0.027} vs \num{0.902 +- 0.043} & $7.39$ & $1.50\text{e-}13$ & \!\!\!*** & $1.50\text{e-}13$ & \!\!\!*** \\
+    $|\nodeSet|=5$ & Recall & ABAPC-LLM (Gemini) vs MPC-LLM (Gemini) & \num{0.778 +- 0.063} vs \num{0.753 +- 0.053} & $2.20$ & $0.028$ & \!\!\!* & $0.028$ & \!\!\!* \\
+    $|\nodeSet|=5$ & F1 & ABAPC-LLM (Gemini) vs ABAPC-LLM (GPT) & \num{0.828 +- 0.048} vs \num{0.755 +- 0.084} & $7.82$ & $5.42\text{e-}15$ & \!\!\!*** & $1.08\text{e-}14$ & \!\!\!*** \\
+    $|\nodeSet|=5$ & F1 & MPC-LLM (Gemini) vs ABAPC-LLM (GPT) & \num{0.822 +- 0.041} vs \num{0.755 +- 0.084} & $6.56$ & $5.37\text{e-}11$ & \!\!\!*** & $5.37\text{e-}11$ & \!\!\!*** \\
+    \midrule
+    $|\nodeSet|=10$ & SHD & ABAPC-LLM (GPT) vs MPC-LLM (Gemini) & \num{5.755 +- 1.417} vs \num{6.197 +- 1.095} & $-3.63$ & $2.81\text{e-}4$ & \!\!\!*** & $5.62\text{e-}4$ & \!\!\!*** \\
+    $|\nodeSet|=10$ & SHD & ABAPC-LLM (Gemini) vs MPC-LLM (Gemini) & \num{5.984 +- 1.257} vs \num{6.197 +- 1.095} & $-1.86$ & $0.063$ & \!\!\!. & $0.063$ & \!\!\!. \\
+    $|\nodeSet|=10$ & Precision & BOSS vs MPC-LLM (GPT) & \num{0.884 +- 0.201} vs \num{0.860 +- 0.095} & $3.80$ & $1.43\text{e-}4$ & \!\!\!*** & $1.43\text{e-}4$ & \!\!\!*** \\
+    $|\nodeSet|=10$ & Recall & ABAPC-LLM (GPT) vs ABAPC-LLM (Gemini) & \num{0.569 +- 0.101} vs \num{0.542 +- 0.090} & $4.71$ & $2.50\text{e-}6$ & \!\!\!*** & $2.50\text{e-}6$ & \!\!\!*** \\
+    $|\nodeSet|=10$ & F1 & ABAPC-LLM (GPT) vs MPC-LLM (Gemini) & \num{0.655 +- 0.102} vs \num{0.634 +- 0.084} & $3.59$ & $3.27\text{e-}4$ & \!\!\!*** & $3.27\text{e-}4$ & \!\!\!*** \\
+    \midrule
+    $|\nodeSet|=15$ & SHD & ABAPC-LLM (Gemini) vs ABAPC & \num{7.508 +- 1.292} vs \num{7.863 +- 1.602} & $-2.67$ & $0.007$ & \!\!\!** & $0.022$ & \!\!\!* \\
+    $|\nodeSet|=15$ & SHD & ABAPC-LLM (GPT) vs ABAPC & \num{7.575 +- 1.513} vs \num{7.863 +- 1.602} & $-2.14$ & $0.033$ & \!\!\!* & $0.049$ & \!\!\!* \\
+    $|\nodeSet|=15$ & SHD & MPC-LLM (Gemini) vs ABAPC & \num{7.616 +- 1.052} vs \num{7.863 +- 1.602} & $-1.85$ & $0.064$ & \!\!\!. & $0.064$ & \!\!\!. \\
+    $|\nodeSet|=15$ & Precision & MPC-LLM (GPT) vs BOSS & \num{0.941 +- 0.064} vs \num{0.892 +- 0.176} & $14.36$ & $9.39\text{e-}47$ & \!\!\!*** & $2.82\text{e-}46$ & \!\!\!*** \\
+    $|\nodeSet|=15$ & Precision & MPC-LLM (Gemini) vs BOSS & \num{0.934 +- 0.049} vs \num{0.892 +- 0.176} & $12.27$ & $1.33\text{e-}34$ & \!\!\!*** & $1.99\text{e-}34$ & \!\!\!*** \\
+    $|\nodeSet|=15$ & Precision & MPC vs BOSS & \num{0.934 +- 0.068} vs \num{0.892 +- 0.176} & $12.14$ & $6.40\text{e-}34$ & \!\!\!*** & $6.40\text{e-}34$ & \!\!\!*** \\
+    $|\nodeSet|=15$ & Recall & ABAPC-LLM (Gemini) vs MPC-LLM (Gemini) & \num{0.573 +- 0.073} vs \num{0.557 +- 0.060} & $2.96$ & $0.003$ & \!\!\!** & $0.006$ & \!\!\!** \\
+    $|\nodeSet|=15$ & Recall & ABAPC-LLM (GPT) vs MPC-LLM (Gemini) & \num{0.570 +- 0.086} vs \num{0.557 +- 0.060} & $2.35$ & $0.019$ & \!\!\!* & $0.019$ & \!\!\!* \\
+    $|\nodeSet|=15$ & F1 & MPC-LLM (Gemini) vs MPC-LLM (GPT) & \num{0.691 +- 0.055} vs \num{0.671 +- 0.068} & $3.71$ & $2.09\text{e-}4$ & \!\!\!*** & $2.09\text{e-}4$ & \!\!\!*** \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}

@@ -1,0 +1,43 @@
+\begin{table*}[t]
+    \caption{Welch tests for the \texttt{earthquake} rows in Table~\ref{tab:bnlearn_dag_all_metrics}. Significance levels for both reported $p$-values are: \textnormal{***} $p<0.001$, \textnormal{**} $p<0.01$, \textnormal{*} $p<0.05$, \textnormal{.} $p<0.1$.}
+    \label{tab:bnlearn_earthquake_indicator_tests}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{ll l|c|r|rl|rl}
+    \toprule
+    \textbf{Group} & \textbf{Metric} & \textbf{Methods} & \textbf{Means$\pm$Std} & \textbf{t} & \multicolumn{2}{c|}{\textbf{p-value}} & \multicolumn{2}{c}{\textbf{$p_{\mathrm{BH}}$}} \\
+    \midrule
+    earthquake & SHD & MPC vs NOTEARS-MLP & \num{0.040 +- 0.200} vs \num{2.120 +- 1.170} & $-12.39$ & $2.92\text{e-}35$ & \!\!\!*** & $8.77\text{e-}35$ & \!\!\!*** \\
+    earthquake & SHD & MPC-LLM vs NOTEARS-MLP & \num{0.040 +- 0.200} vs \num{2.120 +- 1.170} & $-12.39$ & $2.92\text{e-}35$ & \!\!\!*** & $8.77\text{e-}35$ & \!\!\!*** \\
+    earthquake & SHD & ABAPC-LLM vs NOTEARS-MLP & \num{0.080 +- 0.340} vs \num{2.120 +- 1.170} & $-11.84$ & $2.48\text{e-}32$ & \!\!\!*** & $4.97\text{e-}32$ & \!\!\!*** \\
+    earthquake & SHD & ABAPC vs NOTEARS-MLP & \num{0.100 +- 0.463} vs \num{2.120 +- 1.170} & $-11.35$ & $7.25\text{e-}30$ & \!\!\!*** & $1.09\text{e-}29$ & \!\!\!*** \\
+    earthquake & SHD & GRaSP vs NOTEARS-MLP & \num{0.160 +- 0.790} vs \num{2.120 +- 1.170} & $-9.82$ & $9.49\text{e-}23$ & \!\!\!*** & $1.14\text{e-}22$ & \!\!\!*** \\
+    earthquake & SHD & BOSS vs NOTEARS-MLP & \num{0.400 +- 1.210} vs \num{2.120 +- 1.170} & $-7.23$ & $4.98\text{e-}13$ & \!\!\!*** & $4.98\text{e-}13$ & \!\!\!*** \\
+    earthquake & Precision & GRaSP vs NOTEARS-MLP & \num{1.000 +- 0.000} vs \num{0.500 +- 0.270} & $13.09$ & $3.54\text{e-}39$ & \!\!\!*** & $1.06\text{e-}38$ & \!\!\!*** \\
+    earthquake & Precision & BOSS vs NOTEARS-MLP & \num{1.000 +- 0.000} vs \num{0.500 +- 0.270} & $13.09$ & $3.54\text{e-}39$ & \!\!\!*** & $1.06\text{e-}38$ & \!\!\!*** \\
+    earthquake & Precision & MPC vs NOTEARS-MLP & \num{0.990 +- 0.040} vs \num{0.500 +- 0.270} & $12.69$ & $6.37\text{e-}37$ & \!\!\!*** & $9.56\text{e-}37$ & \!\!\!*** \\
+    earthquake & Precision & MPC-LLM vs NOTEARS-MLP & \num{0.990 +- 0.040} vs \num{0.500 +- 0.270} & $12.69$ & $6.37\text{e-}37$ & \!\!\!*** & $9.56\text{e-}37$ & \!\!\!*** \\
+    earthquake & Precision & ABAPC-LLM vs NOTEARS-MLP & \num{0.987 +- 0.052} vs \num{0.500 +- 0.270} & $12.52$ & $5.71\text{e-}36$ & \!\!\!*** & $6.85\text{e-}36$ & \!\!\!*** \\
+    earthquake & Precision & ABAPC vs NOTEARS-MLP & \num{0.982 +- 0.080} vs \num{0.500 +- 0.270} & $12.10$ & $1.02\text{e-}33$ & \!\!\!*** & $1.02\text{e-}33$ & \!\!\!*** \\
+    earthquake & Recall & MPC vs BOSS & \num{1.000 +- 0.000} vs \num{0.900 +- 0.300} & $2.36$ & $0.018$ & \!\!\!* & $0.044$ & \!\!\!* \\
+    earthquake & Recall & MPC-LLM vs BOSS & \num{1.000 +- 0.000} vs \num{0.900 +- 0.300} & $2.36$ & $0.018$ & \!\!\!* & $0.044$ & \!\!\!* \\
+    earthquake & Recall & ABAPC-LLM vs BOSS & \num{0.995 +- 0.035} vs \num{0.900 +- 0.300} & $2.22$ & $0.026$ & \!\!\!* & $0.044$ & \!\!\!* \\
+    earthquake & Recall & ABAPC vs BOSS & \num{0.990 +- 0.071} vs \num{0.900 +- 0.300} & $2.06$ & $0.039$ & \!\!\!* & $0.049$ & \!\!\!* \\
+    earthquake & Recall & GRaSP vs BOSS & \num{0.960 +- 0.200} vs \num{0.900 +- 0.300} & $1.18$ & $0.239$ & \!\!\!ns & $0.239$ & \!\!\!ns \\
+    earthquake & F1 & GRaSP vs NOTEARS-MLP & \num{1.000 +- 0.000} vs \num{0.500 +- 0.270} & $13.09$ & $3.54\text{e-}39$ & \!\!\!*** & $8.49\text{e-}39$ & \!\!\!*** \\
+    earthquake & F1 & BOSS vs NOTEARS-MLP & \num{1.000 +- 0.000} vs \num{0.500 +- 0.270} & $13.09$ & $3.54\text{e-}39$ & \!\!\!*** & $8.49\text{e-}39$ & \!\!\!*** \\
+    earthquake & F1 & MPC vs NOTEARS-MLP & \num{1.000 +- 0.020} vs \num{0.500 +- 0.270} & $13.06$ & $5.66\text{e-}39$ & \!\!\!*** & $8.49\text{e-}39$ & \!\!\!*** \\
+    earthquake & F1 & MPC-LLM vs NOTEARS-MLP & \num{1.000 +- 0.020} vs \num{0.500 +- 0.270} & $13.06$ & $5.66\text{e-}39$ & \!\!\!*** & $8.49\text{e-}39$ & \!\!\!*** \\
+    earthquake & F1 & ABAPC-LLM vs NOTEARS-MLP & \num{0.991 +- 0.041} vs \num{0.500 +- 0.270} & $12.70$ & $5.84\text{e-}37$ & \!\!\!*** & $7.00\text{e-}37$ & \!\!\!*** \\
+    earthquake & F1 & ABAPC vs NOTEARS-MLP & \num{0.986 +- 0.073} vs \num{0.500 +- 0.270} & $12.27$ & $1.30\text{e-}34$ & \!\!\!*** & $1.30\text{e-}34$ & \!\!\!*** \\
+    earthquake & SID & MPC vs BOSS & \num{0.000 +- 0.000} vs \num{1.000 +- 3.030} & $-2.33$ & $0.020$ & \!\!\!* & $0.049$ & \!\!\!* \\
+    earthquake & SID & MPC-LLM vs BOSS & \num{0.000 +- 0.000} vs \num{1.000 +- 3.030} & $-2.33$ & $0.020$ & \!\!\!* & $0.049$ & \!\!\!* \\
+    earthquake & SID & ABAPC-LLM vs BOSS & \num{0.080 +- 0.566} vs \num{1.000 +- 3.030} & $-2.11$ & $0.035$ & \!\!\!* & $0.058$ & \!\!\!. \\
+    earthquake & SID & ABAPC vs BOSS & \num{0.160 +- 1.131} vs \num{1.000 +- 3.030} & $-1.84$ & $0.066$ & \!\!\!. & $0.083$ & \!\!\!. \\
+    earthquake & SID & GRaSP vs BOSS & \num{0.400 +- 1.980} vs \num{1.000 +- 3.030} & $-1.17$ & $0.241$ & \!\!\!ns & $0.241$ & \!\!\!ns \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}

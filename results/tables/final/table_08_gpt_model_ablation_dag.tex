@@ -1,0 +1,53 @@
+\begin{table*}[t]
+    \caption{Structural metrics on the 43 matched \texttt{CauseNet} datasets with Gemini and GPT-5-mini constraints, grouped by $|\nodeSet|$. LLM-constraint variants are labelled by source. Among repeated-run methods, bold marks the best mean and statistically tied methods under BH-corrected Welch tests within each metric/column. Significance levels for the $p$-values against the next non-bold method in the ranking are: \textnormal{***} $p<0.001$, \textnormal{**} $p<0.01$, \textnormal{*} $p<0.05$, \textnormal{.} $p<0.1$. LLM-BFS is shown from one saved run and is excluded from Welch tests and bolding. Tests: Table~\ref{tab:matched_llm_indicator_tests}; tied bolding: Table~\ref{tab:structural_tied_bolding_tests}.}
+    \label{tab:gpt_model_ablation_dag}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{1.8pt}
+    \resizebox{0.92\textwidth}{!}{%
+    \begin{tabular}{l|lcccc}
+    \toprule
+    & \textbf{Method} & \textbf{SHD $\downarrow$} & \textbf{Precision $\uparrow$} & \textbf{Recall $\uparrow$} & \textbf{F1 $\uparrow$} \\
+    \midrule
+    \multirow{12}{*}{\rotatebox{90}{\textbf{$|\nodeSet|=5$}}} & Random & \num{6.857 +- 1.470} & \num{0.273 +- 0.145} & \num{0.385 +- 0.225} & \num{0.311 +- 0.168} \\
+     & FGS & \num{5.610 +- 1.101} & \num{0.295 +- 0.199} & \num{0.192 +- 0.130} & \num{0.224 +- 0.149} \\
+     & NOTEARS-MLP & \num{5.467 +- 0.000} & \num{0.000 +- 0.000} & \num{0.000 +- 0.000} & \num{0.000 +- 0.000} \\
+     & GRaSP & \num{3.677 +- 1.465} & \num{0.737 +- 0.266} & \num{0.347 +- 0.242} & \num{0.591 +- 0.137} \\
+     & BOSS & \num{3.633 +- 1.367} & \num{0.746 +- 0.232} & \num{0.355 +- 0.229} & \num{0.601 +- 0.127} \\
+     & MPC & \num{3.395 +- 0.643} & \num{0.836 +- 0.107} & \num{0.367 +- 0.111} & \num{0.592 +- 0.065} \\
+     & MPC-LLM (Gemini) & \num{1.328 +- 0.331} & {\bfseries \num{0.952 +- 0.027}}\,\textnormal{***} & \num{0.753 +- 0.053} & {\bfseries \num{0.822 +- 0.041}}\,\textnormal{***} \\
+     & MPC-LLM (GPT) & \num{2.213 +- 0.479} & \num{0.835 +- 0.088} & \num{0.589 +- 0.089} & \num{0.713 +- 0.083} \\
+     & ABAPC & \num{2.127 +- 0.566} & \num{0.702 +- 0.084} & \num{0.609 +- 0.090} & \num{0.663 +- 0.083} \\
+     & ABAPC-LLM (Gemini) & {\bfseries \num{1.186 +- 0.375}}\,\textnormal{*} & \num{0.902 +- 0.043} & {\bfseries \num{0.778 +- 0.063}}\,\textnormal{*} & {\bfseries \num{0.828 +- 0.048}}\,\textnormal{***} \\
+     & ABAPC-LLM (GPT) & \num{1.604 +- 0.546} & \num{0.807 +- 0.090} & \num{0.702 +- 0.095} & \num{0.755 +- 0.084} \\
+     & LLM-BFS (Gemini) & \num{2.800} & \num{0.877} & \num{0.558} & \num{0.631} \\
+    \midrule
+    \multirow{12}{*}{\rotatebox{90}{\textbf{$|\nodeSet|=10$}}} & Random & \num{28.076 +- 6.230} & \num{0.143 +- 0.071} & \num{0.300 +- 0.176} & \num{0.184 +- 0.091} \\
+     & FGS & \num{16.127 +- 1.747} & \num{0.189 +- 0.122} & \num{0.107 +- 0.069} & \num{0.132 +- 0.081} \\
+     & NOTEARS-MLP & \num{12.687 +- 0.126} & \num{0.029 +- 0.123} & \num{0.002 +- 0.011} & \num{0.005 +- 0.022} \\
+     & GRaSP & \num{8.466 +- 2.772} & \num{0.805 +- 0.274} & \num{0.366 +- 0.184} & \num{0.519 +- 0.174} \\
+     & BOSS & \num{7.560 +- 2.604} & {\bfseries \num{0.884 +- 0.201}}\,\textnormal{***} & \num{0.426 +- 0.180} & \num{0.569 +- 0.171} \\
+     & MPC & \num{7.173 +- 1.314} & \num{0.836 +- 0.109} & \num{0.446 +- 0.098} & \num{0.574 +- 0.096} \\
+     & MPC-LLM (Gemini) & \num{6.197 +- 1.095} & \num{0.843 +- 0.093} & \num{0.519 +- 0.081} & \num{0.634 +- 0.084} \\
+     & MPC-LLM (GPT) & \num{6.630 +- 1.231} & \num{0.860 +- 0.095} & \num{0.492 +- 0.092} & \num{0.621 +- 0.084} \\
+     & ABAPC & \num{6.345 +- 1.449} & \num{0.723 +- 0.126} & \num{0.526 +- 0.102} & \num{0.605 +- 0.107} \\
+     & ABAPC-LLM (Gemini) & {\bfseries \num{5.984 +- 1.257}}\,\textnormal{.} & \num{0.776 +- 0.096} & \num{0.542 +- 0.090} & \num{0.633 +- 0.089} \\
+     & ABAPC-LLM (GPT) & {\bfseries \num{5.755 +- 1.417}}\,\textnormal{***} & \num{0.787 +- 0.114} & {\bfseries \num{0.569 +- 0.101}}\,\textnormal{***} & {\bfseries \num{0.655 +- 0.102}}\,\textnormal{***} \\
+     & LLM-BFS (Gemini) & \num{12.857} & \num{0.489} & \num{0.432} & \num{0.446} \\
+    \midrule
+    \multirow{12}{*}{\rotatebox{90}{\textbf{$|\nodeSet|=15$}}} & Random & \num{63.989 +- 19.393} & \num{0.083 +- 0.034} & \num{0.302 +- 0.171} & \num{0.123 +- 0.052} \\
+     & FGS & \num{24.747 +- 2.130} & \num{0.095 +- 0.074} & \num{0.059 +- 0.046} & \num{0.073 +- 0.056} \\
+     & NOTEARS-MLP & \num{17.197 +- 0.177} & \num{0.024 +- 0.121} & \num{0.001 +- 0.008} & \num{0.001 +- 0.014} \\
+     & GRaSP & \num{10.230 +- 3.184} & \num{0.854 +- 0.217} & \num{0.436 +- 0.161} & \num{0.564 +- 0.163} \\
+     & BOSS & \num{9.653 +- 3.086} & \num{0.892 +- 0.176} & \num{0.460 +- 0.161} & \num{0.589 +- 0.165} \\
+     & MPC & \num{8.677 +- 1.207} & {\bfseries \num{0.934 +- 0.068}}\,\textnormal{***} & \num{0.497 +- 0.069} & \num{0.640 +- 0.070} \\
+     & MPC-LLM (Gemini) & {\bfseries \num{7.616 +- 1.052}}\,\textnormal{.} & {\bfseries \num{0.934 +- 0.049}}\,\textnormal{***} & \num{0.557 +- 0.060} & {\bfseries \num{0.691 +- 0.055}}\,\textnormal{***} \\
+     & MPC-LLM (GPT) & \num{8.059 +- 1.217} & {\bfseries \num{0.941 +- 0.064}}\,\textnormal{***} & \num{0.532 +- 0.070} & \num{0.671 +- 0.068} \\
+     & ABAPC & \num{7.863 +- 1.602} & \num{0.770 +- 0.101} & \num{0.554 +- 0.089} & \num{0.641 +- 0.092} \\
+     & ABAPC-LLM (Gemini) & {\bfseries \num{7.508 +- 1.292}}\,\textnormal{*} & \num{0.799 +- 0.072} & {\bfseries \num{0.573 +- 0.073}}\,\textnormal{**} & \num{0.663 +- 0.070} \\
+     & ABAPC-LLM (GPT) & {\bfseries \num{7.575 +- 1.513}}\,\textnormal{*} & \num{0.790 +- 0.093} & {\bfseries \num{0.570 +- 0.086}}\,\textnormal{*} & \num{0.658 +- 0.087} \\
+     & LLM-BFS (Gemini) & \num{16.429} & \num{0.448} & \num{0.341} & \num{0.357} \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}

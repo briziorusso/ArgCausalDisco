@@ -1,0 +1,32 @@
+\begin{table*}[t]
+    \caption{LLM-derived constraint quality excluding zero-constraint cases. Formatting follows Table~\ref{tab:desc_consensus_ablation}: bold compares Average vs. Consensus within each setting; green marks the row best; arrows show the description effect.}
+    \label{tab:desc_consensus_nonzero_ablation}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{3.5pt}
+    \resizebox{1\textwidth}{!}{%
+    \begin{tabular}{lcccccccc}
+    \toprule
+     & \multicolumn{4}{c}{\textbf{bnlearn}} & \multicolumn{4}{c}{\textbf{CauseNet}} \\
+    \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+    \textbf{Metric} & \multicolumn{2}{c}{\textbf{Average}} & \multicolumn{2}{c}{\textbf{Consensus}} & \multicolumn{2}{c}{\textbf{Average}} & \multicolumn{2}{c}{\textbf{Consensus}} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+     & \textbf{w/o desc} & \textbf{with desc} & \textbf{w/o desc} & \textbf{with desc} & \textbf{w/o desc} & \textbf{with desc} & \textbf{w/o desc} & \textbf{with desc} \\
+    \midrule
+    \multicolumn{9}{c}{\textbf{Forbidden constraints}} \\
+    \midrule
+    \# constraints & \num{20.48 +- 13.63} & \num{25.47 +- 24.39} & \num{9.60 +- 5.94} & \num{8.17 +- 1.72} & \num{17.86 +- 12.94} & \num{20.79 +- 16.57} & \num{5.57 +- 4.78} & \num{4.58 +- 3.29} \\
+    Precision & \num{0.959 +- 0.062} & {\bfseries \num{0.973 +- 0.041}}\,\up & \best{\num{1.000 +- 0.000}} & \num{0.948 +- 0.085}\,\down & \num{0.966 +- 0.061} & \num{0.949 +- 0.132}\,\down & {\bfseries \num{0.982 +- 0.069}} & {\bfseries \num{0.986 +- 0.053}}\,\up \\
+    Recall & {\bfseries \num{0.423 +- 0.225}} & \best{\num{0.472 +- 0.219}}\,\up & \num{0.289 +- 0.234} & \num{0.275 +- 0.216}\,\down & {\bfseries \num{0.297 +- 0.215}} & {\bfseries \num{0.314 +- 0.220}}\,\up & \num{0.141 +- 0.168} & \num{0.129 +- 0.172}\,\down \\
+    F1 & {\bfseries \num{0.551 +- 0.244}} & \best{\num{0.606 +- 0.224}}\,\up & \num{0.405 +- 0.300} & \num{0.392 +- 0.281}\,\down & {\bfseries \num{0.415 +- 0.228}} & {\bfseries \num{0.434 +- 0.231}}\,\up & \num{0.217 +- 0.218} & \num{0.196 +- 0.222}\,\down \\
+    \midrule
+    \multicolumn{9}{c}{\textbf{Required constraints}} \\
+    \midrule
+    \# constraints & \num{9.92 +- 6.45} & \num{11.17 +- 11.74} & \num{6.75 +- 1.71} & \num{5.50 +- 3.87} & \num{12.66 +- 9.57} & \num{14.66 +- 11.50} & \num{4.53 +- 3.17} & \num{5.02 +- 3.22} \\
+    Precision & \num{0.562 +- 0.213} & \num{0.618 +- 0.210}\,\up & {\bfseries \num{0.562 +- 0.195}} & \best{\num{0.757 +- 0.206}}\,\up & \num{0.491 +- 0.247} & \num{0.468 +- 0.227}\,\down & {\bfseries \num{0.626 +- 0.317}} & {\bfseries \num{0.544 +- 0.320}}\,\down \\
+    Recall & {\bfseries \num{0.535 +- 0.316}} & \best{\num{0.632 +- 0.312}}\,\up & \num{0.454 +- 0.399} & \num{0.422 +- 0.394}\,\down & {\bfseries \num{0.490 +- 0.252}} & {\bfseries \num{0.520 +- 0.239}}\,\up & \num{0.269 +- 0.204} & \num{0.294 +- 0.241}\,\up \\
+    F1 & {\bfseries \num{0.482 +- 0.172}} & \best{\num{0.574 +- 0.211}}\,\up & \num{0.426 +- 0.233} & \num{0.481 +- 0.294}\,\up & {\bfseries \num{0.454 +- 0.203}} & {\bfseries \num{0.457 +- 0.187}}\,\up & \num{0.346 +- 0.214} & \num{0.354 +- 0.242}\,\up \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}

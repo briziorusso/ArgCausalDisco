@@ -1,0 +1,80 @@
+\begin{table*}[t]
+    \caption{Structural metrics on \texttt{bnlearn} benchmarks; dataset labels report $|\nodeSet|$ and $|\edgSet|$. Among repeated-run methods, bold marks the best mean and statistically tied methods under BH-corrected Welch tests within each metric/column. Significance levels for the $p$-values against the next non-bold method in the ranking are: \textnormal{***} $p<0.001$, \textnormal{**} $p<0.01$, \textnormal{*} $p<0.05$, \textnormal{.} $p<0.1$. LLM-BFS is shown from one saved run and is excluded from Welch tests and bolding. Tests: Tables~\ref{tab:bnlearn_earthquake_indicator_tests}, \ref{tab:bnlearn_other_indicator_tests}, and \ref{tab:bnlearn_child_indicator_tests}; tied bolding: Table~\ref{tab:bnlearn_tied_bolding_tests}.}
+    \label{tab:bnlearn_dag_all_metrics}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{llccccc}
+    \toprule
+    \textbf{Dataset} & \textbf{Method} & \textbf{SHD $\downarrow$} & \textbf{SID $\downarrow$} & \textbf{Precision $\uparrow$} & \textbf{Recall $\uparrow$} & \textbf{F1 $\uparrow$} \\
+    \midrule
+    \multirow{10}{*}{\shortstack[l]{\texttt{cancer}\\$|\nodeSet|=5$\\$|\edgSet|=4$}} & Random & \num{5.600 +- 1.650} & \num{11.260 +- 4.400} & \num{0.200 +- 0.220} & \num{0.200 +- 0.220} & \num{0.360 +- 0.160} \\
+     & FGS & \num{2.320 +- 0.470} & \num{11.280 +- 1.880} & \num{0.450 +- 0.080} & \num{0.420 +- 0.120} & \num{0.430 +- 0.100} \\
+     & NOTEARS-MLP & \num{3.980 +- 0.140} & \num{9.980 +- 0.620} & \num{0.250 +- 0.500} & \num{0.000 +- 0.040} & \num{0.400} \\
+     & GRaSP & \num{3.800 +- 0.760} & \num{9.740 +- 1.880} & \num{0.580 +- 0.370} & \num{0.050 +- 0.190} & \num{0.660 +- 0.280} \\
+     & BOSS & \num{3.600 +- 1.110} & \num{9.160 +- 2.620} & \num{0.860 +- 0.240} & \num{0.100 +- 0.280} & \num{0.770 +- 0.300} \\
+     & MPC & \num{3.420 +- 1.400} & \num{8.520 +- 3.520} & \num{0.940 +- 0.180} & \num{0.150 +- 0.350} & {\bfseries \num{0.940 +- 0.180}}\,\textnormal{**} \\
+     & MPC-LLM & {\bfseries \num{0.680 +- 0.590}}\,\textnormal{***} & {\bfseries \num{0.780 +- 1.000}}\,\textnormal{***} & {\bfseries \num{0.990 +- 0.050}}\,\textnormal{.} & {\bfseries \num{0.840 +- 0.130}}\,\textnormal{***} & {\bfseries \num{0.900 +- 0.080}}\,\textnormal{**} \\
+     & ABAPC & \num{2.106 +- 1.148} & \num{8.070 +- 4.491} & \num{0.556 +- 0.272} & \num{0.478 +- 0.276} & \num{0.604 +- 0.179} \\
+     & ABAPC-LLM & {\bfseries \num{0.680 +- 0.587}}\,\textnormal{***} & {\bfseries \num{0.960 +- 1.324}}\,\textnormal{***} & {\bfseries \num{0.996 +- 0.028}}\,\textnormal{.} & {\bfseries \num{0.835 +- 0.148}}\,\textnormal{***} & {\bfseries \num{0.901 +- 0.091}}\,\textnormal{**} \\
+     & LLM-BFS & \num{4.000} & \num{0.000} & \num{0.500} & \num{1.000} & \num{0.667} \\
+    \midrule
+    \multirow{10}{*}{\shortstack[l]{\texttt{earthquake}\\$|\nodeSet|=5$\\$|\edgSet|=4$}} & Random & \num{5.700 +- 1.420} & \num{10.560 +- 3.550} & \num{0.170 +- 0.160} & \num{0.170 +- 0.160} & \num{0.290 +- 0.100} \\
+     & FGS & \num{2.620 +- 0.640} & \num{9.940 +- 0.240} & \num{0.440 +- 0.060} & \num{0.500 +- 0.000} & \num{0.470 +- 0.030} \\
+     & NOTEARS-MLP & \num{2.120 +- 1.170} & \num{9.760 +- 5.380} & \num{0.500 +- 0.270} & \num{0.500 +- 0.280} & \num{0.500 +- 0.270} \\
+     & GRaSP & {\bfseries \num{0.160 +- 0.790}}\,\textnormal{***} & {\bfseries \num{0.400 +- 1.980}} & {\bfseries \num{1.000 +- 0.000}}\,\textnormal{***} & {\bfseries \num{0.960 +- 0.200}} & {\bfseries \num{1.000 +- 0.000}}\,\textnormal{***} \\
+     & BOSS & {\bfseries \num{0.400 +- 1.210}}\,\textnormal{***} & \num{1.000 +- 3.030} & {\bfseries \num{1.000 +- 0.000}}\,\textnormal{***} & \num{0.900 +- 0.300} & {\bfseries \num{1.000 +- 0.000}}\,\textnormal{***} \\
+     & MPC & {\bfseries \num{0.040 +- 0.200}}\,\textnormal{***} & {\bfseries \num{0.000 +- 0.000}}\,\textnormal{*} & {\bfseries \num{0.990 +- 0.040}}\,\textnormal{***} & {\bfseries \num{1.000 +- 0.000}}\,\textnormal{*} & {\bfseries \num{1.000 +- 0.020}}\,\textnormal{***} \\
+     & MPC-LLM & {\bfseries \num{0.040 +- 0.200}}\,\textnormal{***} & {\bfseries \num{0.000 +- 0.000}}\,\textnormal{*} & {\bfseries \num{0.990 +- 0.040}}\,\textnormal{***} & {\bfseries \num{1.000 +- 0.000}}\,\textnormal{*} & {\bfseries \num{1.000 +- 0.020}}\,\textnormal{***} \\
+     & ABAPC & {\bfseries \num{0.100 +- 0.463}}\,\textnormal{***} & {\bfseries \num{0.160 +- 1.131}}\,\textnormal{.} & {\bfseries \num{0.982 +- 0.080}}\,\textnormal{***} & {\bfseries \num{0.990 +- 0.071}}\,\textnormal{*} & {\bfseries \num{0.986 +- 0.073}}\,\textnormal{***} \\
+     & ABAPC-LLM & {\bfseries \num{0.080 +- 0.340}}\,\textnormal{***} & {\bfseries \num{0.080 +- 0.566}}\,\textnormal{.} & {\bfseries \num{0.987 +- 0.052}}\,\textnormal{***} & {\bfseries \num{0.995 +- 0.035}}\,\textnormal{*} & {\bfseries \num{0.991 +- 0.041}}\,\textnormal{***} \\
+     & LLM-BFS & \num{4.000} & \num{0.000} & \num{0.500} & \num{1.000} & \num{0.667} \\
+    \midrule
+    \multirow{10}{*}{\shortstack[l]{\texttt{survey}\\$|\nodeSet|=6$\\$|\edgSet|=6$}} & Random & \num{7.980 +- 1.770} & \num{17.540 +- 6.060} & \num{0.240 +- 0.160} & \num{0.240 +- 0.160} & \num{0.280 +- 0.140} \\
+     & FGS & \num{6.680 +- 1.000} & \num{14.260 +- 3.680} & \num{0.400 +- 0.160} & \num{0.210 +- 0.080} & \num{0.270 +- 0.100} \\
+     & NOTEARS-MLP & \num{6.000 +- 0.000} & \num{17.000 +- 0.000} & -- & \num{0.000 +- 0.000} & -- \\
+     & GRaSP & \num{5.920 +- 0.400} & \num{16.920 +- 0.400} & {\bfseries \num{1.000 +- 0.000}}\,\textnormal{***} & \num{0.010 +- 0.070} & \num{0.500 +- 0.000} \\
+     & BOSS & \num{5.880 +- 0.480} & \num{16.880 +- 0.480} & {\bfseries \num{1.000 +- 0.000}}\,\textnormal{***} & \num{0.020 +- 0.080} & \num{0.500 +- 0.000} \\
+     & MPC & \num{4.620 +- 1.880} & \num{14.120 +- 4.040} & \num{0.830 +- 0.140} & \num{0.230 +- 0.310} & \num{0.680 +- 0.140} \\
+     & MPC-LLM & {\bfseries \num{2.060 +- 1.040}}\,\textnormal{***} & {\bfseries \num{6.320 +- 4.180}}\,\textnormal{***} & \num{0.890 +- 0.120} & {\bfseries \num{0.670 +- 0.160}}\,\textnormal{***} & {\bfseries \num{0.750 +- 0.140}}\,\textnormal{*} \\
+     & ABAPC & \num{3.675 +- 1.027} & \num{15.860 +- 4.087} & \num{0.518 +- 0.153} & \num{0.394 +- 0.165} & \num{0.453 +- 0.145} \\
+     & ABAPC-LLM & \num{3.297 +- 0.981} & \num{13.477 +- 3.868} & \num{0.612 +- 0.165} & \num{0.457 +- 0.155} & \num{0.517 +- 0.147} \\
+     & LLM-BFS & \num{6.000} & \num{0.000} & \num{0.500} & \num{1.000} & \num{0.667} \\
+    \midrule
+    \multirow{10}{*}{\shortstack[l]{\texttt{asia}\\$|\nodeSet|=8$\\$|\edgSet|=8$}} & Random & \num{12.660 +- 1.810} & \num{30.360 +- 7.940} & \num{0.140 +- 0.110} & \num{0.140 +- 0.110} & \num{0.190 +- 0.080} \\
+     & FGS & \num{11.240 +- 0.770} & \num{38.160 +- 2.780} & \num{0.250 +- 0.050} & \num{0.240 +- 0.030} & \num{0.250 +- 0.040} \\
+     & NOTEARS-MLP & \num{7.180 +- 1.260} & \num{32.000 +- 8.000} & \num{0.310 +- 0.200} & \num{0.230 +- 0.160} & \num{0.300 +- 0.150} \\
+     & GRaSP & \num{6.800 +- 1.500} & \num{17.080 +- 6.220} & \num{0.670 +- 0.250} & \num{0.360 +- 0.130} & \num{0.450 +- 0.110} \\
+     & BOSS & \num{6.220 +- 1.000} & \num{24.740 +- 6.740} & \num{0.600 +- 0.350} & \num{0.240 +- 0.140} & \num{0.400 +- 0.110} \\
+     & MPC & \num{6.000 +- 0.000} & \num{23.040 +- 0.830} & {\bfseries \num{0.980 +- 0.080}}\,\textnormal{***} & \num{0.250 +- 0.020} & \num{0.400 +- 0.020} \\
+     & MPC-LLM & {\bfseries \num{2.840 +- 0.470}}\,\textnormal{***} & {\bfseries \num{13.720 +- 0.540}}\,\textnormal{***} & {\bfseries \num{0.990 +- 0.030}}\,\textnormal{***} & {\bfseries \num{0.650 +- 0.050}}\,\textnormal{***} & {\bfseries \num{0.780 +- 0.040}}\,\textnormal{***} \\
+     & ABAPC & \num{5.047 +- 1.028} & \num{25.730 +- 6.848} & \num{0.684 +- 0.207} & \num{0.372 +- 0.122} & \num{0.477 +- 0.149} \\
+     & ABAPC-LLM & \num{3.580 +- 0.710} & \num{15.500 +- 2.308} & {\bfseries \num{0.992 +- 0.040}}\,\textnormal{***} & \num{0.557 +- 0.082} & \num{0.710 +- 0.068} \\
+     & LLM-BFS & \num{5.000} & \num{0.000} & \num{0.615} & \num{1.000} & \num{0.762} \\
+    \midrule
+    \multirow{10}{*}{\shortstack[l]{\texttt{sachs}\\$|\nodeSet|=11$\\$|\edgSet|=17$}} & Random & \num{26.020 +- 2.490} & \num{50.400 +- 5.870} & \num{0.160 +- 0.080} & \num{0.160 +- 0.080} & \num{0.170 +- 0.080} \\
+     & FGS & \num{23.820 +- 1.640} & \num{48.700 +- 3.850} & \num{0.140 +- 0.040} & \num{0.130 +- 0.040} & \num{0.140 +- 0.030} \\
+     & NOTEARS-MLP & \num{13.580 +- 1.200} & \num{52.360 +- 6.610} & \num{0.600 +- 0.190} & \num{0.200 +- 0.070} & \num{0.300 +- 0.100} \\
+     & GRaSP & \num{16.420 +- 1.110} & \num{52.320 +- 1.870} & \num{0.550 +- 0.130} & \num{0.030 +- 0.070} & \num{0.220 +- 0.050} \\
+     & BOSS & \num{17.000 +- 0.000} & \num{53.000 +- 0.000} & -- & \num{0.000 +- 0.000} & -- \\
+     & MPC & \num{16.000 +- 2.740} & \num{50.560 +- 6.680} & \num{0.730 +- 0.010} & \num{0.060 +- 0.160} & \num{0.590 +- 0.030} \\
+     & MPC-LLM & \num{13.280 +- 1.970} & \num{47.840 +- 5.910} & \num{0.740 +- 0.020} & \num{0.220 +- 0.120} & \num{0.320 +- 0.100} \\
+     & ABAPC & \num{5.244 +- 1.684} & \num{26.212 +- 9.472} & \num{0.721 +- 0.101} & \num{0.693 +- 0.100} & \num{0.706 +- 0.100} \\
+     & ABAPC-LLM & {\bfseries \num{4.460 +- 1.264}}\,\textnormal{**} & {\bfseries \num{21.056 +- 6.983}}\,\textnormal{**} & {\bfseries \num{0.759 +- 0.063}}\,\textnormal{*} & {\bfseries \num{0.739 +- 0.075}}\,\textnormal{**} & {\bfseries \num{0.748 +- 0.069}}\,\textnormal{*} \\
+     & LLM-BFS & \num{20.000} & \num{50.000} & \num{0.312} & \num{0.294} & \num{0.303} \\
+    \midrule
+    \multirow{10}{*}{\shortstack[l]{\texttt{child}\\$|\nodeSet|=20$\\$|\edgSet|=25$}} & Random & \num{45.260 +- 2.350} & \num{304.4 +- 22.620} & \num{0.070 +- 0.040} & \num{0.070 +- 0.040} & \num{0.080 +- 0.040} \\
+     & FGS & \num{57.000 +- 4.110} & \num{271.7 +- 28.450} & \num{0.110 +- 0.040} & \num{0.190 +- 0.070} & \num{0.140 +- 0.050} \\
+     & NOTEARS-MLP & \num{20.660 +- 2.400} & \num{220.3 +- 29.260} & \num{0.450 +- 0.100} & \num{0.370 +- 0.080} & \num{0.400 +- 0.080} \\
+     & GRaSP & \num{16.320 +- 3.390} & \num{232.4 +- 36.750} & \num{0.880 +- 0.160} & \num{0.370 +- 0.130} & \num{0.510 +- 0.140} \\
+     & BOSS & \num{14.220 +- 2.360} & \num{210.5 +- 28.260} & {\bfseries \num{0.960 +- 0.080}}\,\textnormal{***} & \num{0.440 +- 0.090} & \num{0.600 +- 0.100} \\
+     & MPC & \num{9.160 +- 4.130} & \num{164.3 +- 63.590} & \num{0.840 +- 0.070} & \num{0.630 +- 0.170} & \num{0.710 +- 0.120} \\
+     & MPC-LLM & {\bfseries \num{5.060 +- 1.800}}\,\textnormal{***} & \num{87.820 +- 26.340} & \num{0.880 +- 0.050} & {\bfseries \num{0.800 +- 0.070}}\,\textnormal{***} & \num{0.830 +- 0.050} \\
+     & ABAPC & {\bfseries \num{5.372 +- 3.250}}\,\textnormal{***} & {\bfseries \num{84.833 +- 45.226}} & \num{0.851 +- 0.089} & {\bfseries \num{0.786 +- 0.129}}\,\textnormal{***} & \num{0.815 +- 0.105} \\
+     & ABAPC-LLM & {\bfseries \num{4.417 +- 2.009}}\,\textnormal{***} & {\bfseries \num{72.653 +- 24.836}}\,\textnormal{**} & \num{0.894 +- 0.050} & {\bfseries \num{0.824 +- 0.080}}\,\textnormal{***} & {\bfseries \num{0.855 +- 0.052}}\,\textnormal{*} \\
+     & LLM-BFS & \num{56.000} & \num{114.0} & \num{0.242} & \num{0.600} & \num{0.345} \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}

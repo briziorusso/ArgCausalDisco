@@ -1,0 +1,47 @@
+\begin{table*}[t]
+    \caption{Welch tests for Table~\ref{tab:bnlearn_dag_all_metrics}, excluding the \texttt{earthquake} and \texttt{child} rows. Significance levels for both reported $p$-values are: \textnormal{***} $p<0.001$, \textnormal{**} $p<0.01$, \textnormal{*} $p<0.05$, \textnormal{.} $p<0.1$.}
+    \label{tab:bnlearn_other_indicator_tests}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{ll l|c|r|rl|rl}
+    \toprule
+    \textbf{Group} & \textbf{Metric} & \textbf{Methods} & \textbf{Means$\pm$Std} & \textbf{t} & \multicolumn{2}{c|}{\textbf{p-value}} & \multicolumn{2}{c}{\textbf{$p_{\mathrm{BH}}$}} \\
+    \midrule
+    asia & SHD & MPC-LLM vs ABAPC-LLM & \num{2.840 +- 0.470} vs \num{3.580 +- 0.710} & $-6.15$ & $7.89\text{e-}10$ & \!\!\!*** & $7.89\text{e-}10$ & \!\!\!*** \\
+    asia & Precision & ABAPC-LLM vs ABAPC & \num{0.992 +- 0.040} vs \num{0.684 +- 0.207} & $10.31$ & $6.65\text{e-}25$ & \!\!\!*** & $9.97\text{e-}25$ & \!\!\!*** \\
+    asia & Precision & MPC-LLM vs ABAPC & \num{0.990 +- 0.030} vs \num{0.684 +- 0.207} & $10.32$ & $5.96\text{e-}25$ & \!\!\!*** & $9.97\text{e-}25$ & \!\!\!*** \\
+    asia & Precision & MPC vs ABAPC & \num{0.980 +- 0.080} vs \num{0.684 +- 0.207} & $9.41$ & $5.11\text{e-}21$ & \!\!\!*** & $5.11\text{e-}21$ & \!\!\!*** \\
+    asia & Recall & MPC-LLM vs ABAPC-LLM & \num{0.650 +- 0.050} vs \num{0.557 +- 0.082} & $6.83$ & $8.49\text{e-}12$ & \!\!\!*** & $8.49\text{e-}12$ & \!\!\!*** \\
+    asia & F1 & MPC-LLM vs ABAPC-LLM & \num{0.780 +- 0.040} vs \num{0.710 +- 0.068} & $6.22$ & $5.00\text{e-}10$ & \!\!\!*** & $5.00\text{e-}10$ & \!\!\!*** \\
+    asia & SID & MPC-LLM vs ABAPC-LLM & \num{13.720 +- 0.540} vs \num{15.500 +- 2.308} & $-5.31$ & $1.10\text{e-}7$ & \!\!\!*** & $1.10\text{e-}7$ & \!\!\!*** \\
+    \midrule
+    cancer & SHD & MPC-LLM vs ABAPC & \num{0.680 +- 0.590} vs \num{2.106 +- 1.148} & $-7.81$ & $5.65\text{e-}15$ & \!\!\!*** & $5.65\text{e-}15$ & \!\!\!*** \\
+    cancer & SHD & ABAPC-LLM vs ABAPC & \num{0.680 +- 0.587} vs \num{2.106 +- 1.148} & $-7.82$ & $5.28\text{e-}15$ & \!\!\!*** & $5.65\text{e-}15$ & \!\!\!*** \\
+    cancer & Precision & ABAPC-LLM vs MPC & \num{0.996 +- 0.028} vs \num{0.940 +- 0.180} & $2.17$ & $0.030$ & \!\!\!* & $0.058$ & \!\!\!. \\
+    cancer & Precision & MPC-LLM vs MPC & \num{0.990 +- 0.050} vs \num{0.940 +- 0.180} & $1.89$ & $0.058$ & \!\!\!. & $0.058$ & \!\!\!. \\
+    cancer & Recall & MPC-LLM vs ABAPC & \num{0.840 +- 0.130} vs \num{0.478 +- 0.276} & $8.38$ & $5.51\text{e-}17$ & \!\!\!*** & $1.10\text{e-}16$ & \!\!\!*** \\
+    cancer & Recall & ABAPC-LLM vs ABAPC & \num{0.835 +- 0.148} vs \num{0.478 +- 0.276} & $8.04$ & $8.72\text{e-}16$ & \!\!\!*** & $8.72\text{e-}16$ & \!\!\!*** \\
+    cancer & F1 & MPC vs BOSS & \num{0.940 +- 0.180} vs \num{0.770 +- 0.300} & $3.44$ & $5.91\text{e-}4$ & \!\!\!*** & $0.002$ & \!\!\!** \\
+    cancer & F1 & ABAPC-LLM vs BOSS & \num{0.901 +- 0.091} vs \num{0.770 +- 0.300} & $2.95$ & $0.003$ & \!\!\!** & $0.003$ & \!\!\!** \\
+    cancer & F1 & MPC-LLM vs BOSS & \num{0.900 +- 0.080} vs \num{0.770 +- 0.300} & $2.96$ & $0.003$ & \!\!\!** & $0.003$ & \!\!\!** \\
+    cancer & SID & MPC-LLM vs ABAPC & \num{0.780 +- 1.000} vs \num{8.070 +- 4.491} & $-11.20$ & $3.96\text{e-}29$ & \!\!\!*** & $7.93\text{e-}29$ & \!\!\!*** \\
+    cancer & SID & ABAPC-LLM vs ABAPC & \num{0.960 +- 1.324} vs \num{8.070 +- 4.491} & $-10.74$ & $6.86\text{e-}27$ & \!\!\!*** & $6.86\text{e-}27$ & \!\!\!*** \\
+    \midrule
+    survey & SHD & MPC-LLM vs ABAPC-LLM & \num{2.060 +- 1.040} vs \num{3.297 +- 0.981} & $-6.12$ & $9.51\text{e-}10$ & \!\!\!*** & $9.51\text{e-}10$ & \!\!\!*** \\
+    survey & Precision & GRaSP vs MPC-LLM & \num{1.000 +- 0.000} vs \num{0.890 +- 0.120} & $6.48$ & $9.06\text{e-}11$ & \!\!\!*** & $9.06\text{e-}11$ & \!\!\!*** \\
+    survey & Precision & BOSS vs MPC-LLM & \num{1.000 +- 0.000} vs \num{0.890 +- 0.120} & $6.48$ & $9.06\text{e-}11$ & \!\!\!*** & $9.06\text{e-}11$ & \!\!\!*** \\
+    survey & Recall & MPC-LLM vs ABAPC-LLM & \num{0.670 +- 0.160} vs \num{0.457 +- 0.155} & $6.76$ & $1.38\text{e-}11$ & \!\!\!*** & $1.38\text{e-}11$ & \!\!\!*** \\
+    survey & F1 & MPC-LLM vs MPC & \num{0.750 +- 0.140} vs \num{0.680 +- 0.140} & $2.50$ & $0.012$ & \!\!\!* & $0.012$ & \!\!\!* \\
+    survey & SID & MPC-LLM vs ABAPC-LLM & \num{6.320 +- 4.180} vs \num{13.477 +- 3.868} & $-8.89$ & $6.36\text{e-}19$ & \!\!\!*** & $6.36\text{e-}19$ & \!\!\!*** \\
+    \midrule
+    sachs & SHD & ABAPC-LLM vs ABAPC & \num{4.460 +- 1.264} vs \num{5.244 +- 1.684} & $-2.63$ & $0.008$ & \!\!\!** & $0.008$ & \!\!\!** \\
+    sachs & Precision & ABAPC-LLM vs MPC-LLM & \num{0.759 +- 0.063} vs \num{0.740 +- 0.020} & $2.01$ & $0.044$ & \!\!\!* & $0.044$ & \!\!\!* \\
+    sachs & Recall & ABAPC-LLM vs ABAPC & \num{0.739 +- 0.075} vs \num{0.693 +- 0.100} & $2.61$ & $0.009$ & \!\!\!** & $0.009$ & \!\!\!** \\
+    sachs & F1 & ABAPC-LLM vs ABAPC & \num{0.748 +- 0.069} vs \num{0.706 +- 0.100} & $2.47$ & $0.014$ & \!\!\!* & $0.014$ & \!\!\!* \\
+    sachs & SID & ABAPC-LLM vs ABAPC & \num{21.056 +- 6.983} vs \num{26.212 +- 9.472} & $-3.10$ & $0.002$ & \!\!\!** & $0.002$ & \!\!\!** \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}

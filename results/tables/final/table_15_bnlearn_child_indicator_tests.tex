@@ -1,0 +1,25 @@
+\begin{table*}[t]
+    \caption{Welch tests for the \texttt{child} rows in Table~\ref{tab:bnlearn_dag_all_metrics}. Significance levels for both reported $p$-values are: \textnormal{***} $p<0.001$, \textnormal{**} $p<0.01$, \textnormal{*} $p<0.05$, \textnormal{.} $p<0.1$.}
+    \label{tab:bnlearn_child_indicator_tests}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{ll l|c|r|rl|rl}
+    \toprule
+    \textbf{Group} & \textbf{Metric} & \textbf{Methods} & \textbf{Means$\pm$Std} & \textbf{t} & \multicolumn{2}{c|}{\textbf{p-value}} & \multicolumn{2}{c}{\textbf{$p_{\mathrm{BH}}$}} \\
+    \midrule
+    child & SHD & ABAPC-LLM vs MPC & \num{4.417 +- 2.009} vs \num{9.160 +- 4.130} & $-7.30$ & $2.82\text{e-}13$ & \!\!\!*** & $8.45\text{e-}13$ & \!\!\!*** \\
+    child & SHD & MPC-LLM vs MPC & \num{5.060 +- 1.800} vs \num{9.160 +- 4.130} & $-6.44$ & $1.23\text{e-}10$ & \!\!\!*** & $1.85\text{e-}10$ & \!\!\!*** \\
+    child & SHD & ABAPC vs MPC & \num{5.372 +- 3.250} vs \num{9.160 +- 4.130} & $-5.10$ & $3.46\text{e-}7$ & \!\!\!*** & $3.46\text{e-}7$ & \!\!\!*** \\
+    child & Precision & BOSS vs ABAPC-LLM & \num{0.960 +- 0.080} vs \num{0.894 +- 0.050} & $4.94$ & $7.67\text{e-}7$ & \!\!\!*** & $7.67\text{e-}7$ & \!\!\!*** \\
+    child & Recall & ABAPC-LLM vs MPC & \num{0.824 +- 0.080} vs \num{0.630 +- 0.170} & $7.31$ & $2.59\text{e-}13$ & \!\!\!*** & $7.76\text{e-}13$ & \!\!\!*** \\
+    child & Recall & MPC-LLM vs MPC & \num{0.800 +- 0.070} vs \num{0.630 +- 0.170} & $6.54$ & $6.22\text{e-}11$ & \!\!\!*** & $9.32\text{e-}11$ & \!\!\!*** \\
+    child & Recall & ABAPC vs MPC & \num{0.786 +- 0.129} vs \num{0.630 +- 0.170} & $5.17$ & $2.38\text{e-}7$ & \!\!\!*** & $2.38\text{e-}7$ & \!\!\!*** \\
+    child & F1 & ABAPC-LLM vs MPC-LLM & \num{0.855 +- 0.052} vs \num{0.830 +- 0.050} & $2.48$ & $0.013$ & \!\!\!* & $0.013$ & \!\!\!* \\
+    child & SID & ABAPC-LLM vs MPC-LLM & \num{72.653 +- 24.836} vs \num{87.820 +- 26.340} & $-2.96$ & $0.003$ & \!\!\!** & $0.006$ & \!\!\!** \\
+    child & SID & ABAPC vs MPC-LLM & \num{84.833 +- 45.226} vs \num{87.820 +- 26.340} & $-0.40$ & $0.687$ & \!\!\!ns & $0.687$ & \!\!\!ns \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table*}
