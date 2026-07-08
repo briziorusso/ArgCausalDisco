@@ -12,6 +12,7 @@ import json
 import math
 import re
 from dataclasses import dataclass
+from itertools import combinations
 from pathlib import Path
 from typing import Iterable
 
@@ -35,6 +36,57 @@ DAG_SUMMARY_COLUMNS = ["dataset", "model"] + [
     ]
     for stat in ["mean", "std"]
 ]
+
+CPDAG_SUMMARY_COLUMNS = ["dataset", "model"] + [
+    f"{metric}_{stat}"
+    for metric in [
+        "elapsed",
+        "nnz",
+        "fdr",
+        "tpr",
+        "fpr",
+        "precision",
+        "recall",
+        "F1",
+        "shd",
+        "SID_low",
+        "SID_high",
+    ]
+    for stat in ["mean", "std"]
+]
+
+SUMMARY_COLUMNS_BY_GRAPH_KIND = {
+    "dag": DAG_SUMMARY_COLUMNS,
+    "cpdag": CPDAG_SUMMARY_COLUMNS,
+}
+
+PROGRESS_METRICS_BY_GRAPH_KIND = {
+    "dag": [
+        ("elapsed", "elapsed"),
+        ("nnz", "nnz"),
+        ("fdr", "fdr"),
+        ("tpr", "tpr"),
+        ("fpr", "fpr"),
+        ("precision", "precision"),
+        ("recall", "recall"),
+        ("F1", "F1"),
+        ("shd", "shd"),
+        ("sid", "SID"),
+    ],
+    "cpdag": [
+        ("elapsed", "elapsed"),
+        ("nnz", "nnz"),
+        ("fdr", "fdr"),
+        ("tpr", "tpr"),
+        ("fpr", "fpr"),
+        ("precision", "precision"),
+        ("recall", "recall"),
+        ("F1", "F1"),
+        ("shd", "shd"),
+        ("sid_low", "SID_low"),
+        ("sid_high", "SID_high"),
+    ],
+}
 
 SYNTH_METHOD_ORDER = [
     "Random",
@@ -69,6 +121,25 @@ class SourceLog:
         pd.DataFrame(self.rows).to_csv(path, index=False)
 
 
+@dataclass(frozen=True)
+class MetricSpec:
+    label: str
+    mean_col: str
+    std_col: str
+    higher_is_better: bool
+
+
+STRUCTURAL_METRICS = {
+    "NSHD": MetricSpec("NSHD", "NSHD_mean", "NSHD_std", False),
+    "F1": MetricSpec("F1", "F1_mean", "F1_std", True),
+    "NSID": MetricSpec("NSID", "NSID_mean", "NSID_std", False),
+    "NSID-low": MetricSpec("NSID-low", "NSID_low_mean", "NSID_low_std", False),
+    "NSID-high": MetricSpec("NSID-high", "NSID_high_mean", "NSID_high_std", False),
+    "Precision": MetricSpec("Precision", "precision_mean", "precision_std", True),
+    "Recall": MetricSpec("Recall", "recall_mean", "recall_std", True),
+}
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate UAI table artifacts from collected g2/alpha results.",
@@ -76,7 +147,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--tag", default="g2a01", help="Result suffix/tag to use.")
     parser.add_argument("--results-dir", default="results")
+    parser.add_argument("--synthetic-dir", default="synthetic")
     parser.add_argument("--out-dir", default="results/tables")
+    parser.add_argument(
+        "--graph-kind",
+        choices=["dag", "cpdag", "both"],
+        default="both",
+        help="Structural graph metric tables to generate.",
+    )
     parser.add_argument(
         "--allow-missing",
         action="store_true",
@@ -106,9 +184,102 @@ def require_all(
     return ok
 
 
-def load_npy_summary(path: Path) -> pd.DataFrame:
+def first_existing_path(artifact: str, candidates: Iterable[Path], source_log: SourceLog) -> Path | None:
+    for path in candidates:
+        if path.exists():
+            source_log.add(artifact, path, "found")
+            return path
+        source_log.add(artifact, path, "missing_optional")
+    return None
+
+
+def load_npy_summary(path: Path, graph_kind: str = "dag") -> pd.DataFrame:
     arr = np.load(path, allow_pickle=True)
-    return pd.DataFrame(arr, columns=DAG_SUMMARY_COLUMNS)
+    return pd.DataFrame(arr, columns=SUMMARY_COLUMNS_BY_GRAPH_KIND[graph_kind])
+
+
+def summary_progress_dir(summary_path: Path) -> Path:
+    version = summary_path.stem.removeprefix("stored_results_")
+    if version.endswith("_cpdag"):
+        version = version[: -len("_cpdag")]
+    return summary_path.parent / "progress" / version
+
+
+def normalize_undefined_pr_scores(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    for col in ["precision", "recall", "F1"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    no_recall = df["recall"].fillna(0).eq(0)
+    df.loc[no_recall & df["precision"].isna(), "precision"] = 0.0
+    df.loc[no_recall & df["F1"].isna(), "F1"] = 0.0
+    return df
+
+
+def normalize_undefined_summary_scores(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    numeric_cols = [
+        "precision_mean",
+        "precision_std",
+        "recall_mean",
+        "F1_mean",
+        "F1_std",
+        "shd_mean",
+    ]
+    for col in numeric_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    if not {"recall_mean", "precision_mean", "F1_mean", "shd_mean"}.issubset(df.columns):
+        return df
+
+    has_observation = df["shd_mean"].notna()
+    no_recall = has_observation & df["recall_mean"].fillna(0).eq(0)
+    df.loc[no_recall & df["precision_mean"].isna(), "precision_mean"] = 0.0
+    df.loc[no_recall & df["precision_std"].isna(), "precision_std"] = 0.0
+    df.loc[no_recall & df["F1_mean"].isna(), "F1_mean"] = 0.0
+    df.loc[no_recall & df["F1_std"].isna(), "F1_std"] = 0.0
+    return df
+
+
+def summary_rows_from_progress(
+    progress_dir: Path,
+    include: set[str],
+    *,
+    graph_kind: str,
+) -> pd.DataFrame:
+    paths = sorted(progress_dir.glob(f"*__*_{graph_kind}.csv"))
+    if not paths:
+        raise FileNotFoundError(f"No {graph_kind} progress CSVs found under {progress_dir}")
+
+    frames = [pd.read_csv(path) for path in paths]
+    df = pd.concat(frames, ignore_index=True)
+    df = df[df["model"].isin(include)].copy()
+    if df.empty:
+        return pd.DataFrame(columns=SUMMARY_COLUMNS_BY_GRAPH_KIND[graph_kind])
+    df = normalize_undefined_pr_scores(df)
+
+    agg_dict = {src: ["mean", "std"] for src, _ in PROGRESS_METRICS_BY_GRAPH_KIND[graph_kind]}
+    summary = df.groupby(["dataset", "model"], as_index=False).agg(agg_dict).round(2)
+    summary.columns = ["dataset", "model"] + [
+        f"{dst}_{stat}" for _, dst in PROGRESS_METRICS_BY_GRAPH_KIND[graph_kind] for stat in ("mean", "std")
+    ]
+    summary = summary.reindex(columns=SUMMARY_COLUMNS_BY_GRAPH_KIND[graph_kind])
+    return normalize_undefined_summary_scores(summary)
+
+
+def summary_rows_from_baseline_artifact(
+    summary_path: Path,
+    include: set[str],
+    *,
+    graph_kind: str,
+    source_log: SourceLog,
+) -> pd.DataFrame:
+    progress_dir = summary_progress_dir(summary_path)
+    if progress_dir.exists():
+        source_log.add(f"{graph_kind}_baseline_progress", progress_dir, "found")
+        return summary_rows_from_progress(progress_dir, include, graph_kind=graph_kind)
+    source_log.add(f"{graph_kind}_baseline_progress", progress_dir, "missing_optional")
+    return summary_rows_from_npy(summary_path, include, graph_kind=graph_kind)
 
 
 def n_nodes(dataset: str) -> int:
@@ -123,6 +294,35 @@ def n_edges(dataset: str) -> int:
     if not match:
         raise ValueError(f"Cannot parse edge count from dataset name: {dataset}")
     return int(match.group(1))
+
+
+def true_n_edges(dataset: str, synthetic_dir: Path) -> int | None:
+    path = synthetic_dir / f"{dataset}.bifxml"
+    if not path.exists():
+        return None
+    return len(re.findall(r"<GIVEN>", path.read_text()))
+
+
+def structural_n_edges(dataset: str, synthetic_dir: Path) -> int:
+    actual = true_n_edges(dataset, synthetic_dir)
+    if actual is not None:
+        return actual
+    return n_edges(dataset)
+
+
+def graph_type(dataset: str) -> str:
+    parts = str(dataset).split("_")
+    if len(parts) >= 7 and parts[0] == "dag":
+        return "_".join(parts[6:])
+    return "unknown"
+
+
+def graph_type_label(value: str) -> str:
+    key = str(value).lower()
+    if key == "random":
+        key = "lt"
+    labels = {"er": "ER", "sf": "SF", "lt": "LT"}
+    return labels.get(key, str(value).replace("_", " ").title())
 
 
 def fmt_num(value: float, ndigits: int = 3) -> str:
@@ -140,6 +340,41 @@ def fmt_pm(mean: float, std: float, ndigits: int = 3, latex: bool = False) -> st
     if latex:
         return rf"\num{{{text}}}"
     return text.replace("+-", " +/- ")
+
+
+def latex_sig_marker(marker: str) -> str:
+    if marker == "***":
+        return r"\ast\ast\ast"
+    if marker == "**":
+        return r"\ast\ast"
+    if marker == "*":
+        return r"\ast"
+    if marker == ".":
+        return r"\cdot"
+    return ""
+
+
+def latex_structural_cell(mean: float, std: float, *, bold: bool, marker: str, ndigits: int = 3) -> str:
+    if pd.isna(mean):
+        return "--"
+    value = rf"{fmt_num(mean, ndigits)}\pm{fmt_num(std, ndigits)}"
+    if bold:
+        value = rf"\mathbf{{{value}}}"
+    marker_text = latex_sig_marker(marker) if bold else ""
+    if marker_text:
+        value = rf"{value}^{{{marker_text}}}"
+    return rf"${value}$"
+
+
+def text_structural_cell(mean: float, std: float, *, bold: bool, marker: str, ndigits: int = 3) -> str:
+    if pd.isna(mean):
+        return "--"
+    value = fmt_pm(mean, std, ndigits=ndigits)
+    if bold:
+        value = f"**{value}**"
+        if marker != "ns":
+            value = f"{value} {marker}"
+    return value
 
 
 def sig_marker(p_value: float) -> str:
@@ -294,24 +529,54 @@ def complete_empty_prior_abapc_rows(
     entirely, so we materialise explicit fallback rows for paper tables and plots.
     """
 
-    frames = [primary.copy()]
-    fallback = pd.concat([f.copy() for f in fallback_frames if f is not None and not f.empty], ignore_index=True)
+    primary_clean = primary.copy()
+    fallback_rows = []
+    nonempty_fallbacks = [f.copy() for f in fallback_frames if f is not None and not f.empty]
+    if not nonempty_fallbacks:
+        return primary
+    fallback = pd.concat(nonempty_fallbacks, ignore_index=True)
     if fallback.empty:
         return primary
+    structural_cols = [
+        col
+        for col in ["dag_F1", "dag_shd", "cpdag_F1", "cpdag_shd"]
+        if col in primary_clean.columns
+    ]
+    if structural_cols:
+        for (dataset, impl), rows in list(primary_clean.groupby(["dataset", "impl"])):
+            if rows[structural_cols].notna().any().any():
+                continue
+            replacement = fallback[(fallback["dataset"].eq(dataset)) & (fallback["impl"].eq(impl))].copy()
+            if replacement.empty or not replacement[structural_cols].notna().any().any():
+                continue
+            primary_clean = primary_clean.loc[
+                ~(primary_clean["dataset"].eq(dataset) & primary_clean["impl"].eq(impl))
+            ].copy()
+            fallback_rows.append(replacement)
 
     for dataset in empty_prior_names:
         org_rows = fallback[(fallback["dataset"].eq(dataset)) & (fallback["impl"].eq("org"))].copy()
         if org_rows.empty:
             continue
         for impl in ["org", "new"]:
-            exists = (primary["dataset"].eq(dataset) & primary["impl"].eq(impl)).any()
-            if exists:
+            exists_mask = primary_clean["dataset"].eq(dataset) & primary_clean["impl"].eq(impl)
+            exists = exists_mask.any()
+            has_valid_metrics = (
+                primary_clean.loc[exists_mask, structural_cols].notna().any().any()
+                if exists and structural_cols
+                else False
+            )
+            if exists and has_valid_metrics:
                 continue
+            if exists:
+                primary_clean = primary_clean.loc[~exists_mask].copy()
             rows = org_rows.copy()
             rows["impl"] = impl
-            frames.append(rows)
+            fallback_rows.append(rows)
 
-    return pd.concat(frames, ignore_index=True)
+    if not fallback_rows:
+        return primary_clean
+    return pd.concat([primary_clean, *fallback_rows], ignore_index=True)
 
 
 def load_abapc_csv(
@@ -562,72 +827,413 @@ def build_constraint_table(results_dir: Path, out_dir: Path, *, filtered: bool, 
     print(f"Wrote {stem}")
 
 
-def summary_rows_from_npy(path: Path, include: set[str] | None = None) -> pd.DataFrame:
-    df = load_npy_summary(path)
+def summary_rows_from_npy(path: Path, include: set[str] | None = None, graph_kind: str = "dag") -> pd.DataFrame:
+    df = load_npy_summary(path, graph_kind=graph_kind)
     if include is not None:
         df = df[df["model"].isin(include)].copy()
+    df = normalize_undefined_summary_scores(df)
     df["source_kind"] = "npy"
     return df
 
 
-def summary_rows_from_abapc(csv_path: Path, consensus_path: Path, fallback_csv: Path) -> pd.DataFrame:
+def summary_rows_from_abapc(
+    csv_path: Path,
+    consensus_path: Path,
+    fallback_csv: Path,
+    graph_kind: str = "dag",
+) -> pd.DataFrame:
     df = load_abapc_csv(csv_path, consensus_path=consensus_path, fallback_paths=[fallback_csv])
     mapping = {"org": "ABAPC", "new": "ABAPC-LLM"}
+    prefix = "dag" if graph_kind == "dag" else "cpdag"
     rows = []
     for (dataset, impl), sub in df.groupby(["dataset", "impl"]):
         model = mapping.get(impl, impl)
+        row = {
+            "dataset": dataset,
+            "model": model,
+            "elapsed_mean": sub["time"].mean(),
+            "elapsed_std": sub["time"].std(ddof=1),
+            "F1_mean": sub[f"{prefix}_F1"].mean(),
+            "F1_std": sub[f"{prefix}_F1"].std(ddof=1),
+            "shd_mean": sub[f"{prefix}_shd"].mean(),
+            "shd_std": sub[f"{prefix}_shd"].std(ddof=1),
+            "precision_mean": sub[f"{prefix}_precision"].mean(),
+            "precision_std": sub[f"{prefix}_precision"].std(ddof=1),
+            "recall_mean": sub[f"{prefix}_recall"].mean(),
+            "recall_std": sub[f"{prefix}_recall"].std(ddof=1),
+            "source_kind": "csv",
+        }
+        if graph_kind == "dag":
+            row.update(
+                {
+                    "SID_mean": sub["dag_sid"].mean(),
+                    "SID_std": sub["dag_sid"].std(ddof=1),
+                }
+            )
+        else:
+            row.update(
+                {
+                    "SID_low_mean": sub["cpdag_sid_low"].mean(),
+                    "SID_low_std": sub["cpdag_sid_low"].std(ddof=1),
+                    "SID_high_mean": sub["cpdag_sid_high"].mean(),
+                    "SID_high_std": sub["cpdag_sid_high"].std(ddof=1),
+                }
+            )
+        rows.append(row)
+    return normalize_undefined_summary_scores(pd.DataFrame(rows))
+
+
+def structural_summary(args: argparse.Namespace, source_log: SourceLog, graph_kind: str = "dag") -> pd.DataFrame | None:
+    results_dir = Path(args.results_dir)
+    synthetic_dir = Path(args.synthetic_dir)
+    tag = args.tag
+    allow_missing = args.allow_missing
+    shared_inputs = {
+        "abapc_csv": results_dir / "ABAPC-LLM" / f"merged_synthetic-desc_{tag}.csv",
+        "abapc_consensus": results_dir / "llm_constraints" / "synthetic-desc-consensus.json",
+    }
+    abapc_fallback_csv = results_dir / "ABAPC-LLM" / f"merged_synthetic_{tag}.csv"
+    if graph_kind == "dag":
+        dag_baseline_summary = first_existing_path(
+            "dag_random_fgs_notears_summary",
+            [
+                results_dir / "stored_results_causenet_base_cp.npy",
+                results_dir / "stored_results_causenet_base.npy",
+            ],
+            source_log,
+        )
+        inputs = {
+            "boss_grasp_summary": results_dir / "stored_results_causenet_boss_grasp.npy",
+            "mpc_mpc_llm_summary": results_dir / f"stored_results_causenet_mpc_desc_{tag}.npy",
+            **shared_inputs,
+        }
+        if dag_baseline_summary is not None:
+            inputs["baseline_summary"] = dag_baseline_summary
+        else:
+            inputs["random_summary"] = results_dir / "stored_results_test_rnd_spc.npy"
+            inputs["fgs_notears_summary"] = results_dir / "stored_results_causenet_base.npy"
+    else:
+        inputs = {
+            "boss_grasp_summary": results_dir / "stored_results_causenet_boss_grasp_cpdag.npy",
+            "mpc_mpc_llm_summary": results_dir / f"stored_results_causenet_mpc_desc_{tag}_cpdag.npy",
+            **shared_inputs,
+        }
+        cpdag_baseline_summary = first_existing_path(
+            "cpdag_random_fgs_notears_summary",
+            [
+                results_dir / "stored_results_causenet_base_cp_cpdag.npy",
+                results_dir / "stored_results_causenet_base_cpdag.npy",
+            ],
+            source_log,
+        )
+        optional_inputs = {"baseline_summary": cpdag_baseline_summary}
+    if not require_all(inputs.items(), source_log, allow_missing):
+        print(f"Skipping {graph_kind.upper()} structural summaries because inputs are incomplete.")
+        return None
+
+    if graph_kind == "dag":
+        if inputs["baseline_summary"] is not None:
+            baseline_frames = [
+                summary_rows_from_baseline_artifact(
+                    inputs["baseline_summary"],
+                    {"Random", "FGS", "NOTEARS-MLP"},
+                    graph_kind=graph_kind,
+                    source_log=source_log,
+                )
+            ]
+        else:
+            baseline_frames = [
+                summary_rows_from_npy(inputs["random_summary"], {"Random"}, graph_kind=graph_kind),
+                summary_rows_from_npy(inputs["fgs_notears_summary"], {"FGS", "NOTEARS-MLP"}, graph_kind=graph_kind),
+            ]
+        frames = baseline_frames + [
+            summary_rows_from_npy(inputs["boss_grasp_summary"], {"GRaSP", "BOSS"}, graph_kind=graph_kind),
+            summary_rows_from_npy(inputs["mpc_mpc_llm_summary"], {"MPC", "MPC-LLM"}, graph_kind=graph_kind),
+            summary_rows_from_abapc(inputs["abapc_csv"], inputs["abapc_consensus"], abapc_fallback_csv, graph_kind=graph_kind),
+        ]
+    else:
+        frames = []
+        if optional_inputs["baseline_summary"] is not None:
+            frames.append(
+                summary_rows_from_baseline_artifact(
+                    optional_inputs["baseline_summary"],
+                    {"Random", "FGS", "NOTEARS-MLP"},
+                    graph_kind=graph_kind,
+                    source_log=source_log,
+                )
+            )
+        frames.extend(
+            [
+                summary_rows_from_npy(inputs["boss_grasp_summary"], {"GRaSP", "BOSS"}, graph_kind=graph_kind),
+                summary_rows_from_npy(inputs["mpc_mpc_llm_summary"], {"MPC", "MPC-LLM"}, graph_kind=graph_kind),
+                summary_rows_from_abapc(inputs["abapc_csv"], inputs["abapc_consensus"], abapc_fallback_csv, graph_kind=graph_kind),
+            ]
+        )
+    df = pd.concat(frames, ignore_index=True)
+    df["graph_kind"] = graph_kind
+    df["n_nodes"] = df["dataset"].map(n_nodes)
+    df["filename_n_edges"] = df["dataset"].map(n_edges)
+    df["n_edges"] = df["dataset"].map(lambda dataset: structural_n_edges(dataset, synthetic_dir))
+    df["graph_type"] = df["dataset"].map(graph_type)
+    df["graph_type_label"] = df["graph_type"].map(graph_type_label)
+    df["NSHD_mean"] = df["shd_mean"].astype(float) / df["n_edges"].astype(float)
+    df["NSHD_std"] = df["shd_std"].astype(float) / df["n_edges"].astype(float)
+    if graph_kind == "dag":
+        df["SID_low_mean"] = df["SID_mean"]
+        df["SID_low_std"] = df["SID_std"]
+        df["SID_high_mean"] = df["SID_mean"]
+        df["SID_high_std"] = df["SID_std"]
+    else:
+        df["SID_mean"] = df["SID_high_mean"]
+        df["SID_std"] = df["SID_high_std"]
+    df["NSID_mean"] = df["SID_mean"].astype(float) / df["n_edges"].astype(float)
+    df["NSID_std"] = df["SID_std"].astype(float) / df["n_edges"].astype(float)
+    df["NSID_low_mean"] = df["SID_low_mean"].astype(float) / df["n_edges"].astype(float)
+    df["NSID_low_std"] = df["SID_low_std"].astype(float) / df["n_edges"].astype(float)
+    df["NSID_high_mean"] = df["SID_high_mean"].astype(float) / df["n_edges"].astype(float)
+    df["NSID_high_std"] = df["SID_high_std"].astype(float) / df["n_edges"].astype(float)
+    return df[df["model"].isin(SYNTH_METHOD_ORDER)].copy()
+
+
+def structural_group_stats(summary: pd.DataFrame, group_col: str, group_value: object, spec: MetricSpec) -> pd.DataFrame:
+    group = summary[summary[group_col].eq(group_value)]
+    rows = []
+    for model in SYNTH_METHOD_ORDER:
+        sub = group[group["model"].eq(model)]
+        if sub.empty or spec.mean_col not in sub or spec.std_col not in sub:
+            continue
         rows.append(
             {
-                "dataset": dataset,
                 "model": model,
-                "elapsed_mean": sub["time"].mean(),
-                "elapsed_std": sub["time"].std(ddof=1),
-                "F1_mean": sub["dag_F1"].mean(),
-                "F1_std": sub["dag_F1"].std(ddof=1),
-                "shd_mean": sub["dag_shd"].mean(),
-                "shd_std": sub["dag_shd"].std(ddof=1),
-                "precision_mean": sub["dag_precision"].mean(),
-                "precision_std": sub["dag_precision"].std(ddof=1),
-                "recall_mean": sub["dag_recall"].mean(),
-                "recall_std": sub["dag_recall"].std(ddof=1),
-                "SID_mean": sub["dag_sid"].mean(),
-                "SID_std": sub["dag_sid"].std(ddof=1),
-                "source_kind": "csv",
+                "mean": float(sub[spec.mean_col].mean()),
+                "std": float(sub[spec.std_col].mean()),
+                "datasets": int(sub["dataset"].nunique()),
+                "nobs": max(1, int(sub["dataset"].nunique() * 50)),
             }
         )
     return pd.DataFrame(rows)
 
 
-def structural_summary(args: argparse.Namespace, source_log: SourceLog) -> pd.DataFrame | None:
-    results_dir = Path(args.results_dir)
-    tag = args.tag
-    allow_missing = args.allow_missing
-    inputs = {
-        "random_summary": results_dir / "stored_results_test_rnd_spc.npy",
-        "fgs_notears_summary": results_dir / "stored_results_causenet_base.npy",
-        "boss_grasp_summary": results_dir / "stored_results_causenet_boss_grasp.npy",
-        "mpc_mpc_llm_summary": results_dir / f"stored_results_causenet_mpc_desc_{tag}.npy",
-        "abapc_csv": results_dir / "ABAPC-LLM" / f"merged_synthetic-desc_{tag}.csv",
-        "abapc_fallback_csv": results_dir / "ABAPC-LLM" / f"merged_synthetic_{tag}.csv",
-        "abapc_consensus": results_dir / "llm_constraints" / "synthetic-desc-consensus.json",
-    }
-    if not require_all(inputs.items(), source_log, allow_missing):
-        print("Skipping structural summaries because inputs are incomplete.")
-        return None
+def metric_best_runner(stats: pd.DataFrame, higher_is_better: bool) -> tuple[str | None, str | None]:
+    finite = stats[np.isfinite(stats["mean"].astype(float))].copy()
+    if finite.empty:
+        return None, None
+    finite["method_order"] = finite["model"].map({model: i for i, model in enumerate(SYNTH_METHOD_ORDER)})
+    finite = finite.sort_values(
+        ["mean", "method_order"],
+        ascending=[not higher_is_better, True],
+    )
+    best = str(finite.iloc[0]["model"])
+    runner = str(finite.iloc[1]["model"]) if len(finite) > 1 else None
+    return best, runner
 
-    frames = [
-        summary_rows_from_npy(inputs["random_summary"], {"Random"}),
-        summary_rows_from_npy(inputs["fgs_notears_summary"], {"FGS", "NOTEARS-MLP"}),
-        summary_rows_from_npy(inputs["boss_grasp_summary"], {"GRaSP", "BOSS"}),
-        summary_rows_from_npy(inputs["mpc_mpc_llm_summary"], {"MPC", "MPC-LLM"}),
-        summary_rows_from_abapc(inputs["abapc_csv"], inputs["abapc_consensus"], inputs["abapc_fallback_csv"]),
+
+def pair_key(method1: str, method2: str) -> tuple[str, str]:
+    return tuple(sorted([method1, method2]))
+
+
+def pairwise_group_tests(
+    stats: pd.DataFrame,
+    *,
+    table_name: str,
+    group_label: str,
+    metric: str,
+    best: str | None,
+    runner: str | None,
+) -> pd.DataFrame:
+    records = []
+    by_model = {row.model: row for row in stats.itertuples(index=False)}
+    for method1, method2 in combinations([m for m in SYNTH_METHOD_ORDER if m in by_model], 2):
+        row1 = by_model[method1]
+        row2 = by_model[method2]
+        if not all(np.isfinite(v) for v in [row1.mean, row1.std, row2.mean, row2.std]):
+            continue
+        t_stat, p_value = welch_from_stats(row1.mean, row1.std, row1.nobs, row2.mean, row2.std, row2.nobs)
+        records.append(
+            {
+                "table": table_name,
+                "group": group_label,
+                "metric": metric,
+                "model_1": method1,
+                "model_2": method2,
+                "mean_1": row1.mean,
+                "std_1": row1.std,
+                "nobs_1": row1.nobs,
+                "mean_2": row2.mean,
+                "std_2": row2.std,
+                "nobs_2": row2.nobs,
+                "t": t_stat,
+                "p_value": p_value,
+                "is_best_runner": pair_key(method1, method2) == pair_key(best, runner) if best and runner else False,
+            }
+        )
+    tests = pd.DataFrame(records)
+    if tests.empty:
+        return tests
+    tests["p_bh"] = np.nan
+    finite_idx = tests[np.isfinite(tests["p_value"].astype(float))].index
+    if len(finite_idx):
+        _, p_bh = bh_adjust(tests.loc[finite_idx, "p_value"], alpha=0.05)
+        tests.loc[finite_idx, "p_bh"] = p_bh
+    tests["marker"] = tests["p_value"].map(sig_marker)
+    tests["marker_bh"] = tests["p_bh"].map(sig_marker)
+    return tests
+
+
+def structural_table_latex(
+    display_rows: list[dict[str, str]],
+    latex_cells: dict[tuple[str, str, str], str],
+    *,
+    group_labels: list[str],
+    metrics: list[MetricSpec],
+) -> str:
+    n_cols = 2 + len(group_labels)
+    lines = [
+        rf"\begin{{tabular}}{{ll{'c' * len(group_labels)}}}",
+        r"\toprule",
+        r"\textbf{Metric} & \textbf{Method} & "
+        + " & ".join(rf"\textbf{{{label}}}" for label in group_labels)
+        + r" \\",
+        r"\midrule",
     ]
-    df = pd.concat(frames, ignore_index=True)
-    df["n_nodes"] = df["dataset"].map(n_nodes)
-    df["n_edges"] = df["dataset"].map(n_edges)
-    df["NSHD_mean"] = df["shd_mean"].astype(float) / df["n_edges"].astype(float)
-    df["NSHD_std"] = df["shd_std"].astype(float) / df["n_edges"].astype(float)
-    return df[df["model"].isin(SYNTH_METHOD_ORDER)].copy()
+    rows_by_metric = {
+        spec.label: [row for row in display_rows if row["Metric"] == spec.label]
+        for spec in metrics
+    }
+    for metric_index, spec in enumerate(metrics):
+        metric_rows = rows_by_metric[spec.label]
+        arrow = r"\uparrow" if spec.higher_is_better else r"\downarrow"
+        for row_index, row in enumerate(metric_rows):
+            metric_cell = (
+                rf"\multirow{{{len(metric_rows)}}}{{*}}{{\textbf{{{spec.label}}} ${arrow}$}}"
+                if row_index == 0
+                else ""
+            )
+            cells = [metric_cell, row["Method"]]
+            for group_label in group_labels:
+                cells.append(latex_cells.get((spec.label, row["Method"], group_label), "--"))
+            lines.append(" & ".join(cells) + r" \\")
+        if metric_index != len(metrics) - 1:
+            lines.append(rf"\cmidrule(lr){{2-{n_cols}}}")
+    lines.extend([r"\bottomrule", r"\end{tabular}"])
+    return "\n".join(lines)
+
+
+def build_structural_metric_table(
+    summary: pd.DataFrame,
+    out_dir: Path,
+    *,
+    stem: str,
+    group_col: str,
+    groups: list[tuple[object, str]],
+    metrics: list[MetricSpec],
+) -> None:
+    group_labels = [label for _, label in groups]
+    methods = [model for model in SYNTH_METHOD_ORDER if summary["model"].eq(model).any()]
+    display_rows = [
+        {"Metric": spec.label, "Method": method, **{label: "--" for label in group_labels}}
+        for spec in metrics
+        for method in methods
+    ]
+    row_lookup = {(row["Metric"], row["Method"]): row for row in display_rows}
+    latex_cells: dict[tuple[str, str, str], str] = {}
+    test_tables = []
+
+    for spec in metrics:
+        for group_value, group_label in groups:
+            stats = structural_group_stats(summary, group_col, group_value, spec)
+            if stats.empty:
+                continue
+            best, runner = metric_best_runner(stats, spec.higher_is_better)
+            tests = pairwise_group_tests(
+                stats,
+                table_name=stem,
+                group_label=group_label,
+                metric=spec.label,
+                best=best,
+                runner=runner,
+            )
+            if not tests.empty:
+                test_tables.append(tests)
+            marker = "ns"
+            if best and runner and not tests.empty:
+                pair_tests = tests[tests["is_best_runner"]]
+                if not pair_tests.empty:
+                    marker = str(pair_tests.iloc[0]["marker_bh"])
+            for row in stats.itertuples(index=False):
+                is_best = row.model == best
+                row_lookup[(spec.label, row.model)][group_label] = text_structural_cell(
+                    row.mean,
+                    row.std,
+                    bold=is_best,
+                    marker=marker if is_best else "ns",
+                )
+                latex_cells[(spec.label, row.model, group_label)] = latex_structural_cell(
+                    row.mean,
+                    row.std,
+                    bold=is_best,
+                    marker=marker if is_best else "ns",
+                )
+
+    table = pd.DataFrame(display_rows)
+    write_text_table(table, out_dir, stem)
+    write_latex(
+        out_dir / f"{stem}.tex",
+        structural_table_latex(display_rows, latex_cells, group_labels=group_labels, metrics=metrics),
+    )
+    if test_tables:
+        pd.concat(test_tables, ignore_index=True).to_csv(out_dir / f"{stem}_star_tests.csv", index=False)
+    print(f"Wrote {stem}")
+
+
+def structural_stem(stem: str, tag: str, graph_kind: str) -> str:
+    if graph_kind == "dag":
+        return f"{stem}_{tag}"
+    return f"structural_{graph_kind}_{stem.removeprefix('structural_')}_{tag}"
+
+
+def build_structural_metric_tables(summary: pd.DataFrame, out_dir: Path, tag: str, graph_kind: str = "dag") -> None:
+    node_groups = [(nodes, rf"$|\nodeSet|={nodes}$") for nodes in [5, 10, 15]]
+    type_values = sorted(
+        summary["graph_type_label"].dropna().unique(),
+        key=lambda value: ["ER", "SF", "LT"].index(value) if value in ["ER", "SF", "LT"] else 99,
+    )
+    type_groups = [(value, value) for value in type_values]
+    appendix_metrics = (
+        [STRUCTURAL_METRICS["NSID"], STRUCTURAL_METRICS["Precision"], STRUCTURAL_METRICS["Recall"]]
+        if graph_kind == "dag"
+        else [
+            STRUCTURAL_METRICS["NSID-low"],
+            STRUCTURAL_METRICS["NSID-high"],
+            STRUCTURAL_METRICS["Precision"],
+            STRUCTURAL_METRICS["Recall"],
+        ]
+    )
+
+    build_structural_metric_table(
+        summary,
+        out_dir,
+        stem=structural_stem("structural_by_nodes_main", tag, graph_kind),
+        group_col="n_nodes",
+        groups=node_groups,
+        metrics=[STRUCTURAL_METRICS["NSHD"], STRUCTURAL_METRICS["F1"]],
+    )
+    build_structural_metric_table(
+        summary,
+        out_dir,
+        stem=structural_stem("structural_by_nodes_appendix", tag, graph_kind),
+        group_col="n_nodes",
+        groups=node_groups,
+        metrics=appendix_metrics,
+    )
+    build_structural_metric_table(
+        summary,
+        out_dir,
+        stem=structural_stem("structural_by_graph_type_appendix", tag, graph_kind),
+        group_col="graph_type_label",
+        groups=type_groups,
+        metrics=[STRUCTURAL_METRICS["NSHD"], STRUCTURAL_METRICS["F1"], *appendix_metrics],
+    )
 
 
 def build_runtime_table(summary: pd.DataFrame, out_dir: Path, tag: str) -> None:
@@ -653,7 +1259,7 @@ def build_runtime_table(summary: pd.DataFrame, out_dir: Path, tag: str) -> None:
     print(f"Wrote {stem}")
 
 
-def build_tests_table(summary: pd.DataFrame, out_dir: Path, tag: str) -> None:
+def build_tests_table(summary: pd.DataFrame, out_dir: Path, tag: str, graph_kind: str = "dag") -> None:
     comparisons = [m for m in SYNTH_METHOD_ORDER if m != "ABAPC-LLM" and m in set(summary["model"])]
     records = []
     for nodes in [5, 10, 15]:
@@ -701,7 +1307,7 @@ def build_tests_table(summary: pd.DataFrame, out_dir: Path, tag: str) -> None:
         table.loc[idx, "p_bh"] = p_bh
     table["marker"] = table["p_value"].map(sig_marker)
     table["marker_bh"] = table["p_bh"].map(sig_marker)
-    stem = f"structural_tests_abapcllm_bh_{tag}"
+    stem = structural_stem("structural_tests_abapcllm_bh", tag, graph_kind)
     write_text_table(table, out_dir, stem)
 
     lines = [
@@ -731,13 +1337,23 @@ def main() -> None:
     build_constraint_table(Path(args.results_dir), out_dir, filtered=False, source_log=source_log, allow_missing=args.allow_missing)
     build_constraint_table(Path(args.results_dir), out_dir, filtered=True, source_log=source_log, allow_missing=args.allow_missing)
 
-    summary = structural_summary(args, source_log)
-    if summary is not None:
-        summary_path = out_dir / f"synthetic_structural_summary_{args.tag}.csv"
+    graph_kinds = ["dag", "cpdag"] if args.graph_kind == "both" else [args.graph_kind]
+    for graph_kind in graph_kinds:
+        summary = structural_summary(args, source_log, graph_kind=graph_kind)
+        if summary is None:
+            continue
+        summary_stem = (
+            f"synthetic_structural_summary_{args.tag}"
+            if graph_kind == "dag"
+            else f"synthetic_{graph_kind}_structural_summary_{args.tag}"
+        )
+        summary_path = out_dir / f"{summary_stem}.csv"
         summary.to_csv(summary_path, index=False)
-        source_log.add("synthetic_structural_summary", summary_path, "written")
-        build_runtime_table(summary, out_dir, args.tag)
-        build_tests_table(summary, out_dir, args.tag)
+        source_log.add(summary_stem, summary_path, "written")
+        build_structural_metric_tables(summary, out_dir, args.tag, graph_kind=graph_kind)
+        build_tests_table(summary, out_dir, args.tag, graph_kind=graph_kind)
+        if graph_kind == "dag":
+            build_runtime_table(summary, out_dir, args.tag)
 
     source_log.write(out_dir / f"paper_table_sources_{args.tag}.csv")
     print(f"Wrote source manifest: {out_dir / f'paper_table_sources_{args.tag}.csv'}")

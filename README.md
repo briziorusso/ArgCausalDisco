@@ -45,7 +45,9 @@ The hosted version is available at: https://clarg-group.github.io/CauseNet-graph
 - `experiments.py`: unified runner for MPC, MPC-LLM, BOSS, GRaSP, NOTEARS, FGS, random baselines, and other models.
 - `priors/`: prompts, schemas, LLM parsing, and prior utilities.
 - `scripts/run_llm_priors.py`: scripted LLM prior generation and consensus aggregation.
-- `scripts/paper_tables.py`: paper-table formatter for collected result files.
+- `scripts/paper_tables.py`: reusable result-loading, summary, and statistics layer for broad/intermediate diagnostics.
+- `scripts/final_paper_tables.py`: numbered UAI camera-ready table generator built on `paper_tables.py`.
+- `scripts/final_table_tests.py`: auxiliary Welch-test verifier/exporter for final table checks.
 - `scripts/export_bfs_result.py`: exports Causal-LLM-BFS results into paper CSV format.
 - `notebooks/`: analysis notebooks for priors, plots, ablations, and paper figures.
 - `synthetic/`, `bnlearn/`, `datasets/bayesian/`: BIFXML/BIF datasets used by the experiments.
@@ -71,7 +73,7 @@ At a high level:
 2. Run statistical and prior-aware baselines with `experiments.py`.
 3. Run ABAPC and ABAPC-LLM with `experiment_llm.py`.
 4. Export Causal-LLM-BFS outputs with `scripts/export_bfs_result.py`.
-5. Generate tables with `scripts/paper_tables.py`.
+5. Generate final numbered paper tables with `scripts/final_paper_tables.py`; use `scripts/paper_tables.py` for broader diagnostics and intermediate tables.
 6. Execute the notebooks in `notebooks/` to produce figures.
 
 ## Environment
