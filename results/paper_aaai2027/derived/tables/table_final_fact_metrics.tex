@@ -1,0 +1,39 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llccccccc}
+\toprule
+Dataset & Method & Correct available & Correct kept & False kept & Precision & Recall & Fact F1 & $n$\\
+\midrule
+Cancer (5) & ABA-PC & $27.2\pm10.1$ & $24.0\pm8.7$ & $\mathbf{1.6\pm1.5}^{***}$ & $\mathbf{0.927\pm0.069}^{***}$ & $0.887\pm0.058$ & $0.904\pm0.046$ & 50\\
+ & OptABA-PC & $27.2\pm10.1$ & $\mathbf{25.6\pm9.8}^{***}$ & $3.3\pm2.2$ & $0.866\pm0.091$ & $\mathbf{0.941\pm0.045}^{***}$ & $0.900\pm0.064$ & 50\\
+ & ASPCR-DAG & $53.7\pm3.37$ & $48.0\pm7.2$ & $12.9\pm8.5$ & $0.792\pm0.132$ & $0.892\pm0.114$ & $0.837\pm0.120$ & 50\\
+\midrule
+Earthquake (5) & ABA-PC & $54.2\pm0.86$ & $54.1\pm0.8$ & $0.1\pm0.3$ & $0.999\pm0.005$ & $0.999\pm0.010$ & $0.999\pm0.007$ & 50\\
+ & OptABA-PC & $54.2\pm0.86$ & $54.2\pm0.8$ & $0.1\pm0.3$ & $0.999\pm0.005$ & $1.000\pm0.002$ & $0.999\pm0.003$ & 50\\
+ & ASPCR-DAG & $75.6\pm2.94$ & $74.7\pm3.8$ & $3.7\pm3.0$ & $0.952\pm0.039$ & $0.987\pm0.018$ & $0.969\pm0.026$ & 50\\
+\midrule
+Survey (6) & ABA-PC & $34.9\pm13.2$ & $24.8\pm9.6$ & $\mathbf{2.4\pm1.5}^{***}$ & $\mathbf{0.894\pm0.088}^{***}$ & $0.716\pm0.105$ & $\mathbf{0.789\pm0.075}^{**}$ & 50\\
+ & OptABA-PC & $34.9\pm13.2$ & $\mathbf{29.7\pm12.3}^{***}$ & $13.4\pm4.7$ & $0.669\pm0.126$ & $\mathbf{0.842\pm0.082}^{***}$ & $0.742\pm0.107$ & 50\\
+ & ASPCR-DAG & $135.0\pm11.2$ & $116.1\pm12.8$ & $82.0\pm18.5$ & $0.589\pm0.077$ & $0.862\pm0.082$ & $0.697\pm0.070$ & 50\\
+\midrule
+Asia (8) & ABA-PC & $129.2\pm9.59$ & $105.8\pm8.8$ & $\mathbf{2.4\pm0.9}^{***}$ & $\mathbf{0.978\pm0.008}^{***}$ & $0.819\pm0.032$ & $0.891\pm0.018$ & 50\\
+ & OptABA-PC & $128.6\pm8.66$ & $\mathbf{127.0\pm8.8}^{***}_{49}$ & $5.4\pm3.1_{49}$ & $0.959\pm0.023_{49}$ & $\mathbf{0.988\pm0.009}^{***}_{49}$ & $\mathbf{0.973\pm0.015}^{***}_{49}$ & 49\\
+\midrule
+ER (5) & ABA-PC & $32.7\pm7.31$ & $30.9\pm7.3$ & $\mathbf{1.2\pm1.6}^{**}$ & $\mathbf{0.963\pm0.051}^{*}$ & $0.946\pm0.064$ & $0.953\pm0.049$ & 50\\
+ & OptABA-PC & $32.7\pm7.31$ & $\mathbf{32.2\pm7.3}^{***}$ & $1.5\pm1.9$ & $0.955\pm0.056$ & $\mathbf{0.984\pm0.027}^{***}$ & $\mathbf{0.969\pm0.039}^{**}$ & 50\\
+\midrule
+ER (8) & ABA-PC & $89.2\pm26.2$ & $71.4\pm23.5$ & $\mathbf{2.7\pm2.6}^{***}$ & $\mathbf{0.962\pm0.031}^{***}$ & $0.800\pm0.104$ & $0.871\pm0.069$ & 50\\
+ & OptABA-PC & $89.2\pm26.2$ & $\mathbf{86.8\pm25.7}^{***}$ & $6.0\pm5.8$ & $0.934\pm0.055$ & $\mathbf{0.973\pm0.033}^{***}$ & $\mathbf{0.953\pm0.043}^{***}$ & 50\\
+\midrule
+SF (5) & ABA-PC & $30.9\pm5.83$ & $29.0\pm7.2$ & $0.5\pm0.6$ & $0.982\pm0.025$ & $0.929\pm0.090$ & $0.953\pm0.056$ & 50\\
+ & OptABA-PC & $30.9\pm5.83$ & $\mathbf{30.7\pm6.0}^{***}$ & $0.5\pm0.9$ & $0.982\pm0.032$ & $\mathbf{0.992\pm0.022}^{***}$ & $\mathbf{0.987\pm0.026}^{***}$ & 50\\
+\midrule
+SF (8) & ABA-PC & $96.6\pm45.5$ & $72.1\pm37.1$ & $\mathbf{2.6\pm2.8}^{***}$ & $\mathbf{0.957\pm0.045}^{***}$ & $0.752\pm0.106$ & $0.838\pm0.065$ & 50\\
+ & OptABA-PC & $96.6\pm45.5$ & $\mathbf{93.2\pm45.4}^{***}$ & $9.0\pm7.3$ & $0.903\pm0.066$ & $\mathbf{0.962\pm0.043}^{***}$ & $\mathbf{0.931\pm0.051}^{***}$ & 50\\
+\bottomrule
+\end{tabular}
+\caption{CI-fact accounting on the matched primary experiments (mean $\pm$ standard deviation). Correct available is the number of recorded tests agreeing with $d$-separation in the generating DAG; correct/false kept split the facts retained after repair. Precision, recall, and Fact F1 treat a retained correct test as a true positive, a retained false test as a false positive, and a released correct test as a false negative. The final column $n$ is the number of successful runs contributing to that row. ABA-PC and OptABA-PC repair the identical test set, so stars identify their significant paired winner at BH-adjusted $p<0.05$, $0.01$, and $0.001$; only the winner is bold and marked. ASPCR-DAG reports descriptive accounting for its different native Bayesian trace. MPC and FGS are omitted because neither exposes a comparable retained-fact set.}
+\label{tab:final-fact-metrics}
+\end{table*}

@@ -1,0 +1,2 @@
+dataset,model,n_runs,elapsed_mean,elapsed_std,nnz_mean,nnz_std,fdr_mean,fdr_std,tpr_mean,tpr_std,fpr_mean,fpr_std,precision_mean,precision_std,recall_mean,recall_std,F1_mean,F1_std,shd_mean,shd_std
+earthquake,MPC,50,0.014760236740112254,0.002839423880621318,4.08,0.27404751561786966,0.016,0.05480950312357394,1.0,0.0,0.013335999999999999,0.04568372085349888,0.9840000000000001,0.05480950312357394,1.0,0.0,0.991112,0.03044667898514532,0.2,0.7284313590846836

@@ -1,0 +1,6 @@
+dataset,dataset_label,proved_pairs,aba_strictly_suboptimal,full_trace_enforced,relative_cost_reduction_median,relative_cost_reduction_q1,relative_cost_reduction_q3
+cancer,Cancer (5),50,50,0,0.40158060275621354,0.33360697772234993,0.4869879477406164
+earthquake,Earthquake (5),50,1,47,0.0,0.0,0.0
+survey,Survey (6),50,50,0,0.5706941382533224,0.5126617638575343,0.635472885920816
+er5,ER (5),50,0,50,0.0,0.0,0.0
+sf5,SF (5),50,7,42,0.0,0.0,0.0

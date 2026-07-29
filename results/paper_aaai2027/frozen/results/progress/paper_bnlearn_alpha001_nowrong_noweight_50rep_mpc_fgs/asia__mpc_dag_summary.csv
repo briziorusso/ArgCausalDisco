@@ -1,0 +1,2 @@
+dataset,model,n_runs,elapsed_mean,elapsed_std,nnz_mean,nnz_std,fdr_mean,fdr_std,tpr_mean,tpr_std,fpr_mean,fpr_std,precision_mean,precision_std,recall_mean,recall_std,F1_mean,F1_std,shd_mean,shd_std
+asia,MPC,50,0.038433651924133255,0.005287024496845241,2.0,0.0,0.0,0.0,0.25,0.0,0.0,0.0,1.0,0.0,0.25,0.0,0.3999999999999999,1.1214946133455537e-16,6.0,0.0

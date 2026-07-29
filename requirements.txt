@@ -1,25 +1,2 @@
-networkx
-rustworkx
-pandas
-numpy
-scikit-learn
-tqdm
-ipykernel
-igraph
-pydot
-clingo
-pgmpy
-nbformat
-pmlb
-pgmpy
-python-javabridge
-pyparsing
-pydantic
-torch
-causal-learn
-gcastle 
-git+git://github.com/xunzheng/notears
-### the below has to be run in the terminal
-#>>> pip install git+git://github.com/bd2kccd/py-causal --no-deps --no-dependencies
-#>>> conda create -n potassco -c conda-forge clingo
-#>>> conda activate potassco
+# Reproduction environment for the OptABA-PC paper.
+-r requirements-repro.txt

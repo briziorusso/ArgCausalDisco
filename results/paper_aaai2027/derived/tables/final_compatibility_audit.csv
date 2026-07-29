@@ -1,0 +1,1748 @@
+dataset,method,seed,compatibility_basis,n_cpdags_returned,n_dags_returned,n_cpdags_compat,n_dags_compat
+cancer,ABA-PC,2026.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,ABA-PC,2027.0,retained CI facts,5.0,24.0,5.0,24.0
+cancer,ABA-PC,2028.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,ABA-PC,2029.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2030.0,retained CI facts,120.0,221.0,120.0,221.0
+cancer,ABA-PC,2031.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2032.0,retained CI facts,6.0,9.0,6.0,9.0
+cancer,ABA-PC,2033.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,ABA-PC,2034.0,retained CI facts,33.0,64.0,33.0,64.0
+cancer,ABA-PC,2035.0,retained CI facts,5.0,19.0,5.0,19.0
+cancer,ABA-PC,2036.0,retained CI facts,33.0,64.0,33.0,64.0
+cancer,ABA-PC,2037.0,retained CI facts,3.0,4.0,3.0,4.0
+cancer,ABA-PC,2038.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2039.0,retained CI facts,12.0,70.0,12.0,70.0
+cancer,ABA-PC,2040.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2041.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,ABA-PC,2042.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,ABA-PC,2043.0,retained CI facts,18.0,23.0,18.0,23.0
+cancer,ABA-PC,2044.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,ABA-PC,2045.0,retained CI facts,6.0,39.0,6.0,39.0
+cancer,ABA-PC,2046.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2047.0,retained CI facts,33.0,64.0,33.0,64.0
+cancer,ABA-PC,2048.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2049.0,retained CI facts,2.0,7.0,2.0,7.0
+cancer,ABA-PC,2050.0,retained CI facts,3.0,13.0,3.0,13.0
+cancer,ABA-PC,2051.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2052.0,retained CI facts,11.0,15.0,11.0,15.0
+cancer,ABA-PC,2053.0,retained CI facts,10.0,14.0,10.0,14.0
+cancer,ABA-PC,2054.0,retained CI facts,37.0,84.0,37.0,84.0
+cancer,ABA-PC,2055.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,ABA-PC,2056.0,retained CI facts,7.0,13.0,7.0,13.0
+cancer,ABA-PC,2057.0,retained CI facts,108.0,220.0,108.0,220.0
+cancer,ABA-PC,2058.0,retained CI facts,2.0,4.0,2.0,4.0
+cancer,ABA-PC,2059.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,ABA-PC,2060.0,retained CI facts,31.0,57.0,31.0,57.0
+cancer,ABA-PC,2061.0,retained CI facts,2.0,7.0,2.0,7.0
+cancer,ABA-PC,2062.0,retained CI facts,131.0,236.0,131.0,236.0
+cancer,ABA-PC,2063.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,ABA-PC,2064.0,retained CI facts,7.0,13.0,7.0,13.0
+cancer,ABA-PC,2065.0,retained CI facts,32.0,151.0,32.0,151.0
+cancer,ABA-PC,2066.0,retained CI facts,9.0,12.0,9.0,12.0
+cancer,ABA-PC,2067.0,retained CI facts,7.0,13.0,7.0,13.0
+cancer,ABA-PC,2068.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2069.0,retained CI facts,5.0,7.0,5.0,7.0
+cancer,ABA-PC,2070.0,retained CI facts,1.0,3.0,1.0,3.0
+cancer,ABA-PC,2071.0,retained CI facts,12.0,41.0,12.0,41.0
+cancer,ABA-PC,2072.0,retained CI facts,28.0,32.0,28.0,32.0
+cancer,ABA-PC,2073.0,retained CI facts,2.0,3.0,2.0,3.0
+cancer,ABA-PC,2074.0,retained CI facts,1.0,2.0,1.0,2.0
+cancer,ABA-PC,2075.0,retained CI facts,7.0,10.0,7.0,10.0
+cancer,OptABA-PC,2026.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2027.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,OptABA-PC,2028.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,OptABA-PC,2029.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2030.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2031.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2032.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2033.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,OptABA-PC,2034.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2035.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,OptABA-PC,2036.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2037.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2038.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2039.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2040.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2041.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2042.0,retained CI facts,1.0,2.0,1.0,2.0
+cancer,OptABA-PC,2043.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2044.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2045.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2046.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2047.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2048.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2049.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,OptABA-PC,2050.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2051.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2052.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2053.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2054.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,OptABA-PC,2055.0,retained CI facts,1.0,3.0,1.0,3.0
+cancer,OptABA-PC,2056.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2057.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2058.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2059.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2060.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2061.0,retained CI facts,1.0,4.0,1.0,4.0
+cancer,OptABA-PC,2062.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2063.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2064.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2065.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2066.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2067.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2068.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2069.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2070.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2071.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2072.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2073.0,retained CI facts,1.0,2.0,1.0,2.0
+cancer,OptABA-PC,2074.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,OptABA-PC,2075.0,retained CI facts,1.0,1.0,1.0,1.0
+cancer,MPC,2026.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2027.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2028.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2029.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2030.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2031.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+cancer,MPC,2032.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2033.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2034.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2035.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2036.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+cancer,MPC,2037.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+cancer,MPC,2038.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2039.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+cancer,MPC,2040.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2041.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2042.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2043.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2044.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2045.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2046.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2047.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+cancer,MPC,2048.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2049.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2050.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2051.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2052.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+cancer,MPC,2053.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2054.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2055.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2056.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2057.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2058.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2059.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2060.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2061.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2062.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+cancer,MPC,2063.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2064.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2065.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2066.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2067.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+cancer,MPC,2068.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2069.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2070.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+cancer,MPC,2071.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2072.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2073.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,MPC,2074.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+cancer,MPC,2075.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+cancer,FGS,2026.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2027.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2028.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2029.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2030.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2031.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2032.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2033.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2034.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2035.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2036.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2037.0,not applicable (score based),1.0,8.0,,
+cancer,FGS,2038.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2039.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2040.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2041.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2042.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2043.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2044.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2045.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2046.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2047.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2048.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2049.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2050.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2051.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2052.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2053.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2054.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2055.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2056.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2057.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2058.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2059.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2060.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2061.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2062.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2063.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2064.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2065.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2066.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2067.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2068.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2069.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2070.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2071.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2072.0,not applicable (score based),1.0,4.0,,
+cancer,FGS,2073.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2074.0,not applicable (score based),1.0,5.0,,
+cancer,FGS,2075.0,not applicable (score based),1.0,5.0,,
+cancer,ASPCR-DAG,2026.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2027.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2028.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2029.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2030.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2031.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2032.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2033.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2034.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2035.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2036.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2037.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2038.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2039.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2040.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2041.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2042.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2043.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2044.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2045.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2046.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2047.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2048.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2049.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2050.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2051.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2052.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2053.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2054.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2055.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2056.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2057.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2058.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2059.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2060.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2061.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2062.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2063.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2064.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2065.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2066.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2067.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2068.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2069.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2070.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2071.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2072.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2073.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2074.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+cancer,ASPCR-DAG,2075.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ABA-PC,2026.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2027.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2028.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2029.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2030.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2031.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2032.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2033.0,retained CI facts,3.0,4.0,3.0,4.0
+earthquake,ABA-PC,2034.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2035.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2036.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2037.0,retained CI facts,1.0,2.0,1.0,2.0
+earthquake,ABA-PC,2038.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2039.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2040.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2041.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2042.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2043.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2044.0,retained CI facts,1.0,2.0,1.0,2.0
+earthquake,ABA-PC,2045.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2046.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2047.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2048.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2049.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2050.0,retained CI facts,1.0,2.0,1.0,2.0
+earthquake,ABA-PC,2051.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2052.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2053.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2054.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2055.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2056.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2057.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2058.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2059.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2060.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2061.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2062.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2063.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2064.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2065.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2066.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2067.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2068.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2069.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2070.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2071.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2072.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2073.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2074.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,ABA-PC,2075.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2026.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2027.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2028.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2029.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2030.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2031.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2032.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2033.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2034.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2035.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2036.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2037.0,retained CI facts,1.0,2.0,1.0,2.0
+earthquake,OptABA-PC,2038.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2039.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2040.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2041.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2042.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2043.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2044.0,retained CI facts,1.0,2.0,1.0,2.0
+earthquake,OptABA-PC,2045.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2046.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2047.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2048.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2049.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2050.0,retained CI facts,1.0,2.0,1.0,2.0
+earthquake,OptABA-PC,2051.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2052.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2053.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2054.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2055.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2056.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2057.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2058.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2059.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2060.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2061.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2062.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2063.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2064.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2065.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2066.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2067.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2068.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2069.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2070.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2071.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2072.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2073.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2074.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,OptABA-PC,2075.0,retained CI facts,1.0,1.0,1.0,1.0
+earthquake,MPC,2026.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2027.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2028.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2029.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2030.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2031.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2032.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2033.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+earthquake,MPC,2034.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2035.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2036.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2037.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+earthquake,MPC,2038.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2039.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2040.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2041.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2042.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2043.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2044.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+earthquake,MPC,2045.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2046.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2047.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2048.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2049.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2050.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+earthquake,MPC,2051.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2052.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2053.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2054.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2055.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2056.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2057.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2058.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2059.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2060.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2061.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+earthquake,MPC,2062.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2063.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2064.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2065.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2066.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2067.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2068.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2069.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+earthquake,MPC,2070.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2071.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2072.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2073.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2074.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,MPC,2075.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+earthquake,FGS,2026.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2027.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2028.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2029.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2030.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2031.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2032.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2033.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2034.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2035.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2036.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2037.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2038.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2039.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2040.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2041.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2042.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2043.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2044.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2045.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2046.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2047.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2048.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2049.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2050.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2051.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2052.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2053.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2054.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2055.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2056.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2057.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2058.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2059.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2060.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2061.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2062.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2063.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2064.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2065.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2066.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2067.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2068.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2069.0,not applicable (score based),1.0,13.0,,
+earthquake,FGS,2070.0,not applicable (score based),1.0,13.0,,
+earthquake,FGS,2071.0,not applicable (score based),1.0,10.0,,
+earthquake,FGS,2072.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2073.0,not applicable (score based),1.0,5.0,,
+earthquake,FGS,2074.0,not applicable (score based),1.0,13.0,,
+earthquake,FGS,2075.0,not applicable (score based),1.0,5.0,,
+earthquake,ASPCR-DAG,2026.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2027.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2028.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2029.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2030.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2031.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2032.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2033.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2034.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2035.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2036.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2037.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2038.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2039.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2040.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2041.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2042.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2043.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2044.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2045.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2046.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2047.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2048.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2049.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2050.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2051.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2052.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2053.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2054.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2055.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2056.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2057.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2058.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2059.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2060.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2061.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2062.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2063.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2064.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2065.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2066.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2067.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2068.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+earthquake,ASPCR-DAG,2069.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2070.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2071.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2072.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2073.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2074.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ASPCR-DAG,2075.0,complete native ASPCR CI trace,1.0,1.0,1.0,1.0
+survey,ABA-PC,2026.0,retained CI facts,837.0,1821.0,837.0,1821.0
+survey,ABA-PC,2027.0,retained CI facts,14.0,14.0,14.0,14.0
+survey,ABA-PC,2028.0,retained CI facts,28.0,42.0,28.0,42.0
+survey,ABA-PC,2029.0,retained CI facts,453.0,547.0,453.0,547.0
+survey,ABA-PC,2030.0,retained CI facts,150.0,155.0,150.0,155.0
+survey,ABA-PC,2031.0,retained CI facts,706.0,2341.0,706.0,2341.0
+survey,ABA-PC,2032.0,retained CI facts,5684.0,30665.0,5684.0,30665.0
+survey,ABA-PC,2033.0,retained CI facts,464.0,1897.0,464.0,1897.0
+survey,ABA-PC,2034.0,retained CI facts,186.0,191.0,186.0,191.0
+survey,ABA-PC,2035.0,retained CI facts,701.0,1357.0,701.0,1357.0
+survey,ABA-PC,2036.0,retained CI facts,2.0,4.0,2.0,4.0
+survey,ABA-PC,2037.0,retained CI facts,26.0,119.0,26.0,119.0
+survey,ABA-PC,2038.0,retained CI facts,2454.0,10144.0,2454.0,10144.0
+survey,ABA-PC,2039.0,retained CI facts,41.0,53.0,41.0,53.0
+survey,ABA-PC,2040.0,retained CI facts,2301.0,13144.0,2301.0,13144.0
+survey,ABA-PC,2041.0,retained CI facts,6.0,8.0,6.0,8.0
+survey,ABA-PC,2042.0,retained CI facts,81.0,271.0,81.0,271.0
+survey,ABA-PC,2043.0,retained CI facts,3.0,6.0,3.0,6.0
+survey,ABA-PC,2044.0,retained CI facts,62.0,528.0,62.0,528.0
+survey,ABA-PC,2045.0,retained CI facts,397.0,587.0,397.0,587.0
+survey,ABA-PC,2046.0,retained CI facts,163.0,222.0,163.0,222.0
+survey,ABA-PC,2047.0,retained CI facts,2.0,4.0,2.0,4.0
+survey,ABA-PC,2048.0,retained CI facts,28.0,73.0,28.0,73.0
+survey,ABA-PC,2049.0,retained CI facts,2260.0,14746.0,2260.0,14746.0
+survey,ABA-PC,2050.0,retained CI facts,5089.0,24520.0,5089.0,24520.0
+survey,ABA-PC,2051.0,retained CI facts,2.0,4.0,2.0,4.0
+survey,ABA-PC,2052.0,retained CI facts,154.0,621.0,154.0,621.0
+survey,ABA-PC,2053.0,retained CI facts,2747.0,14583.0,2747.0,14583.0
+survey,ABA-PC,2054.0,retained CI facts,8.0,16.0,8.0,16.0
+survey,ABA-PC,2055.0,retained CI facts,390.0,2109.0,390.0,2109.0
+survey,ABA-PC,2056.0,retained CI facts,18.0,52.0,18.0,52.0
+survey,ABA-PC,2057.0,retained CI facts,1227.0,2323.0,1227.0,2323.0
+survey,ABA-PC,2058.0,retained CI facts,28.0,122.0,28.0,122.0
+survey,ABA-PC,2059.0,retained CI facts,106.0,189.0,106.0,189.0
+survey,ABA-PC,2060.0,retained CI facts,257.0,461.0,257.0,461.0
+survey,ABA-PC,2061.0,retained CI facts,1991.0,4934.0,1991.0,4934.0
+survey,ABA-PC,2062.0,retained CI facts,8513.0,36051.0,8513.0,36051.0
+survey,ABA-PC,2063.0,retained CI facts,56.0,221.0,56.0,221.0
+survey,ABA-PC,2064.0,retained CI facts,46.0,263.0,46.0,263.0
+survey,ABA-PC,2065.0,retained CI facts,6.0,9.0,6.0,9.0
+survey,ABA-PC,2066.0,retained CI facts,35.0,50.0,35.0,50.0
+survey,ABA-PC,2067.0,retained CI facts,262.0,490.0,262.0,490.0
+survey,ABA-PC,2068.0,retained CI facts,91.0,243.0,91.0,243.0
+survey,ABA-PC,2069.0,retained CI facts,9340.0,37025.0,9340.0,37025.0
+survey,ABA-PC,2070.0,retained CI facts,871.0,2259.0,871.0,2259.0
+survey,ABA-PC,2071.0,retained CI facts,14720.0,28396.0,14720.0,28396.0
+survey,ABA-PC,2072.0,retained CI facts,519.0,1675.0,519.0,1675.0
+survey,ABA-PC,2073.0,retained CI facts,133.0,193.0,133.0,193.0
+survey,ABA-PC,2074.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,ABA-PC,2075.0,retained CI facts,265.0,514.0,265.0,514.0
+survey,OptABA-PC,2026.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2027.0,retained CI facts,2.0,4.0,2.0,4.0
+survey,OptABA-PC,2028.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2029.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2030.0,retained CI facts,4.0,8.0,4.0,8.0
+survey,OptABA-PC,2031.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2032.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2033.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2034.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2035.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2036.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2037.0,retained CI facts,1.0,6.0,1.0,6.0
+survey,OptABA-PC,2038.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2039.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2040.0,retained CI facts,1.0,6.0,1.0,6.0
+survey,OptABA-PC,2041.0,retained CI facts,2.0,4.0,2.0,4.0
+survey,OptABA-PC,2042.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2043.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2044.0,retained CI facts,1.0,3.0,1.0,3.0
+survey,OptABA-PC,2045.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2046.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2047.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2048.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2049.0,retained CI facts,4.0,8.0,4.0,8.0
+survey,OptABA-PC,2050.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2051.0,retained CI facts,1.0,3.0,1.0,3.0
+survey,OptABA-PC,2052.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2053.0,retained CI facts,1.0,6.0,1.0,6.0
+survey,OptABA-PC,2054.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2055.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2056.0,retained CI facts,1.0,4.0,1.0,4.0
+survey,OptABA-PC,2057.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2058.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2059.0,retained CI facts,1.0,6.0,1.0,6.0
+survey,OptABA-PC,2060.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2061.0,retained CI facts,2.0,8.0,2.0,8.0
+survey,OptABA-PC,2062.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2063.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2064.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2065.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2066.0,retained CI facts,1.0,3.0,1.0,3.0
+survey,OptABA-PC,2067.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,OptABA-PC,2068.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2069.0,retained CI facts,1.0,6.0,1.0,6.0
+survey,OptABA-PC,2070.0,retained CI facts,1.0,4.0,1.0,4.0
+survey,OptABA-PC,2071.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2072.0,retained CI facts,4.0,4.0,4.0,4.0
+survey,OptABA-PC,2073.0,retained CI facts,1.0,1.0,1.0,1.0
+survey,OptABA-PC,2074.0,retained CI facts,1.0,6.0,1.0,6.0
+survey,OptABA-PC,2075.0,retained CI facts,1.0,2.0,1.0,2.0
+survey,MPC,2026.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2027.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+survey,MPC,2028.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2029.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2030.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+survey,MPC,2031.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2032.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2033.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+survey,MPC,2034.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+survey,MPC,2035.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2036.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2037.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2038.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2039.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2040.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2041.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+survey,MPC,2042.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+survey,MPC,2043.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+survey,MPC,2044.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2045.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2046.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2047.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+survey,MPC,2048.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2049.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2050.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2051.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2052.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2053.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2054.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2055.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2056.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2057.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+survey,MPC,2058.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2059.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2060.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+survey,MPC,2061.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2062.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2063.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+survey,MPC,2064.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2065.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2066.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2067.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2068.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+survey,MPC,2069.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2070.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+survey,MPC,2071.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2072.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2073.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+survey,MPC,2074.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,MPC,2075.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+survey,FGS,2026.0,not applicable (score based),1.0,3.0,,
+survey,FGS,2027.0,not applicable (score based),1.0,2.0,,
+survey,FGS,2028.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2029.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2030.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2031.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2032.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2033.0,not applicable (score based),1.0,6.0,,
+survey,FGS,2034.0,not applicable (score based),1.0,3.0,,
+survey,FGS,2035.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2036.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2037.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2038.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2039.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2040.0,not applicable (score based),1.0,3.0,,
+survey,FGS,2041.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2042.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2043.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2044.0,not applicable (score based),1.0,2.0,,
+survey,FGS,2045.0,not applicable (score based),1.0,3.0,,
+survey,FGS,2046.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2047.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2048.0,not applicable (score based),1.0,3.0,,
+survey,FGS,2049.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2050.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2051.0,not applicable (score based),1.0,3.0,,
+survey,FGS,2052.0,not applicable (score based),1.0,3.0,,
+survey,FGS,2053.0,not applicable (score based),1.0,2.0,,
+survey,FGS,2054.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2055.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2056.0,not applicable (score based),1.0,3.0,,
+survey,FGS,2057.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2058.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2059.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2060.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2061.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2062.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2063.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2064.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2065.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2066.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2067.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2068.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2069.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2070.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2071.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2072.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2073.0,not applicable (score based),1.0,5.0,,
+survey,FGS,2074.0,not applicable (score based),1.0,4.0,,
+survey,FGS,2075.0,not applicable (score based),1.0,4.0,,
+survey,ASPCR-DAG,2026.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2027.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2028.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2029.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2030.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2031.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2032.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2033.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2034.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2035.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2036.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2037.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2038.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2039.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2040.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2041.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2042.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2043.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2044.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2045.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2046.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2047.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2048.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2049.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2050.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2051.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2052.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2053.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2054.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2055.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2056.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2057.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2058.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2059.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2060.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2061.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2062.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2063.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2064.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2065.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2066.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2067.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2068.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2069.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2070.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2071.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2072.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2073.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2074.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+survey,ASPCR-DAG,2075.0,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+asia,ABA-PC,2026.0,retained CI facts,13017.0,43675.0,13017.0,43675.0
+asia,ABA-PC,2027.0,retained CI facts,1833.0,6224.0,1833.0,6224.0
+asia,ABA-PC,2028.0,retained CI facts,16821.0,36075.0,16821.0,36075.0
+asia,ABA-PC,2029.0,retained CI facts,18076.0,36250.0,18076.0,36250.0
+asia,ABA-PC,2030.0,retained CI facts,43.0,43.0,43.0,43.0
+asia,ABA-PC,2031.0,retained CI facts,16737.0,40850.0,16737.0,40850.0
+asia,ABA-PC,2032.0,retained CI facts,234.0,888.0,234.0,888.0
+asia,ABA-PC,2033.0,retained CI facts,15067.0,36625.0,15067.0,36625.0
+asia,ABA-PC,2034.0,retained CI facts,7456.0,27368.0,7456.0,27368.0
+asia,ABA-PC,2035.0,retained CI facts,1056.0,2520.0,1056.0,2520.0
+asia,ABA-PC,2036.0,retained CI facts,22181.0,33350.0,22181.0,33350.0
+asia,ABA-PC,2037.0,retained CI facts,18359.0,35475.0,18359.0,35475.0
+asia,ABA-PC,2038.0,retained CI facts,174.0,534.0,174.0,534.0
+asia,ABA-PC,2039.0,retained CI facts,32.0,192.0,32.0,192.0
+asia,ABA-PC,2040.0,retained CI facts,16306.0,41650.0,16306.0,41650.0
+asia,ABA-PC,2041.0,retained CI facts,9.0,9.0,9.0,9.0
+asia,ABA-PC,2042.0,retained CI facts,16594.0,35250.0,16594.0,35250.0
+asia,ABA-PC,2043.0,retained CI facts,19166.0,36075.0,19166.0,36075.0
+asia,ABA-PC,2044.0,retained CI facts,19494.0,39450.0,19494.0,39450.0
+asia,ABA-PC,2045.0,retained CI facts,9416.0,45525.0,9416.0,45525.0
+asia,ABA-PC,2046.0,retained CI facts,16093.0,36800.0,16093.0,36800.0
+asia,ABA-PC,2047.0,retained CI facts,9620.0,49053.0,9620.0,49053.0
+asia,ABA-PC,2048.0,retained CI facts,20492.0,32775.0,20492.0,32775.0
+asia,ABA-PC,2049.0,retained CI facts,14954.0,39225.0,14954.0,39225.0
+asia,ABA-PC,2050.0,retained CI facts,3213.0,16854.0,3213.0,16854.0
+asia,ABA-PC,2051.0,retained CI facts,10904.0,43525.0,10904.0,43525.0
+asia,ABA-PC,2052.0,retained CI facts,8392.0,50625.0,8392.0,50625.0
+asia,ABA-PC,2053.0,retained CI facts,16421.0,33775.0,16421.0,33775.0
+asia,ABA-PC,2054.0,retained CI facts,16.0,58.0,16.0,58.0
+asia,ABA-PC,2055.0,retained CI facts,9653.0,48550.0,9653.0,48550.0
+asia,ABA-PC,2056.0,retained CI facts,10763.0,46975.0,10763.0,46975.0
+asia,ABA-PC,2057.0,retained CI facts,18280.0,33625.0,18280.0,33625.0
+asia,ABA-PC,2058.0,retained CI facts,22056.0,35175.0,22056.0,35175.0
+asia,ABA-PC,2059.0,retained CI facts,9907.0,44425.0,9907.0,44425.0
+asia,ABA-PC,2060.0,retained CI facts,5262.0,19239.0,5262.0,19239.0
+asia,ABA-PC,2061.0,retained CI facts,11327.0,45750.0,11327.0,45750.0
+asia,ABA-PC,2062.0,retained CI facts,16815.0,34700.0,16815.0,34700.0
+asia,ABA-PC,2063.0,retained CI facts,20449.0,33050.0,20449.0,33050.0
+asia,ABA-PC,2064.0,retained CI facts,1960.0,4896.0,1960.0,4896.0
+asia,ABA-PC,2065.0,retained CI facts,16574.0,33975.0,16574.0,33975.0
+asia,ABA-PC,2066.0,retained CI facts,19476.0,29025.0,19476.0,29025.0
+asia,ABA-PC,2067.0,retained CI facts,14636.0,29425.0,14636.0,29425.0
+asia,ABA-PC,2068.0,retained CI facts,7790.0,23725.0,7790.0,23725.0
+asia,ABA-PC,2069.0,retained CI facts,6591.0,20184.0,6591.0,20184.0
+asia,ABA-PC,2070.0,retained CI facts,8207.0,18125.0,8207.0,18125.0
+asia,ABA-PC,2071.0,retained CI facts,7812.0,17625.0,7812.0,17625.0
+asia,ABA-PC,2072.0,retained CI facts,9064.0,21375.0,9064.0,21375.0
+asia,ABA-PC,2073.0,retained CI facts,12110.0,17825.0,12110.0,17825.0
+asia,ABA-PC,2074.0,retained CI facts,32.0,192.0,32.0,192.0
+asia,ABA-PC,2075.0,retained CI facts,196.0,996.0,196.0,996.0
+asia,OptABA-PC,2026.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2027.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2028.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2029.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2030.0,retained CI facts,1.0,1.0,1.0,1.0
+asia,OptABA-PC,2031.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2032.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2033.0,retained CI facts,1.0,1.0,1.0,1.0
+asia,OptABA-PC,2034.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2035.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2036.0,retained CI facts,1.0,2.0,1.0,2.0
+asia,OptABA-PC,2037.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2038.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2039.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2040.0,retained CI facts,1.0,1.0,1.0,1.0
+asia,OptABA-PC,2041.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2042.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2043.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2044.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2045.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2046.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2048.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2049.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2050.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2051.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2052.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2053.0,retained CI facts,1.0,1.0,1.0,1.0
+asia,OptABA-PC,2054.0,retained CI facts,1.0,1.0,1.0,1.0
+asia,OptABA-PC,2055.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2056.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2057.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2058.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2059.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2060.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2061.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2062.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2063.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2064.0,retained CI facts,1.0,2.0,1.0,2.0
+asia,OptABA-PC,2065.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2066.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2067.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2068.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2069.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2070.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2071.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2072.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,OptABA-PC,2073.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2074.0,retained CI facts,2.0,12.0,2.0,12.0
+asia,OptABA-PC,2075.0,retained CI facts,1.0,3.0,1.0,3.0
+asia,MPC,2026.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2027.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2028.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2029.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2030.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2031.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2032.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2033.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2034.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2035.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2036.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2037.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2038.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2039.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2040.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2041.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2042.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2043.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2044.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2045.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2046.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2047.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2048.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2049.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2050.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2051.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2052.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2053.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2054.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2055.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2056.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2057.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2058.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2059.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2060.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2061.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2062.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2063.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2064.0,full recorded matched G2 CI trace,1.0,5.0,0.0,0.0
+asia,MPC,2065.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2066.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2067.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2068.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2069.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2070.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2071.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2072.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,MPC,2073.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2074.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+asia,MPC,2075.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+asia,FGS,2026.0,not applicable (score based),1.0,16.0,,
+asia,FGS,2027.0,not applicable (score based),1.0,2.0,,
+asia,FGS,2028.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2029.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2030.0,not applicable (score based),1.0,2.0,,
+asia,FGS,2031.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2032.0,not applicable (score based),1.0,2.0,,
+asia,FGS,2033.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2034.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2035.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2036.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2037.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2038.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2039.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2040.0,not applicable (score based),1.0,2.0,,
+asia,FGS,2041.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2042.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2043.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2044.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2045.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2046.0,not applicable (score based),1.0,2.0,,
+asia,FGS,2047.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2048.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2049.0,not applicable (score based),1.0,10.0,,
+asia,FGS,2050.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2051.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2052.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2053.0,not applicable (score based),1.0,2.0,,
+asia,FGS,2054.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2055.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2056.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2057.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2058.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2059.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2060.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2061.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2062.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2063.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2064.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2065.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2066.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2067.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2068.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2069.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2070.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2071.0,not applicable (score based),1.0,6.0,,
+asia,FGS,2072.0,not applicable (score based),1.0,5.0,,
+asia,FGS,2073.0,not applicable (score based),1.0,2.0,,
+asia,FGS,2074.0,not applicable (score based),1.0,4.0,,
+asia,FGS,2075.0,not applicable (score based),1.0,6.0,,
+er5,ABA-PC,2026.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,ABA-PC,2027.0,retained CI facts,2.0,16.0,2.0,16.0
+er5,ABA-PC,2028.0,retained CI facts,3.0,22.0,3.0,22.0
+er5,ABA-PC,2029.0,retained CI facts,11.0,56.0,11.0,56.0
+er5,ABA-PC,2030.0,retained CI facts,1.0,6.0,1.0,6.0
+er5,ABA-PC,2031.0,retained CI facts,28.0,88.0,28.0,88.0
+er5,ABA-PC,2032.0,retained CI facts,7.0,11.0,7.0,11.0
+er5,ABA-PC,2033.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,ABA-PC,2034.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,ABA-PC,2035.0,retained CI facts,1.0,1.0,1.0,1.0
+er5,ABA-PC,2036.0,retained CI facts,39.0,206.0,39.0,206.0
+er5,ABA-PC,2037.0,retained CI facts,10.0,34.0,10.0,34.0
+er5,ABA-PC,2038.0,retained CI facts,2.0,4.0,2.0,4.0
+er5,ABA-PC,2039.0,retained CI facts,5.0,14.0,5.0,14.0
+er5,ABA-PC,2040.0,retained CI facts,66.0,356.0,66.0,356.0
+er5,ABA-PC,2041.0,retained CI facts,1.0,3.0,1.0,3.0
+er5,ABA-PC,2042.0,retained CI facts,1.0,3.0,1.0,3.0
+er5,ABA-PC,2043.0,retained CI facts,5.0,17.0,5.0,17.0
+er5,ABA-PC,2044.0,retained CI facts,1.0,3.0,1.0,3.0
+er5,ABA-PC,2045.0,retained CI facts,8.0,25.0,8.0,25.0
+er5,ABA-PC,2046.0,retained CI facts,1.0,6.0,1.0,6.0
+er5,ABA-PC,2047.0,retained CI facts,5.0,42.0,5.0,42.0
+er5,ABA-PC,2048.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,ABA-PC,2049.0,retained CI facts,4.0,9.0,4.0,9.0
+er5,ABA-PC,2050.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,ABA-PC,2051.0,retained CI facts,5.0,42.0,5.0,42.0
+er5,ABA-PC,2052.0,retained CI facts,2.0,4.0,2.0,4.0
+er5,ABA-PC,2053.0,retained CI facts,5.0,42.0,5.0,42.0
+er5,ABA-PC,2054.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,ABA-PC,2055.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,ABA-PC,2056.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,ABA-PC,2057.0,retained CI facts,1.0,3.0,1.0,3.0
+er5,ABA-PC,2058.0,retained CI facts,11.0,17.0,11.0,17.0
+er5,ABA-PC,2059.0,retained CI facts,8.0,46.0,8.0,46.0
+er5,ABA-PC,2060.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,ABA-PC,2061.0,retained CI facts,6.0,15.0,6.0,15.0
+er5,ABA-PC,2062.0,retained CI facts,11.0,17.0,11.0,17.0
+er5,ABA-PC,2063.0,retained CI facts,1.0,1.0,1.0,1.0
+er5,ABA-PC,2064.0,retained CI facts,28.0,77.0,28.0,77.0
+er5,ABA-PC,2065.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,ABA-PC,2066.0,retained CI facts,4.0,24.0,4.0,24.0
+er5,ABA-PC,2067.0,retained CI facts,48.0,162.0,48.0,162.0
+er5,ABA-PC,2068.0,retained CI facts,18.0,84.0,18.0,84.0
+er5,ABA-PC,2069.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,ABA-PC,2070.0,retained CI facts,3.0,10.0,3.0,10.0
+er5,ABA-PC,2071.0,retained CI facts,12.0,21.0,12.0,21.0
+er5,ABA-PC,2072.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,ABA-PC,2073.0,retained CI facts,23.0,48.0,23.0,48.0
+er5,ABA-PC,2074.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,ABA-PC,2075.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,OptABA-PC,2026.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,OptABA-PC,2027.0,retained CI facts,1.0,8.0,1.0,8.0
+er5,OptABA-PC,2028.0,retained CI facts,3.0,22.0,3.0,22.0
+er5,OptABA-PC,2029.0,retained CI facts,4.0,8.0,4.0,8.0
+er5,OptABA-PC,2030.0,retained CI facts,1.0,6.0,1.0,6.0
+er5,OptABA-PC,2031.0,retained CI facts,1.0,1.0,1.0,1.0
+er5,OptABA-PC,2032.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,OptABA-PC,2033.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2034.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2035.0,retained CI facts,4.0,11.0,4.0,11.0
+er5,OptABA-PC,2036.0,retained CI facts,2.0,7.0,2.0,7.0
+er5,OptABA-PC,2037.0,retained CI facts,10.0,34.0,10.0,34.0
+er5,OptABA-PC,2038.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,OptABA-PC,2039.0,retained CI facts,1.0,6.0,1.0,6.0
+er5,OptABA-PC,2040.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,OptABA-PC,2041.0,retained CI facts,1.0,3.0,1.0,3.0
+er5,OptABA-PC,2042.0,retained CI facts,1.0,3.0,1.0,3.0
+er5,OptABA-PC,2043.0,retained CI facts,5.0,17.0,5.0,17.0
+er5,OptABA-PC,2044.0,retained CI facts,1.0,3.0,1.0,3.0
+er5,OptABA-PC,2045.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2046.0,retained CI facts,1.0,6.0,1.0,6.0
+er5,OptABA-PC,2047.0,retained CI facts,5.0,42.0,5.0,42.0
+er5,OptABA-PC,2048.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2049.0,retained CI facts,4.0,9.0,4.0,9.0
+er5,OptABA-PC,2050.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,OptABA-PC,2051.0,retained CI facts,5.0,42.0,5.0,42.0
+er5,OptABA-PC,2052.0,retained CI facts,2.0,4.0,2.0,4.0
+er5,OptABA-PC,2053.0,retained CI facts,5.0,42.0,5.0,42.0
+er5,OptABA-PC,2054.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,OptABA-PC,2055.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2056.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2057.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,OptABA-PC,2058.0,retained CI facts,6.0,20.0,6.0,20.0
+er5,OptABA-PC,2059.0,retained CI facts,8.0,46.0,8.0,46.0
+er5,OptABA-PC,2060.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2061.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2062.0,retained CI facts,11.0,17.0,11.0,17.0
+er5,OptABA-PC,2063.0,retained CI facts,1.0,6.0,1.0,6.0
+er5,OptABA-PC,2064.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,OptABA-PC,2065.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,OptABA-PC,2066.0,retained CI facts,1.0,6.0,1.0,6.0
+er5,OptABA-PC,2067.0,retained CI facts,1.0,6.0,1.0,6.0
+er5,OptABA-PC,2068.0,retained CI facts,18.0,84.0,18.0,84.0
+er5,OptABA-PC,2069.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,OptABA-PC,2070.0,retained CI facts,3.0,10.0,3.0,10.0
+er5,OptABA-PC,2071.0,retained CI facts,12.0,21.0,12.0,21.0
+er5,OptABA-PC,2072.0,retained CI facts,2.0,6.0,2.0,6.0
+er5,OptABA-PC,2073.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,OptABA-PC,2074.0,retained CI facts,1.0,2.0,1.0,2.0
+er5,OptABA-PC,2075.0,retained CI facts,1.0,4.0,1.0,4.0
+er5,MPC,2026.0,full recorded matched G2 CI trace,1.0,4.0,1.0,4.0
+er5,MPC,2027.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er5,MPC,2028.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er5,MPC,2029.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er5,MPC,2030.0,full recorded matched G2 CI trace,1.0,10.0,0.0,0.0
+er5,MPC,2031.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+er5,MPC,2032.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2033.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+er5,MPC,2034.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2035.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2036.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er5,MPC,2037.0,full recorded matched G2 CI trace,1.0,3.0,1.0,3.0
+er5,MPC,2038.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2039.0,full recorded matched G2 CI trace,1.0,12.0,0.0,0.0
+er5,MPC,2040.0,full recorded matched G2 CI trace,1.0,10.0,0.0,0.0
+er5,MPC,2041.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+er5,MPC,2042.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er5,MPC,2043.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+er5,MPC,2044.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+er5,MPC,2045.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2046.0,full recorded matched G2 CI trace,1.0,6.0,1.0,6.0
+er5,MPC,2047.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+er5,MPC,2048.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+er5,MPC,2049.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er5,MPC,2050.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er5,MPC,2051.0,full recorded matched G2 CI trace,1.0,3.0,1.0,3.0
+er5,MPC,2052.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2053.0,full recorded matched G2 CI trace,1.0,3.0,1.0,3.0
+er5,MPC,2054.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2055.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2056.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+er5,MPC,2057.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er5,MPC,2058.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er5,MPC,2059.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er5,MPC,2060.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er5,MPC,2061.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2062.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er5,MPC,2063.0,full recorded matched G2 CI trace,1.0,10.0,0.0,0.0
+er5,MPC,2064.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2065.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er5,MPC,2066.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er5,MPC,2067.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er5,MPC,2068.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+er5,MPC,2069.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2070.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+er5,MPC,2071.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+er5,MPC,2072.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2073.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2074.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er5,MPC,2075.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er5,FGS,2026.0,not applicable (score based),1.0,1.0,,
+er5,FGS,2027.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2028.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2029.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2030.0,not applicable (score based),1.0,5.0,,
+er5,FGS,2031.0,not applicable (score based),1.0,1.0,,
+er5,FGS,2032.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2033.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2034.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2035.0,not applicable (score based),1.0,6.0,,
+er5,FGS,2036.0,not applicable (score based),1.0,10.0,,
+er5,FGS,2037.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2038.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2039.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2040.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2041.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2042.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2043.0,not applicable (score based),1.0,5.0,,
+er5,FGS,2044.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2045.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2046.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2047.0,not applicable (score based),1.0,6.0,,
+er5,FGS,2048.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2049.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2050.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2051.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2052.0,not applicable (score based),1.0,5.0,,
+er5,FGS,2053.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2054.0,not applicable (score based),1.0,6.0,,
+er5,FGS,2055.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2056.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2057.0,not applicable (score based),1.0,5.0,,
+er5,FGS,2058.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2059.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2060.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2061.0,not applicable (score based),1.0,6.0,,
+er5,FGS,2062.0,not applicable (score based),1.0,1.0,,
+er5,FGS,2063.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2064.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2065.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2066.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2067.0,not applicable (score based),1.0,4.0,,
+er5,FGS,2068.0,not applicable (score based),1.0,3.0,,
+er5,FGS,2069.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2070.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2071.0,not applicable (score based),1.0,1.0,,
+er5,FGS,2072.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2073.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2074.0,not applicable (score based),1.0,2.0,,
+er5,FGS,2075.0,not applicable (score based),1.0,1.0,,
+er8,ABA-PC,2026.0,retained CI facts,5.0,16.0,5.0,16.0
+er8,ABA-PC,2027.0,retained CI facts,9782.0,30325.0,9782.0,30325.0
+er8,ABA-PC,2028.0,retained CI facts,70.0,568.0,70.0,568.0
+er8,ABA-PC,2029.0,retained CI facts,1.0,1.0,1.0,1.0
+er8,ABA-PC,2030.0,retained CI facts,1136.0,4350.0,1136.0,4350.0
+er8,ABA-PC,2031.0,retained CI facts,11935.0,17000.0,11935.0,17000.0
+er8,ABA-PC,2032.0,retained CI facts,1.0,3.0,1.0,3.0
+er8,ABA-PC,2033.0,retained CI facts,540.0,780.0,540.0,780.0
+er8,ABA-PC,2034.0,retained CI facts,3.0,20.0,3.0,20.0
+er8,ABA-PC,2035.0,retained CI facts,196.0,300.0,196.0,300.0
+er8,ABA-PC,2036.0,retained CI facts,51.0,156.0,51.0,156.0
+er8,ABA-PC,2037.0,retained CI facts,12510.0,30050.0,12510.0,30050.0
+er8,ABA-PC,2038.0,retained CI facts,62.0,124.0,62.0,124.0
+er8,ABA-PC,2039.0,retained CI facts,9212.0,32075.0,9212.0,32075.0
+er8,ABA-PC,2040.0,retained CI facts,48.0,93.0,48.0,93.0
+er8,ABA-PC,2041.0,retained CI facts,6501.0,24475.0,6501.0,24475.0
+er8,ABA-PC,2042.0,retained CI facts,11111.0,28550.0,11111.0,28550.0
+er8,ABA-PC,2043.0,retained CI facts,24.0,88.0,24.0,88.0
+er8,ABA-PC,2044.0,retained CI facts,3.0,12.0,3.0,12.0
+er8,ABA-PC,2045.0,retained CI facts,6477.0,38850.0,6477.0,38850.0
+er8,ABA-PC,2046.0,retained CI facts,2416.0,14858.0,2416.0,14858.0
+er8,ABA-PC,2047.0,retained CI facts,1676.0,4902.0,1676.0,4902.0
+er8,ABA-PC,2048.0,retained CI facts,6985.0,36825.0,6985.0,36825.0
+er8,ABA-PC,2049.0,retained CI facts,4.0,48.0,4.0,48.0
+er8,ABA-PC,2050.0,retained CI facts,1441.0,2697.0,1441.0,2697.0
+er8,ABA-PC,2051.0,retained CI facts,6.0,20.0,6.0,20.0
+er8,ABA-PC,2052.0,retained CI facts,6936.0,13952.0,6936.0,13952.0
+er8,ABA-PC,2053.0,retained CI facts,13630.0,25175.0,13630.0,25175.0
+er8,ABA-PC,2054.0,retained CI facts,19.0,160.0,19.0,160.0
+er8,ABA-PC,2055.0,retained CI facts,2.0,4.0,2.0,4.0
+er8,ABA-PC,2056.0,retained CI facts,3857.0,4851.0,3857.0,4851.0
+er8,ABA-PC,2057.0,retained CI facts,6.0,56.0,6.0,56.0
+er8,ABA-PC,2058.0,retained CI facts,1866.0,6082.0,1866.0,6082.0
+er8,ABA-PC,2059.0,retained CI facts,9464.0,38250.0,9464.0,38250.0
+er8,ABA-PC,2060.0,retained CI facts,16032.0,24650.0,16032.0,24650.0
+er8,ABA-PC,2061.0,retained CI facts,3520.0,39724.0,3520.0,39724.0
+er8,ABA-PC,2062.0,retained CI facts,18064.0,40425.0,18064.0,40425.0
+er8,ABA-PC,2063.0,retained CI facts,7.0,9.0,7.0,9.0
+er8,ABA-PC,2064.0,retained CI facts,2.0,12.0,2.0,12.0
+er8,ABA-PC,2065.0,retained CI facts,268.0,3114.0,268.0,3114.0
+er8,ABA-PC,2066.0,retained CI facts,5.0,84.0,5.0,84.0
+er8,ABA-PC,2067.0,retained CI facts,523.0,1708.0,523.0,1708.0
+er8,ABA-PC,2068.0,retained CI facts,10808.0,44125.0,10808.0,44125.0
+er8,ABA-PC,2069.0,retained CI facts,153.0,320.0,153.0,320.0
+er8,ABA-PC,2070.0,retained CI facts,17624.0,42625.0,17624.0,42625.0
+er8,ABA-PC,2071.0,retained CI facts,5.0,22.0,5.0,22.0
+er8,ABA-PC,2072.0,retained CI facts,6364.0,22493.0,6364.0,22493.0
+er8,ABA-PC,2073.0,retained CI facts,6.0,24.0,6.0,24.0
+er8,ABA-PC,2074.0,retained CI facts,582.0,1616.0,582.0,1616.0
+er8,ABA-PC,2075.0,retained CI facts,63.0,319.0,63.0,319.0
+er8,OptABA-PC,2026.0,retained CI facts,1.0,4.0,1.0,4.0
+er8,OptABA-PC,2027.0,retained CI facts,2.0,6.0,2.0,6.0
+er8,OptABA-PC,2028.0,retained CI facts,14.0,28.0,14.0,28.0
+er8,OptABA-PC,2029.0,retained CI facts,4.0,30.0,4.0,30.0
+er8,OptABA-PC,2030.0,retained CI facts,8.0,22.0,8.0,22.0
+er8,OptABA-PC,2031.0,retained CI facts,8.0,32.0,8.0,32.0
+er8,OptABA-PC,2032.0,retained CI facts,1.0,3.0,1.0,3.0
+er8,OptABA-PC,2033.0,retained CI facts,1.0,4.0,1.0,4.0
+er8,OptABA-PC,2034.0,retained CI facts,3.0,20.0,3.0,20.0
+er8,OptABA-PC,2035.0,retained CI facts,4.0,21.0,4.0,21.0
+er8,OptABA-PC,2036.0,retained CI facts,1.0,2.0,1.0,2.0
+er8,OptABA-PC,2037.0,retained CI facts,12.0,80.0,12.0,80.0
+er8,OptABA-PC,2038.0,retained CI facts,1.0,2.0,1.0,2.0
+er8,OptABA-PC,2039.0,retained CI facts,1.0,6.0,1.0,6.0
+er8,OptABA-PC,2040.0,retained CI facts,1.0,3.0,1.0,3.0
+er8,OptABA-PC,2041.0,retained CI facts,4.0,48.0,4.0,48.0
+er8,OptABA-PC,2042.0,retained CI facts,1.0,4.0,1.0,4.0
+er8,OptABA-PC,2043.0,retained CI facts,6.0,24.0,6.0,24.0
+er8,OptABA-PC,2044.0,retained CI facts,1.0,4.0,1.0,4.0
+er8,OptABA-PC,2045.0,retained CI facts,4.0,46.0,4.0,46.0
+er8,OptABA-PC,2046.0,retained CI facts,1.0,4.0,1.0,4.0
+er8,OptABA-PC,2047.0,retained CI facts,1.0,2.0,1.0,2.0
+er8,OptABA-PC,2048.0,retained CI facts,1.0,4.0,1.0,4.0
+er8,OptABA-PC,2049.0,retained CI facts,2.0,32.0,2.0,32.0
+er8,OptABA-PC,2050.0,retained CI facts,4.0,8.0,4.0,8.0
+er8,OptABA-PC,2051.0,retained CI facts,1.0,16.0,1.0,16.0
+er8,OptABA-PC,2052.0,retained CI facts,4.0,12.0,4.0,12.0
+er8,OptABA-PC,2053.0,retained CI facts,2.0,9.0,2.0,9.0
+er8,OptABA-PC,2054.0,retained CI facts,16.0,102.0,16.0,102.0
+er8,OptABA-PC,2055.0,retained CI facts,1.0,2.0,1.0,2.0
+er8,OptABA-PC,2056.0,retained CI facts,1.0,1.0,1.0,1.0
+er8,OptABA-PC,2057.0,retained CI facts,1.0,3.0,1.0,3.0
+er8,OptABA-PC,2058.0,retained CI facts,1.0,4.0,1.0,4.0
+er8,OptABA-PC,2059.0,retained CI facts,6.0,54.0,6.0,54.0
+er8,OptABA-PC,2060.0,retained CI facts,4.0,24.0,4.0,24.0
+er8,OptABA-PC,2061.0,retained CI facts,23.0,318.0,23.0,318.0
+er8,OptABA-PC,2062.0,retained CI facts,1.0,8.0,1.0,8.0
+er8,OptABA-PC,2063.0,retained CI facts,1.0,2.0,1.0,2.0
+er8,OptABA-PC,2064.0,retained CI facts,2.0,12.0,2.0,12.0
+er8,OptABA-PC,2065.0,retained CI facts,2.0,96.0,2.0,96.0
+er8,OptABA-PC,2066.0,retained CI facts,5.0,84.0,5.0,84.0
+er8,OptABA-PC,2067.0,retained CI facts,1.0,2.0,1.0,2.0
+er8,OptABA-PC,2068.0,retained CI facts,1.0,2.0,1.0,2.0
+er8,OptABA-PC,2069.0,retained CI facts,3.0,12.0,3.0,12.0
+er8,OptABA-PC,2070.0,retained CI facts,2.0,18.0,2.0,18.0
+er8,OptABA-PC,2071.0,retained CI facts,2.0,3.0,2.0,3.0
+er8,OptABA-PC,2072.0,retained CI facts,2.0,14.0,2.0,14.0
+er8,OptABA-PC,2073.0,retained CI facts,3.0,36.0,3.0,36.0
+er8,OptABA-PC,2074.0,retained CI facts,2.0,6.0,2.0,6.0
+er8,OptABA-PC,2075.0,retained CI facts,63.0,319.0,63.0,319.0
+er8,MPC,2026.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2027.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+er8,MPC,2028.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+er8,MPC,2029.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+er8,MPC,2030.0,full recorded matched G2 CI trace,0.0,0.0,0.0,0.0
+er8,MPC,2031.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2032.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er8,MPC,2033.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+er8,MPC,2034.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+er8,MPC,2035.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+er8,MPC,2036.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er8,MPC,2037.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2038.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2039.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2040.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er8,MPC,2041.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2042.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2043.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+er8,MPC,2044.0,full recorded matched G2 CI trace,1.0,12.0,0.0,0.0
+er8,MPC,2045.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+er8,MPC,2046.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2047.0,full recorded matched G2 CI trace,1.0,12.0,0.0,0.0
+er8,MPC,2048.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2049.0,full recorded matched G2 CI trace,1.0,16.0,0.0,0.0
+er8,MPC,2050.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2051.0,full recorded matched G2 CI trace,1.0,20.0,0.0,0.0
+er8,MPC,2052.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2053.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2054.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2055.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2056.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2057.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2058.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2059.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2060.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2061.0,full recorded matched G2 CI trace,1.0,12.0,0.0,0.0
+er8,MPC,2062.0,full recorded matched G2 CI trace,1.0,8.0,0.0,0.0
+er8,MPC,2063.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2064.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2065.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2066.0,full recorded matched G2 CI trace,1.0,6.0,1.0,6.0
+er8,MPC,2067.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+er8,MPC,2068.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2069.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2070.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2071.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+er8,MPC,2072.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2073.0,full recorded matched G2 CI trace,1.0,16.0,0.0,0.0
+er8,MPC,2074.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+er8,MPC,2075.0,full recorded matched G2 CI trace,1.0,3.0,1.0,3.0
+er8,FGS,2026.0,not applicable (score based),1.0,8.0,,
+er8,FGS,2027.0,not applicable (score based),1.0,7.0,,
+er8,FGS,2028.0,not applicable (score based),1.0,12.0,,
+er8,FGS,2029.0,not applicable (score based),1.0,3.0,,
+er8,FGS,2030.0,not applicable (score based),1.0,1.0,,
+er8,FGS,2031.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2032.0,not applicable (score based),1.0,3.0,,
+er8,FGS,2033.0,not applicable (score based),1.0,7.0,,
+er8,FGS,2034.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2035.0,not applicable (score based),1.0,3.0,,
+er8,FGS,2036.0,not applicable (score based),1.0,9.0,,
+er8,FGS,2037.0,not applicable (score based),1.0,8.0,,
+er8,FGS,2038.0,not applicable (score based),1.0,8.0,,
+er8,FGS,2039.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2040.0,not applicable (score based),1.0,6.0,,
+er8,FGS,2041.0,not applicable (score based),1.0,2.0,,
+er8,FGS,2042.0,not applicable (score based),1.0,2.0,,
+er8,FGS,2043.0,not applicable (score based),1.0,3.0,,
+er8,FGS,2044.0,not applicable (score based),1.0,1.0,,
+er8,FGS,2045.0,not applicable (score based),1.0,16.0,,
+er8,FGS,2046.0,not applicable (score based),1.0,6.0,,
+er8,FGS,2047.0,not applicable (score based),1.0,12.0,,
+er8,FGS,2048.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2049.0,not applicable (score based),1.0,2.0,,
+er8,FGS,2050.0,not applicable (score based),1.0,2.0,,
+er8,FGS,2051.0,not applicable (score based),1.0,8.0,,
+er8,FGS,2052.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2053.0,not applicable (score based),1.0,2.0,,
+er8,FGS,2054.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2055.0,not applicable (score based),1.0,3.0,,
+er8,FGS,2056.0,not applicable (score based),1.0,3.0,,
+er8,FGS,2057.0,not applicable (score based),1.0,6.0,,
+er8,FGS,2058.0,not applicable (score based),1.0,12.0,,
+er8,FGS,2059.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2060.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2061.0,not applicable (score based),1.0,3.0,,
+er8,FGS,2062.0,not applicable (score based),1.0,2.0,,
+er8,FGS,2063.0,not applicable (score based),1.0,10.0,,
+er8,FGS,2064.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2065.0,not applicable (score based),1.0,16.0,,
+er8,FGS,2066.0,not applicable (score based),1.0,16.0,,
+er8,FGS,2067.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2068.0,not applicable (score based),1.0,7.0,,
+er8,FGS,2069.0,not applicable (score based),1.0,6.0,,
+er8,FGS,2070.0,not applicable (score based),1.0,18.0,,
+er8,FGS,2071.0,not applicable (score based),1.0,2.0,,
+er8,FGS,2072.0,not applicable (score based),1.0,3.0,,
+er8,FGS,2073.0,not applicable (score based),1.0,10.0,,
+er8,FGS,2074.0,not applicable (score based),1.0,4.0,,
+er8,FGS,2075.0,not applicable (score based),1.0,4.0,,
+sf5,ABA-PC,2026.0,retained CI facts,8.0,27.0,8.0,27.0
+sf5,ABA-PC,2027.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,ABA-PC,2028.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2029.0,retained CI facts,8.0,16.0,8.0,16.0
+sf5,ABA-PC,2030.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,ABA-PC,2031.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2032.0,retained CI facts,15.0,98.0,15.0,98.0
+sf5,ABA-PC,2033.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2034.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2035.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2036.0,retained CI facts,31.0,209.0,31.0,209.0
+sf5,ABA-PC,2037.0,retained CI facts,6.0,21.0,6.0,21.0
+sf5,ABA-PC,2038.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,ABA-PC,2039.0,retained CI facts,6.0,27.0,6.0,27.0
+sf5,ABA-PC,2040.0,retained CI facts,8.0,27.0,8.0,27.0
+sf5,ABA-PC,2041.0,retained CI facts,12.0,36.0,12.0,36.0
+sf5,ABA-PC,2042.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,ABA-PC,2043.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,ABA-PC,2044.0,retained CI facts,11.0,43.0,11.0,43.0
+sf5,ABA-PC,2045.0,retained CI facts,27.0,54.0,27.0,54.0
+sf5,ABA-PC,2046.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2047.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,ABA-PC,2048.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2049.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2050.0,retained CI facts,1.0,2.0,1.0,2.0
+sf5,ABA-PC,2051.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,ABA-PC,2052.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2053.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2054.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2055.0,retained CI facts,10.0,35.0,10.0,35.0
+sf5,ABA-PC,2056.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2057.0,retained CI facts,60.0,288.0,60.0,288.0
+sf5,ABA-PC,2058.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2059.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,ABA-PC,2060.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2061.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2062.0,retained CI facts,40.0,178.0,40.0,178.0
+sf5,ABA-PC,2063.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,ABA-PC,2064.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,ABA-PC,2065.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,ABA-PC,2066.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2067.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2068.0,retained CI facts,1.0,3.0,1.0,3.0
+sf5,ABA-PC,2069.0,retained CI facts,1.0,4.0,1.0,4.0
+sf5,ABA-PC,2070.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2071.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,ABA-PC,2072.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,ABA-PC,2073.0,retained CI facts,26.0,124.0,26.0,124.0
+sf5,ABA-PC,2074.0,retained CI facts,2.0,3.0,2.0,3.0
+sf5,ABA-PC,2075.0,retained CI facts,2.0,3.0,2.0,3.0
+sf5,OptABA-PC,2026.0,retained CI facts,8.0,27.0,8.0,27.0
+sf5,OptABA-PC,2027.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,OptABA-PC,2028.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2029.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2030.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,OptABA-PC,2031.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2032.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2033.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2034.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2035.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2036.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,OptABA-PC,2037.0,retained CI facts,2.0,3.0,2.0,3.0
+sf5,OptABA-PC,2038.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,OptABA-PC,2039.0,retained CI facts,6.0,27.0,6.0,27.0
+sf5,OptABA-PC,2040.0,retained CI facts,8.0,27.0,8.0,27.0
+sf5,OptABA-PC,2041.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,OptABA-PC,2042.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,OptABA-PC,2043.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,OptABA-PC,2044.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,OptABA-PC,2045.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2046.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2047.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,OptABA-PC,2048.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2049.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2050.0,retained CI facts,1.0,3.0,1.0,3.0
+sf5,OptABA-PC,2051.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,OptABA-PC,2052.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2053.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2054.0,retained CI facts,1.0,4.0,1.0,4.0
+sf5,OptABA-PC,2055.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2056.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2057.0,retained CI facts,1.0,2.0,1.0,2.0
+sf5,OptABA-PC,2058.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2059.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,OptABA-PC,2060.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2061.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2062.0,retained CI facts,40.0,178.0,40.0,178.0
+sf5,OptABA-PC,2063.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,OptABA-PC,2064.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,OptABA-PC,2065.0,retained CI facts,585.0,2469.0,585.0,2469.0
+sf5,OptABA-PC,2066.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2067.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2068.0,retained CI facts,1.0,2.0,1.0,2.0
+sf5,OptABA-PC,2069.0,retained CI facts,1.0,4.0,1.0,4.0
+sf5,OptABA-PC,2070.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2071.0,retained CI facts,2.0,6.0,2.0,6.0
+sf5,OptABA-PC,2072.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,OptABA-PC,2073.0,retained CI facts,26.0,124.0,26.0,124.0
+sf5,OptABA-PC,2074.0,retained CI facts,2.0,3.0,2.0,3.0
+sf5,OptABA-PC,2075.0,retained CI facts,2.0,7.0,2.0,7.0
+sf5,MPC,2026.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2027.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2028.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2029.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2030.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2031.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+sf5,MPC,2032.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2033.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2034.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+sf5,MPC,2035.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2036.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2037.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2038.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2039.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2040.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2041.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2042.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2043.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2044.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2045.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2046.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2047.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2048.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+sf5,MPC,2049.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2050.0,full recorded matched G2 CI trace,1.0,3.0,0.0,0.0
+sf5,MPC,2051.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2052.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2053.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2054.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+sf5,MPC,2055.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2056.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2057.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2058.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2059.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2060.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2061.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2062.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2063.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2064.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2065.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2066.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+sf5,MPC,2067.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2068.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2069.0,full recorded matched G2 CI trace,1.0,4.0,1.0,4.0
+sf5,MPC,2070.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+sf5,MPC,2071.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf5,MPC,2072.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,MPC,2073.0,full recorded matched G2 CI trace,1.0,1.0,1.0,1.0
+sf5,MPC,2074.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+sf5,MPC,2075.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf5,FGS,2026.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2027.0,not applicable (score based),1.0,3.0,,
+sf5,FGS,2028.0,not applicable (score based),1.0,4.0,,
+sf5,FGS,2029.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2030.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2031.0,not applicable (score based),1.0,4.0,,
+sf5,FGS,2032.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2033.0,not applicable (score based),1.0,3.0,,
+sf5,FGS,2034.0,not applicable (score based),1.0,6.0,,
+sf5,FGS,2035.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2036.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2038.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2039.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2040.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2041.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2042.0,not applicable (score based),1.0,4.0,,
+sf5,FGS,2043.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2044.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2045.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2046.0,not applicable (score based),1.0,5.0,,
+sf5,FGS,2047.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2048.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2049.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2050.0,not applicable (score based),1.0,4.0,,
+sf5,FGS,2051.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2052.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2053.0,not applicable (score based),1.0,6.0,,
+sf5,FGS,2054.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2055.0,not applicable (score based),1.0,4.0,,
+sf5,FGS,2056.0,not applicable (score based),1.0,5.0,,
+sf5,FGS,2058.0,not applicable (score based),1.0,6.0,,
+sf5,FGS,2059.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2060.0,not applicable (score based),1.0,4.0,,
+sf5,FGS,2061.0,not applicable (score based),1.0,3.0,,
+sf5,FGS,2062.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2063.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2064.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2065.0,not applicable (score based),1.0,1.0,,
+sf5,FGS,2066.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2067.0,not applicable (score based),1.0,2.0,,
+sf5,FGS,2068.0,not applicable (score based),1.0,6.0,,
+sf5,FGS,2069.0,not applicable (score based),1.0,4.0,,
+sf5,FGS,2070.0,not applicable (score based),1.0,4.0,,
+sf5,FGS,2071.0,not applicable (score based),1.0,3.0,,
+sf5,FGS,2072.0,not applicable (score based),1.0,6.0,,
+sf5,FGS,2073.0,not applicable (score based),1.0,3.0,,
+sf5,FGS,2074.0,not applicable (score based),1.0,3.0,,
+sf5,FGS,2075.0,not applicable (score based),1.0,3.0,,
+sf8,ABA-PC,2026.0,retained CI facts,4843.0,11575.0,4843.0,11575.0
+sf8,ABA-PC,2027.0,retained CI facts,9698.0,16875.0,9698.0,16875.0
+sf8,ABA-PC,2028.0,retained CI facts,50.0,236.0,50.0,236.0
+sf8,ABA-PC,2029.0,retained CI facts,2731.0,5934.0,2731.0,5934.0
+sf8,ABA-PC,2030.0,retained CI facts,11696.0,32275.0,11696.0,32275.0
+sf8,ABA-PC,2031.0,retained CI facts,64.0,616.0,64.0,616.0
+sf8,ABA-PC,2032.0,retained CI facts,129.0,688.0,129.0,688.0
+sf8,ABA-PC,2033.0,retained CI facts,7580.0,15900.0,7580.0,15900.0
+sf8,ABA-PC,2034.0,retained CI facts,185.0,543.0,185.0,543.0
+sf8,ABA-PC,2035.0,retained CI facts,3467.0,4112.0,3467.0,4112.0
+sf8,ABA-PC,2036.0,retained CI facts,5613.0,12155.0,5613.0,12155.0
+sf8,ABA-PC,2037.0,retained CI facts,1698.0,5848.0,1698.0,5848.0
+sf8,ABA-PC,2038.0,retained CI facts,638.0,1491.0,638.0,1491.0
+sf8,ABA-PC,2039.0,retained CI facts,8611.0,33275.0,8611.0,33275.0
+sf8,ABA-PC,2040.0,retained CI facts,40.0,73.0,40.0,73.0
+sf8,ABA-PC,2041.0,retained CI facts,259.0,383.0,259.0,383.0
+sf8,ABA-PC,2042.0,retained CI facts,64.0,326.0,64.0,326.0
+sf8,ABA-PC,2043.0,retained CI facts,2370.0,6120.0,2370.0,6120.0
+sf8,ABA-PC,2044.0,retained CI facts,80.0,191.0,80.0,191.0
+sf8,ABA-PC,2045.0,retained CI facts,19.0,87.0,19.0,87.0
+sf8,ABA-PC,2046.0,retained CI facts,20.0,164.0,20.0,164.0
+sf8,ABA-PC,2047.0,retained CI facts,11372.0,32300.0,11372.0,32300.0
+sf8,ABA-PC,2048.0,retained CI facts,75.0,242.0,75.0,242.0
+sf8,ABA-PC,2049.0,retained CI facts,10124.0,32203.0,10124.0,32203.0
+sf8,ABA-PC,2050.0,retained CI facts,10223.0,22525.0,10223.0,22525.0
+sf8,ABA-PC,2051.0,retained CI facts,5988.0,17905.0,5988.0,17905.0
+sf8,ABA-PC,2052.0,retained CI facts,74.0,191.0,74.0,191.0
+sf8,ABA-PC,2053.0,retained CI facts,409.0,947.0,409.0,947.0
+sf8,ABA-PC,2054.0,retained CI facts,6153.0,21730.0,6153.0,21730.0
+sf8,ABA-PC,2055.0,retained CI facts,6.0,70.0,6.0,70.0
+sf8,ABA-PC,2056.0,retained CI facts,3834.0,35075.0,3834.0,35075.0
+sf8,ABA-PC,2057.0,retained CI facts,10234.0,22900.0,10234.0,22900.0
+sf8,ABA-PC,2058.0,retained CI facts,7681.0,31175.0,7681.0,31175.0
+sf8,ABA-PC,2059.0,retained CI facts,10.0,12.0,10.0,12.0
+sf8,ABA-PC,2060.0,retained CI facts,11.0,100.0,11.0,100.0
+sf8,ABA-PC,2061.0,retained CI facts,361.0,2628.0,361.0,2628.0
+sf8,ABA-PC,2062.0,retained CI facts,436.0,2526.0,436.0,2526.0
+sf8,ABA-PC,2063.0,retained CI facts,10105.0,25450.0,10105.0,25450.0
+sf8,ABA-PC,2064.0,retained CI facts,320.0,536.0,320.0,536.0
+sf8,ABA-PC,2065.0,retained CI facts,1028.0,5015.0,1028.0,5015.0
+sf8,ABA-PC,2066.0,retained CI facts,2.0,12.0,2.0,12.0
+sf8,ABA-PC,2067.0,retained CI facts,16.0,33.0,16.0,33.0
+sf8,ABA-PC,2068.0,retained CI facts,24.0,56.0,24.0,56.0
+sf8,ABA-PC,2069.0,retained CI facts,22.0,154.0,22.0,154.0
+sf8,ABA-PC,2070.0,retained CI facts,11.0,25.0,11.0,25.0
+sf8,ABA-PC,2071.0,retained CI facts,951.0,1890.0,951.0,1890.0
+sf8,ABA-PC,2072.0,retained CI facts,89.0,180.0,89.0,180.0
+sf8,ABA-PC,2073.0,retained CI facts,144.0,1068.0,144.0,1068.0
+sf8,ABA-PC,2074.0,retained CI facts,15639.0,29550.0,15639.0,29550.0
+sf8,ABA-PC,2075.0,retained CI facts,209.0,461.0,209.0,461.0
+sf8,OptABA-PC,2026.0,retained CI facts,7250.0,42625.0,7250.0,42625.0
+sf8,OptABA-PC,2027.0,retained CI facts,108.0,513.0,108.0,513.0
+sf8,OptABA-PC,2028.0,retained CI facts,2.0,12.0,2.0,12.0
+sf8,OptABA-PC,2029.0,retained CI facts,9.0,9.0,9.0,9.0
+sf8,OptABA-PC,2030.0,retained CI facts,185.0,543.0,185.0,543.0
+sf8,OptABA-PC,2031.0,retained CI facts,1.0,4.0,1.0,4.0
+sf8,OptABA-PC,2032.0,retained CI facts,2.0,9.0,2.0,9.0
+sf8,OptABA-PC,2033.0,retained CI facts,2.0,6.0,2.0,6.0
+sf8,OptABA-PC,2034.0,retained CI facts,185.0,1086.0,185.0,1086.0
+sf8,OptABA-PC,2035.0,retained CI facts,11.0,50.0,11.0,50.0
+sf8,OptABA-PC,2036.0,retained CI facts,1.0,4.0,1.0,4.0
+sf8,OptABA-PC,2037.0,retained CI facts,11.0,100.0,11.0,100.0
+sf8,OptABA-PC,2038.0,retained CI facts,11.0,25.0,11.0,25.0
+sf8,OptABA-PC,2039.0,retained CI facts,2.0,21.0,2.0,21.0
+sf8,OptABA-PC,2040.0,retained CI facts,2.0,6.0,2.0,6.0
+sf8,OptABA-PC,2041.0,retained CI facts,2.0,12.0,2.0,12.0
+sf8,OptABA-PC,2042.0,retained CI facts,2.0,6.0,2.0,6.0
+sf8,OptABA-PC,2043.0,retained CI facts,1.0,2.0,1.0,2.0
+sf8,OptABA-PC,2044.0,retained CI facts,2.0,3.0,2.0,3.0
+sf8,OptABA-PC,2045.0,retained CI facts,1.0,2.0,1.0,2.0
+sf8,OptABA-PC,2046.0,retained CI facts,20.0,164.0,20.0,164.0
+sf8,OptABA-PC,2047.0,retained CI facts,11.0,25.0,11.0,25.0
+sf8,OptABA-PC,2048.0,retained CI facts,2.0,7.0,2.0,7.0
+sf8,OptABA-PC,2049.0,retained CI facts,185.0,1086.0,185.0,1086.0
+sf8,OptABA-PC,2050.0,retained CI facts,2.0,3.0,2.0,3.0
+sf8,OptABA-PC,2051.0,retained CI facts,8.0,20.0,8.0,20.0
+sf8,OptABA-PC,2052.0,retained CI facts,11.0,25.0,11.0,25.0
+sf8,OptABA-PC,2053.0,retained CI facts,2.0,6.0,2.0,6.0
+sf8,OptABA-PC,2054.0,retained CI facts,185.0,543.0,185.0,543.0
+sf8,OptABA-PC,2055.0,retained CI facts,6.0,70.0,6.0,70.0
+sf8,OptABA-PC,2056.0,retained CI facts,2.0,6.0,2.0,6.0
+sf8,OptABA-PC,2057.0,retained CI facts,1.0,6.0,1.0,6.0
+sf8,OptABA-PC,2058.0,retained CI facts,2.0,3.0,2.0,3.0
+sf8,OptABA-PC,2059.0,retained CI facts,1.0,1.0,1.0,1.0
+sf8,OptABA-PC,2060.0,retained CI facts,11.0,50.0,11.0,50.0
+sf8,OptABA-PC,2061.0,retained CI facts,11.0,100.0,11.0,100.0
+sf8,OptABA-PC,2062.0,retained CI facts,1.0,1.0,1.0,1.0
+sf8,OptABA-PC,2063.0,retained CI facts,2.0,6.0,2.0,6.0
+sf8,OptABA-PC,2064.0,retained CI facts,1.0,2.0,1.0,2.0
+sf8,OptABA-PC,2065.0,retained CI facts,185.0,1086.0,185.0,1086.0
+sf8,OptABA-PC,2066.0,retained CI facts,2.0,12.0,2.0,12.0
+sf8,OptABA-PC,2067.0,retained CI facts,2.0,6.0,2.0,6.0
+sf8,OptABA-PC,2068.0,retained CI facts,1.0,2.0,1.0,2.0
+sf8,OptABA-PC,2069.0,retained CI facts,1.0,2.0,1.0,2.0
+sf8,OptABA-PC,2070.0,retained CI facts,11.0,25.0,11.0,25.0
+sf8,OptABA-PC,2071.0,retained CI facts,1.0,2.0,1.0,2.0
+sf8,OptABA-PC,2072.0,retained CI facts,1.0,4.0,1.0,4.0
+sf8,OptABA-PC,2073.0,retained CI facts,4.0,12.0,4.0,12.0
+sf8,OptABA-PC,2074.0,retained CI facts,44.0,125.0,44.0,125.0
+sf8,OptABA-PC,2075.0,retained CI facts,11.0,50.0,11.0,50.0
+sf8,MPC,2026.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2027.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2028.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2029.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2030.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2031.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2032.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2033.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2034.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2035.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2036.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2037.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2038.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2039.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2040.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2041.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2042.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2043.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2044.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2045.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2046.0,full recorded matched G2 CI trace,1.0,2.0,1.0,2.0
+sf8,MPC,2047.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2048.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2049.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2050.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2051.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2052.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2053.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+sf8,MPC,2054.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2055.0,full recorded matched G2 CI trace,1.0,3.0,1.0,3.0
+sf8,MPC,2056.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2057.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2058.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+sf8,MPC,2059.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2060.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2061.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2062.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2063.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2064.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2065.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2066.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2067.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2068.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2069.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,MPC,2070.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2071.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2072.0,full recorded matched G2 CI trace,1.0,6.0,0.0,0.0
+sf8,MPC,2073.0,full recorded matched G2 CI trace,1.0,4.0,0.0,0.0
+sf8,MPC,2074.0,full recorded matched G2 CI trace,1.0,1.0,0.0,0.0
+sf8,MPC,2075.0,full recorded matched G2 CI trace,1.0,2.0,0.0,0.0
+sf8,FGS,2026.0,not applicable (score based),1.0,3.0,,
+sf8,FGS,2027.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2028.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2029.0,not applicable (score based),1.0,1.0,,
+sf8,FGS,2030.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2031.0,not applicable (score based),1.0,18.0,,
+sf8,FGS,2032.0,not applicable (score based),1.0,6.0,,
+sf8,FGS,2033.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2034.0,not applicable (score based),1.0,5.0,,
+sf8,FGS,2035.0,not applicable (score based),1.0,12.0,,
+sf8,FGS,2036.0,not applicable (score based),1.0,8.0,,
+sf8,FGS,2037.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2038.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2039.0,not applicable (score based),1.0,3.0,,
+sf8,FGS,2040.0,not applicable (score based),1.0,9.0,,
+sf8,FGS,2041.0,not applicable (score based),1.0,1.0,,
+sf8,FGS,2042.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2043.0,not applicable (score based),1.0,16.0,,
+sf8,FGS,2044.0,not applicable (score based),1.0,7.0,,
+sf8,FGS,2045.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2046.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2047.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2048.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2049.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2050.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2051.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2052.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2053.0,not applicable (score based),1.0,5.0,,
+sf8,FGS,2054.0,not applicable (score based),1.0,6.0,,
+sf8,FGS,2055.0,not applicable (score based),1.0,3.0,,
+sf8,FGS,2056.0,not applicable (score based),1.0,6.0,,
+sf8,FGS,2057.0,not applicable (score based),1.0,3.0,,
+sf8,FGS,2058.0,not applicable (score based),1.0,6.0,,
+sf8,FGS,2059.0,not applicable (score based),1.0,1.0,,
+sf8,FGS,2060.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2061.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2062.0,not applicable (score based),1.0,2.0,,
+sf8,FGS,2063.0,not applicable (score based),1.0,3.0,,
+sf8,FGS,2064.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2065.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2066.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2067.0,not applicable (score based),1.0,3.0,,
+sf8,FGS,2068.0,not applicable (score based),1.0,6.0,,
+sf8,FGS,2069.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2070.0,not applicable (score based),1.0,3.0,,
+sf8,FGS,2071.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2072.0,not applicable (score based),1.0,3.0,,
+sf8,FGS,2073.0,not applicable (score based),1.0,4.0,,
+sf8,FGS,2074.0,not applicable (score based),1.0,6.0,,
+sf8,FGS,2075.0,not applicable (score based),1.0,4.0,,

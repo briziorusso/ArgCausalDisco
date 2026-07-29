@@ -1,0 +1,57 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\caption{Matched baseline comparison for the current experimental runs. Values are mean $\pm$ standard deviation over successful matched repetitions; $n_g$ reports the minimum number of graph-metric repetitions available across the CPDAG and DAG columns. Runtime is averaged over all available runtime records. Lower SHD/runtime and higher F1 are better. Bold entries are the best mean and methods not significantly different from it under Welch tests with Benjamini--Hochberg correction at $\alpha=0.05$; superscripts on bold top entries show the corrected top-vs-next-nonbold indicator test. Adapted comparison with CI-test $\alpha=0.01$, sample size 5000, no injected wrong CI facts, and no conditioning-set-size weighting. ASPCR-log is run only on datasets with at most 6 nodes.}
+\label{tab:current-alpha001-nowrong-noweight-preview-comparison}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrccccc}
+\toprule
+Dataset & Method & $n_g$ & CPDAG SHD $\downarrow$ & CPDAG F1 $\uparrow$ & DAG SHD $\downarrow$ & DAG F1 $\uparrow$ & Time (s) $\downarrow$\\
+\midrule
+Cancer (5) & ABA-PC & 50 & $2.814\pm1.181$ & $0.522\pm0.214$ & $2.976\pm1.199$ & $\mathbf{0.483\pm0.223}^{\ast}$ & $1.510\pm0.478$\\
+Cancer (5) & OptABA-PC & 50 & $\mathbf{1.840\pm1.113}^{\ast\ast\ast}$ & $\mathbf{0.576\pm0.259}$ & $\mathbf{1.888\pm1.139}^{\ast\ast}$ & $\mathbf{0.563\pm0.262}^{\ast\ast\ast}$ & $1.277\pm0.377$\\
+Cancer (5) & MPC & 50 & $\mathbf{1.580\pm0.971}^{\ast\ast\ast}$ & $\mathbf{0.661\pm0.202}^{\ast\ast}$ & $2.900\pm1.741$ & $0.280\pm0.440$ & $\mathbf{0.011\pm0.003}^{\ast\ast\ast}$\\
+Cancer (5) & FGS & 50 & $2.460\pm0.542$ & $0.405\pm0.108$ & $2.460\pm0.542$ & $0.405\pm0.108$ & $0.135\pm0.113$\\
+Cancer (5) & ASPCR-log & 50 & $3.040\pm0.880$ & $0.463\pm0.148$ & $2.660\pm0.798$ & $0.396\pm0.203$ & $19.53\pm2.259$\\
+\midrule
+Earthquake (5) & ABA-PC & 50 & $\mathbf{0.087\pm0.300}^{\ast\ast\ast}$ & $\mathbf{0.991\pm0.033}^{\ast\ast\ast}$ & $\mathbf{0.095\pm0.338}^{\ast\ast\ast}$ & $\mathbf{0.989\pm0.039}^{\ast\ast\ast}$ & $1.832\pm0.833$\\
+Earthquake (5) & OptABA-PC & 50 & $\mathbf{0.080\pm0.274}^{\ast\ast\ast}$ & $\mathbf{0.991\pm0.030}^{\ast\ast\ast}$ & $\mathbf{0.080\pm0.274}^{\ast\ast\ast}$ & $\mathbf{0.991\pm0.030}^{\ast\ast\ast}$ & $1.679\pm0.813$\\
+Earthquake (5) & MPC & 50 & $\mathbf{0.200\pm0.728}^{\ast\ast\ast}$ & $\mathbf{0.991\pm0.030}^{\ast\ast\ast}$ & $\mathbf{0.020\pm0.141}^{\ast\ast\ast}$ & $\mathbf{0.998\pm0.016}^{\ast\ast\ast}$ & $\mathbf{0.015\pm0.003}^{\ast\ast\ast}$\\
+Earthquake (5) & FGS & 50 & $2.480\pm0.614$ & $0.474\pm0.033$ & $2.480\pm0.614$ & $0.474\pm0.033$ & $0.165\pm0.012$\\
+Earthquake (5) & ASPCR-log & 50 & $1.660\pm1.303$ & $0.758\pm0.200$ & $1.060\pm0.843$ & $0.866\pm0.110$ & $19.44\pm2.930$\\
+\midrule
+Survey (6) & ABA-PC & 50 & $7.140\pm1.389$ & $0.438\pm0.088$ & $6.733\pm1.388$ & $0.340\pm0.103$ & $15.67\pm30.23$\\
+Survey (6) & OptABA-PC & 50 & $4.350\pm1.094$ & $0.597\pm0.127$ & $\mathbf{3.767\pm0.906}^{\ast\ast}$ & $\mathbf{0.482\pm0.140}^{\ast\ast\ast}$ & $2.940\pm1.746$\\
+Survey (6) & MPC & 50 & $\mathbf{3.680\pm1.491}^{\ast}$ & $\mathbf{0.815\pm0.088}^{\ast\ast\ast}$ & $4.700\pm2.043$ & $0.242\pm0.367$ & $\mathbf{0.016\pm0.004}^{\ast\ast\ast}$\\
+Survey (6) & FGS & 50 & $8.200\pm0.728$ & $0.257\pm0.085$ & $6.980\pm0.958$ & $0.257\pm0.085$ & $0.149\pm0.025$\\
+Survey (6) & ASPCR-log & 50 & $5.340\pm1.154$ & $0.382\pm0.177$ & $4.960\pm0.856$ & $0.250\pm0.181$ & $70.08\pm20.76$\\
+\midrule
+Asia (8) & ABA-PC & 50 & $14.37\pm3.256$ & $0.224\pm0.073$ & $13.99\pm2.807$ & $0.310\pm0.095$ & $95.37\pm48.77$\\
+Asia (8) & OptABA-PC & 49 & $\mathbf{3.867\pm0.602}^{\ast\ast\ast}$ & $\mathbf{0.536\pm0.062}^{\ast\ast\ast}$ & $\mathbf{4.510\pm0.591}^{\ast\ast\ast}$ & $\mathbf{0.665\pm0.009}^{\ast\ast\ast}$ & $66.10\pm85.15$\\
+Asia (8) & MPC & 50 & $\mathbf{3.820\pm0.438}^{\ast\ast\ast}$ & $0.483\pm0.045$ & $6.000\pm0.000$ & $0.400\pm0.000$ & $\mathbf{0.038\pm0.005}^{\ast\ast\ast}$\\
+Asia (8) & FGS & 50 & $12.14\pm0.572$ & $0.244\pm0.040$ & $11.26\pm0.777$ & $0.244\pm0.040$ & $0.189\pm0.016$\\
+\midrule
+ER (5) & ABA-PC & 50 & $\mathbf{2.865\pm2.004}^{\ast\ast\ast}$ & $\mathbf{0.488\pm0.163}^{\ast\ast\ast}$ & $\mathbf{5.229\pm0.270}^{\ast\ast\ast}$ & $\mathbf{0.490\pm0.028}^{\ast\ast}$ & $1.801\pm1.084$\\
+ER (5) & OptABA-PC & 50 & $\mathbf{2.865\pm2.004}^{\ast\ast\ast}$ & $\mathbf{0.488\pm0.163}^{\ast\ast\ast}$ & $\mathbf{5.229\pm0.270}^{\ast\ast\ast}$ & $\mathbf{0.490\pm0.028}^{\ast\ast}$ & $1.731\pm1.083$\\
+ER (5) & MPC & 50 & $4.800\pm3.452$ & $\mathbf{0.543\pm0.175}^{\ast\ast\ast}$ & $7.060\pm2.351$ & $0.358\pm0.280$ & $\mathbf{0.016\pm0.002}^{\ast\ast\ast}$\\
+ER (5) & ASPCR-log & 50 & $8.200\pm0.990$ & $0.285\pm0.171$ & $8.420\pm1.401$ & $0.225\pm0.187$ & $16.68\pm1.965$\\
+\midrule
+ER (8) & ABA-PC & 42 & $15.06\pm4.318$ & $0.422\pm0.149$ & $13.78\pm3.941$ & $0.445\pm0.151$ & $124.3\pm39.49$\\
+ER (8) & OptABA-PC & 47 & $10.55\pm2.992$ & $0.556\pm0.132$ & $9.746\pm2.602$ & $\mathbf{0.564\pm0.127}^{\ast\ast\ast}$ & $299.9\pm85.24$\\
+ER (8) & MPC & 50 & $\mathbf{7.940\pm3.139}^{\ast\ast\ast}$ & $\mathbf{0.637\pm0.140}^{\ast\ast}$ & $\mathbf{7.520\pm2.288}^{\ast\ast\ast}$ & $\mathbf{0.613\pm0.139}^{\ast\ast\ast}$ & $\mathbf{0.104\pm0.069}^{\ast\ast\ast}$\\
+\midrule
+SF (5) & ABA-PC & 50 & $3.755\pm1.568$ & $0.654\pm0.158$ & $4.027\pm1.510$ & $0.567\pm0.149$ & $2.379\pm1.541$\\
+SF (5) & OptABA-PC & 50 & $3.575\pm1.379$ & $0.663\pm0.144$ & $3.842\pm1.418$ & $0.580\pm0.140$ & $2.264\pm1.558$\\
+SF (5) & MPC & 50 & $\mathbf{1.400\pm1.678}^{\ast\ast\ast}$ & $\mathbf{0.859\pm0.131}^{\ast\ast\ast}$ & $\mathbf{1.680\pm1.133}^{\ast\ast\ast}$ & $\mathbf{0.843\pm0.126}^{\ast\ast\ast}$ & $\mathbf{0.015\pm0.003}^{\ast\ast\ast}$\\
+SF (5) & ASPCR-log & 50 & $5.080\pm1.412$ & $0.418\pm0.202$ & $5.100\pm1.298$ & $0.368\pm0.205$ & $16.91\pm2.229$\\
+\midrule
+SF (8) & ABA-PC & 48 & $12.10\pm3.447$ & $0.498\pm0.140$ & $11.42\pm3.297$ & $0.487\pm0.139$ & $87.85\pm48.48$\\
+SF (8) & OptABA-PC & 50 & $7.962\pm3.033$ & $0.646\pm0.115$ & $7.679\pm2.639$ & $0.613\pm0.127$ & $223.7\pm129.2$\\
+SF (8) & MPC & 50 & $\mathbf{4.940\pm1.932}^{\ast\ast\ast}$ & $\mathbf{0.726\pm0.115}^{\ast\ast\ast}$ & $\mathbf{5.400\pm1.841}^{\ast\ast\ast}$ & $\mathbf{0.708\pm0.129}^{\ast\ast\ast}$ & $\mathbf{0.056\pm0.019}^{\ast\ast\ast}$\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+% Generated by ./scripts/collect\_matched\_baseline\_tables.py.

@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Forced-fact contestability for exact OptABA-PC repair and ASPCR-DAG over their overlapping validated datasets. Each challenge hardens a fact failed by the method's baseline optimum while leaving alternative releases soft. Zero margin counts proved challenges for which hard retention does not increase the optimum. The normalized margin is $\mu(f)/w_f$ for OptABA-PC and $\mu_{\mathrm{ASP}}(f)/w_f$ for ASPCR-DAG; $Q_1$ and $Q_3$ denote its first and third quartiles. ASPCR uses its exhaustive native Bayesian log-weighted trace, while OptABA-PC uses the matched adaptive G$^2$ trace, so challenge counts and normalized margins describe within-method robustness and are not paired or directly commensurate.}
+\label{tab:aspcr-contestability-comparison}
+\begin{tabular}{llrrr}
+\toprule
+Dataset & Method & Challenges & Zero margin & Normalized margin median [$Q_1,Q_3$] \\
+\midrule
+Cancer (5) & OptABA-PC & 207 & 0/207 (0\%) & 0.297 [0.158,0.609] \\
+ & ASPCR-DAG & 959 & 0/959 (0\%) & 4.041 [1.615,7.946] \\
+\midrule
+Earthquake (5) & OptABA-PC & 4 & 0/4 (0\%) & 4.170 [1.628,6.332] \\
+ & ASPCR-DAG & 80 & 0/80 (0\%) & 3.625 [0.990,6.349] \\
+\midrule
+Survey (6) & OptABA-PC & 507 & 0/507 (0\%) & 0.517 [0.200,1.026] \\
+ & ASPCR-DAG & 2094 & 0/2094 (0\%) & 2.376 [0.537,14.074] \\
+\bottomrule
+\end{tabular}
+\end{table*}

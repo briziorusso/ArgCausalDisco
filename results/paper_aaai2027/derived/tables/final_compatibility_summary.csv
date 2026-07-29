@@ -1,0 +1,36 @@
+dataset,method,seeds,compatibility_basis,returned_cpdags_mean,returned_dags_mean,ci_compatible_cpdag_seeds,ci_compatible_dag_seeds
+cancer,ABA-PC,50,retained CI facts,15.08,31.94,50.0,50.0
+cancer,OptABA-PC,50,retained CI facts,1.0,1.5,50.0,50.0
+cancer,MPC,50,full recorded matched G2 CI trace,1.0,3.34,0.0,0.0
+cancer,FGS,50,not applicable (score based),1.0,4.64,,
+cancer,ASPCR-DAG,50,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+earthquake,ABA-PC,50,retained CI facts,1.04,1.12,50.0,50.0
+earthquake,OptABA-PC,50,retained CI facts,1.0,1.06,50.0,50.0
+earthquake,MPC,50,full recorded matched G2 CI trace,1.0,1.06,47.0,47.0
+earthquake,FGS,50,not applicable (score based),1.0,7.28,,
+earthquake,ASPCR-DAG,50,complete native ASPCR CI trace,1.0,1.0,22.0,22.0
+survey,ABA-PC,50,retained CI facts,1278.48,4725.26,50.0,50.0
+survey,OptABA-PC,50,retained CI facts,1.24,2.86,50.0,50.0
+survey,MPC,50,full recorded matched G2 CI trace,0.76,2.86,0.0,0.0
+survey,FGS,50,not applicable (score based),1.0,4.06,,
+survey,ASPCR-DAG,50,complete native ASPCR CI trace,1.0,1.0,0.0,0.0
+asia,ABA-PC,50,retained CI facts,10822.72,27191.5,50.0,50.0
+asia,OptABA-PC,49,retained CI facts,1.183673469387755,4.408163265306122,49.0,49.0
+asia,MPC,50,full recorded matched G2 CI trace,1.0,4.82,0.0,0.0
+asia,FGS,50,not applicable (score based),1.0,5.3,,
+er5,ABA-PC,50,retained CI facts,8.18,32.1,50.0,50.0
+er5,OptABA-PC,50,retained CI facts,2.98,11.6,50.0,50.0
+er5,MPC,50,full recorded matched G2 CI trace,1.0,3.34,11.0,11.0
+er5,FGS,50,not applicable (score based),1.0,3.36,,
+er8,ABA-PC,50,retained CI facts,3840.04,11539.72,50.0,50.0
+er8,OptABA-PC,50,retained CI facts,4.74,31.96,50.0,50.0
+er8,MPC,50,full recorded matched G2 CI trace,0.98,5.16,3.0,3.0
+er8,FGS,50,not applicable (score based),1.0,5.92,,
+sf5,ABA-PC,50,retained CI facts,88.36,372.6,50.0,50.0
+sf5,OptABA-PC,50,retained CI facts,85.08,357.64,50.0,50.0
+sf5,MPC,50,full recorded matched G2 CI trace,1.0,1.72,17.0,17.0
+sf5,FGS,48,not applicable (score based),1.0,2.75,,
+sf8,ABA-PC,50,retained CI facts,3108.12,8716.52,50.0,50.0
+sf8,OptABA-PC,50,retained CI facts,170.34,969.76,50.0,50.0
+sf8,MPC,50,full recorded matched G2 CI trace,1.0,2.8,2.0,2.0
+sf8,FGS,50,not applicable (score based),1.0,4.42,,

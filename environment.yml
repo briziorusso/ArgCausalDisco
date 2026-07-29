@@ -1,0 +1,11 @@
+name: optaba-pc-repro
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12.1
+  - openjdk=19.0.2
+  - pip=26.0.1
+  - setuptools=78.1.1
+  - wheel=0.45.1
+  - pip:
+      - -r requirements-repro.txt

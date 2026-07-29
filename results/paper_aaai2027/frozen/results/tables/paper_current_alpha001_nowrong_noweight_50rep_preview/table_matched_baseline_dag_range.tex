@@ -1,0 +1,46 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\caption{DAG compatible-set view for ABA-PC and OptABA-PC against MPC. For MPC, average, best, and worst coincide because the method returns one graph. For ABA-PC and OptABA-PC, average, best, and worst are computed over the compatible graph set returned by graph evaluation. Bold entries are best/tied under Welch tests with Benjamini--Hochberg correction.}
+\label{tab:current-alpha001-nowrong-noweight-preview-dag-range}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrcccccc}
+\toprule
+Dataset & Method & $n$ & Avg SHD $\downarrow$ & Best SHD $\downarrow$ & Worst SHD $\downarrow$ & Avg F1 $\uparrow$ & Best F1 $\uparrow$ & Worst F1 $\uparrow$\\
+\midrule
+Cancer (5) & ABA-PC & 50 & $2.976\pm1.199$ & $\mathbf{1.440\pm1.181}^{\ast\ast\ast}$ & $4.180\pm1.956$ & $\mathbf{0.483\pm0.223}^{\ast\ast}$ & $\mathbf{0.688\pm0.270}^{\ast\ast\ast}$ & $0.346\pm0.264$\\
+Cancer (5) & OptABA-PC & 50 & $\mathbf{1.888\pm1.139}^{\ast\ast\ast}$ & $\mathbf{1.700\pm1.147}^{\ast\ast\ast}$ & $\mathbf{2.000\pm1.212}^{\ast\ast}$ & $\mathbf{0.563\pm0.262}^{\ast\ast\ast}$ & $\mathbf{0.616\pm0.277}^{\ast\ast\ast}$ & $\mathbf{0.531\pm0.281}^{\ast\ast}$\\
+Cancer (5) & MPC & 50 & $2.900\pm1.741$ & $2.900\pm1.741$ & $2.900\pm1.741$ & $0.280\pm0.440$ & $0.280\pm0.440$ & $0.280\pm0.440$\\
+\midrule
+Earthquake (5) & ABA-PC & 50 & $\mathbf{0.095\pm0.338}$ & $\mathbf{0.080\pm0.274}$ & $\mathbf{0.120\pm0.480}$ & $\mathbf{0.989\pm0.039}$ & $\mathbf{0.991\pm0.030}$ & $\mathbf{0.985\pm0.062}$\\
+Earthquake (5) & OptABA-PC & 50 & $\mathbf{0.080\pm0.274}$ & $\mathbf{0.080\pm0.274}$ & $\mathbf{0.080\pm0.274}$ & $\mathbf{0.991\pm0.030}$ & $\mathbf{0.991\pm0.030}$ & $\mathbf{0.991\pm0.030}$\\
+Earthquake (5) & MPC & 50 & $\mathbf{0.020\pm0.141}$ & $\mathbf{0.020\pm0.141}$ & $\mathbf{0.020\pm0.141}$ & $\mathbf{0.998\pm0.016}$ & $\mathbf{0.998\pm0.016}$ & $\mathbf{0.998\pm0.016}$\\
+\midrule
+Survey (6) & ABA-PC & 50 & $6.733\pm1.388$ & $\mathbf{2.560\pm1.473}^{\ast}$ & $10.28\pm2.696$ & $0.340\pm0.103$ & $\mathbf{0.677\pm0.180}^{\ast\ast}$ & $0.101\pm0.135$\\
+Survey (6) & OptABA-PC & 50 & $\mathbf{3.767\pm0.906}^{\ast\ast}$ & $3.180\pm0.919$ & $\mathbf{4.380\pm1.141}^{\ast\ast\ast}$ & $\mathbf{0.482\pm0.140}^{\ast\ast\ast}$ & $0.586\pm0.130$ & $\mathbf{0.373\pm0.204}^{\ast}$\\
+Survey (6) & MPC & 50 & $4.700\pm2.043$ & $4.700\pm2.043$ & $\mathbf{4.700\pm2.043}^{\ast\ast\ast}$ & $0.242\pm0.367$ & $0.242\pm0.367$ & $0.242\pm0.367$\\
+\midrule
+Asia (8) & ABA-PC & 50 & $13.99\pm2.807$ & $8.020\pm2.272$ & $19.52\pm3.448$ & $0.310\pm0.095$ & $0.565\pm0.105$ & $0.109\pm0.107$\\
+Asia (8) & OptABA-PC & 49 & $\mathbf{4.510\pm0.591}^{\ast\ast\ast}$ & $\mathbf{3.735\pm0.569}^{\ast\ast\ast}$ & $\mathbf{5.000\pm0.816}^{\ast\ast\ast}$ & $\mathbf{0.665\pm0.009}^{\ast\ast\ast}$ & $\mathbf{0.752\pm0.045}^{\ast\ast\ast}$ & $\mathbf{0.614\pm0.031}^{\ast\ast\ast}$\\
+Asia (8) & MPC & 50 & $6.000\pm0.000$ & $6.000\pm0.000$ & $6.000\pm0.000$ & $0.400\pm0.000$ & $0.400\pm0.000$ & $0.400\pm0.000$\\
+\midrule
+ER (5) & ABA-PC & 50 & $\mathbf{5.229\pm0.270}^{\ast\ast\ast}$ & $\mathbf{0.180\pm0.896}^{\ast\ast\ast}$ & $9.840\pm0.817$ & $\mathbf{0.490\pm0.028}^{\ast\ast}$ & $\mathbf{0.985\pm0.078}^{\ast\ast\ast}$ & $0.018\pm0.094$\\
+ER (5) & OptABA-PC & 50 & $\mathbf{5.229\pm0.270}^{\ast\ast\ast}$ & $\mathbf{0.180\pm0.896}^{\ast\ast\ast}$ & $9.840\pm0.817$ & $\mathbf{0.490\pm0.028}^{\ast\ast}$ & $\mathbf{0.985\pm0.078}^{\ast\ast\ast}$ & $0.018\pm0.094$\\
+ER (5) & MPC & 50 & $7.060\pm2.351$ & $7.060\pm2.351$ & $\mathbf{7.060\pm2.351}^{\ast\ast\ast}$ & $0.358\pm0.280$ & $0.358\pm0.280$ & $\mathbf{0.358\pm0.280}^{\ast\ast\ast}$\\
+\midrule
+ER (8) & ABA-PC & 42 & $13.78\pm3.941$ & $7.452\pm4.056$ & $19.21\pm4.182$ & $0.445\pm0.151$ & $0.690\pm0.168$ & $0.218\pm0.142$\\
+ER (8) & OptABA-PC & 47 & $9.746\pm2.602$ & $\mathbf{5.213\pm3.127}^{\ast\ast}$ & $13.68\pm3.421$ & $\mathbf{0.564\pm0.127}^{\ast\ast\ast}$ & $\mathbf{0.763\pm0.153}^{\ast}$ & $0.374\pm0.157$\\
+ER (8) & MPC & 50 & $\mathbf{7.520\pm2.288}^{\ast\ast\ast}$ & $7.520\pm2.288$ & $\mathbf{7.520\pm2.288}^{\ast\ast\ast}$ & $\mathbf{0.613\pm0.139}^{\ast\ast\ast}$ & $0.613\pm0.139$ & $\mathbf{0.613\pm0.139}^{\ast\ast\ast}$\\
+\midrule
+SF (5) & ABA-PC & 50 & $4.027\pm1.510$ & $\mathbf{0.660\pm0.961}^{\ast\ast\ast}$ & $7.020\pm2.910$ & $0.567\pm0.149$ & $\mathbf{0.929\pm0.102}^{\ast\ast\ast}$ & $0.247\pm0.271$\\
+SF (5) & OptABA-PC & 50 & $3.842\pm1.418$ & $\mathbf{0.740\pm0.965}^{\ast\ast\ast}$ & $6.580\pm2.907$ & $0.580\pm0.140$ & $\mathbf{0.917\pm0.112}^{\ast\ast}$ & $0.289\pm0.260$\\
+SF (5) & MPC & 50 & $\mathbf{1.680\pm1.133}^{\ast\ast\ast}$ & $1.680\pm1.133$ & $\mathbf{1.680\pm1.133}^{\ast\ast\ast}$ & $\mathbf{0.843\pm0.126}^{\ast\ast\ast}$ & $0.843\pm0.126$ & $\mathbf{0.843\pm0.126}^{\ast\ast\ast}$\\
+\midrule
+SF (8) & ABA-PC & 48 & $11.42\pm3.297$ & $\mathbf{5.208\pm3.024}$ & $16.75\pm4.205$ & $0.487\pm0.139$ & $\mathbf{0.750\pm0.152}$ & $0.248\pm0.150$\\
+SF (8) & OptABA-PC & 50 & $7.679\pm2.639$ & $\mathbf{4.880\pm2.662}$ & $10.10\pm3.530$ & $0.613\pm0.127$ & $\mathbf{0.752\pm0.137}$ & $0.478\pm0.161$\\
+SF (8) & MPC & 50 & $\mathbf{5.400\pm1.841}^{\ast\ast\ast}$ & $\mathbf{5.400\pm1.841}$ & $\mathbf{5.400\pm1.841}^{\ast\ast\ast}$ & $\mathbf{0.708\pm0.129}^{\ast\ast\ast}$ & $\mathbf{0.708\pm0.129}$ & $\mathbf{0.708\pm0.129}^{\ast\ast\ast}$\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

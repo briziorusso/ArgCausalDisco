@@ -133,3 +133,10 @@ dmypy.json
 
 *.pkl
 outputs/
+
+# Result trees are generated locally. Only the curated paper release is source
+# controlled; its recomputed/ directory remains disposable working space.
+/results/*
+!/results/paper_aaai2027/
+!/results/paper_aaai2027/**
+/results/paper_aaai2027/recomputed/

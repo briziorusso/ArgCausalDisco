@@ -1,0 +1,174 @@
+{
+  "completion_exceptions": {
+    "asia/OptABA-PC": {
+      "missing_saved_seeds": [
+        2047
+      ]
+    },
+    "er8/MPC": {
+      "missing_graph_evaluation_seeds": [
+        2030
+      ]
+    },
+    "sf5/FGS": {
+      "missing_saved_seeds": [
+        2037,
+        2057
+      ]
+    },
+    "survey/MPC": {
+      "missing_graph_evaluation_seeds": [
+        2026,
+        2029,
+        2035,
+        2038,
+        2040,
+        2048,
+        2052,
+        2055,
+        2056,
+        2064,
+        2069,
+        2070
+      ]
+    }
+  },
+  "excluded_exploratory_families": [
+    "injected_fact_corruption",
+    "shapley_pc",
+    "smoke_runs",
+    "ten_repetition_runs",
+    "development_alpha_0.05"
+  ],
+  "formal_checker": {
+    "path": "scripts/verify_formal_properties.py",
+    "sha256": "ca1db3ffb863fa2e262df92b3e3142edcb1ee6894935b9913126af472d15faca"
+  },
+  "frozen_bytes": 121744730,
+  "frozen_file_count": 6364,
+  "frozen_tree_sha256": "fc50e1026526dd8861f9f2e38e0d3c84b782b1c7dd6cf6c11ba906dce5ed02fb",
+  "included_source_paths": [
+    "results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked",
+    "results/final_mcs_experiments_er_sf_sparse_alpha001_noweight_50rep",
+    "results/tables/paper_current_alpha001_nowrong_noweight_50rep_preview",
+    "results/metadata_paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs.json",
+    "results/stored_results_paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs.csv",
+    "results/stored_results_paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs_cpdag.csv",
+    "results/progress/paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
+    "results/estimated_graphs/paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
+    "results/metadata_paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs.json",
+    "results/stored_results_paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs.csv",
+    "results/stored_results_paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs_cpdag.csv",
+    "results/progress/paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs",
+    "results/estimated_graphs/paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs",
+    "results/metadata_paper_er_sf_alpha001_nowrong_noweight_50rep_mpc.json",
+    "results/stored_results_paper_er_sf_alpha001_nowrong_noweight_50rep_mpc.csv",
+    "results/stored_results_paper_er_sf_alpha001_nowrong_noweight_50rep_mpc_cpdag.csv",
+    "results/progress/paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
+    "results/estimated_graphs/paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
+    "results/metadata_paper_er_sf_alpha001_nowrong_noweight_50rep_fgs.json",
+    "results/stored_results_paper_er_sf_alpha001_nowrong_noweight_50rep_fgs.csv",
+    "results/stored_results_paper_er_sf_alpha001_nowrong_noweight_50rep_fgs_cpdag.csv",
+    "results/progress/paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
+    "results/estimated_graphs/paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
+    "results/metadata_paper_aspcr_dag_alpha001_n5000_50rep.json",
+    "results/stored_results_paper_aspcr_dag_alpha001_n5000_50rep.csv",
+    "results/stored_results_paper_aspcr_dag_alpha001_n5000_50rep_cpdag.csv",
+    "results/progress/paper_aspcr_dag_alpha001_n5000_50rep",
+    "results/estimated_graphs/paper_aspcr_dag_alpha001_n5000_50rep",
+    "results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep"
+  ],
+  "protocol": {
+    "aspcr_dag": {
+      "bayesian_alpha": 20,
+      "conditioning_schedule": "n-2",
+      "datasets_reported": [
+        "cancer",
+        "earthquake",
+        "survey"
+      ],
+      "encoding": "new_wmaxsat_acyclic_sufficient.pl",
+      "model_space": "dag_sufficient",
+      "prior_independence": 0.4,
+      "solver_configuration": "crafty",
+      "solver_timeout_seconds": 25000,
+      "test": "bayes",
+      "weight": "log"
+    },
+    "datasets": {
+      "fixed": [
+        "cancer",
+        "earthquake",
+        "survey",
+        "asia"
+      ],
+      "primary_edges_per_node": 1,
+      "sensitivity_edges_per_node": 2,
+      "synthetic_primary": [
+        "er5",
+        "er8",
+        "sf5",
+        "sf8"
+      ]
+    },
+    "excluded": [
+      "injected_fact_corruption",
+      "shapley_pc",
+      "smoke_runs",
+      "ten_repetition_runs",
+      "development_alpha_0.05"
+    ],
+    "fgs": {
+      "faithfulness_assumed": true,
+      "maximum_degree": -1,
+      "score": "sem-bic"
+    },
+    "mpc": {
+      "conditioning_depth_limit": null,
+      "stable": true,
+      "uc_priority": 2,
+      "uc_rule": 5
+    },
+    "release": "paper_aaai2027",
+    "repair": {
+      "conditioning_set_weight": false,
+      "encoding": "incremental_bayes_ball",
+      "graph_evaluation_timeout_seconds": 120,
+      "objective": "minimum_total_release_weight",
+      "opt_mode": "optN",
+      "opt_strategy": "bb",
+      "reification": "mus",
+      "solve_timeout_seconds": 300,
+      "threads": 4
+    },
+    "sample_size": 5000,
+    "seeds": {
+      "count": 50,
+      "end": 2075,
+      "start": 2026
+    },
+    "shared_ci": {
+      "alpha": 0.01,
+      "methods": [
+        "ABA-PC",
+        "OptABA-PC",
+        "MPC"
+      ],
+      "test": "gsq"
+    },
+    "versions": {
+      "aspcr": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "baseline_fixed": "paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
+      "baseline_synthetic_dense_fgs": "paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
+      "baseline_synthetic_dense_mpc": "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
+      "baseline_synthetic_primary": "paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs",
+      "tables": "paper_final_matched_50rep"
+    }
+  },
+  "release": "paper_aaai2027",
+  "reported_aspcr_datasets": [
+    "cancer",
+    "earthquake",
+    "survey"
+  ]
+}

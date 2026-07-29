@@ -1,0 +1,144 @@
+{
+  "generated_at": "2026-07-15T16:08:41",
+  "methods": [
+    {
+      "enc": "inc",
+      "id": "inc|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    }
+  ],
+  "metric_defs": [
+    {
+      "higher_is_better": false,
+      "name": "timeR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "timeBSR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "solveR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "toR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "nATR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "wATR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "nDR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "shdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "F1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "adjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "ahR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "factR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "cshdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cF1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cadjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cahR"
+    }
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "ranks_avg": {
+    "inc|-|baseline|optN|-": {
+      "F1R": 1.7307692307692308,
+      "adjR": 1.8076923076923077,
+      "ahR": 1.7307692307692308,
+      "cF1R": 1.8846153846153846,
+      "cadjR": 1.8846153846153846,
+      "cahR": 1.8076923076923077,
+      "cshdR": 1.8076923076923077,
+      "factR": 1.3461538461538463,
+      "nATR": 1.8461538461538463,
+      "nDR": 1.8846153846153846,
+      "shdR": 1.8076923076923077,
+      "solveR": 1.0,
+      "timeBSR": 1.0,
+      "timeR": 1.2307692307692308,
+      "toR": 1.2692307692307692,
+      "wATR": 1.8076923076923077
+    },
+    "inc|lex|bb|optN|mus": {
+      "F1R": 1.2692307692307692,
+      "adjR": 1.1923076923076923,
+      "ahR": 1.2692307692307692,
+      "cF1R": 1.1153846153846154,
+      "cadjR": 1.1153846153846154,
+      "cahR": 1.1923076923076923,
+      "cshdR": 1.1923076923076923,
+      "factR": 1.6538461538461537,
+      "nATR": 1.1538461538461537,
+      "nDR": 1.1153846153846154,
+      "shdR": 1.1923076923076923,
+      "solveR": 2.0,
+      "timeBSR": 2.0,
+      "timeR": 1.7692307692307692,
+      "toR": 1.7307692307692308,
+      "wATR": 1.1923076923076923
+    }
+  },
+  "reps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "results_dir": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked/wc_sweep_sf8_2026_er_sf_alpha001_nowrong_noweight_seed2063_2075_20260715_151522"
+}

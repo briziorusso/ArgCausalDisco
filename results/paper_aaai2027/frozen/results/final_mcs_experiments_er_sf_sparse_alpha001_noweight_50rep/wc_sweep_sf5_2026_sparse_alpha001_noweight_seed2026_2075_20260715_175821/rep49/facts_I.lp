@@ -1,0 +1,16 @@
+#external ext_dep(0,1,s2y3). I=0.6281536090723657,unknown
+#external ext_dep(0,2,empty). I=0.9999799796372588,unknown
+#external ext_dep(0,2,s1). I=0.9999999999458926,unknown
+#external ext_dep(0,2,s3). I=0.9310171797607695,unknown
+#external ext_indep(0,3,empty). I=0.8070768060147595,unknown
+#external ext_indep(0,4,empty). I=0.6607211415362619,unknown
+#external ext_dep(1,2,empty). I=1.0,unknown
+#external ext_dep(1,2,s0). I=1.0,unknown
+#external ext_dep(1,2,s3). I=0.9999999203762362,unknown
+#external ext_dep(1,3,empty). I=1.0,unknown
+#external ext_dep(1,3,s0). I=1.0,unknown
+#external ext_dep(1,3,s2). I=1.0,unknown
+#external ext_indep(1,4,empty). I=0.6872071292474656,unknown
+#external ext_indep(2,3,s0y1). I=0.7901107079584583,unknown
+#external ext_indep(2,4,empty). I=0.5039316665879263,unknown
+#external ext_indep(3,4,empty). I=0.5172167262727846,unknown

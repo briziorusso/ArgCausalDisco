@@ -1,0 +1,89 @@
+\begin{table*}[t]
+\centering
+\tiny
+\setlength{\tabcolsep}{2pt}
+\caption{Welch tests for Table~\ref{tab:current-alpha001-nowrong-noweight-preview-comparison}. Each row compares a bolded top entry with the next non-bold method in that dataset--metric ranking. Significance symbols are based on Benjamini--Hochberg corrected p-values within each dataset--metric family and are printed as superscripts on the corresponding bold table entries. Part 1 of 2.}
+\label{tab:current-alpha001-nowrong-noweight-preview-indicator-tests}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllrcrcc}
+\toprule
+Dataset & Metric & Methods & $n$ & Means $\pm$ Std & $t$ & $p$ & $p_{\mathrm{BH}}$\\
+\midrule
+Cancer (5) & CPDAG SHD $\downarrow$ & MPC vs FGS & 50/50 & $1.580\pm0.971$ vs $2.460\pm0.542$ & $-5.60$ & $<0.001$\,*** & $<0.001$\,***\\
+Cancer (5) & CPDAG SHD $\downarrow$ & OptABA-PC vs FGS & 50/50 & $1.840\pm1.113$ vs $2.460\pm0.542$ & $-3.54$ & $<0.001$\,*** & $<0.001$\,***\\
+Cancer (5) & CPDAG F1 $\uparrow$ & MPC vs ABA-PC & 50/50 & $0.661\pm0.202$ vs $0.522\pm0.214$ & $3.34$ & $0.001$\,** & $0.002$\,**\\
+Cancer (5) & CPDAG F1 $\uparrow$ & OptABA-PC vs ABA-PC & 50/50 & $0.576\pm0.259$ vs $0.522\pm0.214$ & $1.14$ & $0.259$\,ns & $0.259$\,ns\\
+Cancer (5) & DAG SHD $\downarrow$ & OptABA-PC vs FGS & 50/50 & $1.888\pm1.139$ vs $2.460\pm0.542$ & $-3.20$ & $0.002$\,** & $0.002$\,**\\
+Cancer (5) & DAG F1 $\uparrow$ & OptABA-PC vs FGS & 50/50 & $0.563\pm0.262$ vs $0.405\pm0.108$ & $3.93$ & $<0.001$\,*** & $<0.001$\,***\\
+Cancer (5) & DAG F1 $\uparrow$ & ABA-PC vs FGS & 50/50 & $0.483\pm0.223$ vs $0.405\pm0.108$ & $2.21$ & $0.030$\,* & $0.030$\,*\\
+Cancer (5) & Time (s) $\downarrow$ & MPC vs FGS & 50/50 & $0.011\pm0.003$ vs $0.135\pm0.113$ & $-7.79$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & CPDAG SHD $\downarrow$ & OptABA-PC vs ASPCR-log & 50/50 & $0.080\pm0.274$ vs $1.660\pm1.303$ & $-8.39$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & CPDAG SHD $\downarrow$ & ABA-PC vs ASPCR-log & 50/50 & $0.087\pm0.300$ vs $1.660\pm1.303$ & $-8.32$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & CPDAG SHD $\downarrow$ & MPC vs ASPCR-log & 50/50 & $0.200\pm0.728$ vs $1.660\pm1.303$ & $-6.91$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & CPDAG F1 $\uparrow$ & OptABA-PC vs ASPCR-log & 50/50 & $0.991\pm0.030$ vs $0.758\pm0.200$ & $8.14$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & CPDAG F1 $\uparrow$ & MPC vs ASPCR-log & 50/50 & $0.991\pm0.030$ vs $0.758\pm0.200$ & $8.14$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & CPDAG F1 $\uparrow$ & ABA-PC vs ASPCR-log & 50/50 & $0.991\pm0.033$ vs $0.758\pm0.200$ & $8.11$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & DAG SHD $\downarrow$ & MPC vs ASPCR-log & 50/50 & $0.020\pm0.141$ vs $1.060\pm0.843$ & $-8.60$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & DAG SHD $\downarrow$ & OptABA-PC vs ASPCR-log & 50/50 & $0.080\pm0.274$ vs $1.060\pm0.843$ & $-7.82$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & DAG SHD $\downarrow$ & ABA-PC vs ASPCR-log & 50/50 & $0.095\pm0.338$ vs $1.060\pm0.843$ & $-7.51$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & DAG F1 $\uparrow$ & MPC vs ASPCR-log & 50/50 & $0.998\pm0.016$ vs $0.866\pm0.110$ & $8.42$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & DAG F1 $\uparrow$ & OptABA-PC vs ASPCR-log & 50/50 & $0.991\pm0.030$ vs $0.866\pm0.110$ & $7.78$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & DAG F1 $\uparrow$ & ABA-PC vs ASPCR-log & 50/50 & $0.989\pm0.039$ vs $0.866\pm0.110$ & $7.50$ & $<0.001$\,*** & $<0.001$\,***\\
+Earthquake (5) & Time (s) $\downarrow$ & MPC vs FGS & 50/50 & $0.015\pm0.003$ vs $0.165\pm0.012$ & $-83.38$ & $<0.001$\,*** & $<0.001$\,***\\
+Survey (6) & CPDAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/50 & $3.680\pm1.491$ vs $4.350\pm1.094$ & $-2.56$ & $0.012$\,* & $0.012$\,*\\
+Survey (6) & CPDAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/50 & $0.815\pm0.088$ vs $0.597\pm0.127$ & $9.96$ & $<0.001$\,*** & $<0.001$\,***\\
+Survey (6) & DAG SHD $\downarrow$ & OptABA-PC vs MPC & 50/50 & $3.767\pm0.906$ vs $4.700\pm2.043$ & $-2.95$ & $0.004$\,** & $0.004$\,**\\
+Survey (6) & DAG F1 $\uparrow$ & OptABA-PC vs ABA-PC & 50/50 & $0.482\pm0.140$ vs $0.340\pm0.103$ & $5.75$ & $<0.001$\,*** & $<0.001$\,***\\
+Survey (6) & Time (s) $\downarrow$ & MPC vs FGS & 50/50 & $0.016\pm0.004$ vs $0.149\pm0.025$ & $-36.56$ & $<0.001$\,*** & $<0.001$\,***\\
+Asia (8) & CPDAG SHD $\downarrow$ & MPC vs FGS & 50/50 & $3.820\pm0.438$ vs $12.14\pm0.572$ & $-81.71$ & $<0.001$\,*** & $<0.001$\,***\\
+Asia (8) & CPDAG SHD $\downarrow$ & OptABA-PC vs FGS & 49/50 & $3.867\pm0.602$ vs $12.14\pm0.572$ & $-70.09$ & $<0.001$\,*** & $<0.001$\,***\\
+Asia (8) & CPDAG F1 $\uparrow$ & OptABA-PC vs MPC & 49/50 & $0.536\pm0.062$ vs $0.483\pm0.045$ & $4.87$ & $<0.001$\,*** & $<0.001$\,***\\
+Asia (8) & DAG SHD $\downarrow$ & OptABA-PC vs MPC & 49/50 & $4.510\pm0.591$ vs $6.000\pm0.000$ & $-17.66$ & $<0.001$\,*** & $<0.001$\,***\\
+Asia (8) & DAG F1 $\uparrow$ & OptABA-PC vs MPC & 49/50 & $0.665\pm0.009$ vs $0.400\pm0.000$ & $203.85$ & $<0.001$\,*** & $<0.001$\,***\\
+Asia (8) & Time (s) $\downarrow$ & MPC vs FGS & 50/50 & $0.038\pm0.005$ vs $0.189\pm0.016$ & $-64.90$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (5) & CPDAG SHD $\downarrow$ & ABA-PC vs MPC & 50/50 & $2.865\pm2.004$ vs $4.800\pm3.452$ & $-3.43$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (5) & CPDAG SHD $\downarrow$ & OptABA-PC vs MPC & 50/50 & $2.865\pm2.004$ vs $4.800\pm3.452$ & $-3.43$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (5) & CPDAG F1 $\uparrow$ & MPC vs ASPCR-log & 50/50 & $0.543\pm0.175$ vs $0.285\pm0.171$ & $7.44$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (5) & CPDAG F1 $\uparrow$ & ABA-PC vs ASPCR-log & 50/50 & $0.488\pm0.163$ vs $0.285\pm0.171$ & $6.08$ & $<0.001$\,*** & $<0.001$\,***\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\tiny
+\setlength{\tabcolsep}{2pt}
+\caption{Welch tests for Table~\ref{tab:current-alpha001-nowrong-noweight-preview-comparison}. Each row compares a bolded top entry with the next non-bold method in that dataset--metric ranking. Significance symbols are based on Benjamini--Hochberg corrected p-values within each dataset--metric family and are printed as superscripts on the corresponding bold table entries. Continued, part 2 of 2.}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllrcrcc}
+\toprule
+Dataset & Metric & Methods & $n$ & Means $\pm$ Std & $t$ & $p$ & $p_{\mathrm{BH}}$\\
+\midrule
+ER (5) & CPDAG F1 $\uparrow$ & OptABA-PC vs ASPCR-log & 50/50 & $0.488\pm0.163$ vs $0.285\pm0.171$ & $6.08$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (5) & DAG SHD $\downarrow$ & ABA-PC vs MPC & 50/50 & $5.229\pm0.270$ vs $7.060\pm2.351$ & $-5.47$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (5) & DAG SHD $\downarrow$ & OptABA-PC vs MPC & 50/50 & $5.229\pm0.270$ vs $7.060\pm2.351$ & $-5.47$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (5) & DAG F1 $\uparrow$ & ABA-PC vs MPC & 50/50 & $0.490\pm0.028$ vs $0.358\pm0.280$ & $3.32$ & $0.002$\,** & $0.002$\,**\\
+ER (5) & DAG F1 $\uparrow$ & OptABA-PC vs MPC & 50/50 & $0.490\pm0.028$ vs $0.358\pm0.280$ & $3.32$ & $0.002$\,** & $0.002$\,**\\
+ER (5) & Time (s) $\downarrow$ & MPC vs OptABA-PC & 50/50 & $0.016\pm0.002$ vs $1.731\pm1.083$ & $-11.21$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (8) & CPDAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/47 & $7.940\pm3.139$ vs $10.55\pm2.992$ & $-4.20$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (8) & CPDAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/47 & $0.637\pm0.140$ vs $0.556\pm0.132$ & $2.93$ & $0.004$\,** & $0.004$\,**\\
+ER (8) & DAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/47 & $7.520\pm2.288$ vs $9.746\pm2.602$ & $-4.46$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (8) & DAG F1 $\uparrow$ & MPC vs ABA-PC & 50/42 & $0.613\pm0.139$ vs $0.445\pm0.151$ & $5.52$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (8) & DAG F1 $\uparrow$ & OptABA-PC vs ABA-PC & 47/42 & $0.564\pm0.127$ vs $0.445\pm0.151$ & $4.02$ & $<0.001$\,*** & $<0.001$\,***\\
+ER (8) & Time (s) $\downarrow$ & MPC vs ABA-PC & 50/50 & $0.104\pm0.069$ vs $124.3\pm39.49$ & $-22.25$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (5) & CPDAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/50 & $1.400\pm1.678$ vs $3.575\pm1.379$ & $-7.08$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (5) & CPDAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/50 & $0.859\pm0.131$ vs $0.663\pm0.144$ & $7.13$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (5) & DAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/50 & $1.680\pm1.133$ vs $3.842\pm1.418$ & $-8.42$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (5) & DAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/50 & $0.843\pm0.126$ vs $0.580\pm0.140$ & $9.89$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (5) & Time (s) $\downarrow$ & MPC vs OptABA-PC & 50/50 & $0.015\pm0.003$ vs $2.264\pm1.558$ & $-10.21$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (8) & CPDAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/50 & $4.940\pm1.932$ vs $7.962\pm3.033$ & $-5.94$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (8) & CPDAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/50 & $0.726\pm0.115$ vs $0.646\pm0.115$ & $3.46$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (8) & DAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/50 & $5.400\pm1.841$ vs $7.679\pm2.639$ & $-5.01$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (8) & DAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/50 & $0.708\pm0.129$ vs $0.613\pm0.127$ & $3.69$ & $<0.001$\,*** & $<0.001$\,***\\
+SF (8) & Time (s) $\downarrow$ & MPC vs ABA-PC & 50/50 & $0.056\pm0.019$ vs $87.85\pm48.48$ & $-12.81$ & $<0.001$\,*** & $<0.001$\,***\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+

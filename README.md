@@ -1,61 +1,109 @@
-# Optimal Correction Sets for Argumentative Causal Discovery
+# OptABA-PC: optimal repair for contestable causal discovery
 
-This `MCS` branch of ArgCausalDisco contributes an optimal-MCS version of Causal ABA: instead of ABA-PC's heuristic "release low-ranked facts until the encoding becomes satisfiable", this branch treats fact release as a repair problem and computes an optimal correction set (optimal MCS) with weak constraints.
-In the manuscript this solver-backed variant is the OptABA-PC method.
+OptABA-PC is a solver-backed extension of Causal Assumption-based Argumentation
+for finite-sample causal discovery. Conditional-independence (CI) tests can be
+mutually inconsistent, so no DAG satisfies them all. ABA-PC restores coherence
+by releasing facts in a fixed strength order. OptABA-PC instead makes the
+released facts an explicit minimum-cost correction set and computes an optimum
+with Answer Set Programming (ASP) weak constraints.
 
-## Where the MCS logic lives
+The implementation provides:
 
-- `scripts/wc_opt_strategy_sweep.py` is the experiment driver used to generate the archived runs in [`results/final_mcs_experiments`](results/final_mcs_experiments).
-- `causalaba_mus.py` implements the proposed optimum-MCS path through `CausalABA_WC(...)`. It builds the guarded `mus(i)` program and optimizes the weight of released CI facts with clingo weak constraints.
-- `causalaba.py` is the original implementation of Causal ABA.
-- `causalaba_increm.py` is the more efficient engine behind the ABA-PC baselines compared against the optimum-MCS solver in the presented results.
-- The archived `final_mcs_experiments` artifacts are produced by `scripts/wc_opt_strategy_sweep.py` invoking `causalaba_mus.CausalABA_WC(...)`.
+- an incremental Bayes-ball encoding of CI constraints over DAGs;
+- optimal weighted CI-fact repair with a stable-model/MCS projection;
+- the retained and released fact sets and every compatible CPDAG/DAG;
+- executable checks of the paper's formal properties;
+- matched ABA-PC, MPC, FGS, and DAG-restricted ASPCR experiments;
+- compatibility, contestability, statistical-analysis, and table pipelines.
 
-## Environment
+The central guarantee is about evidence correspondence: every graph returned by
+ABA-PC or OptABA-PC satisfies every CI fact retained by its repair. OptABA-PC
+additionally minimizes total release cost. MPC and FGS are graph-estimation
+references; ASPCR-DAG minimizes a different graph--test disagreement objective.
 
-The code was tested with Python 3.10.
-Install the Python dependencies from the repository root:
+## Repository map
 
-```bash
-pip install -r requirements.txt
-```
+| Path | Purpose |
+| --- | --- |
+| `causalaba_increm.py` | Incremental Bayes-ball Causal ABA program and ABA-PC repair |
+| `causalaba_mus.py` | OptABA-PC weak-constraint objective and optimal correction sets |
+| `scripts/wc_opt_strategy_sweep.py` | Matched ABA-PC/OptABA-PC experiments |
+| `scripts/run_matched_baseline_experiments.py` | MPC, FGS, and ASPCR-DAG experiments |
+| `cd_algorithms/run_aspcr_csvdata.R` | Auditable DAG-restricted ASPCR wrapper |
+| `verify_formal_properties.py` | Root entry point for the dependency-free formal checks |
+| `scripts/verify_formal_properties.py` | Formal-property checker implementation |
+| `scripts/validate_matched_aspcr_results.py` | Per-seed ASPCR graph/fact/provenance validator |
+| `scripts/build_final_experiment_tables.py` | Final statistics, compatibility audit, and tables |
+| `scripts/run_contestability_experiments.py` | OptABA-PC hard-retention contestations |
+| `scripts/audit_mpc_test_enforcement.py` | MPC full-trace enforcement audit |
+| `scripts/run_aspcr_contestability.py` | ASPCR-DAG failed-fact sensitivity analysis |
+| `tests/` | Deterministic unit and pipeline tests |
+| `configs/paper_aaai2027.json` | Machine-readable final protocol and artefact versions |
+| `results/paper_aaai2027/` | Curated frozen evidence, derived outputs, and checksums |
 
-You need `clingo` on `PATH`.
-The published sweeps in `results/final_mcs_experiments` do not require `wasp`; that solver is only needed for separate MUS/MCS enumeration workflows.
+## Quick verification
 
-## How `results/final_mcs_experiments` was created
-
-Running `scripts/wc_opt_strategy_sweep.py` creates a timestamped directory under `results/` named `wc_sweep_*_<timestamp>/` containing:
-
-- `0.Config` with the resolved configuration
-- `summary.json` and `metric_ranks.json`
-- per-repetition folders `rep*/` with the generated facts and emitted `.lp` programs
-
-The directories now collected under [`results/final_mcs_experiments`](results/final_mcs_experiments) were created that way and then copied into this archive folder.
-
-### Exact archived commands
-
-The following commands reproduce the archived sweep setup.
-Defaults not shown on the bnlearn commands resolve to `--strategies bb --objectives lex --encodings inc,base --opt-modes optN --reifications mus`.
-
-```bash
-python scripts/wc_opt_strategy_sweep.py --reps 10 --seed 2026 --source bnlearn --bnlearn-dataset cancer --bn-data-path datasets --timeout-sec 120 --graph-eval-timeout 120 --no-condset-weight
-python scripts/wc_opt_strategy_sweep.py --reps 10 --seed 2026 --source bnlearn --bnlearn-dataset survey --bn-data-path datasets --timeout-sec 120 --graph-eval-timeout 120 --no-condset-weight
-python scripts/wc_opt_strategy_sweep.py --reps 10 --seed 2026 --source bnlearn --bnlearn-dataset asia --bn-data-path datasets --timeout-sec 120 --graph-eval-timeout 120 --no-condset-weight
-python scripts/wc_opt_strategy_sweep.py --reps 10 --seed 2026 --source bnlearn --bnlearn-dataset earthquake --bn-data-path datasets --timeout-sec 120 --graph-eval-timeout 120 --no-condset-weight
-python scripts/wc_opt_strategy_sweep.py --n-nodes 5 --seed 2026 --reps 10 --strategies bb --objectives lex --encodings inc,base --opt-modes optN --timeout-sec 120 --pct-wrong-facts 0.2 --notes "musonly optonly lexonly solve120 eval120 gsq noweight std worst" --graph-eval-timeout 120 --reif mus --no-condset-weight
-python scripts/wc_opt_strategy_sweep.py --n-nodes 8 --seed 2026 --reps 10 --strategies bb --objectives lex --encodings inc --opt-modes optN --timeout-sec 300 --pct-wrong-facts 0.2 --notes "musonly optonly lexonly solve120 eval 300 gsq noweight std worst" --graph-eval-timeout 120 --reif mus --no-condset-weight
-```
-
-
-## Recreate the paper table
-
-Once the run directories are present as children of [`results/final_mcs_experiments`](results/final_mcs_experiments), regenerate the LaTeX table with:
+Create the pinned Python environment and run the fast checks:
 
 ```bash
-python results/final_mcs_experiments/recreate_main_results_table.py
+conda env create -f environment.yml
+conda activate optaba-pc-repro
+python -m pytest -q tests
+python verify_formal_properties.py
+python scripts/validate_release_artifacts.py
 ```
 
-This writes [`results/final_mcs_experiments/main_results_table.tex`](results/final_mcs_experiments/main_results_table.tex).
-The table script expects the five directories used in the manuscript table: `cancer`, `survey`, `asia`, synthetic `ER (5)`, and synthetic `ER (8)`.
-The archived `earthquake` sweep is kept in the folder as an additional run, but it is not consumed by the table recreation script since no difference between methods are observed there (both perfect).
+The formal checker is dependency-free. It exhaustively compares the implemented
+Bayes-ball rules with independent active-path and Shachter references on 571
+labelled DAGs and 26,370 ordered queries, then checks stable-model projection,
+optimal MCS costs, private conflicts, hard retention, and exact contestation
+margins on the paper examples.
+
+## Final empirical protocol
+
+The primary study uses 50 seeds (2026--2075) and 5,000 observations per seed.
+Cancer, Earthquake, Survey, and Asia use the bundled bnlearn BIF networks.
+Synthetic ER and SF DAGs have five or eight nodes and one edge per node in the
+primary experiment; two-edge-per-node runs are a reported density-sensitivity
+analysis. ABA-PC, OptABA-PC, and MPC use the G-squared CI test at
+`alpha=0.01`. FGS uses SEM-BIC. ASPCR-DAG retains its published Bayesian
+log-weighted CI configuration on the same samples.
+
+ABA-PC and OptABA-PC receive identical CI facts and weights. Their runs use the
+incremental encoding, no conditioning-set weight multiplier, a 300-second solve
+limit, a separate 120-second compatible-graph evaluation limit, four clingo
+threads, branch-and-bound optimization, and `optN` enumeration.
+
+No injected fact corruption, Shapley-PC result, smoke run, 10-repetition run, or
+development `alpha=0.05` experiment belongs to the released evidence.
+
+## Reproducing the paper artefacts
+
+Detailed installation, external ASPCR setup, exact commands, expected partial
+evaluations, and table regeneration are in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
+The curated result index is in
+[`results/paper_aaai2027/README.md`](results/paper_aaai2027/README.md), and every
+released artefact is covered by the accompanying SHA-256 inventories.
+
+To rebuild the paper tables directly from the frozen evidence:
+
+```bash
+python scripts/build_final_experiment_tables.py \
+  --results-dir results/paper_aaai2027/frozen/results \
+  --mcs-results-dir results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked \
+  --out-dir results/paper_aaai2027/recomputed/tables
+```
+
+## Software and licence
+
+The final environment is CPU-only Python 3.12.1 with clingo 5.8.0. FGS requires
+OpenJDK 19 and `py-causal`; ASPCR-DAG requires R 4.1.2 and the separately
+distributed Hyttinen--Eberhardt--Järvisalo code package. Exact package versions
+are pinned in `environment.yml`, `requirements-repro.txt`, and
+`REPRODUCIBILITY.md`. Before rerunning FGS, install its wrapper after environment
+creation with `python -m pip install --no-deps -r requirements-fgs.txt`; the
+compatible Java bridge is already pinned in the main environment.
+
+Unless a file states otherwise, this repository is released under the Apache
+License 2.0. Third-party datasets and external implementations retain their own
+terms.

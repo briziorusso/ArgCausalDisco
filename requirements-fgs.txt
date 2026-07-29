@@ -1,0 +1,4 @@
+# pycausal 1.2.1 declares the obsolete distribution name `javabridge`.
+# Install this file with --no-deps after requirements-repro.txt; the compatible
+# `python-javabridge==4.0.4` module is already pinned there.
+pycausal==1.2.1
