@@ -1567,6 +1567,11 @@ def main() -> None:
         help="Skip baseline removal runs (causalaba + causalaba_increm) and only run the WC optimizations.",
     )
     parser.add_argument(
+        "--skip-base-baseline",
+        action="store_true",
+        help="Skip only the legacy non-incremental causalaba baseline; keep causalaba_increm and WC runs.",
+    )
+    parser.add_argument(
         "--skip-wc",
         action="store_true",
         help="Skip WC optimization sweeps and only run baselines (causalaba + causalaba_increm).",
@@ -2352,7 +2357,7 @@ def main() -> None:
             for _om in opt_modes:
                 if (rep, "causalaba_increm", _om) not in done_baseline:
                     pending_baseline_runs.append(("causalaba_increm", _om))
-                if (rep, "causalaba", _om) not in done_baseline:
+                if not args.skip_base_baseline and (rep, "causalaba", _om) not in done_baseline:
                     pending_baseline_runs.append(("causalaba", _om))
 
         pending_wc: list[tuple[str, str, str, str, str]] = []
@@ -3211,7 +3216,7 @@ def main() -> None:
                 )
 
         # Baseline non-incremental ABAPC removal (per opt_mode)
-        if not args.skip_baseline:
+        if not args.skip_baseline and not args.skip_base_baseline:
             for _om in opt_modes:
                 if (rep, "causalaba", _om) in done_baseline:
                     continue

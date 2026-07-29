@@ -1013,16 +1013,7 @@ def _run_paper_example_4nodes_search() -> None:
                     if cand.exists():
                         clingo_path = str(cand)
 
-                wasp_path = shutil.which("wasp")
-                if wasp_path is None:
-                    # Local WASP build used elsewhere in this repo.
-                    for cand in (
-                        Path("/vol/bitbucket/fr920/wasp/build/release/wasp"),
-                        Path("/vol/bitbucket/fr920/wasp_tarocco/build/release/wasp"),
-                    ):
-                        if cand.exists():
-                            wasp_path = str(cand)
-                            break
+                wasp_path = shutil.which("wasp") or os.environ.get("WASP_BIN")
 
                 if clingo_path is None or wasp_path is None:
                     missing = []
