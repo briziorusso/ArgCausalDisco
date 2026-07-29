@@ -2,3 +2,5 @@ results/paper_aaai2027/** -whitespace
 results export-ignore
 logs export-ignore
 causal-cmd.log export-ignore
+notebooks export-ignore
+encodings/test_lps/mock_three_var_manual export-ignore
