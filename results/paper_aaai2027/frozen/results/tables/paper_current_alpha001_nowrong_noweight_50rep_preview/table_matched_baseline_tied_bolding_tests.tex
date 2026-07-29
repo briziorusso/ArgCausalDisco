@@ -1,0 +1,34 @@
+\begin{table*}[t]
+\centering
+\tiny
+\setlength{\tabcolsep}{2pt}
+\caption{Non-significant best-vs-comparator Welch tests used to extend bolding in Table~\ref{tab:current-alpha001-nowrong-noweight-preview-comparison}. Significance symbols are based on Benjamini--Hochberg corrected p-values within each dataset--metric family ($^{***}p<0.001$, $^{**}p<0.01$, $^{*}p<0.05$, $^{.}p<0.1$).}
+\label{tab:current-alpha001-nowrong-noweight-preview-tied-tests}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllrcrcc}
+\toprule
+Dataset & Metric & Methods & $n$ & Means $\pm$ Std & $t$ & $p$ & $p_{\mathrm{BH}}$\\
+\midrule
+Cancer (5) & CPDAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/50 & $1.580\pm0.971$ vs $1.840\pm1.113$ & $-1.24$ & $0.216$\,ns & $0.216$\,ns\\
+Cancer (5) & CPDAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/50 & $0.661\pm0.202$ vs $0.576\pm0.259$ & $1.84$ & $0.069$\,. & $0.069$\,.\\
+Cancer (5) & DAG F1 $\uparrow$ & OptABA-PC vs ABA-PC & 50/50 & $0.563\pm0.262$ vs $0.483\pm0.223$ & $1.64$ & $0.103$\,ns & $0.103$\,ns\\
+Earthquake (5) & CPDAG SHD $\downarrow$ & OptABA-PC vs ABA-PC & 50/50 & $0.080\pm0.274$ vs $0.087\pm0.300$ & $-0.12$ & $0.908$\,ns & $0.908$\,ns\\
+Earthquake (5) & CPDAG SHD $\downarrow$ & OptABA-PC vs MPC & 50/50 & $0.080\pm0.274$ vs $0.200\pm0.728$ & $-1.09$ & $0.280$\,ns & $0.373$\,ns\\
+Earthquake (5) & CPDAG F1 $\uparrow$ & OptABA-PC vs ABA-PC & 50/50 & $0.991\pm0.030$ vs $0.991\pm0.033$ & $0.09$ & $0.925$\,ns & $1.000$\,ns\\
+Earthquake (5) & CPDAG F1 $\uparrow$ & OptABA-PC vs MPC & 50/50 & $0.991\pm0.030$ vs $0.991\pm0.030$ & $0.00$ & $1.000$\,ns & $1.000$\,ns\\
+Earthquake (5) & DAG SHD $\downarrow$ & MPC vs ABA-PC & 50/50 & $0.020\pm0.141$ vs $0.095\pm0.338$ & $-1.45$ & $0.153$\,ns & $0.173$\,ns\\
+Earthquake (5) & DAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/50 & $0.020\pm0.141$ vs $0.080\pm0.274$ & $-1.38$ & $0.173$\,ns & $0.173$\,ns\\
+Earthquake (5) & DAG F1 $\uparrow$ & MPC vs ABA-PC & 50/50 & $0.998\pm0.016$ vs $0.989\pm0.039$ & $1.45$ & $0.153$\,ns & $0.173$\,ns\\
+Earthquake (5) & DAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/50 & $0.998\pm0.016$ vs $0.991\pm0.030$ & $1.38$ & $0.173$\,ns & $0.173$\,ns\\
+Asia (8) & CPDAG SHD $\downarrow$ & MPC vs OptABA-PC & 50/49 & $3.820\pm0.438$ vs $3.867\pm0.602$ & $-0.45$ & $0.656$\,ns & $0.656$\,ns\\
+ER (5) & CPDAG SHD $\downarrow$ & ABA-PC vs OptABA-PC & 50/50 & $2.865\pm2.004$ vs $2.865\pm2.004$ & $0.00$ & $1.000$\,ns & $1.000$\,ns\\
+ER (5) & CPDAG F1 $\uparrow$ & MPC vs ABA-PC & 50/50 & $0.543\pm0.175$ vs $0.488\pm0.163$ & $1.62$ & $0.109$\,ns & $0.109$\,ns\\
+ER (5) & CPDAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/50 & $0.543\pm0.175$ vs $0.488\pm0.163$ & $1.62$ & $0.109$\,ns & $0.109$\,ns\\
+ER (5) & DAG SHD $\downarrow$ & ABA-PC vs OptABA-PC & 50/50 & $5.229\pm0.270$ vs $5.229\pm0.270$ & $0.00$ & $1.000$\,ns & $1.000$\,ns\\
+ER (5) & DAG F1 $\uparrow$ & ABA-PC vs OptABA-PC & 50/50 & $0.490\pm0.028$ vs $0.490\pm0.028$ & $0.00$ & $1.000$\,ns & $1.000$\,ns\\
+ER (8) & DAG F1 $\uparrow$ & MPC vs OptABA-PC & 50/47 & $0.613\pm0.139$ vs $0.564\pm0.127$ & $1.81$ & $0.073$\,. & $0.073$\,.\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+

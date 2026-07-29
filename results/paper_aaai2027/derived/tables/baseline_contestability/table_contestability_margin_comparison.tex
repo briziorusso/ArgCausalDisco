@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{Dataset-level comparison of forced-fact responses. Baselines are analyzable seeds; each target is one fact released by OptABA-PC or failed by ASPCR-DAG and made mandatory in a hard-retention re-solve. For OptABA-PC, each re-solve instantiates a user contestation and $\mu(f)$ empirically instantiates the proved contestability threshold. For ASPCR-DAG, each re-solve is a post-hoc sensitivity probe and $\mu_{\mathrm{ASP}}(f)$ is a sensitivity gap, not evidence that the method offers redress. Zero $\mu$/gap counts proved re-solves for which hard retention does not increase the optimum. The normalized quantities are $\mu(f)/w_f$ and $\mu_{\mathrm{ASP}}(f)/w_f$; $Q_1$ and $Q_3$ denote their first and third quartiles. The last column gives infeasible targets/timeouts. ASPCR-DAG uses its exhaustive native Bayesian log-weighted trace, whereas OptABA-PC uses the matched adaptive G$^2$ trace and corresponding release weights, so target counts and normalized values are not paired cross-method effect sizes.}
+\label{tab:contestability-margin-comparison}
+\begin{tabular}{llrrrrrl}
+\toprule
+Dataset & Method & Baselines & Targets & Proved & Zero $\mu$/gap & Normalized $\mu$/gap median [$Q_1,Q_3$] & Infeas./timeout \\
+\midrule
+Cancer (5) & OptABA-PC & 50 & 207 & 207 & 0/207 (0\%) & 0.297 [0.158,0.609] & 0/0 \\
+ & ASPCR-DAG & 50 & 959 & 959 & 0/959 (0\%) & 4.041 [1.615,7.946] & 0/0 \\
+\midrule
+Earthquake (5) & OptABA-PC & 50 & 4 & 4 & 0/4 (0\%) & 4.170 [1.628,6.332] & 0/0 \\
+ & ASPCR-DAG & 50 & 80 & 80 & 0/80 (0\%) & 3.625 [0.990,6.349] & 0/0 \\
+\midrule
+Survey (6) & OptABA-PC & 50 & 507 & 507 & 0/507 (0\%) & 0.517 [0.200,1.026] & 0/0 \\
+ & ASPCR-DAG & 50 & 2094 & 2094 & 0/2094 (0\%) & 2.376 [0.537,14.074] & 0/0 \\
+\midrule
+ER (5) & OptABA-PC & 50 & 0 & 0 & -- & -- & 0/0 \\
+\midrule
+SF (5) & OptABA-PC & 50 & 24 & 24 & 0/24 (0\%) & 0.734 [0.308,1.344] & 0/0 \\
+\bottomrule
+\end{tabular}
+\end{table*}

@@ -1,0 +1,55 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llccccc}
+\toprule
+Dataset & Method & CPDAG SHD $\downarrow$ & CPDAG F1 $\uparrow$ & DAG SHD $\downarrow$ & DAG F1 $\uparrow$ & Compat. CPDAGs $\downarrow$\\
+\midrule
+Cancer (5) & ABA-PC & $2.81\pm1.18$ & $0.522\pm0.214$ & $2.98\pm1.20$ & $0.483\pm0.223$ & $15.1\pm28.8$\\
+ & OptABA-PC & $\mathbf{1.84\pm1.11}^{***}$ & $\mathbf{0.576\pm0.259}^{*}$ & $\mathbf{1.89\pm1.14}^{***}$ & $\mathbf{0.563\pm0.262}^{*}$ & $\mathbf{1.0\pm0.0}^{***}$\\
+ & MPC & $1.58\pm0.97$ & $\mathbf{0.661\pm0.202}^{\dagger}$ & $1.70\pm1.01$ & $0.623\pm0.222$ & $0.0\pm0.0$\\
+ & FGS & $2.46\pm0.54^{\dagger\dagger\dagger}$ & $0.405\pm0.108^{\dagger\dagger\dagger}$ & $2.35\pm0.42^{\dagger}$ & $0.436\pm0.073^{\dagger\dagger}$ & --\\
+ & ASPCR-DAG & $2.24\pm0.56^{\dagger}$ & $0.490\pm0.123^{\dagger}$ & $2.34\pm0.89^{\dagger}$ & $0.462\pm0.225^{\dagger}$ & $0.0\pm0.0$\\
+\midrule
+Earthquake (5) & ABA-PC & $0.09\pm0.30$ & $0.991\pm0.033$ & $0.10\pm0.34$ & $0.989\pm0.039$ & $1.0\pm0.3$\\
+ & OptABA-PC & $0.08\pm0.27$ & $0.991\pm0.030$ & $0.08\pm0.27$ & $0.991\pm0.030$ & $1.0\pm0.0$\\
+ & MPC & $0.20\pm0.73$ & $0.991\pm0.030$ & $0.08\pm0.27$ & $0.991\pm0.030$ & $0.9\pm0.2$\\
+ & FGS & $2.48\pm0.61^{\dagger\dagger\dagger}$ & $0.474\pm0.033^{\dagger\dagger\dagger}$ & $2.47\pm0.59^{\dagger\dagger\dagger}$ & $0.476\pm0.029^{\dagger\dagger\dagger}$ & --\\
+ & ASPCR-DAG & $1.08\pm1.16^{\dagger\dagger\dagger}$ & $0.866\pm0.168^{\dagger\dagger\dagger}$ & $1.06\pm1.20^{\dagger\dagger\dagger}$ & $0.871\pm0.176^{\dagger\dagger\dagger}$ & $0.4\pm0.5$\\
+\midrule
+Survey (6) & ABA-PC & $7.14\pm1.39$ & $0.438\pm0.088$ & $6.73\pm1.39$ & $0.340\pm0.103$ & $1278.5\pm2807.2$\\
+ & OptABA-PC & $\mathbf{4.35\pm1.09}^{***}$ & $\mathbf{0.597\pm0.127}^{***}$ & $\mathbf{3.77\pm0.91}^{***}$ & $\mathbf{0.482\pm0.140}^{***}$ & $\mathbf{1.2\pm0.7}^{***}$\\
+ & MPC & $\mathbf{3.68\pm1.49}^{\dagger\dagger}$ & $\mathbf{0.815\pm0.088}^{\dagger\dagger\dagger}$ & $\mathbf{3.17\pm1.49}^{\dagger}_{38}$ & $0.528\pm0.242_{38}$ & $0.0\pm0.0$\\
+ & FGS & $8.20\pm0.73^{\dagger\dagger\dagger}$ & $0.257\pm0.085^{\dagger\dagger\dagger}$ & $7.28\pm0.87^{\dagger\dagger\dagger}$ & $0.194\pm0.076^{\dagger\dagger\dagger}$ & --\\
+ & ASPCR-DAG & $4.52\pm1.23$ & $0.496\pm0.154^{\dagger\dagger}$ & $4.16\pm1.23^{\dagger}$ & $0.385\pm0.220^{\dagger\dagger}$ & $0.0\pm0.0$\\
+\midrule
+Asia (8) & ABA-PC & $14.4\pm3.26$ & $0.224\pm0.073$ & $14.0\pm2.81$ & $0.310\pm0.095$ & $10822.7\pm7112.3$\\
+ & OptABA-PC & $\mathbf{3.87\pm0.60}^{***}_{49}$ & $\mathbf{0.536\pm0.062}^{***}_{49}$ & $\mathbf{4.51\pm0.59}^{***}_{49}$ & $\mathbf{0.665\pm0.009}^{***}_{49}$ & $\mathbf{1.2\pm0.4}^{***}_{49}$\\
+ & MPC & $3.82\pm0.44$ & $0.483\pm0.045^{\dagger\dagger\dagger}$ & $\mathbf{3.92\pm0.25}^{\dagger\dagger\dagger}$ & $0.620\pm0.013^{\dagger\dagger\dagger}$ & $0.0\pm0.0$\\
+ & FGS & $12.1\pm0.57^{\dagger\dagger\dagger}$ & $0.244\pm0.040^{\dagger\dagger\dagger}$ & $11.8\pm0.72^{\dagger\dagger\dagger}$ & $0.176\pm0.026^{\dagger\dagger\dagger}$ & --\\
+\midrule
+ER (5) & ABA-PC & $2.88\pm2.01$ & $0.562\pm0.224$ & $3.17\pm1.73$ & $0.567\pm0.215$ & $8.2\pm13.0$\\
+ & OptABA-PC & $\mathbf{2.09\pm1.71}^{**}$ & $\mathbf{0.589\pm0.213}^{*}$ & $\mathbf{2.49\pm1.35}^{***}$ & $\mathbf{0.620\pm0.188}^{**}$ & $\mathbf{3.0\pm3.4}^{***}$\\
+ & MPC & $\mathbf{0.96\pm1.32}^{\dagger\dagger\dagger}$ & $\mathbf{0.712\pm0.251}^{\dagger\dagger\dagger}$ & $\mathbf{1.23\pm0.94}^{\dagger\dagger\dagger}$ & $\mathbf{0.768\pm0.177}^{\dagger\dagger\dagger}$ & $0.2\pm0.4$\\
+ & FGS & $5.26\pm1.38^{\dagger\dagger\dagger}$ & $0.246\pm0.204^{\dagger\dagger\dagger}$ & $5.07\pm1.38^{\dagger\dagger\dagger}$ & $0.244\pm0.163^{\dagger\dagger\dagger}$ & --\\
+\midrule
+ER (8) & ABA-PC & $8.19\pm4.21$ & $0.478\pm0.179$ & $7.99\pm3.77$ & $0.496\pm0.181$ & $3840.0\pm5377.9$\\
+ & OptABA-PC & $\mathbf{3.53\pm1.89}^{***}$ & $\mathbf{0.627\pm0.167}^{***}$ & $\mathbf{3.85\pm1.58}^{***}$ & $\mathbf{0.650\pm0.137}^{***}$ & $\mathbf{4.7\pm9.5}^{***}$\\
+ & MPC & $\mathbf{2.12\pm1.79}^{\dagger\dagger\dagger}$ & $\mathbf{0.704\pm0.137}^{\dagger\dagger}$ & $\mathbf{2.38\pm1.21}^{\dagger\dagger\dagger}_{49}$ & $\mathbf{0.727\pm0.140}^{\dagger\dagger}_{49}$ & $0.1\pm0.2$\\
+ & FGS & $11.3\pm1.69^{\dagger\dagger\dagger}$ & $0.122\pm0.122^{\dagger\dagger\dagger}$ & $11.0\pm1.83^{\dagger\dagger\dagger}$ & $0.119\pm0.109^{\dagger\dagger\dagger}$ & --\\
+\midrule
+SF (5) & ABA-PC & $2.77\pm2.10$ & $0.670\pm0.176$ & $3.07\pm1.94$ & $0.594\pm0.213$ & $88.4\pm202.7$\\
+ & OptABA-PC & $\mathbf{2.03\pm1.97}^{***}$ & $\mathbf{0.737\pm0.148}^{**}$ & $\mathbf{2.52\pm1.89}^{**}$ & $\mathbf{0.650\pm0.197}^{**}$ & $\mathbf{85.1\pm203.9}^{**}$\\
+ & MPC & $\mathbf{0.34\pm0.80}^{\dagger\dagger\dagger}$ & $\mathbf{0.874\pm0.173}^{\dagger\dagger\dagger}$ & $\mathbf{0.48\pm0.58}^{\dagger\dagger\dagger}$ & $\mathbf{0.893\pm0.120}^{\dagger\dagger\dagger}$ & $0.3\pm0.5$\\
+ & FGS & $4.94\pm1.19^{\dagger\dagger\dagger}_{48}$ & $0.121\pm0.173^{\dagger\dagger\dagger}_{48}$ & $4.73\pm1.25^{\dagger\dagger\dagger}_{48}$ & $0.149\pm0.129^{\dagger\dagger\dagger}_{48}$ & --\\
+\midrule
+SF (8) & ABA-PC & $8.15\pm3.77$ & $0.498\pm0.154$ & $8.14\pm3.46$ & $0.481\pm0.166$ & $3108.1\pm4287.4$\\
+ & OptABA-PC & $\mathbf{4.42\pm2.05}^{***}$ & $\mathbf{0.629\pm0.129}^{***}$ & $\mathbf{4.76\pm1.97}^{***}$ & $\mathbf{0.601\pm0.146}^{***}$ & $\mathbf{170.3\pm1023.2}^{***}$\\
+ & MPC & $\mathbf{1.58\pm1.49}^{\dagger\dagger\dagger}$ & $\mathbf{0.774\pm0.163}^{\dagger\dagger\dagger}$ & $\mathbf{1.88\pm1.23}^{\dagger\dagger\dagger}$ & $\mathbf{0.773\pm0.143}^{\dagger\dagger\dagger}$ & $0.0\pm0.2$\\
+ & FGS & $9.16\pm1.42^{\dagger\dagger\dagger}$ & $0.083\pm0.114^{\dagger\dagger\dagger}$ & $8.88\pm1.46^{\dagger\dagger\dagger}$ & $0.081\pm0.087^{\dagger\dagger\dagger}$ & --\\
+\bottomrule
+\end{tabular}
+\caption{Graph reconstruction and CI-compatible equivalence classes on the matched primary experiments (mean $\pm$ standard deviation over seeds). ABA-PC and OptABA-PC CPDAG values average over every equivalence class admitted by the selected repair; MPC, FGS, and ASPCR-DAG return one graph per run. DAG columns average reconstruction over all structurally consistent extensions of those CPDAGs, exposing orientation quality within each represented class. The final column counts CPDAGs satisfying the enforced evidence: retained post-repair facts for ABA-PC/OptABA-PC and every recorded test for MPC/ASPCR-DAG; it is undefined for score-based FGS (`--'). Stars identify the significant ABA-PC--OptABA-PC winner. Daggers on an external method indicate a paired difference from OptABA-PC; bold daggers favour that external method, whereas unbold daggers favour OptABA-PC. One, two, and three symbols denote BH-adjusted $p<0.05$, $0.01$, and $0.001$; a subscript gives paired $n<50$.}
+\label{tab:final-graph-metrics}
+\end{table*}

@@ -1,0 +1,148 @@
+{
+  "generated_at": "2026-07-15T15:15:20",
+  "methods": [
+    {
+      "enc": "inc",
+      "id": "inc|-|baseline|optN|-",
+      "obj": "-",
+      "opt_mode": "optN",
+      "reif": "-",
+      "strategy": "baseline"
+    },
+    {
+      "enc": "inc",
+      "id": "inc|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    }
+  ],
+  "metric_defs": [
+    {
+      "higher_is_better": false,
+      "name": "timeR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "timeBSR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "solveR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "toR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "nATR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "wATR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "nDR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "shdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "F1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "adjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "ahR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "factR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "cshdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cF1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cadjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cahR"
+    }
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "ranks_avg": {
+    "inc|-|baseline|optN|-": {
+      "F1R": 1.8823529411764706,
+      "adjR": 1.8823529411764706,
+      "ahR": 1.8823529411764706,
+      "cF1R": 1.8823529411764706,
+      "cadjR": 1.8823529411764706,
+      "cahR": 1.7352941176470589,
+      "cshdR": 1.8235294117647058,
+      "factR": 1.411764705882353,
+      "nATR": 2.0,
+      "nDR": 1.8235294117647058,
+      "shdR": 1.9411764705882353,
+      "solveR": 1.0,
+      "timeBSR": 1.0,
+      "timeR": 1.1176470588235294,
+      "toR": 1.1470588235294117,
+      "wATR": 2.0
+    },
+    "inc|lex|bb|optN|mus": {
+      "F1R": 1.1176470588235294,
+      "adjR": 1.1176470588235294,
+      "ahR": 1.1176470588235294,
+      "cF1R": 1.1176470588235294,
+      "cadjR": 1.1176470588235294,
+      "cahR": 1.2647058823529411,
+      "cshdR": 1.1764705882352942,
+      "factR": 1.588235294117647,
+      "nATR": 1.0,
+      "nDR": 1.1764705882352942,
+      "shdR": 1.0588235294117647,
+      "solveR": 2.0,
+      "timeBSR": 2.0,
+      "timeR": 1.8823529411764706,
+      "toR": 1.8529411764705883,
+      "wATR": 1.0
+    }
+  },
+  "reps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "results_dir": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked/wc_sweep_8_2026_er_sf_alpha001_nowrong_noweight_seed2059_2075_20260715_132258"
+}

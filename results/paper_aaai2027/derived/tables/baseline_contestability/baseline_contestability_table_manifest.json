@@ -1,0 +1,50 @@
+{
+  "allow_partial_aspcr": false,
+  "aspcr_status": "complete",
+  "created_at_utc": "2026-07-28T14:47:01.395383+00:00",
+  "inputs": {
+    "aspcr": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/aspcr_contestability_summary.csv",
+      "sha256": "722830bbf52297bc86a2ac0a31cfdc16d8c0908aa9e695d293b367509149f873"
+    },
+    "aspcr_challenges": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/aspcr_contestability_challenges.csv",
+      "sha256": "e1a68d28725b91667ca749add80c4ff83dcfbcabf07c5767be0dc4ec55621ea0"
+    },
+    "mpc": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_enforcement_summary.csv",
+      "sha256": "4bd62b00c1f09c242ff59017f3b58928e8e3e860130cfe97534045e87e1e0a82"
+    },
+    "optaba": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_current_alpha001_nowrong_noweight_50rep_preview/contestability_dataset_summary.csv",
+      "sha256": "808796449543ef67d4acb6c58745d3d6ce99d0d66c8ab795659bb48330ff6efe"
+    },
+    "optaba_challenges": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_current_alpha001_nowrong_noweight_50rep_preview/contestability_challenges.csv",
+      "sha256": "191be8ceb92df4103d2986401fb652eaa4d8780a06a548a7ab2e217cc329f28a"
+    },
+    "optaba_manifest": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_current_alpha001_nowrong_noweight_50rep_preview/contestability_manifest.json",
+      "sha256": "d0f5d637a0384616f733f0d4c04d86bbb55822c65a04058c81e8e7c233380823"
+    }
+  },
+  "outputs": {
+    "abapc_summary": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/abapc_optimality_summary.csv",
+      "sha256": "2bf71cdcd4e2f3b45b81cc5cebc0e66276371bcf2e3022f00f66becb94706e9c"
+    },
+    "mpc_table": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/table_mpc_enforcement_gap.tex",
+      "sha256": "06bd6ebacaf4039e204d2935c6f60a47e884826a45fb07655853f1b080cc5f51"
+    },
+    "overview_table": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/table_contestability_method_overview.tex",
+      "sha256": "3c6f87a7948b5941ca8b5318be849ceb94596679751b9ddf1358d03677419a93"
+    },
+    "repair_table": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/table_contestability_margin_comparison.tex",
+      "sha256": "2f98d1ca6084d78ddd0a13025fc664f143a199bf6b02cedf9a55fc5900f3dc1f"
+    }
+  },
+  "script": "./scripts/build_baseline_contestability_tables.py"
+}

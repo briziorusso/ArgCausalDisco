@@ -1,0 +1,2462 @@
+{
+  "already_complete": 3133,
+  "command": [
+    "python",
+    "scripts/run_aspcr_contestability.py",
+    "--workers",
+    "4",
+    "--timeout-sec",
+    "300"
+  ],
+  "counts": {
+    "challenge_rows": 3133,
+    "infeasible": 0,
+    "proved_challenges": 3133,
+    "target_enforcement_failures": 0,
+    "timeouts": 0,
+    "zero_margin_challenges": 0
+  },
+  "datasets": [
+    "cancer",
+    "earthquake",
+    "survey"
+  ],
+  "expected_challenges": 3133,
+  "inputs": {
+    "artifact_dir": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results",
+    "artifacts": [
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2026_constraints.csv",
+          "sha256": "a4e31f0bb0a76556cd5a2ff02c9aa11476864cb0b25ae871056ca9b3f1431d23"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2026_diagnostics.csv",
+          "sha256": "5bffc274cd3bc11ba46fe6dcd6f33277506547dc7c421e767c5594287187a4f8"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2026_constraints.lp",
+          "sha256": "2e9c4f19c665cc791c7c3e53c6ca255834bbe07ecce3023fa1e7575c135677b8"
+        },
+        "seed": 2026
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2027_constraints.csv",
+          "sha256": "bc5585a40bc07fefcafb34c8890141150d663a1fcef1a1b88b8c2fc88af832c6"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2027_diagnostics.csv",
+          "sha256": "5d5085aef06a38b7aa6e932997071f58269d358be107b9abb83ac0aba27d64ee"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2027_constraints.lp",
+          "sha256": "b58e8e7346557e61ce4e746a927d418a5c7afbefc7503c96169641214ddc3ac1"
+        },
+        "seed": 2027
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2028_constraints.csv",
+          "sha256": "4dcca63fcb5559607a384563ea5919bc790225292bd4bf0064548812c33c13e5"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2028_diagnostics.csv",
+          "sha256": "334bd317589eb88adc408e24b02972e668f5fd4be32ed5c27c4b12fa97ea0a3b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2028_constraints.lp",
+          "sha256": "5a243ddb695dff3501e75bb46a4c7af53f6d90e899f49b2fafe92643ee8ace28"
+        },
+        "seed": 2028
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2029_constraints.csv",
+          "sha256": "3f99488171fc0920d7824aba4b6681bb7ddd81abae8101ec73646451f9447b8e"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2029_diagnostics.csv",
+          "sha256": "ceb4c9d26c9e5cb27049446c1fe33c84eaaaf248183724b7398218816007a531"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2029_constraints.lp",
+          "sha256": "e791131e8dc7146a62830ffa0d4a61b0149693bd7a63ddc0540e07c92cde5499"
+        },
+        "seed": 2029
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2030_constraints.csv",
+          "sha256": "e8ae3513dc57f46037594daf499ed4391a9f868b899a2b5499a7e1bf3bd905a6"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2030_diagnostics.csv",
+          "sha256": "a8861e1e97d5e08a841f256755d1b75085fe9cc957e431bda34862670658dbc8"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2030_constraints.lp",
+          "sha256": "ff15840548268574dd9ae0fd61cc756c492ff3c63e20d81f33791f48d127b721"
+        },
+        "seed": 2030
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2031_constraints.csv",
+          "sha256": "80e4a0e2ba2781d4340bc484c3f29850f91727e961b8a1b5c6f164bacdbaf781"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2031_diagnostics.csv",
+          "sha256": "d86eb383573f48517ffdf750eb1910806be7c17a9b691fa590b7379f025f1c8f"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2031_constraints.lp",
+          "sha256": "cc3b9af9603c0f852667f52b0cbc7e1e224e8763e7688efc2e92630e58de3cfe"
+        },
+        "seed": 2031
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2032_constraints.csv",
+          "sha256": "e30eb1d186a11f41425822f5838cebc6d5c3889e2303d1a8cf6136c0c2e20cf8"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2032_diagnostics.csv",
+          "sha256": "8b6b6e3e7e24a8d2f4d771f83339db9f95a8f922ac1d5be55b40078657c380ed"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2032_constraints.lp",
+          "sha256": "a98e6926170152b59fb41bc7bb23f0d7e60470dfc4d49bfafe51f4e579fd4f57"
+        },
+        "seed": 2032
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2033_constraints.csv",
+          "sha256": "ad2b9fae57782d61e89fb72be4870e7c499e0872ac088c6fadf6706cc9a881d3"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2033_diagnostics.csv",
+          "sha256": "adab123f181772bd1211348638ba5e665e623e9636f1acac0fefe631ecdf5be6"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2033_constraints.lp",
+          "sha256": "78b57ca7ccc1fcc4f0e4874005d9bd37bde005cd768bb9c1d2b7ae253d5f422c"
+        },
+        "seed": 2033
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2034_constraints.csv",
+          "sha256": "3eba288116e0d73e2ff7865b1e295f13d2d9bb18823f69e76488d2cca88c6b14"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2034_diagnostics.csv",
+          "sha256": "8b20a9a7f792555b57bd214316ad74f4e1a233344d2f5b58953c37f9092778a7"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2034_constraints.lp",
+          "sha256": "8a18b240660417b9e725bd315f8000ac59792df2d97c6d19d5197613710b5e19"
+        },
+        "seed": 2034
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2035_constraints.csv",
+          "sha256": "124cbf75cc8b5dddcbe71f87eee66014f24a8356f7420512cf951aaf6f6f921a"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2035_diagnostics.csv",
+          "sha256": "d77424591def853fbeacfa59511667178bd207f914b0408ee7ad87e824de3a86"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2035_constraints.lp",
+          "sha256": "02892591b02e8e68d7acb3443ad4bef7dfd0ea159cc63e25a9328c5ce2680a26"
+        },
+        "seed": 2035
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2036_constraints.csv",
+          "sha256": "20684530c14b8f8746ee343baceeaa11c37f8f995c2c903cff23cceb1a546939"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2036_diagnostics.csv",
+          "sha256": "f21bc9e0cb23b6854550b80e27b7f36e554ff6e80eeb76f356eac0b3d68f5e1b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2036_constraints.lp",
+          "sha256": "34ac19481824452e944ff242637f79d1d5988510fe4ccb1efa07e1815821a327"
+        },
+        "seed": 2036
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2037_constraints.csv",
+          "sha256": "056b0b527bfb626ddfd2ac181908c99048af1e90c478b78568157dc36a094399"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2037_diagnostics.csv",
+          "sha256": "aa2d6e29e1c0a8bfdb9c99009db2e2e59b726719bea274329ed600180646937c"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2037_constraints.lp",
+          "sha256": "b8d2c27353d10810c38e0ec11b385c85ff61f5af39edd0acaea46414eda46d5e"
+        },
+        "seed": 2037
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2038_constraints.csv",
+          "sha256": "628ecfdcd207b588dfcd8b1c6b915aa6a16eeb67ee86243cbb4ad10f3c00125e"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2038_diagnostics.csv",
+          "sha256": "6bfa92ee0f383ff58d0c5bfa43e8342a67c9cd52e65b92beaaf033ec3dc96b4a"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2038_constraints.lp",
+          "sha256": "0fdd2c8dad36d12184a0317910be674de54d3c2d2a240c0f5923a4116dbef80a"
+        },
+        "seed": 2038
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2039_constraints.csv",
+          "sha256": "4bb709238e356c866a9a86540bc67524ecc2ce1fd85af16a248e5873557656d1"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2039_diagnostics.csv",
+          "sha256": "07ac08bcf9402ee2c44529b55f592d05cf25e4069c80c6664a264649a2f50c8a"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2039_constraints.lp",
+          "sha256": "89d0b3bb79d95934c14df68e6050d31d04867022c8b5c5df232414bbd848d22d"
+        },
+        "seed": 2039
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2040_constraints.csv",
+          "sha256": "6e45b2930e77748410ea56511726cb8d2ac31e9c07eece22e379a643266a2156"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2040_diagnostics.csv",
+          "sha256": "2fb93f85800c2b03bb670fb4d561489cd98f134de759dfaa9c17d188445110dd"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2040_constraints.lp",
+          "sha256": "f4f49055f4a5db4c8062c7c5d9334a202788822bfe50eb5acb57c1bda5cfe275"
+        },
+        "seed": 2040
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2041_constraints.csv",
+          "sha256": "c87d1a12ca232b86e398c65a6e4dab5dee1c734c2979ee15a08a4635b274ff47"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2041_diagnostics.csv",
+          "sha256": "087a3a03d44b8d584bb6841cfdd36e35b675ab7e6a0670b75a179aa60a525d9f"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2041_constraints.lp",
+          "sha256": "7a384dd911e44da639ad4bc42012c27656bddcdbe7c5772add3f3147b3ab0b22"
+        },
+        "seed": 2041
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2042_constraints.csv",
+          "sha256": "daa235dd74b52e3247c196165b4235acef5cd9ac24fd1130dfb419c9b77c7ae4"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2042_diagnostics.csv",
+          "sha256": "df071a58937724377ccd8a98613bdacd1ffc7b836b75ca64a91506e11c293bc1"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2042_constraints.lp",
+          "sha256": "a6e61ebb5da47e711742a8a3b0c2d80575915514a3d579a837eb206f04fa367a"
+        },
+        "seed": 2042
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2043_constraints.csv",
+          "sha256": "58fc37595fc232312671f52faffe2df854996ca88b423b914fa0759f5171aa6c"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2043_diagnostics.csv",
+          "sha256": "f5930eaf0130ba3cb1884d7d5bd816a9de9fd21da8687ea5ee068c1c8af2a2d0"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2043_constraints.lp",
+          "sha256": "b8ff6f4ecb69038ee284763568c22e82447d9efcf2f60c85dabbf716c9ed3fa2"
+        },
+        "seed": 2043
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2044_constraints.csv",
+          "sha256": "7b7b8e0ed5322a2581c9ddd26683924aef6281253faf830d03cf299291f8e6f9"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2044_diagnostics.csv",
+          "sha256": "56b2bee95b687ad48133459ab8491a0808950fa383b0c99ec2b4eed6c86cccb3"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2044_constraints.lp",
+          "sha256": "a91e0fe9022c4efa53dfa8d95c87f8c0ee248cd8d6bf6a696f06b614acedb5e5"
+        },
+        "seed": 2044
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2045_constraints.csv",
+          "sha256": "8c53f5607024c16cc05129b15255f3d8e9b43a5297d0b65cf62e8ee460284bf9"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2045_diagnostics.csv",
+          "sha256": "655dce5fc383a78a89634adfa711a3053956129ec2d1fee5367a18e6f5cbe4b5"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2045_constraints.lp",
+          "sha256": "b97f0713d625d3585e3e53aa04bd707fe0c16dbbe7c352549e4e97eb949f6fb0"
+        },
+        "seed": 2045
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2046_constraints.csv",
+          "sha256": "43cd0940d3b9abe4500fe8f876e13f0e9ec55cb22809e0905cc3771e79a4dfed"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2046_diagnostics.csv",
+          "sha256": "ccfb7c2144de3456b6bc13774de25729295b5ec8f1ea9afccc8af1b0aab2b035"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2046_constraints.lp",
+          "sha256": "3674ac98fa648fa8ede82b7f966a1f3a6f5dfac35e506b03a4d00ad12a96968d"
+        },
+        "seed": 2046
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2047_constraints.csv",
+          "sha256": "40b1187ec5b493789925b234c83c61bd3615c23ab1d8e021bb1e9f3ba76aa421"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2047_diagnostics.csv",
+          "sha256": "6358df5a4741e2e4c63c9491b7da3dc467fb251f5944b84d687476871bb785cf"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2047_constraints.lp",
+          "sha256": "ce37709f2f3190c179da1dd6b644ee9e954dece71f55955762b7acd44bb2f129"
+        },
+        "seed": 2047
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2048_constraints.csv",
+          "sha256": "794d326a68945e7326c930c48e31bfa0ac0b824e930f07e333b6af7da5d3c3dd"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2048_diagnostics.csv",
+          "sha256": "5476c90bc1124a8e0cbe3cd26f7d2c872eaab24c770cb1759a1241f30bff33dc"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2048_constraints.lp",
+          "sha256": "dcc8a5da665960898b74dc91aefb90a26e27cfa2769674e075d423769a4539d6"
+        },
+        "seed": 2048
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2049_constraints.csv",
+          "sha256": "f19accaea9e81ed7a9d892825bd527b878b887c4ef5600cfb04340ac13fa8872"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2049_diagnostics.csv",
+          "sha256": "73ca8ac66df6dbd27ceced2fee0e4fd92bc0c27840eb64042925270e08d4ae4e"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2049_constraints.lp",
+          "sha256": "e759d57b00198bdcbbb17c9f44a1e0911a7eaa8ddfd9392d73f039bd7b197707"
+        },
+        "seed": 2049
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2050_constraints.csv",
+          "sha256": "a5e05dfc5f58ea8a588d5241bbe414fd4a24d51065de4b7f0f77f94ac2828009"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2050_diagnostics.csv",
+          "sha256": "47e69e8f7fab3d2d9a0f83d747c1c5f87b354c47b214fe0378d14cff712e777c"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2050_constraints.lp",
+          "sha256": "af11850df7a7d0bcc9d6c699364c88c45c9446e532a3e8fe4ad0c7f9329caa05"
+        },
+        "seed": 2050
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2051_constraints.csv",
+          "sha256": "eab397c243fb85ac4fd2901ed0b93e75a5092d190e0d395a7c0dbacc0b17c735"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2051_diagnostics.csv",
+          "sha256": "cbf0e9ba9f7d736e59416bf9bda7c23890fb7c2b56c8b235b308b24af360b8d1"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2051_constraints.lp",
+          "sha256": "3d5b958a33bdd07ccca7dc01ab128dc9f47e43558cf3a82622dcf7e94b3b6146"
+        },
+        "seed": 2051
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2052_constraints.csv",
+          "sha256": "d6e16db8288ffb1336ee4b4eec859c89c379396305a7067b76a0b883332a7a82"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2052_diagnostics.csv",
+          "sha256": "5b4a75fec245779428f011223bc9ca91d2004ce185077bc8371c53610537d4ec"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2052_constraints.lp",
+          "sha256": "c71d97ef7fec73d682d968675c148433cbfedad54e8c86368f879b1b81cee868"
+        },
+        "seed": 2052
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2053_constraints.csv",
+          "sha256": "49872ead0c447fcbaed8d91b3d44e5537d4ae06d6fa5aab64a6edac711c80ee5"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2053_diagnostics.csv",
+          "sha256": "38177a0f4575759622e7e9f4eef322721ca98b43b4a62240e4f259edbca41532"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2053_constraints.lp",
+          "sha256": "4cc732a8d17dddf1500c323d645f81b097ebdfd5f518fe4a67a8c023638729e8"
+        },
+        "seed": 2053
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2054_constraints.csv",
+          "sha256": "dbba18f9a91d572014a72691c120203eaa8beacdf0d6e3bb7a1b1210a962c4a1"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2054_diagnostics.csv",
+          "sha256": "c10f2524bb2b30ba2ca6e0a7741746361ffa7ec7408b48d11ab5d8a35a8fc004"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2054_constraints.lp",
+          "sha256": "72810caa809376f87495e5fbce379dc2286dafd0bc849036d7eafc1545a082a4"
+        },
+        "seed": 2054
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2055_constraints.csv",
+          "sha256": "9cabc0097e89aeaf9c501ee244c21ac3c747935023ba38d4e7e0f930c6e399a5"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2055_diagnostics.csv",
+          "sha256": "7dce93a2f308ecf04bd912c174c1968a1e49fd0232adef3a67295efd45c1d0d8"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2055_constraints.lp",
+          "sha256": "b3e97abf69cc1e79685437193afc21810a5ebcb9ece527c319d59596fd7ab024"
+        },
+        "seed": 2055
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2056_constraints.csv",
+          "sha256": "da811ea0f18dde080810e0acc227ae196373dbfc6cc58f71fcd23c2335a3f1ec"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2056_diagnostics.csv",
+          "sha256": "c268ec63f03a37ee004e14f476d2aa1ea71fdb105dbb151e15eac5279a280075"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2056_constraints.lp",
+          "sha256": "9721af56e2923e5a6ad2408eba48669d0bcbb00a870236ec6b836a726f3fe064"
+        },
+        "seed": 2056
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2057_constraints.csv",
+          "sha256": "ae72b43bdb562da0b5c7c9ef06d24e9c4ef720d544dfc126df762a9584a675f1"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2057_diagnostics.csv",
+          "sha256": "dba34f7b54e538d63110d554e591c5e358715fdec1ed28c2d04544bca5a7cdce"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2057_constraints.lp",
+          "sha256": "1a5094d91b933d5a5edc9501a1b1a2b214d9840f49a6f1778c78a31d5c812011"
+        },
+        "seed": 2057
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2058_constraints.csv",
+          "sha256": "62faffd9dc678478e10c99a4997cfe396d3376dae205781479362b20634b8520"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2058_diagnostics.csv",
+          "sha256": "fa0783e7ed38eb58809904f9adf6a08032e168832243954e583fb3aa6882e202"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2058_constraints.lp",
+          "sha256": "db6c3d64abe8bf1f23ad08d254337a6e37b360cf13376fff6371b91c247c2965"
+        },
+        "seed": 2058
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2059_constraints.csv",
+          "sha256": "9b3436bae077395271018f88915dea43d578694a687ffab12150fa5daac4748c"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2059_diagnostics.csv",
+          "sha256": "73a666aa0006f57998fff75cd6c0a2f94199d746a479a51799290b92c6ad823e"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2059_constraints.lp",
+          "sha256": "d3eb3b6cdfb2cb55e0b3785b35ab2a68a28115d86fa4e8cffcdb759e3de44f73"
+        },
+        "seed": 2059
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2060_constraints.csv",
+          "sha256": "cb59900270cba4e8bfc5c3c388fe147d6674f51ddb05b102e64a740f5f9a0a1d"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2060_diagnostics.csv",
+          "sha256": "f9f8231416dc422e434c0934a5699c1d1d807f857372740458ef3762e497444e"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2060_constraints.lp",
+          "sha256": "d870c5adb5ef5b186d0a057b3e5f0df492f470e7c3783e926579c28d47d578e2"
+        },
+        "seed": 2060
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2061_constraints.csv",
+          "sha256": "2470f81d33f6fa0cc9b98d41c997a4eefde2d452d3ce86fddf4c394f11bded8e"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2061_diagnostics.csv",
+          "sha256": "64febb767832a2bbd5ee9d310fd48a36e81544b7d0e1c552484d41a9f2ddb5c5"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2061_constraints.lp",
+          "sha256": "6921bc27c24c317372a68c572d3788f406cc1026eeb27bcbbd4bfadcb87254d2"
+        },
+        "seed": 2061
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2062_constraints.csv",
+          "sha256": "8c682d0843673bf75f6b9f8e4f2de83d5942290fa8b2512556d1b764c524c939"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2062_diagnostics.csv",
+          "sha256": "941784ac6dfa1b1f3a1f9739aebdfbcfb4b86c4a18f26960360ef4d7cd83536e"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2062_constraints.lp",
+          "sha256": "f9fc4a1b6ee680055a1de8bd71aeb8ce84312c8009791f52dc88a9d2a5250b8b"
+        },
+        "seed": 2062
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2063_constraints.csv",
+          "sha256": "ace070ccaf1876a47fcc96a0012a9301d8d2fc317779dabfb4126c8f759ecd1e"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2063_diagnostics.csv",
+          "sha256": "44b625a9d18f6354f995b3bf75276a7f5ca2912632ee6c3051db8677b02e904f"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2063_constraints.lp",
+          "sha256": "7118f9fb09cc6bec192b745203b62066290e8dffb70bae6cf2e9baff8bd51895"
+        },
+        "seed": 2063
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2064_constraints.csv",
+          "sha256": "8e8e74463cf2185ca56e63e2348ef0470e34c7a55e484586af74ddf83e2bbf91"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2064_diagnostics.csv",
+          "sha256": "0356cb6981b4921a591465fa002bac6388b20957cf8f6cbaae734be784176022"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2064_constraints.lp",
+          "sha256": "cbf09db77c474436c531acef498bd7cd5ada496b25dc7fbb429d54d0e698ce11"
+        },
+        "seed": 2064
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2065_constraints.csv",
+          "sha256": "d1260e6297c2bcc6cf543644e22076e3c729085f6cbebe906fa81191e58daf33"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2065_diagnostics.csv",
+          "sha256": "ea7310ce430e7cb42c58d4a82362274d281f7ca0d311846792aae069685a38d7"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2065_constraints.lp",
+          "sha256": "b9773ae7347f4d225a759a749ade3dc294d36c84dcfc8be3e80cf9f08c278389"
+        },
+        "seed": 2065
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2066_constraints.csv",
+          "sha256": "6fb21d6590705d90ec22d953a4a1b506bd09bcd17214235951c1c81fa0b78cb5"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2066_diagnostics.csv",
+          "sha256": "977a8556ae1642dd622c5defebc143699b4b88e120eaa4b4ec7131300e20da29"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2066_constraints.lp",
+          "sha256": "05e55cf890481225bb6b0c186e77ca39e8f27e4b256696b21358196b7c5d8d6d"
+        },
+        "seed": 2066
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2067_constraints.csv",
+          "sha256": "5920acee3ffc4f636fb1a32126b1aa4fc61e5acc837cdb492f8467c7919b4067"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2067_diagnostics.csv",
+          "sha256": "ae6fb0b0f453cc533035633c6c7382aa92eaf1bfc4d11d14bec2862a98be519a"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2067_constraints.lp",
+          "sha256": "03b60d59edb380edc32cda5e4cea56a0a5933593e9cb6d397b3d7164061e6a22"
+        },
+        "seed": 2067
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2068_constraints.csv",
+          "sha256": "87a55bbf03c22c62037d3d9ea37413919b8a0a9fb9386427a9b42d51ec036e4d"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2068_diagnostics.csv",
+          "sha256": "3ffcf94cfb3a1c7e634391f1308aaa8be3d93e39cd6acbdf4707981192dd3c4e"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2068_constraints.lp",
+          "sha256": "2eff701f0ea6972682271678244dc1f88698099bd9b4fa9809085fc8ee45ae93"
+        },
+        "seed": 2068
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2069_constraints.csv",
+          "sha256": "462fbf280efdb8b5a67d038e92a10459b82288bd75d607852d88edbb5fbf1be6"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2069_diagnostics.csv",
+          "sha256": "218f7b140ac59102e4b9e64ee3bffd7b88e1f8f5738cdf9087d49961927c5dcf"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2069_constraints.lp",
+          "sha256": "4376dc9efab1f6dae27c288a1a8ef61a5a986e13337d00285e7f2e96f2ea9a36"
+        },
+        "seed": 2069
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2070_constraints.csv",
+          "sha256": "52aa6cfca903fa81a4a28b1d7784243ace5fabebc268e0aef84d7989693ec550"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2070_diagnostics.csv",
+          "sha256": "002e5e4f6baa4aefc3e40c35fd2f301c8e2bca28a1dad60409ef56f9f619ba5b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2070_constraints.lp",
+          "sha256": "8136d9c610007e1930bf71786fe26ee42d4c735957045baad633ca7139fc20dd"
+        },
+        "seed": 2070
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2071_constraints.csv",
+          "sha256": "b1d6589c72cf4541efa8b87e5c8c6026b5ca5306e1fd8493ae32c3318dd0eb37"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2071_diagnostics.csv",
+          "sha256": "39b93aefd7f0124781df825245336ec65005f03d0ca308e83608d5775804ca30"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2071_constraints.lp",
+          "sha256": "0345be22bde5ae1a7020ae9ba35035f40b6a527fa7ee643908288ecb9a116d94"
+        },
+        "seed": 2071
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2072_constraints.csv",
+          "sha256": "98e3f56441e0e2c909a2688f1595bc68378188c34dbfe426e06173b131dbcdca"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2072_diagnostics.csv",
+          "sha256": "d23f9e701a54094d9655fa546b18d980c8a147c902335723f447c15c444782e2"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2072_constraints.lp",
+          "sha256": "f7197635b2b36a2330b82e1140032d0143b8e3290e45c0de7e88c60108b51bd8"
+        },
+        "seed": 2072
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2073_constraints.csv",
+          "sha256": "1a52bd1ce1c68289725c83d53b4395142190201ea14c07d2fec649f7ff247bca"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2073_diagnostics.csv",
+          "sha256": "423f0df44d0657c9a3692038d7cdca9b31f7f8210dd4e039e9e17e6e96fd313c"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2073_constraints.lp",
+          "sha256": "3c90a8cc088b1759c4e8cd35bec4d082de3b17ea00d5dfda7b674118b3a767d8"
+        },
+        "seed": 2073
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2074_constraints.csv",
+          "sha256": "571b97379166fa4c9c35dd26ca03c9df8b5b30e319d5da1bf540d1bdd84dbeca"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2074_diagnostics.csv",
+          "sha256": "5a67419f4e44568f23797d11ca9f3e7bc4225e9140d0eb995298bf873f600e4b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2074_constraints.lp",
+          "sha256": "189a47c377237c21d579b5624241e49862706d17556b410a1bbe98bd4700ec59"
+        },
+        "seed": 2074
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2075_constraints.csv",
+          "sha256": "cb14b36f01c1537ff7042e4674613962e924e208aefea9b5e11adea40a241cce"
+        },
+        "dataset": "cancer",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_cancer_2075_diagnostics.csv",
+          "sha256": "e7c4ac6f612c47f7d2cd06f02005c6ff967c45452aeb163f7de68876d4f0d372"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/cancer_2075_constraints.lp",
+          "sha256": "945c34f69418268881e9d8867ae8750f0f927af5612423357778a5cd09fd0cc6"
+        },
+        "seed": 2075
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2026_constraints.csv",
+          "sha256": "dc9637ae42eb6179b4a16a5e13a95689cf320b067e63aa521ae19d70597bd182"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2026_diagnostics.csv",
+          "sha256": "4a6ffe3cd71a6f02fe8f27c7c801eaa6c9e03d24c6f8fad4223a5e60dbebfcdf"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2026_constraints.lp",
+          "sha256": "3e5870d944e65ce4fe839d323706bc1c3fb0ad36d2182371db170e556761ad0d"
+        },
+        "seed": 2026
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2027_constraints.csv",
+          "sha256": "be265ef43760e0011ae8a13fe481db02605534b1652d50faa32c81d28059b732"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2027_diagnostics.csv",
+          "sha256": "c018703792aa7604085b84784877545b8131c5d0defbfe7c5a39986c34e8d026"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2027_constraints.lp",
+          "sha256": "ca82ad047ec97663d905fe8e71f8bac052b903cc6f665e5d9e64bd0ed645fa13"
+        },
+        "seed": 2027
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2028_constraints.csv",
+          "sha256": "abf81ba09ba8a3268a96d17f681bebf6b7c2054803243819b14683b11a99d740"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2028_diagnostics.csv",
+          "sha256": "37e7214a1c4340d698cfc8912b8567c38f7ecf5a313824fb1393cee3783b1d8e"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2028_constraints.lp",
+          "sha256": "4cd1687f733926e749e859c112189cb76f6a7b3b01d879e27fac1dedfdfd9170"
+        },
+        "seed": 2028
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2029_constraints.csv",
+          "sha256": "6a1f3f87218273f4b1daf00d5b627feb255342b044e692857ea725b191b1036a"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2029_diagnostics.csv",
+          "sha256": "69dfdd0f9623a7e736705f40abe0e8a52226cfba472b5abf08350149c2274b44"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2029_constraints.lp",
+          "sha256": "644c579189edd7d502836b9da12934fdc5aebd145cf2d1575453ca0cdf02f7ce"
+        },
+        "seed": 2029
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2030_constraints.csv",
+          "sha256": "6cd4b5beeead415972cb65d9918a514ea470e1a732b7b768bf606d6876026bdf"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2030_diagnostics.csv",
+          "sha256": "4b14503f8507020f07f4539386f9c2edcd7df73107d4dc17b0d82052077dd4bb"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2030_constraints.lp",
+          "sha256": "b3a00dc864f90e96e38b8f3d4846020bb735d9a41a8d7bf560b65e2356187f0d"
+        },
+        "seed": 2030
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2031_constraints.csv",
+          "sha256": "0eaabbb86a6e44d28851a8b84279da152c8377dada2eb35f5ec5a2ba2e320941"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2031_diagnostics.csv",
+          "sha256": "d702c7e54ed9523907fa3f21b4f50953e4b7f7e6b43a2f426487dd6007d63acd"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2031_constraints.lp",
+          "sha256": "28e4a005610b2f6cb05e5b22dbbd7138106e1e06212e8aa1236543bd7dc0a193"
+        },
+        "seed": 2031
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2032_constraints.csv",
+          "sha256": "9a30bbe23039af6e56bb0928f98d805a4bca22fa065c609ca6eca0a0c6b1f9da"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2032_diagnostics.csv",
+          "sha256": "33975344714c2c11c0da588e3edd1083eb9031a710cd43bb3621b5d1ecdd6847"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2032_constraints.lp",
+          "sha256": "fbce15ed886a158c996661eee26fca847354e4f635afaf3ea59c389481eda3ce"
+        },
+        "seed": 2032
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2033_constraints.csv",
+          "sha256": "681b3a9748d0f1e31b150bbb13982208d4d1f0121295e004e6e77addcc62af87"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2033_diagnostics.csv",
+          "sha256": "7d01c969b24a94670ec77e383b9a6d2b4a3b29b27ec03ae4cde4cfaa65f7908d"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2033_constraints.lp",
+          "sha256": "5fb52dee2f1c0d217ae61161bb96eb38ff91a46a997276debdc88cd178b23726"
+        },
+        "seed": 2033
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2034_constraints.csv",
+          "sha256": "c25fe1da7e4639e8bb0e4bf8a0ecd0877d14b50d6b9353be98a8cbbcc0a7603d"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2034_diagnostics.csv",
+          "sha256": "8c032c71757ae471f13d0bfeb2a4d8c5cf319969e601f2fa6fba14b77322d826"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2034_constraints.lp",
+          "sha256": "f96799f96b1281762f9208589e6d23fc55ea6979eff24caecede0bce5155be95"
+        },
+        "seed": 2034
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2035_constraints.csv",
+          "sha256": "6125b366f237e914cae75fa235a4182770f5c6319de0edca82d946989b931d30"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2035_diagnostics.csv",
+          "sha256": "55754101e2acf75e9b6307ba4e45d55f442ddcc7f7fc5ab263431dd334a0151a"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2035_constraints.lp",
+          "sha256": "512f75cb1eb7a704721d27dba08e161fe4e6370d0618b10dcc4251e43c091a0e"
+        },
+        "seed": 2035
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2036_constraints.csv",
+          "sha256": "23f9a4eee2f8cd9e17835f2c98b0f46e05639904939038de3c970296c366218c"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2036_diagnostics.csv",
+          "sha256": "7ccadc3e35fc36992d58d57f5a206d8f721ed1ee81218d495e1f155f648d76f1"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2036_constraints.lp",
+          "sha256": "dbd6da8ef829070c16a94304076085a52f3c5372ea43d9f243d0cb8c0690084f"
+        },
+        "seed": 2036
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2037_constraints.csv",
+          "sha256": "a0971670a1ff64b3d7d47a53f23825b62a8d72272cc956b16d3747a5131b8967"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2037_diagnostics.csv",
+          "sha256": "a1e031c3c728146fe61bf4d5ee7b622aed715bae90df9d2f10cddc8e9f7630e3"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2037_constraints.lp",
+          "sha256": "ce5b504ca5c4469b3cbd5d2782b26cb32c6f96cdfe29ceac447ee86027c4059a"
+        },
+        "seed": 2037
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2038_constraints.csv",
+          "sha256": "a49d043ee3f955b1299ca160c2936c6be55f93c44e791559da8f5bad4514a186"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2038_diagnostics.csv",
+          "sha256": "32a1cedf3b66ff12d35f079c50c0039aaae49023cfc4b809a0024d180f4d40b1"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2038_constraints.lp",
+          "sha256": "a6fa4dab6bbd157b04c0ffe16788d2cc8264b116ba21b2e8d7c79e67fc9df908"
+        },
+        "seed": 2038
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2039_constraints.csv",
+          "sha256": "314e011b29bf3783988b5ea5ce905c260a00709adce9ad9b681252547ee74940"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2039_diagnostics.csv",
+          "sha256": "968aa50f91bd1e29d8b8f804552f74e868cddc9aee9e182841b5b68e6303e865"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2039_constraints.lp",
+          "sha256": "41fc662eab2b40394a43620fa55ddd14b1789c88b691ca70b6c8d8022b9eeb6b"
+        },
+        "seed": 2039
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2040_constraints.csv",
+          "sha256": "b596a19dd9f0bee11ff111566a0b0fd2ccbefb9cb1eeadab8978dfd535d530d3"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2040_diagnostics.csv",
+          "sha256": "941fd91013ba5e9acf0ece02b57136dd899a5a1a74461e34f1b5476d7fc82af7"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2040_constraints.lp",
+          "sha256": "380b64d30389030a79b1a591fccc5615c3f30d0e17667d4c9cf80b4c7d58b5d1"
+        },
+        "seed": 2040
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2041_constraints.csv",
+          "sha256": "36d79e0bdf42ef241efd52978a82d2c073083c96ce7ea30bece085d778e82ac1"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2041_diagnostics.csv",
+          "sha256": "dc3c894306b9c44ef6c8cf2545feb96115cb32b66ca4dfdfed8274e22b3fa326"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2041_constraints.lp",
+          "sha256": "1ca7d049eebaf88daae52e2d419cb44ca662eb972b391101896b1448e04d75c7"
+        },
+        "seed": 2041
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2042_constraints.csv",
+          "sha256": "5d69709ac0c9078c4699c20ea19bb91b32a90b2050f9f3be2aa98ad880fe7375"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2042_diagnostics.csv",
+          "sha256": "565a26b4618a190d00ffdc48e8bc3fe3555311dc4594b579176c44c0d99d7c64"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2042_constraints.lp",
+          "sha256": "439ac7d28ebd35303b70d5e3e20a84bbdc59a6a74c6261282569ca3106f0a5f0"
+        },
+        "seed": 2042
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2043_constraints.csv",
+          "sha256": "75462e340ace35e023ed0beec20339678a2132710bb22e1136cf16baaadbdcf6"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2043_diagnostics.csv",
+          "sha256": "4e6f497a4acc79e86a3fc61cbdedd112f621e368e87bf489e5a6a3972be550ec"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2043_constraints.lp",
+          "sha256": "d3ad39345e37a02c5eb73beeab6387523d173865b90808ed89e4d3802e3f465c"
+        },
+        "seed": 2043
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2044_constraints.csv",
+          "sha256": "0f7ae2f9fdb13ff5fbe43eabc367317403a3ea6c36e890efef4773b09734b3e4"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2044_diagnostics.csv",
+          "sha256": "77468684c5dc00af39fa3299d3dfc54c7452ee500290a18c53f472ab98010fe8"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2044_constraints.lp",
+          "sha256": "2dda875b39f05716a501d8e0e93830037690faa74391d11e0d6941002c880673"
+        },
+        "seed": 2044
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2045_constraints.csv",
+          "sha256": "f756562177fa7303b6a48f15966dc1154d4461ac0c02cca7fb0203bf03f215c0"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2045_diagnostics.csv",
+          "sha256": "2774ef43bc39e2cf415e2684f018df1db960eec91d97549002a5bfbc006d818e"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2045_constraints.lp",
+          "sha256": "639c8e70d6bed0be98c9c092960e1c6004c989ab7619861885232a503fd816e6"
+        },
+        "seed": 2045
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2046_constraints.csv",
+          "sha256": "adf7e3d4383804f603b8768959c522837374070c97f56f2044dc6634f7eee003"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2046_diagnostics.csv",
+          "sha256": "c84e08ad7b85b6f36df1a3b888c4cde941fc23d5e526bea30d350ef3f6672964"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2046_constraints.lp",
+          "sha256": "caa12983f94171c53780d9baa06702490ee8d85c4d0e3d1fe5428d1eba912c51"
+        },
+        "seed": 2046
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2047_constraints.csv",
+          "sha256": "9471f1886def4b7434c7b6fb197be4eb74d247e54c0c9af0f1e9f290dfcf1595"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2047_diagnostics.csv",
+          "sha256": "8cc0fd6e19c541f54974aacedc8a44ae74d71e56c9a66bc508d5f5d88133a728"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2047_constraints.lp",
+          "sha256": "aa7645cb49820e9efd5875f8ab3ff22eeb1732d3964b91ff4836176c44099416"
+        },
+        "seed": 2047
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2048_constraints.csv",
+          "sha256": "150f89238ec31964ffc1bf9377f2829ff3da498b14651ab4cc885b856c192fd7"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2048_diagnostics.csv",
+          "sha256": "76b70a7b4c959fc72e1df8d31ec9b8206236a789904b5a60209926f1a910b016"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2048_constraints.lp",
+          "sha256": "c0a93f7f20346877309b319feb46e9d6cf7a61d9a17a0037c31c1c2630a661cd"
+        },
+        "seed": 2048
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2049_constraints.csv",
+          "sha256": "6d767d901cc8f6f743e9f4a3ef87d16ec446781512664fa359a9cfd671a9d15e"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2049_diagnostics.csv",
+          "sha256": "06af13426dba5c5e76ccda0bdb7c4a296a6329bd3c761a23c7dd483e2e8d5dc0"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2049_constraints.lp",
+          "sha256": "1f3ff5805065f0b3652348aa3327d24929aad9b6929c5a55807a65c9ceec2936"
+        },
+        "seed": 2049
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2050_constraints.csv",
+          "sha256": "2ae7c298c40848684e3d4b48adb5b492bb85e988ce1ee92e094268fb677e4e9e"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2050_diagnostics.csv",
+          "sha256": "55587441d2dc2c3d26fe234d99ae8cb0653486165043d62e04832652fcdc63c6"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2050_constraints.lp",
+          "sha256": "e90c39372edd61142d4ddea04618936ed2502ce3793b451b027f191bc0de1865"
+        },
+        "seed": 2050
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2051_constraints.csv",
+          "sha256": "d4b71b6a1500c34e06333ec50e880015a272430f62f428491a5ed65b2cca8558"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2051_diagnostics.csv",
+          "sha256": "4a2775d8e570ca7d27b5c1af7418c12e39f186e94b01b8894a96cd111871b423"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2051_constraints.lp",
+          "sha256": "2b53cd675446e92963771da1a5f984044a02675023f22d7dbb4fdb9af7b27130"
+        },
+        "seed": 2051
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2052_constraints.csv",
+          "sha256": "ac1e0838c690eb7bad9cb3fbd814d1891f9e061b13cd0ee35d850a0cfef7325f"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2052_diagnostics.csv",
+          "sha256": "c3ca325c6a718e5712e0bd94470e032bed64ef470046fb6a779bf6733d5b7285"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2052_constraints.lp",
+          "sha256": "a73692107a5cc7f4e4482bf835cf95a387378315c6d5dc2d08e2b6170b6ed137"
+        },
+        "seed": 2052
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2053_constraints.csv",
+          "sha256": "096e79e906ffbeae15595e61c2102206c3d81599d07a1fc8082790a51bc8072b"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2053_diagnostics.csv",
+          "sha256": "ad7b385db0a27419c6fda8cfa054478af696dc44f32b8569d8491df86d778289"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2053_constraints.lp",
+          "sha256": "3efcf51efa625b1f696fd6bf82b349582b99594dddebc3d962a83f25567c80b1"
+        },
+        "seed": 2053
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2054_constraints.csv",
+          "sha256": "e7702e4855ae9edf99a6fd47a8bf4bb022a7d4a731f203710a2dafd359dc6777"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2054_diagnostics.csv",
+          "sha256": "5f3ae0598c0aa63bc63389d7d4a833d7b60100236502f8f35389e80c924f9770"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2054_constraints.lp",
+          "sha256": "198319074289d5c488d05c3e2c948314437a04acaa609578f25d096ec0e14624"
+        },
+        "seed": 2054
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2055_constraints.csv",
+          "sha256": "cee261e44a46e001bff703eaac173f44ab0df8e0733b54c6dcd505c028e02391"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2055_diagnostics.csv",
+          "sha256": "eb4cf93298e5838575cb2f7175baa2d6fc5f812978ed4fbc9052ac7f0220a4fb"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2055_constraints.lp",
+          "sha256": "50a299cfeec06bb4e1fb610ed5c9bbd4d21e536f39a1373e9c136ec947d64f5f"
+        },
+        "seed": 2055
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2056_constraints.csv",
+          "sha256": "b1e527fcb61faf80f501082b0433670f75ee663fbcfcfabf8dc6633408059f91"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2056_diagnostics.csv",
+          "sha256": "f4d07d568fd259dbb8d576b7d3abf4453d697441d4963129a26abc4ad35fb0b7"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2056_constraints.lp",
+          "sha256": "f511264584c218b7b2fe3445550e395471f9521d712c07815309c2d668ec5911"
+        },
+        "seed": 2056
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2057_constraints.csv",
+          "sha256": "56cd12ef5a1b01a89fb79bf95eb1b52e2ed0616dd0badae932819f857040366d"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2057_diagnostics.csv",
+          "sha256": "0ebe64c86c8e878fd13c6e01b88cfd4624825ac84b6bdcbe0fa8f67bdecd85fc"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2057_constraints.lp",
+          "sha256": "9f9e74bf4028e064476f725bc6844eddfc12611e5ef36551b73a94cdbd753848"
+        },
+        "seed": 2057
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2058_constraints.csv",
+          "sha256": "d69d790e8312abd75bf262db6194549b6f5a9075d10c6b6fb09ad93b3a5fbcf9"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2058_diagnostics.csv",
+          "sha256": "506b7de28a893ccba239c04993585e41514782da01a891a2a771b81d22acde7b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2058_constraints.lp",
+          "sha256": "99ac63cd780e064b820b0f8f2e70d7dc0d0fe78cd6221aa2329c32dd4174e4a8"
+        },
+        "seed": 2058
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2059_constraints.csv",
+          "sha256": "4329613e526a2e8d6d762d2988f8564bd46cabac8c0c72149a1d23a5a7182627"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2059_diagnostics.csv",
+          "sha256": "2f0ab9f1269e450af17641bfb783e3902ab60ff68311d5019e44b9d6588d037d"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2059_constraints.lp",
+          "sha256": "2058388a5434648ef9259bfba534185894e9311fc4f7d011a1dafdb41934b363"
+        },
+        "seed": 2059
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2060_constraints.csv",
+          "sha256": "d0b082377aee6620ebe6f49652bc7129b7388d867692e2a6c27c53448bd66f73"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2060_diagnostics.csv",
+          "sha256": "32b2ffe04535e1ea8d23262f0a916d690ad4fc6e9ecc5307ce6b8fc0e3eec97d"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2060_constraints.lp",
+          "sha256": "0683ff22e11a860bcb3b73f8ad0cd5f5c88787770651ab9ad01ceb38b225e35e"
+        },
+        "seed": 2060
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2061_constraints.csv",
+          "sha256": "77a15ea51a0d0de94ef1aa7b69758b3088a915397406cb76cb334c15f4bcd56c"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2061_diagnostics.csv",
+          "sha256": "09a72a7f28ed2b03ca7a14f224e24602ecbd97f3c4ee77330a793f1e30f48df2"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2061_constraints.lp",
+          "sha256": "4d29471266b457e3e7959f0671b33040be1919a27c691b850ec396c548e86396"
+        },
+        "seed": 2061
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2062_constraints.csv",
+          "sha256": "70914298c2c347447b7e39af76d45131e504e53989ce52023e36cec75a30ffca"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2062_diagnostics.csv",
+          "sha256": "47e1f67109a0dea5638448daec26ae4945e565671f7beb408bec619198e43f9d"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2062_constraints.lp",
+          "sha256": "40526ab66933adbb57c4014556fce01865d2698305a4802ec2ec97c3aa5cd383"
+        },
+        "seed": 2062
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2063_constraints.csv",
+          "sha256": "7f1bdbe8df218f33f5668147486c75111e3f4a33028524d064544d24058afbc5"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2063_diagnostics.csv",
+          "sha256": "8f205dadf370586bdc10777e529db2011018dab86b1fb4c7fd22967ec9e330a0"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2063_constraints.lp",
+          "sha256": "2bf20580888c7853ce70c61da6cdd6b1bd558afb950bd8d1e5f1904c0d93a4a3"
+        },
+        "seed": 2063
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2064_constraints.csv",
+          "sha256": "fdddf7fe193ed828accb320e5d3ce7d79a48c05025c383ef3cf4b58174163e90"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2064_diagnostics.csv",
+          "sha256": "c2ca7b37b0d8cb7933f54024b200e1661f884d5a77ca19d2a3a1ed4382c01cc9"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2064_constraints.lp",
+          "sha256": "c8fcd8c9271c7229ffcfc9b55049b132eab6c773ea3e70d87aecd1e5d1c7e38d"
+        },
+        "seed": 2064
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2065_constraints.csv",
+          "sha256": "6444a2d448be6f07727acf377566ec04b76088618b14a80181002730a9f0eb99"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2065_diagnostics.csv",
+          "sha256": "869a401bfa50c94efca52de3761d9fdf857126bdc1f0e397772480fb03a578b0"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2065_constraints.lp",
+          "sha256": "32285f90badd6e3ca296281b3537c2dfc41d4285b73e7201d072b41859fc5197"
+        },
+        "seed": 2065
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2066_constraints.csv",
+          "sha256": "75dad1b57aea601fd5e27d16bfe271bf316b357120f13ff3b3254ae78c8c6e63"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2066_diagnostics.csv",
+          "sha256": "c071463e95d41bf3e2ef45bfaeb7de1454b9489ed57752d6bec4842b82838688"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2066_constraints.lp",
+          "sha256": "a36466761d0dd06508382159963faf06ab84bce5b0426fe01fb4c2795992dedd"
+        },
+        "seed": 2066
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2067_constraints.csv",
+          "sha256": "b1345d1e6afd238ad2a28c90aca4b509a7d6c93f9447599963da50e481fe9859"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2067_diagnostics.csv",
+          "sha256": "32c0e29e966c40b68d9492c52792385c902c3d618ce1929baccd49d2bf89ff09"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2067_constraints.lp",
+          "sha256": "054a41da0514538a96cd6ed2c0e18133b655b43ecf7d25892733efcf8a276a5e"
+        },
+        "seed": 2067
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2068_constraints.csv",
+          "sha256": "61ccde41fd9dbfc99b38e8242facc3dc1517f924859b63159ed3b0f51109197d"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2068_diagnostics.csv",
+          "sha256": "50b32b1ed3f64d2b467980a167aedc38b9e681c528aa0d457e417e05fa033d07"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2068_constraints.lp",
+          "sha256": "2806d0d7f36ba9d6337986bf9a04af63d652ba4442abdb1055979bc65f1be914"
+        },
+        "seed": 2068
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2069_constraints.csv",
+          "sha256": "94e8bfff3115c2128a23b6fa49b1144c19d58e5c08b58d917e14715f2037cb73"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2069_diagnostics.csv",
+          "sha256": "ea0a3f15ecc6451cbedcac2100dd5fac53a682b0877d2de2ec95dbc86f51dc18"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2069_constraints.lp",
+          "sha256": "176fa3d877f8d318b27936b75100078be665fe52a599abc7d45b0d1fc97a43aa"
+        },
+        "seed": 2069
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2070_constraints.csv",
+          "sha256": "e7784cc51160386d0bd0fc2f4919a476e8e14ed403ac73e18b3f0b65dee76207"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2070_diagnostics.csv",
+          "sha256": "44a41524225d214bd884b681693be3959b57004551f66e4041f6479ea90231ea"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2070_constraints.lp",
+          "sha256": "517a17a05c24c06a37616b2ac8c145181555015cfeb5c6b4d8a4c0739d65dc94"
+        },
+        "seed": 2070
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2071_constraints.csv",
+          "sha256": "746c5a6212c5d38607d1da4eae390917b9b21e60ab6aafcca5eb3ed5ead37fae"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2071_diagnostics.csv",
+          "sha256": "2d234f2db6792660cff567d94378d6c39973baf9382f3c32145f4a5429ef50db"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2071_constraints.lp",
+          "sha256": "9f8471bfb394fe0663046dba2026552cbec5751157e720d09ac42fd7524b7aa9"
+        },
+        "seed": 2071
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2072_constraints.csv",
+          "sha256": "d1c25db562476b2f3ff939c17bf5c51dbf7b950055c6c695f738dcd72f9b6bf7"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2072_diagnostics.csv",
+          "sha256": "b147a44ccbe8b2daa385d0c1f17132c968c86d4d0434107174d034736c146bb7"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2072_constraints.lp",
+          "sha256": "0f514b6d62b81e2bcf5532f6fdedd4cfdeab0fcfe6acdb87e0fbeffa820ad19c"
+        },
+        "seed": 2072
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2073_constraints.csv",
+          "sha256": "d1b45540f3f3afcb1274bce3100e10274890d6f5ddfe4200ebe1608dc64f33de"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2073_diagnostics.csv",
+          "sha256": "a0e72e9c749efc6c508c7ef19231d10385e953c260ead4475b8489e44c1276ef"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2073_constraints.lp",
+          "sha256": "9b03444a8e2c68595911de34388a4fe016de9a710caf11914cb7384f35db06cd"
+        },
+        "seed": 2073
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2074_constraints.csv",
+          "sha256": "c5a2c7bd57d776e6334413b2c4bb10790485deaa1f238716d63a3d7b7ea5612f"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2074_diagnostics.csv",
+          "sha256": "bdd087b676d6050d9cf9bfa5477cdcbfeb64c6e6e95280dd979aea9eb745f39b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2074_constraints.lp",
+          "sha256": "3c698cb4fc4baf868405c39f937efdf3f8c19024318856086ccb01f46194858b"
+        },
+        "seed": 2074
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2075_constraints.csv",
+          "sha256": "a073d64cf5e30e15f3f955db71d950ad53c422d7b65e78fafe1591a1e1ba7999"
+        },
+        "dataset": "earthquake",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_earthquake_2075_diagnostics.csv",
+          "sha256": "0d11e241daf5b719d9834075cd2d0df5e75e0a19e32cd302a853703f89a8c139"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/earthquake_2075_constraints.lp",
+          "sha256": "1b3d873f2bb9e589e56d6580171570d0f7cf94f35cebaa09620ad5b08ca2ee4b"
+        },
+        "seed": 2075
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2026_constraints.csv",
+          "sha256": "3d8fd0cd9cc1a43c43fabff721323f37715a4b5d8509c57eff4ecd50fdd4117a"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2026_diagnostics.csv",
+          "sha256": "b255dd3a87ae9e11b736b6d6e1c0656ea054aa00ce5838e6571b03a4ddd850ba"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2026_constraints.lp",
+          "sha256": "d1a661cfa75b6df8e69129f8aec457cdfcc8eb2d5abc596cfbe043f12fa451a4"
+        },
+        "seed": 2026
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2027_constraints.csv",
+          "sha256": "77f3bf7a417e98ff53ab3b20e34a25b154b7126e4bcaa064e13de71bfe3ec88b"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2027_diagnostics.csv",
+          "sha256": "eb6c7b775f92a82c7454f40f5e09fe2e4034b0189b6a0041aff70b6dfed80aa9"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2027_constraints.lp",
+          "sha256": "7c1396dc8580201dce9443685b8f7ce616e0566e00f8c25811751d9419ce39ae"
+        },
+        "seed": 2027
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2028_constraints.csv",
+          "sha256": "25c87e21666969872c73f257b52adafbbb342764e5edfa19c8d85536fae1b9bd"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2028_diagnostics.csv",
+          "sha256": "a8147fafaf23e65bfa268825926cae8e4900bacb372333195303ba26f9c9e430"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2028_constraints.lp",
+          "sha256": "3ed22498dc74486a7a5dd3d77906a379035de4e462b37db060fde9086dec5b8d"
+        },
+        "seed": 2028
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2029_constraints.csv",
+          "sha256": "bd4895d91c283629530cd37630199af38ee73f872655a9d0d430439a293364b8"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2029_diagnostics.csv",
+          "sha256": "16916d7ca7ecaf8d9bd441fa90fbe0448de706f0a1a99c1facf8908c7e9d975e"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2029_constraints.lp",
+          "sha256": "c59add0a561f08705ef356106b6e1f3c61e13439decde9164ecdb9badb6d9a3e"
+        },
+        "seed": 2029
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2030_constraints.csv",
+          "sha256": "14850cf27821f93b9edec399ef565c4f2807b0898b363546e15edef269a8bc8a"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2030_diagnostics.csv",
+          "sha256": "e0639fe22cbea68132102f4c36d310d6347b47dc4f83cf2e462df32b8c58dbbb"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2030_constraints.lp",
+          "sha256": "fba27f1eabe4c94bab1f8e3a6c5028a016871aec74cc0b135317ef2b90e15650"
+        },
+        "seed": 2030
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2031_constraints.csv",
+          "sha256": "e78fe95dc1a6c301d92af462cb797cd0a3ea969b195886ea97550d670f1d2315"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2031_diagnostics.csv",
+          "sha256": "3ed831a5c57b491d6b868a633b7dc9c166288e0e46991d349382c85a44246aba"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2031_constraints.lp",
+          "sha256": "dd7e5440af08cfade1758b13b6986dda960149e64f3ba0f8332e01ac3d691ef8"
+        },
+        "seed": 2031
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2032_constraints.csv",
+          "sha256": "3d97e0bf3236f1a9a2526c7e73f105ba5d9e2be73b27cd9be05d82fab6c24bd6"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2032_diagnostics.csv",
+          "sha256": "df43cd95254bce5629250116486fa0fdceec780e0db5ffac07f50239e173d2fb"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2032_constraints.lp",
+          "sha256": "3474465e3cff84e9373f7b5cdc4567d1f9999b9659634fe88dab9b9178435d46"
+        },
+        "seed": 2032
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2033_constraints.csv",
+          "sha256": "6463daf53097ad7abd7de7be7677d2f5de8ddf8b140a74d000c65ad0609207b1"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2033_diagnostics.csv",
+          "sha256": "d734f4da2ca6a9a5e1d6d1e3b9e68dd39d402bf3548fee1246f4e5088134a000"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2033_constraints.lp",
+          "sha256": "fa1aaa305020a25e1e0cebef83572d895f01aef5e5ce02b7abdb5eef86283de9"
+        },
+        "seed": 2033
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2034_constraints.csv",
+          "sha256": "c3d0771f379ad679f9152c7a3bd863f48b709162acceef4998998ac865c94bf6"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2034_diagnostics.csv",
+          "sha256": "ae32414046b4e532737de2e011fc5a1f29b6648db032319b9f962390cca00e56"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2034_constraints.lp",
+          "sha256": "ca7b78cede2c23e08cab28deda240aa3bfc673de599569f817967b858ecf8b1b"
+        },
+        "seed": 2034
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2035_constraints.csv",
+          "sha256": "f9c999fb293e81506c75fa3ac0373a83a3615b0da8b72bdc492dd9738dd23927"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2035_diagnostics.csv",
+          "sha256": "9b178235036739432b571613299bba3fd8fa57f98b16b8c16dd62d1615cc4f8d"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2035_constraints.lp",
+          "sha256": "953d0f57ed379dc73a7a8585620561144a5bf940db8d14dda6405444bb4e6ddc"
+        },
+        "seed": 2035
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2036_constraints.csv",
+          "sha256": "4cd45dbd4fc6912199e5b7b2c223487fcf98ecd0e8dde1335e3fe9c9ea9c2978"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2036_diagnostics.csv",
+          "sha256": "7b89a9a1ca4108558aea0ae6074a3fb02c6311c141163ea77eeaa6c6e86548ed"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2036_constraints.lp",
+          "sha256": "7f4303a2a2d77bc362d5cc72f182330d16f2afd9ac058cf32bfbd0f3edb80a46"
+        },
+        "seed": 2036
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2037_constraints.csv",
+          "sha256": "d37f560444c21910825e3b010a734a0173e02ceae25da68128d7eb0f2c1c2332"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2037_diagnostics.csv",
+          "sha256": "230597b8505499826bf97646c02c7e71e5a8aa48b34b2fc0e755dd19838102b6"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2037_constraints.lp",
+          "sha256": "2b9b4c994890bbd2216eb396e252c1c7965f70ba85d549135dc88b544182004b"
+        },
+        "seed": 2037
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2038_constraints.csv",
+          "sha256": "42ded069ffc5ed4b55c3ef968279bde3ef3073a0f2c44d5422ec762889d9925f"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2038_diagnostics.csv",
+          "sha256": "f4f079b18bc7da5bad18fd6624cefc32c11089b74edea0df04706b86fba5f76b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2038_constraints.lp",
+          "sha256": "612af54580d5490dd33a1aa2fee05e6f6560608260838160b519261416010d8e"
+        },
+        "seed": 2038
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2039_constraints.csv",
+          "sha256": "445bbff134f3a84cfefa162d7fff10da02216e895e4200248d5b5c8a496e68d7"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2039_diagnostics.csv",
+          "sha256": "2dcd1f0fb8cbe3b7f054e490193ab5020968463e8346bbe85415f28676e10812"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2039_constraints.lp",
+          "sha256": "ebcd24b08deb50bf00e41a63c3fec7fe49852f93c7f959de6c21518efff77bdf"
+        },
+        "seed": 2039
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2040_constraints.csv",
+          "sha256": "14c72b3a32e03ea8c3bd3fe0f3c05dcfa17cf4e08304df46523a1be05cd08ea9"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2040_diagnostics.csv",
+          "sha256": "a03497a1d53dd0632691b52547e3c321a8737d76e0967bc91e7f633c783f1bde"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2040_constraints.lp",
+          "sha256": "9ab8e8ae25c2b323a200f2f29e93d0c25f3ba417131dbe1b387a0516cbc00ce5"
+        },
+        "seed": 2040
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2041_constraints.csv",
+          "sha256": "39a353780ba02cb215a4cfc002538edefca7580355319056f3ec9ac4e2eedb41"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2041_diagnostics.csv",
+          "sha256": "de8122f1b75197d031fb204ce784d62b944d90bc6a1a1233a61d4a08617adced"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2041_constraints.lp",
+          "sha256": "0b16f68ec8acdf81e0d8f346c5ace57fdd7dbd5d0f2f01f6a22bee701f11945d"
+        },
+        "seed": 2041
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2042_constraints.csv",
+          "sha256": "7f31b9d95cc5f0ba781a045934cc40ef3526374a54686f0c1de393c993ef2296"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2042_diagnostics.csv",
+          "sha256": "6457112e97f6df23ee0a599794b27f05659c5e2024f71376d4df939b3d1df30b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2042_constraints.lp",
+          "sha256": "2482d92f47fbea8942c8aec0c27b8c2ac7bee95f88c72268cd09c7659fc9b27f"
+        },
+        "seed": 2042
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2043_constraints.csv",
+          "sha256": "dfdddc137051ade85049a3fcf7becba990a173fd002f50711fbbb0e04f399170"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2043_diagnostics.csv",
+          "sha256": "be83146cb603f9d4a8f1f6b990da7c3002abf25c226cf7dd184199a94ea79d38"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2043_constraints.lp",
+          "sha256": "5469b849c2acfa9907e57ecd0a599156c7c1de96a94454bf7b4d91fc73e51043"
+        },
+        "seed": 2043
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2044_constraints.csv",
+          "sha256": "17a4304f800a7da0158be509ba8db77c309dda7cdc2aecb78496b6f26e4bb67b"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2044_diagnostics.csv",
+          "sha256": "007ae042d8ec9ada1c87e9d2695ae69f31628fe3a9497dded2c037d82dda3837"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2044_constraints.lp",
+          "sha256": "3445b42026009ef56e40998410fdb38adeb194a78dc898e2eea11f08137ec566"
+        },
+        "seed": 2044
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2045_constraints.csv",
+          "sha256": "564d101044ea47e187cd1ebe74154270ca1d0353efceff5ab86fc18c7fa72de7"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2045_diagnostics.csv",
+          "sha256": "bb908134f452ab922ff71ea8a0da03041ee67e8311d82280133bb21f9221548a"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2045_constraints.lp",
+          "sha256": "30a1ec8bee15ee50fc508dfa06afc15046bb250452301890d08c4724f17cac52"
+        },
+        "seed": 2045
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2046_constraints.csv",
+          "sha256": "266cacc6b0e5698915e619fa68900ae46d4f4966636b5af08f938958e4d50b7c"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2046_diagnostics.csv",
+          "sha256": "3a7d6b6b58b1ab5eeebbac77c75c5a329fd995c37e614a3269361d93e2dbc8fb"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2046_constraints.lp",
+          "sha256": "99cdbfddbf83960738954616ca12b5ccd465c2e533500b88b6f69ef8f9082fc8"
+        },
+        "seed": 2046
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2047_constraints.csv",
+          "sha256": "f9b6191a5453735485438fc92da559aa146c8bd2fc431397c5d35681b5b408ef"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2047_diagnostics.csv",
+          "sha256": "1a7d3f777f07d7d77156cd46ce9a24fb99f02709bebba0ee530e90b342a63701"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2047_constraints.lp",
+          "sha256": "020bd3310576c713b19ab0d4540af9dad4a98465ce84d5e171dd0e83d2cbc387"
+        },
+        "seed": 2047
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2048_constraints.csv",
+          "sha256": "55010fc8e430f7947d7a1b67a6ea74716392bc8afacd3638a663be7b02602e7c"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2048_diagnostics.csv",
+          "sha256": "9e38ddf2abe99e970666430feeb760b110fac5ef239415956ce275ee29558fed"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2048_constraints.lp",
+          "sha256": "e02f9b809b411adee7fb730bedaa155700a6c872dd3b946dc9f4fdac7b4aa7b9"
+        },
+        "seed": 2048
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2049_constraints.csv",
+          "sha256": "223f6c1d7b17530ada760619b300136bf7d9218277ce564c350049df983c85d8"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2049_diagnostics.csv",
+          "sha256": "e1928af27ac85271ee5a4fa998d44fe4f945a52913d39a5a13735ef07776044c"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2049_constraints.lp",
+          "sha256": "6605eecb95741855cec90ff97b6b36dd8448a8abc1ac3d17627bf7a6024bab46"
+        },
+        "seed": 2049
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2050_constraints.csv",
+          "sha256": "b1b7760d3b731d5f199f85fecb8b38ea5a38834dddf981ba795f199afe3673f6"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2050_diagnostics.csv",
+          "sha256": "d8a684752b3d4ad32517fede85cddbbef453ba0fd368fd1ebf9662bc513e9de3"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2050_constraints.lp",
+          "sha256": "b665755fb4f1b413483868ad1df888e5fd6cab07cb7db17ce94c011b0f4ff189"
+        },
+        "seed": 2050
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2051_constraints.csv",
+          "sha256": "ea9d93f75dd0ac0610ed2fd1a2cddc2a1c92c6ce8f2a4c96fc54bcb1421e4a4a"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2051_diagnostics.csv",
+          "sha256": "58437ceeb4eee55c71e7e6ab19d874cc6eed1a4b289d861e268d4069693b7a55"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2051_constraints.lp",
+          "sha256": "1aae3ddc500d91c5a008a8e9d44045bfe9fc9e91e207fcf1d9466b65a8a59ab1"
+        },
+        "seed": 2051
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2052_constraints.csv",
+          "sha256": "2ed203c0c3d47c257b858ba011dd1bf9411f4e6951e098e83cedbb6a1c3b84ec"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2052_diagnostics.csv",
+          "sha256": "a37b2c5289160528b7e9989e9fae1f4134216964e0d0676cdceef5c58714376c"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2052_constraints.lp",
+          "sha256": "e230ca4f34daf326f7c276f1c8952beda12391fc0147796887719a3b2585ab2e"
+        },
+        "seed": 2052
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2053_constraints.csv",
+          "sha256": "81851097537342b971a49513c75d98fc6b41f5ad6a0a9300bd60dc60f1a22715"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2053_diagnostics.csv",
+          "sha256": "bc9946728a3840b5ec2fade7ca643722916ce9669c5e4990b7669d70e5615bbc"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2053_constraints.lp",
+          "sha256": "1588f8909dedaceace95e2dbd043c06bb65cac3fa13e779cd722e19d21f5868f"
+        },
+        "seed": 2053
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2054_constraints.csv",
+          "sha256": "9db6906b3bf42b7c76d1186a61c20b234a13a8fd615d85906dbe568c2f8bb589"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2054_diagnostics.csv",
+          "sha256": "1a78d31b012ff3c49ea3a58bbc32922e30a76a654f22511c042781db9438c9a8"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2054_constraints.lp",
+          "sha256": "20ce94954fdad423dfed559dfce490bb72d27d8489dcfacdc561b0c33dc3204e"
+        },
+        "seed": 2054
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2055_constraints.csv",
+          "sha256": "48922ff3f89fb75e4fdc921c1c5df82e30c769b0ed743990f4d1d153a0b6def8"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2055_diagnostics.csv",
+          "sha256": "bde85b74f374007436fb3e3e6f48d823a619ff5a9c221e99b8bf37ff86304f72"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2055_constraints.lp",
+          "sha256": "43ce2e0d8dd2229a33a36a967ae51172a18fa85d6735147c9de1f21559a0a544"
+        },
+        "seed": 2055
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2056_constraints.csv",
+          "sha256": "225eb4aab7b276e409c66e798ae37fa88f9475be3cb9f3262c7893a0bd364ae6"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2056_diagnostics.csv",
+          "sha256": "149b89f25b1afa51e9bd940d9c790889852c4a7c9ecd52ac6b797bede86eb020"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2056_constraints.lp",
+          "sha256": "19bce34fde85b16fc867db54727bf776dab1296e955b84b85d8bfb681d1980f5"
+        },
+        "seed": 2056
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2057_constraints.csv",
+          "sha256": "837d383a1a9b0bb673d00fb3bf03818fce091186d28df60dfc7fd2bcb2a40ca5"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2057_diagnostics.csv",
+          "sha256": "b008cda388aea4cd54f026c736d3de1214130f7d114305254b5d275faa38a68b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2057_constraints.lp",
+          "sha256": "06ef56b562a234f85592b985afe49abedc35ba064400041c4b6dde29757a6258"
+        },
+        "seed": 2057
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2058_constraints.csv",
+          "sha256": "e50c67ced7caefb6bc7e9cfff9a2716c2b9b526aa18b45da64f6e562962e26b1"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2058_diagnostics.csv",
+          "sha256": "f034cf61a3f7736c600133030ca28ac7af032c0ec9eabfe3895decbccc872dd2"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2058_constraints.lp",
+          "sha256": "118ec320e7188a3593b8e49018f046c6eb60e026c682455bec72b0658fe745e2"
+        },
+        "seed": 2058
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2059_constraints.csv",
+          "sha256": "e55d9af0a876dd234c2a2b96b74375ec018bd331886f986e390b7e5369b05a34"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2059_diagnostics.csv",
+          "sha256": "7651c6aef2d4c8de7096e2186690b1d04f754b6c34c069ae863d405c6750bb35"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2059_constraints.lp",
+          "sha256": "4aa6f06736e93b11789629add5ed377ebc2f916fa62450c112812c935b578c51"
+        },
+        "seed": 2059
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2060_constraints.csv",
+          "sha256": "c84223e88046132d35eb4f327182fdbf524b72b25731eec8df2691de1113832b"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2060_diagnostics.csv",
+          "sha256": "ad87bac6c3fab6f9d4fd821be9bc2b6e2fc7552d1ca2cbd0998ed911fa98c3c3"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2060_constraints.lp",
+          "sha256": "01a99803aad70d74c5ab496e1b2e717c5eb56bc8e7069ee3750b458dceec5347"
+        },
+        "seed": 2060
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2061_constraints.csv",
+          "sha256": "e381cd9b7d59ba375f1deff18744df4f1b940ed1b5a442ec108973ea4a25de92"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2061_diagnostics.csv",
+          "sha256": "8796f597e6580c49b1d64b575ba9198ff74193f56bf35108922d2e4cbd860bfe"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2061_constraints.lp",
+          "sha256": "cf4f5340bc6cce2c00e5ca4c32861b76314ebace54aa6624edeb313963698271"
+        },
+        "seed": 2061
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2062_constraints.csv",
+          "sha256": "e85e41b9694270d1b4efc884ed5d5c0d02d2c8f9d35968133d8baa8b43ce000a"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2062_diagnostics.csv",
+          "sha256": "82ce0cdb37688e7a2aea8cecdcc923297296626e2d897d1c9cf693e29f466a00"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2062_constraints.lp",
+          "sha256": "60ae56b35323d4a655aff29d61b319b63f67eabe9287d26f747e2fc1faeeefa3"
+        },
+        "seed": 2062
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2063_constraints.csv",
+          "sha256": "45f89ada37d0a7ddb7e93e42b306953e39624a2cc27603c8cbdac5e7dc8bfda4"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2063_diagnostics.csv",
+          "sha256": "fb93ff2ce7457f1881edb92989b387070881ada4c894d5554f99a479301d6795"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2063_constraints.lp",
+          "sha256": "811b92e6c5dd0caaa7cecd8605b1623d7167d224216c43875f297bd6775b4820"
+        },
+        "seed": 2063
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2064_constraints.csv",
+          "sha256": "9602fcacaa56d06e75cd788c31699a4a2f33527a830630b3acfec55c719bb072"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2064_diagnostics.csv",
+          "sha256": "341ec8aef8af779e501dcee8a9dc2e4c81ec442a22552e23e7c461b805d664c4"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2064_constraints.lp",
+          "sha256": "6ddb1169b3b5a38dbefc820735cabe42f6c4e5c73bf787146bf4b77152366bc2"
+        },
+        "seed": 2064
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2065_constraints.csv",
+          "sha256": "c635d011b83a0fd36d7e885d77cbeaef4090f6607454c53bae09053e7deebb31"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2065_diagnostics.csv",
+          "sha256": "ab36cc50de001192e72585787fc7a466253b8337d6bbbb8e250b4d414adececd"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2065_constraints.lp",
+          "sha256": "138b44398b2c35fd6d354536e5e99003f4861309afb59e6006545239b6308088"
+        },
+        "seed": 2065
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2066_constraints.csv",
+          "sha256": "6e3a5827ad399ea23855a62cdc45800f714777df05f1180617c650e8db3c74d2"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2066_diagnostics.csv",
+          "sha256": "f29d2494edf355f78de43e096a91a1f2f7e5a01c1692b3b5983f3453fe1fab42"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2066_constraints.lp",
+          "sha256": "a890f3d798b3da5d2c495dc21da56b9d39cc8227ef78e8bf1b98d3a030c5ee96"
+        },
+        "seed": 2066
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2067_constraints.csv",
+          "sha256": "1b203f747fe1603ee61ea0ff3fc8512eb5cbdfe6a147a0cccd14e2b2dc1d3bfa"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2067_diagnostics.csv",
+          "sha256": "9dbead1a04311e5fc761ab7a9f414b6cebdfa52c91bc61ef83567fb3762fa095"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2067_constraints.lp",
+          "sha256": "2144627df8823abc97f8e2a01a33f5e6760c59f1495bb9201a7f5fa630036ab3"
+        },
+        "seed": 2067
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2068_constraints.csv",
+          "sha256": "adc7b7dc49a024d8e0649a2264449fc63782e58c1191ec5a1bc9b796411b6f29"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2068_diagnostics.csv",
+          "sha256": "58a63d6207ec028e8b37817b77309d1f45f8d202fa7cbbd62720816dd6a50728"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2068_constraints.lp",
+          "sha256": "957aba503111308642ce4d387325ade469a53a2abec2b38ca30f2f41daa7dca4"
+        },
+        "seed": 2068
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2069_constraints.csv",
+          "sha256": "b7d76430e077f6f08e3da4263221d99049200a7204d9dd6331e420c79afc5a42"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2069_diagnostics.csv",
+          "sha256": "6d1a4a456376f555d33e09df266c2bd2c19ed83f2e93b99214719da728eb6bcd"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2069_constraints.lp",
+          "sha256": "538ef525181f58e98318bf88003d7d3b6d732edc2af3b7104cb2389d2261a111"
+        },
+        "seed": 2069
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2070_constraints.csv",
+          "sha256": "662a379fed3d5c18b976f105c42a9a2af505417a5fea39c57bfc13630b33357d"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2070_diagnostics.csv",
+          "sha256": "dd3e229ff41daec0631e2cf1f12a7716a64ece373b1452ef3ae935d26a8457a6"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2070_constraints.lp",
+          "sha256": "4757bafdfe3c3684a2ef9f9d09ab4d6a05f7ce5d9506e3f7d3c208babc58bb2f"
+        },
+        "seed": 2070
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2071_constraints.csv",
+          "sha256": "2903a7e7195be992f626da1ee23c6f43b0b5ddc22990020333f3bb7145d44a0e"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2071_diagnostics.csv",
+          "sha256": "3f84ea8626f99d17dc0d6be6288a8e2f722e41ce0a1e5dd06d9270cf369a4465"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2071_constraints.lp",
+          "sha256": "c212557df6ca58f07a023c17c1ded7143290270ed20252854e0f47defee838b8"
+        },
+        "seed": 2071
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2072_constraints.csv",
+          "sha256": "957c06724185c78245ef6a7abf4c7505ea9e6029e2ecf38194abd46b4c4eaea2"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2072_diagnostics.csv",
+          "sha256": "b473f2d6bd28972f9d94955a743b043224ffb44c2a50a9f62e9f68f2e74c986a"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2072_constraints.lp",
+          "sha256": "6e052fb9fa2fc5d2752521fb663edd9026e831dcf4c53eab2377cd1e6fd929d5"
+        },
+        "seed": 2072
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2073_constraints.csv",
+          "sha256": "a8750f98be24509fad8d153d4fbdd2de6779e3f3db3125f4311d071857059e1d"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2073_diagnostics.csv",
+          "sha256": "89d13107aeafb9b77f101cbf2c98cccfacfc3fb1f46a3a950bd29f693525d00b"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2073_constraints.lp",
+          "sha256": "324e69b192b7bc68ef221d76dac5139f8fb628a4f608e3106ac00bb875e8868d"
+        },
+        "seed": 2073
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2074_constraints.csv",
+          "sha256": "8bc5bba08aeca67ebc247ca0ee0e5f3231d6db8b09e5f79bf825f1bec44d726f"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2074_diagnostics.csv",
+          "sha256": "86d8785811230c530252b97aac39b25b24f6421e47703676fa54763fd80772b5"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2074_constraints.lp",
+          "sha256": "dfba74adc7b2f606b3607c1132d774165219d9c12aac8b1f70ca4dae892a710e"
+        },
+        "seed": 2074
+      },
+      {
+        "constraints": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2075_constraints.csv",
+          "sha256": "0c2bf8b3fa369c5ec0d04f6ed73b014253b3f2be6c777c9476bd4647a85dadad"
+        },
+        "dataset": "survey",
+        "diagnostics": {
+          "path": "results/paper_aaai2027/frozen/results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep/results/aspcr_log-weights_dag_sufficient_survey_2075_diagnostics.csv",
+          "sha256": "ee338cdeb9070dcc60cb0e2a4c84edc0a53c2a535b79bb6945bacfea7b27572a"
+        },
+        "program": {
+          "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/programs/survey_2075_constraints.lp",
+          "sha256": "79c1cd751ee618c03135aef21f4eef87cad2b6e560a544a4bd2a47500f275171"
+        },
+        "seed": 2075
+      }
+    ],
+    "encoding": {
+      "path": "${ASPCR_ROOT}/ASP/new_wmaxsat_acyclic_sufficient.pl",
+      "sha256": "b27755d7eb14cd1691d55c66aee13f635b52ce8d068d2e4e48c450c4d0b0b13e"
+    }
+  },
+  "instances": 150,
+  "max_challenges": null,
+  "outputs": {
+    "baseline_validations": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/aspcr_baseline_validations.csv",
+      "sha256": "90bb4bc1223d8b63dde4196e15466e9810d64b46eb95c995eeb1a36bfc4f66b5"
+    },
+    "challenges": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/aspcr_contestability_challenges.csv",
+      "sha256": "e1a68d28725b91667ca749add80c4ff83dcfbcabf07c5767be0dc4ec55621ea0"
+    },
+    "summary": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/aspcr_contestability_summary.csv",
+      "sha256": "722830bbf52297bc86a2ac0a31cfdc16d8c0908aa9e695d293b367509149f873"
+    }
+  },
+  "pending_selected": 0,
+  "schema_version": 1,
+  "script": "./scripts/run_aspcr_contestability.py",
+  "semantics": "Exact ASPCR native-trace margin: force one baseline-failed fact hard while all other Bayesian log-weighted facts remain soft.",
+  "solver": {
+    "path": "clingo",
+    "version": "clingo version 5.8.0"
+  },
+  "status": "complete",
+  "timeout_sec": 300.0,
+  "updated_at_utc": "2026-07-28T06:59:50.255547+00:00",
+  "workers": 4
+}

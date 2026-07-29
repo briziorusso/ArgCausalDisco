@@ -1,0 +1,46 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\caption{Fact-level diagnostics for the ABA-PC inputs and accepted fact sets. Raw PC facts are the complete CI fact set produced by the same PC/MPC configuration before ABA-PC removal. Values are mean $\pm$ standard deviation over unique seeds. Higher precision, recall, and F1 are better; lower wrong and kept-wrong counts are better. Adapted comparison with CI-test $\alpha=0.01$, sample size 5000, no injected wrong CI facts, and no conditioning-set-size weighting. ASPCR-log is run only on datasets with at most 6 nodes.}
+\label{tab:current-alpha001-nowrong-noweight-preview-fact-diagnostics}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrcccccccc}
+\toprule
+Dataset & Method & $n$ & Facts & Wrong & Kept & Kept wrong & Removed wrong & Precision & Recall & F1\\
+\midrule
+Cancer (5) & Raw PC facts & 50 & $33.08\pm9.625$ & $5.900\pm1.909$ & $33.08\pm9.625$ & $5.900\pm1.909$ & $0.000\pm0.000$ & $0.804\pm0.082$ & $1.000\pm0.000$ & $0.889\pm0.054$\\
+Cancer (5) & ABA-PC & 50 & $33.08\pm9.625$ & $5.900\pm1.909$ & $25.58\pm8.303$ & $1.600\pm1.512$ & $4.300\pm1.432$ & $0.927\pm0.069$ & $0.887\pm0.058$ & $0.904\pm0.046$\\
+Cancer (5) & OptABA-PC & 50 & $33.08\pm9.625$ & $5.900\pm1.909$ & $28.94\pm8.702$ & $3.320\pm2.208$ & $2.580\pm1.311$ & $0.866\pm0.091$ & $0.941\pm0.045$ & $0.900\pm0.064$\\
+\midrule
+Earthquake (5) & Raw PC facts & 50 & $54.34\pm1.171$ & $0.140\pm0.405$ & $54.34\pm1.171$ & $0.140\pm0.405$ & $0.000\pm0.000$ & $0.998\pm0.007$ & $1.000\pm0.000$ & $0.999\pm0.004$\\
+Earthquake (5) & ABA-PC & 50 & $54.34\pm1.171$ & $0.140\pm0.405$ & $54.20\pm0.990$ & $0.080\pm0.274$ & $0.060\pm0.240$ & $0.999\pm0.005$ & $0.999\pm0.010$ & $0.999\pm0.007$\\
+Earthquake (5) & OptABA-PC & 50 & $54.34\pm1.171$ & $0.140\pm0.405$ & $54.26\pm1.065$ & $0.080\pm0.274$ & $0.060\pm0.240$ & $0.999\pm0.005$ & $1.000\pm0.002$ & $0.999\pm0.003$\\
+\midrule
+Survey (6) & Raw PC facts & 50 & $53.28\pm16.11$ & $18.34\pm4.383$ & $53.28\pm16.11$ & $18.34\pm4.383$ & $0.000\pm0.000$ & $0.641\pm0.079$ & $1.000\pm0.000$ & $0.778\pm0.060$\\
+Survey (6) & ABA-PC & 50 & $53.28\pm16.11$ & $18.34\pm4.383$ & $27.24\pm9.011$ & $2.400\pm1.485$ & $15.94\pm4.975$ & $0.894\pm0.088$ & $0.716\pm0.105$ & $0.789\pm0.075$\\
+Survey (6) & OptABA-PC & 50 & $53.28\pm16.11$ & $18.34\pm4.383$ & $43.14\pm13.02$ & $13.44\pm4.678$ & $4.900\pm3.303$ & $0.669\pm0.126$ & $0.842\pm0.082$ & $0.742\pm0.107$\\
+\midrule
+Asia (8) & Raw PC facts & 50 & $138.8\pm22.16$ & $12.84\pm3.565$ & $138.8\pm22.16$ & $12.84\pm3.565$ & $0.000\pm0.000$ & $0.908\pm0.019$ & $1.000\pm0.000$ & $0.952\pm0.010$\\
+Asia (8) & ABA-PC & 50 & $142.2\pm10.27$ & $13.06\pm3.060$ & $108.2\pm8.915$ & $2.400\pm0.926$ & $10.66\pm3.179$ & $0.978\pm0.008$ & $0.819\pm0.032$ & $0.891\pm0.018$\\
+Asia (8) & OptABA-PC & 50 & $138.8\pm22.16$ & $12.84\pm3.565$ & $129.8\pm20.43$ & $5.340\pm3.160$ & $7.500\pm2.573$ & $0.959\pm0.023$ & $0.988\pm0.009$ & $0.973\pm0.015$\\
+\midrule
+ER (5) & Raw PC facts & 50 & $70.30\pm9.431$ & $0.060\pm0.314$ & $70.30\pm9.431$ & $0.060\pm0.314$ & $0.000\pm0.000$ & $0.999\pm0.006$ & $1.000\pm0.000$ & $0.999\pm0.003$\\
+ER (5) & ABA-PC & 50 & $70.30\pm9.431$ & $0.060\pm0.314$ & $70.30\pm9.431$ & $0.060\pm0.314$ & $0.000\pm0.000$ & $0.999\pm0.006$ & $1.000\pm0.000$ & $0.999\pm0.003$\\
+ER (5) & OptABA-PC & 50 & $70.30\pm9.431$ & $0.060\pm0.314$ & $70.30\pm9.431$ & $0.060\pm0.314$ & $0.000\pm0.000$ & $0.999\pm0.006$ & $1.000\pm0.000$ & $0.999\pm0.003$\\
+\midrule
+ER (8) & Raw PC facts & 50 & $322.2\pm95.89$ & $29.40\pm16.33$ & $322.2\pm95.89$ & $29.40\pm16.33$ & $0.000\pm0.000$ & $0.902\pm0.058$ & $1.000\pm0.000$ & $0.947\pm0.033$\\
+ER (8) & ABA-PC & 50 & $322.2\pm95.89$ & $29.40\pm16.33$ & $283.0\pm97.23$ & $2.200\pm1.959$ & $27.20\pm16.35$ & $0.991\pm0.009$ & $0.956\pm0.025$ & $0.973\pm0.015$\\
+ER (8) & OptABA-PC & 50 & $322.2\pm95.89$ & $29.40\pm16.33$ & $302.6\pm96.16$ & $13.10\pm10.08$ & $16.30\pm9.433$ & $0.952\pm0.037$ & $0.988\pm0.013$ & $0.969\pm0.024$\\
+\midrule
+SF (5) & Raw PC facts & 50 & $51.78\pm5.898$ & $1.440\pm2.383$ & $51.78\pm5.898$ & $1.440\pm2.383$ & $0.000\pm0.000$ & $0.968\pm0.058$ & $1.000\pm0.000$ & $0.983\pm0.033$\\
+SF (5) & ABA-PC & 50 & $51.78\pm5.898$ & $1.440\pm2.383$ & $50.86\pm7.307$ & $0.680\pm0.957$ & $0.760\pm2.036$ & $0.984\pm0.025$ & $0.995\pm0.016$ & $0.990\pm0.018$\\
+SF (5) & OptABA-PC & 50 & $51.78\pm5.898$ & $1.440\pm2.383$ & $51.30\pm6.431$ & $1.100\pm1.821$ & $0.340\pm1.081$ & $0.974\pm0.050$ & $0.996\pm0.013$ & $0.985\pm0.032$\\
+\midrule
+SF (8) & Raw PC facts & 50 & $220.9\pm81.48$ & $28.96\pm17.71$ & $220.9\pm81.48$ & $28.96\pm17.71$ & $0.000\pm0.000$ & $0.862\pm0.075$ & $1.000\pm0.000$ & $0.924\pm0.044$\\
+SF (8) & ABA-PC & 50 & $220.9\pm81.48$ & $28.96\pm17.71$ & $182.8\pm75.07$ & $2.580\pm1.896$ & $26.38\pm17.40$ & $0.982\pm0.015$ & $0.932\pm0.040$ & $0.956\pm0.024$\\
+SF (8) & OptABA-PC & 50 & $220.9\pm81.48$ & $28.96\pm17.71$ & $204.7\pm77.64$ & $16.38\pm13.48$ & $12.58\pm8.680$ & $0.913\pm0.066$ & $0.980\pm0.024$ & $0.944\pm0.046$\\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

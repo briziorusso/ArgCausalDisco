@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Empirical contestability of CI facts released by the reported OptABA-PC optimum over the frozen 50 seeds.}
+\label{tab:empirical-contestability}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Dataset & Seeds & Challenges & Proved & Zero margin & Median [Q1,Q3] & Infeasible & Timeouts \\
+\midrule
+Cancer (5) & 50 & 207 & 207 & 0.000 (0) & 0.297 [0.158,0.609] & 0 & 0 \\
+Earthquake (5) & 50 & 4 & 4 & 0.000 (0) & 4.170 [1.628,6.332] & 0 & 0 \\
+Survey (6) & 50 & 507 & 507 & 0.000 (0) & 0.517 [0.200,1.026] & 0 & 0 \\
+ER (5) & 50 & 0 & 0 & -- & -- & 0 & 0 \\
+SF (5) & 50 & 24 & 24 & 0.000 (0) & 0.734 [0.308,1.344] & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\begin{minipage}{0.98\textwidth}
+\footnotesize
+Zero margin is reported as a proportion (count) among challenges with both optima proved. The normalized-margin column reports the median [first quartile, third quartile]. Unavailable numerical summaries are shown as --. ER (5) is retained explicitly even when its frozen optima release no CI facts.
+\end{minipage}
+\end{table*}

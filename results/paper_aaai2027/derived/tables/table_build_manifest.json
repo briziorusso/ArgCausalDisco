@@ -1,0 +1,507 @@
+{
+  "version": "paper_final_matched_50rep",
+  "expected_seeds": [
+    2026,
+    2027,
+    2028,
+    2029,
+    2030,
+    2031,
+    2032,
+    2033,
+    2034,
+    2035,
+    2036,
+    2037,
+    2038,
+    2039,
+    2040,
+    2041,
+    2042,
+    2043,
+    2044,
+    2045,
+    2046,
+    2047,
+    2048,
+    2049,
+    2050,
+    2051,
+    2052,
+    2053,
+    2054,
+    2055,
+    2056,
+    2057,
+    2058,
+    2059,
+    2060,
+    2061,
+    2062,
+    2063,
+    2064,
+    2065,
+    2066,
+    2067,
+    2068,
+    2069,
+    2070,
+    2071,
+    2072,
+    2073,
+    2074,
+    2075
+  ],
+  "sample_size": 5000,
+  "ci_alpha": 0.01,
+  "mcs_results_dir": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked",
+  "baseline_versions": [
+    "paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
+    "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
+    "paper_er_sf_alpha001_nowrong_noweight_50rep_fgs"
+  ],
+  "corrected_aspcr_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+  "aspcr_selection": {
+    "cancer": {
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
+    },
+    "earthquake": {
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
+    },
+    "survey": {
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
+    },
+    "asia": {
+      "status": "unavailable",
+      "source_version": null,
+      "corrected_successful_seeds": 0,
+      "selected_rows": 0
+    },
+    "er5": {
+      "status": "unavailable",
+      "source_version": null,
+      "corrected_successful_seeds": 0,
+      "selected_rows": 0,
+      "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting."
+    },
+    "er8": {
+      "status": "unavailable",
+      "source_version": null,
+      "corrected_successful_seeds": 0,
+      "selected_rows": 0,
+      "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting."
+    },
+    "sf5": {
+      "status": "unavailable",
+      "source_version": null,
+      "corrected_successful_seeds": 0,
+      "selected_rows": 0,
+      "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting."
+    },
+    "sf8": {
+      "status": "unavailable",
+      "source_version": null,
+      "corrected_successful_seeds": 0,
+      "selected_rows": 0,
+      "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting."
+    }
+  },
+  "all_corrected_aspcr_artifacts": {
+    "cancer": {
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
+    },
+    "earthquake": {
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
+    },
+    "survey": {
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
+    },
+    "asia": {
+      "status": "unavailable",
+      "source_version": null,
+      "corrected_successful_seeds": 0,
+      "selected_rows": 0
+    },
+    "er5": {
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
+    },
+    "er8": {
+      "status": "unavailable",
+      "source_version": null,
+      "corrected_successful_seeds": 0,
+      "selected_rows": 0
+    },
+    "sf5": {
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
+    },
+    "sf8": {
+      "status": "unavailable",
+      "source_version": null,
+      "corrected_successful_seeds": 0,
+      "selected_rows": 0
+    }
+  },
+  "primary_synthetic_setting": {
+    "edge_per_node": 1,
+    "repair_source": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_sparse_alpha001_noweight_50rep",
+    "baseline_version": "paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs"
+  },
+  "sensitivity_sources": {
+    "dense_alpha001_n5000": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked",
+    "sparse_alpha001_n5000": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_sparse_alpha001_noweight_50rep"
+  },
+  "graph_completion": {
+    "cancer/ABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "cancer/OptABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "cancer/MPC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "cancer/FGS": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "cancer/ASPCR-DAG": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "earthquake/ABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "earthquake/OptABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "earthquake/MPC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "earthquake/FGS": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "earthquake/ASPCR-DAG": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "survey/ABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "survey/OptABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "survey/MPC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 38,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": [
+        2026,
+        2029,
+        2035,
+        2038,
+        2040,
+        2048,
+        2052,
+        2055,
+        2056,
+        2064,
+        2069,
+        2070
+      ]
+    },
+    "survey/FGS": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "survey/ASPCR-DAG": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "asia/ABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "asia/OptABA-PC": {
+      "saved_seeds": 49,
+      "graph_evaluations": 49,
+      "missing_saved_seed_ids": [
+        2047
+      ],
+      "missing_graph_evaluation_seed_ids": [
+        2047
+      ]
+    },
+    "asia/MPC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "asia/FGS": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "er5/ABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "er5/OptABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "er5/MPC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "er5/FGS": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "er8/ABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "er8/OptABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "er8/MPC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 49,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": [
+        2030
+      ]
+    },
+    "er8/FGS": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "sf5/ABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "sf5/OptABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "sf5/MPC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "sf5/FGS": {
+      "saved_seeds": 48,
+      "graph_evaluations": 48,
+      "missing_saved_seed_ids": [
+        2037,
+        2057
+      ],
+      "missing_graph_evaluation_seed_ids": [
+        2037,
+        2057
+      ]
+    },
+    "sf8/ABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "sf8/OptABA-PC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "sf8/MPC": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "sf8/FGS": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    }
+  },
+  "fact_completion": {
+    "cancer/ABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "cancer/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "cancer/ASPCR-DAG": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "earthquake/ABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "earthquake/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "earthquake/ASPCR-DAG": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "survey/ABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "survey/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "survey/ASPCR-DAG": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "asia/ABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "asia/OptABA-PC": {
+      "fact_audits": 49,
+      "missing_fact_audit_seed_ids": [
+        2047
+      ]
+    },
+    "er5/ABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "er5/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "er8/ABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "er8/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "sf5/ABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "sf5/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "sf8/ABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "sf8/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    }
+  },
+  "fact_accounting_identities_validated": true,
+  "compatibility_semantics": {
+    "returned": "Structural CPDAG output and its consistent DAG extensions.",
+    "ABA-PC/OptABA-PC": "Satisfies the retained post-repair CI facts.",
+    "MPC": "Satisfies every test in the full recorded matched G2 CI-test trace.",
+    "ASPCR-DAG": "Satisfies the complete native Bayesian CI-test trace.",
+    "FGS": "Not applicable because FGS is score based."
+  },
+  "compatibility_identities_validated": true,
+  "compatibility_audit_csv": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/final_compatibility_audit.csv",
+  "compatibility_summary_csv": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/final_compatibility_summary.csv",
+  "graph_rows": 1747,
+  "fact_rows": 949
+}

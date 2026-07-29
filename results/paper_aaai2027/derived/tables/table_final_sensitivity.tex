@@ -1,0 +1,35 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\textbf{Density sensitivity at fixed $N=5000$ and $\alpha=0.01$}\\[2pt]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllccccc}
+\toprule
+Dataset & Setting & Method & Correct retained & Fact F1 & CPDAG F1 & CPDAG SHD & Time (s)\\
+\midrule
+ER (5) & Sparse (primary) & ABA-PC & $30.9\pm7.3$ & $0.953\pm0.049$ & $0.562\pm0.224$ & $2.88\pm2.01$ & $1.01\pm0.15$\\
+ &  & OptABA-PC & $\mathbf{32.2\pm7.3}^{***}$ & $\mathbf{0.969\pm0.039}^{**}$ & $\mathbf{0.589\pm0.213}^{*}$ & $\mathbf{2.09\pm1.71}^{**}$ & $\mathbf{0.90\pm0.08}^{***}$\\
+ & Dense & ABA-PC & $70.2\pm9.5$ & $0.999\pm0.003$ & $0.488\pm0.163$ & $2.87\pm2.00$ & $1.80\pm1.08$\\
+ &  & OptABA-PC & $70.2\pm9.5$ & $0.999\pm0.003$ & $0.488\pm0.163$ & $2.87\pm2.00$ & $\mathbf{1.73\pm1.08}^{***}$\\
+\addlinespace[2pt]
+ER (8) & Sparse (primary) & ABA-PC & $71.4\pm23.5$ & $0.871\pm0.069$ & $0.478\pm0.179$ & $8.19\pm4.21$ & $\mathbf{48.0\pm54.3}^{***}$\\
+ &  & OptABA-PC & $\mathbf{86.8\pm25.7}^{***}$ & $\mathbf{0.953\pm0.043}^{***}$ & $\mathbf{0.627\pm0.167}^{***}$ & $\mathbf{3.53\pm1.89}^{***}$ & $139.1\pm139.4$\\
+ & Dense & ABA-PC & $280.8\pm97.3$ & $0.973\pm0.015$ & $0.422\pm0.149_{42}$ & $15.1\pm4.32_{42}$ & $\mathbf{124.3\pm39.5}^{***}$\\
+ &  & OptABA-PC & $\mathbf{289.5\pm97.3}^{***}$ & $0.969\pm0.024$ & $\mathbf{0.556\pm0.132}^{***}_{47}$ & $\mathbf{10.6\pm2.99}^{***}_{47}$ & $299.9\pm85.2$\\
+\addlinespace[2pt]
+SF (5) & Sparse (primary) & ABA-PC & $29.0\pm7.2$ & $0.953\pm0.056$ & $0.670\pm0.176$ & $2.77\pm2.10$ & $1.85\pm2.03$\\
+ &  & OptABA-PC & $\mathbf{30.7\pm6.0}^{***}$ & $\mathbf{0.987\pm0.026}^{***}$ & $\mathbf{0.737\pm0.148}^{**}$ & $\mathbf{2.03\pm1.97}^{***}$ & $\mathbf{1.76\pm2.05}^{***}$\\
+ & Dense & ABA-PC & $50.2\pm7.7$ & $0.990\pm0.018$ & $0.654\pm0.158$ & $3.75\pm1.57$ & $2.38\pm1.54$\\
+ &  & OptABA-PC & $50.2\pm7.6$ & $0.985\pm0.032$ & $0.663\pm0.144$ & $3.57\pm1.38$ & $\mathbf{2.26\pm1.56}^{***}$\\
+\addlinespace[2pt]
+SF (8) & Sparse (primary) & ABA-PC & $72.1\pm37.1$ & $0.838\pm0.065$ & $0.498\pm0.154$ & $8.15\pm3.77$ & $\mathbf{42.3\pm53.4}^{**}$\\
+ &  & OptABA-PC & $\mathbf{93.2\pm45.4}^{***}$ & $\mathbf{0.931\pm0.051}^{***}$ & $\mathbf{0.629\pm0.129}^{***}$ & $\mathbf{4.42\pm2.05}^{***}$ & $99.1\pm122.0$\\
+ & Dense & ABA-PC & $180.3\pm75.4$ & $0.956\pm0.024$ & $0.498\pm0.140_{48}$ & $12.1\pm3.45_{48}$ & $\mathbf{87.9\pm48.5}^{***}$\\
+ &  & OptABA-PC & $\mathbf{188.3\pm75.5}^{***}$ & $0.944\pm0.046$ & $\mathbf{0.646\pm0.115}^{***}$ & $\mathbf{7.96\pm3.03}^{***}$ & $223.7\pm129.2$\\
+\bottomrule
+\end{tabular}
+}%
+\caption{Graph-density sensitivity of the ABA-PC--OptABA-PC comparison (absolute mean $\pm$ standard deviation over seeds 2026--2075). Sparse graphs use one edge per node and are the primary synthetic setting; dense graphs use two edges per node. Sample size ($N=5000$), CI-test threshold ($\alpha=0.01$), data generator, and all other method settings are held fixed. Stars identify the statistically significant winner at BH-adjusted $p<0.05$, $0.01$, and $0.001$; only that value is bold and marked.}
+\label{tab:repair-sensitivity}
+\end{table*}
