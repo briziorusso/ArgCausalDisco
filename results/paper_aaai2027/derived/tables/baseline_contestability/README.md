@@ -5,13 +5,17 @@ This directory keeps three deliberately different comparisons.
 - `abapc_optimality_summary.csv` compares ABA-PC's heuristic release cost with
   the independently re-solved and proved OptABA-PC optimum on the identical
   facts and weights used by the 250-instance contestability audit.
-- `mpc_enforcement_audit.csv` checks whether each returned Majority-PC CPDAG
-  satisfies every outcome in its recorded matched G2 trace.  It is an
-  enforcement-gap diagnostic, not a contestability margin.
+- `mpc_matched_250/mpc_enforcement_audit.csv` checks Majority-PC on the exact
+  five datasets, seeds, graph-density settings, and G2 traces used by the
+  250-instance OptABA-PC contestability audit.  The root-level MPC audit keeps
+  the broader eight-dataset primary reconstruction scope.  Both are
+  enforcement-gap diagnostics, not contestability margins.
 - `aspcr_native/aspcr_contestability_challenges.csv` contains one exact
   forced-fact optimization for every fact failed by the saved ASPCR-DAG
   optimum.  The challenged fact is hard and all other native Bayesian
   log-weighted facts remain soft.
+- `margin_insight_summary.csv` freezes the pooled threshold, perturbation, and
+  sensitivity quantities discussed in the supplement.
 
 The generated TeX tables are `table_contestability_method_overview.tex`,
 `table_contestability_margin_comparison.tex`, and
@@ -22,7 +26,9 @@ semantics.
 Reproduce from the repository root after activating the pinned environment:
 
 ```bash
-python scripts/audit_mpc_test_enforcement.py
+python scripts/audit_mpc_test_enforcement.py \
+  --scope contestability-250 \
+  --output-dir results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_matched_250
 python scripts/run_aspcr_contestability.py --workers 4 --timeout-sec 300
 python scripts/build_baseline_contestability_tables.py
 ```

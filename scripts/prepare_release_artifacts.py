@@ -24,10 +24,15 @@ BASELINE_VERSIONS = (
     "paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
     "paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs",
     "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
-    "paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
+    "paper_fgs_bdeu_alpha001_n5000_50rep",
 )
-ASPCR_VERSION = "paper_aspcr_dag_alpha001_n5000_50rep"
-REPORTED_ASPCR_DATASETS = ("cancer", "earthquake", "survey")
+ASPCR_VERSIONS = {
+    "paper_aspcr_dag_alpha001_n5000_50rep": ("cancer", "earthquake", "survey"),
+    "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep": ("er5", "sf5"),
+}
+REPORTED_ASPCR_DATASETS = tuple(
+    dataset for datasets in ASPCR_VERSIONS.values() for dataset in datasets
+)
 
 STATIC_RELEASE_FILES = {"README.md", "CONTESTABILITY_SCOPE.md"}
 GENERATED_RELEASE_NAMES = {
@@ -109,19 +114,30 @@ def _default_include(path: Path) -> bool:
     return path.name not in {".DS_Store", ".RData", ".Rhistory", ".Rapp.history"} and path.suffix != ".log"
 
 
-def _aspcr_include(path: Path) -> bool:
-    if not _default_include(path):
-        return False
-    name = path.name.lower()
-    if any(part.lower() in {"er5", "sf5"} for part in path.parts):
-        return False
-    if path.suffix.lower() in {".csv", ".npz"}:
-        dataset_tokens = tuple(f"_{dataset}_" for dataset in REPORTED_ASPCR_DATASETS)
-        if any(token in name for token in dataset_tokens):
-            return True
-        if any(token in name for token in ("_er5_", "_sf5_")):
+def _aspcr_include_for(datasets: tuple[str, ...]) -> Callable[[Path], bool]:
+    """Include generic ASPCR files and only the requested dataset artefacts."""
+
+    known = {"cancer", "earthquake", "survey", "asia", "er5", "er8", "sf5", "sf8"}
+    allowed = set(datasets)
+
+    def include(path: Path) -> bool:
+        if not _default_include(path):
             return False
-    return True
+        name = f"_{path.name.lower()}_"
+        mentioned = {
+            dataset
+            for dataset in known
+            if f"_{dataset}_" in name or any(part.lower() == dataset for part in path.parts)
+        }
+        return not mentioned or bool(mentioned & allowed)
+
+    return include
+
+
+def _aspcr_include(path: Path) -> bool:
+    """Backward-compatible all-reported-dataset filter used by focused tests."""
+
+    return _aspcr_include_for(REPORTED_ASPCR_DATASETS)(path)
 
 
 def _copy_entry(
@@ -204,6 +220,7 @@ def _final_source_paths() -> list[tuple[str, Callable[[Path], bool]]]:
     paths: list[tuple[str, Callable[[Path], bool]]] = [
         ("results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked", _default_include),
         ("results/final_mcs_experiments_er_sf_sparse_alpha001_noweight_50rep", _default_include),
+        ("results/recovery_optaba_runs", _default_include),
         ("results/tables/paper_current_alpha001_nowrong_noweight_50rep_preview", _default_include),
     ]
     for version in BASELINE_VERSIONS:
@@ -216,16 +233,18 @@ def _final_source_paths() -> list[tuple[str, Callable[[Path], bool]]]:
                 (f"results/estimated_graphs/{version}", _default_include),
             ]
         )
-    paths.extend(
-        [
-            (f"results/metadata_{ASPCR_VERSION}.json", _default_include),
-            (f"results/stored_results_{ASPCR_VERSION}.csv", _default_include),
-            (f"results/stored_results_{ASPCR_VERSION}_cpdag.csv", _default_include),
-            (f"results/progress/{ASPCR_VERSION}", _aspcr_include),
-            (f"results/estimated_graphs/{ASPCR_VERSION}", _aspcr_include),
-            (f"results/aspcr_matched/{ASPCR_VERSION}", _aspcr_include),
-        ]
-    )
+    for version, datasets in ASPCR_VERSIONS.items():
+        include = _aspcr_include_for(datasets)
+        paths.extend(
+            [
+                (f"results/metadata_{version}.json", _default_include),
+                (f"results/stored_results_{version}.csv", include),
+                (f"results/stored_results_{version}_cpdag.csv", include),
+                (f"results/progress/{version}", include),
+                (f"results/estimated_graphs/{version}", include),
+                (f"results/aspcr_matched/{version}", include),
+            ]
+        )
     return paths
 
 
@@ -270,10 +289,8 @@ def build(force: bool) -> dict[str, Any]:
             "sha256": _sha256(formal_path),
         },
         "completion_exceptions": {
-            "asia/OptABA-PC": {"missing_saved_seeds": [2047]},
             "survey/MPC": {"missing_graph_evaluation_seeds": [2026, 2029, 2035, 2038, 2040, 2048, 2052, 2055, 2056, 2064, 2069, 2070]},
             "er8/MPC": {"missing_graph_evaluation_seeds": [2030]},
-            "sf5/FGS": {"missing_saved_seeds": [2037, 2057]},
         },
     }
     (RELEASE_ROOT / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")

@@ -11,7 +11,7 @@ The implementation provides:
 
 - an incremental Bayes-ball encoding of CI constraints over DAGs;
 - optimal weighted CI-fact repair with a stable-model/MCS projection;
-- the retained and released fact sets and every compatible CPDAG/DAG;
+- the retained and released fact sets and auditable compatible CPDAG/DAG witnesses;
 - executable checks of the paper's formal properties;
 - matched ABA-PC, MPC, FGS, and DAG-restricted ASPCR experiments;
 - compatibility, contestability, statistical-analysis, and table pipelines.
@@ -64,10 +64,11 @@ margins on the paper examples.
 The primary study uses 50 seeds (2026--2075) and 5,000 observations per seed.
 Cancer, Earthquake, Survey, and Asia use the bundled bnlearn BIF networks.
 Synthetic ER and SF DAGs have five or eight nodes and one edge per node in the
-primary experiment; two-edge-per-node runs are a reported density-sensitivity
-analysis. ABA-PC, OptABA-PC, and MPC use the G-squared CI test at
-`alpha=0.01`. FGS uses SEM-BIC. ASPCR-DAG retains its published Bayesian
-log-weighted CI configuration on the same samples.
+primary experiment; bounded two-edge-per-node five-node runs are used only in
+the exact contestability audit. ABA-PC, OptABA-PC, and MPC use the G-squared CI test at
+`alpha=0.01`. FGS uses its native discrete BDeu score. ASPCR-DAG retains its
+published Bayesian log-weighted CI configuration on the same samples and is
+reported for Cancer, Earthquake, Survey, ER(5), and SF(5).
 
 ABA-PC and OptABA-PC receive identical CI facts and weights. Their runs use the
 incremental encoding, no conditioning-set weight multiplier, a 300-second solve
@@ -91,6 +92,7 @@ To rebuild the paper tables directly from the frozen evidence:
 python scripts/build_final_experiment_tables.py \
   --results-dir results/paper_aaai2027/frozen/results \
   --mcs-results-dir results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked \
+  --mcs-recovery-dir results/paper_aaai2027/frozen/results/recovery_optaba_runs \
   --out-dir results/paper_aaai2027/recomputed/tables
 ```
 

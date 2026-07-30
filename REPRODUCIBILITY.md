@@ -45,8 +45,8 @@ categorical data-generating distribution. No downloaded observational dataset
 is required.
 
 The final seeds are 2026--2075. The primary synthetic ER/SF configuration uses
-one edge per node; two edges per node are used only for the reported density
-sensitivity and the bounded five-node contestability audit. ABA-PC, OptABA-PC,
+one edge per node; two edges per node are used only for the bounded five-node
+exact contestability audit. ABA-PC, OptABA-PC,
 and MPC use G-squared CI tests at `alpha=0.01`. There is no injected fact
 corruption and no conditioning-set-size multiplier.
 
@@ -63,7 +63,7 @@ tuning was performed:
 | MPC | Stable Majority-PC; G-squared; `alpha=0.01`; majority collider rule `uc_rule=5`; priority 2; no conditioning-depth limit. |
 | ABA-PC | Receives MPC's CI trace; releases facts from lowest to highest strength until coherent; incremental Bayes-ball encoding. |
 | OptABA-PC | Same facts, weights, and graph encoding as ABA-PC; MUS-reified weak constraints; clingo `bb`, `optN`, four threads; minimum total release weight. |
-| FGS | Tetrad/py-causal FGS; SEM-BIC score; maximum degree `-1`; faithfulness assumed; other Tetrad defaults. |
+| FGS | Tetrad/py-causal FGES; discrete BDeu score; sample prior 15; structure prior 1; maximum degree `-1`; faithfulness assumed; symmetric first step disabled. |
 | ASPCR-DAG | Native Bayesian CI test; log weights; prior independence 0.4; Bayesian alpha 20; exhaustive `n-2` schedule; acyclic causally sufficient encoding; clingo `crafty`; 25,000-second solver limit. |
 
 ABA repair runs use a 300-second solver limit and a separate 120-second
@@ -105,8 +105,8 @@ for specification in "ER 5" "ER 8" "SF 5" "SF 8"; do
 done
 ```
 
-Repeat the synthetic commands with `--edge-per-node 2` for the density
-sensitivity runs.
+The exact five-node contestability inputs use the same command with
+`--edge-per-node 2`; they are not part of the primary reconstruction table.
 
 ## 4. MPC and FGS
 
@@ -116,14 +116,14 @@ used after FGS to ensure that the Tetrad JVM does not keep the process alive.
 ```bash
 python scripts/run_matched_baseline_experiments.py \
   --version paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs \
-  --methods mpc fgs --datasets cancer earthquake survey asia \
+  --methods mpc --datasets cancer earthquake survey asia \
   --results-dir results/reproduced --n-runs 50 --seed-start 2026 \
   --sample-size 5000 --test-alpha 0.01 --test-name gsq \
   --edge-per-node 2 --hard-exit
 
 python scripts/run_matched_baseline_experiments.py \
   --version paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs \
-  --methods mpc fgs --datasets er5 er8 sf5 sf8 \
+  --methods mpc --datasets er5 er8 sf5 sf8 \
   --results-dir results/reproduced --n-runs 50 --seed-start 2026 \
   --sample-size 5000 --test-alpha 0.01 --test-name gsq \
   --edge-per-node 1 --hard-exit
@@ -136,11 +136,12 @@ python scripts/run_matched_baseline_experiments.py \
   --edge-per-node 2
 
 python scripts/run_matched_baseline_experiments.py \
-  --version paper_er_sf_alpha001_nowrong_noweight_50rep_fgs \
-  --methods fgs --datasets er5 er8 sf5 sf8 \
+  --version paper_fgs_bdeu_alpha001_n5000_50rep \
+  --methods fgs_bdeu \
+  --datasets cancer earthquake survey asia er5 er8 sf5 sf8 \
   --results-dir results/reproduced --n-runs 50 --seed-start 2026 \
   --sample-size 5000 --test-alpha 0.01 --test-name gsq \
-  --edge-per-node 2 --hard-exit
+  --edge-per-node 1 --hard-exit
 ```
 
 Add `--resume` to any interrupted matched-baseline command. Resume uses
@@ -167,7 +168,15 @@ export CLINGO_BIN_DIR="$(dirname "$(command -v clingo)")"
 python scripts/run_matched_baseline_experiments.py \
   --version paper_aspcr_dag_alpha001_n5000_50rep \
   --methods aspcr_log_dag \
-  --datasets cancer earthquake survey er5 sf5 \
+  --datasets cancer earthquake survey \
+  --results-dir results/reproduced --n-runs 50 --seed-start 2026 \
+  --sample-size 5000 --test-alpha 0.001 \
+  --aspcr-r-dir "$ASPCR_R_DIR" --rscript "$RSCRIPT" \
+  --clingo-bin-dir "$CLINGO_BIN_DIR" --fail-fast
+
+python scripts/run_matched_baseline_experiments.py \
+  --version paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep \
+  --methods aspcr_log_dag --datasets er5 sf5 --edge-per-node 1 \
   --results-dir results/reproduced --n-runs 50 --seed-start 2026 \
   --sample-size 5000 --test-alpha 0.001 \
   --aspcr-r-dir "$ASPCR_R_DIR" --rscript "$RSCRIPT" \
@@ -184,7 +193,13 @@ Validate every saved trace and graph:
 python scripts/validate_matched_aspcr_results.py \
   --results-dir results/reproduced \
   --version paper_aspcr_dag_alpha001_n5000_50rep \
-  --datasets cancer earthquake survey er5 sf5 \
+  --datasets cancer earthquake survey \
+  --n-runs 50 --seed-start 2026 --sample-size 5000 --test-alpha 0.001
+
+python scripts/validate_matched_aspcr_results.py \
+  --results-dir results/reproduced \
+  --version paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep \
+  --datasets er5 sf5 \
   --n-runs 50 --seed-start 2026 --sample-size 5000 --test-alpha 0.001
 ```
 
@@ -214,7 +229,7 @@ python scripts/build_baseline_contestability_tables.py --help
 ```
 
 The frozen evidence contains 742/742 proved OptABA-PC hard-retention solves,
-400 MPC full-trace audits, and 3,133/3,133 proved ASPCR-DAG sensitivity solves.
+400 MPC full-trace audits, and 4,330/4,330 proved ASPCR-DAG sensitivity solves.
 The latter are sensitivity probes, not an ASPCR redress guarantee.
 
 ## 7. Rebuild and validate the tables
@@ -223,21 +238,17 @@ The latter are sensitivity probes, not an ASPCR redress guarantee.
 python scripts/build_final_experiment_tables.py \
   --results-dir results/paper_aaai2027/frozen/results \
   --mcs-results-dir results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked \
+  --mcs-recovery-dir results/paper_aaai2027/frozen/results/recovery_optaba_runs \
   --out-dir results/paper_aaai2027/recomputed/tables
 
 python scripts/validate_release_artifacts.py
 ```
 
-No missing outcome is imputed. The frozen completion record contains these
-exceptions:
-
-- Asia OptABA-PC: seed 2047 unavailable (49/50).
-- Survey MPC compatible-graph evaluation: 38/50.
-- ER(8) MPC compatible-graph evaluation: seed 2030 unavailable (49/50).
-- SF(5) FGS: seeds 2037 and 2057 unavailable (48/50).
-
-All other reported method/dataset rows have 50 saved seeds, subject to a metric
-being inapplicable (for example, CI-fact F1 for FGS).
+No missing outcome is imputed. All reported method--dataset pairs have 50 saved
+outputs. MPC has no consistent DAG extension for 12 endpoint-invalid Survey
+outputs and one endpoint-invalid ER(8) output, so the affected DAG metrics use
+38 and 49 paired seeds, respectively. CPDAG and repair comparisons retain all
+50 seeds; inapplicable metrics, such as CI-fact F1 for FGS, remain undefined.
 
 ## 8. Frozen artefact integrity
 

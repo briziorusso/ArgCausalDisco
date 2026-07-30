@@ -2,19 +2,21 @@
 \centering
 \footnotesize
 \setlength{\tabcolsep}{2pt}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lcccccc}
 \toprule
 Dataset & $\Delta n_{\mathrm{acc}}^{T}\uparrow$ & $\Delta\mathrm{FactF1}\uparrow$ & $\Delta\#\mathrm{CPDAG}\downarrow$ & $\Delta\mathrm{F1}_{\mathrm{CPDAG}}\uparrow$ & $\Delta\mathrm{SHD}\downarrow$ & $\Delta t\downarrow$\\
 \midrule
-Cancer (5) & $+1.6\ (+6.8\%)$ & $-0.004\ (-0.5\%)$ & $-14.1\ (-93.4\%)$ & $+0.054\ (+10.3\%)$ & $-0.974\ (-34.6\%)$ & $-0.233\ (\times0.85)$\\
-Survey (6) & $+4.9\ (+19.6\%)$ & $-0.047\ (-5.9\%)$ & $-1277.2\ (-99.9\%)$ & $+0.159\ (+36.3\%)$ & $-2.790\ (-39.1\%)$ & $-12.728\ (\times0.19)$\\
-Asia (8) & $+21.8\ (+20.7\%)$ & $+0.082\ (+9.2\%)$ & $-10846.1\ (-100.0\%)$ & $+0.311\ (+138.6\%)$ & $-10.536\ (-73.1\%)$ & $-27.356\ (\times0.71)$\\
-ER (5) & $+1.3\ (+4.1\%)$ & $+0.016\ (+1.6\%)$ & $-5.2\ (-63.6\%)$ & $+0.027\ (+4.9\%)$ & $-0.792\ (-27.5\%)$ & $-0.106\ (\times0.90)$\\
-ER (8) & $+15.4\ (+21.5\%)$ & $+0.082\ (+9.5\%)$ & $-3835.3\ (-99.9\%)$ & $+0.150\ (+31.3\%)$ & $-4.661\ (-56.9\%)$ & $+91.044\ (\times2.90)$\\
-SF (5) & $+1.7\ (+6.0\%)$ & $+0.034\ (+3.6\%)$ & $-3.3\ (-3.7\%)$ & $+0.067\ (+10.1\%)$ & $-0.741\ (-26.8\%)$ & $-0.094\ (\times0.95)$\\
-SF (8) & $+21.1\ (+29.2\%)$ & $+0.093\ (+11.1\%)$ & $-2937.8\ (-94.5\%)$ & $+0.131\ (+26.3\%)$ & $-3.725\ (-45.7\%)$ & $+56.807\ (\times2.34)$\\
+Cancer (5) & $\mathbf{+1.6\ (+6.8\%)}^{***}$ & $-0.004\ (-0.5\%)$ & $\mathbf{-14.1\ (-93.4\%)}^{***}$ & $\mathbf{+0.054\ (+10.3\%)}^{*}$ & $\mathbf{-0.974\ (-34.6\%)}^{***}$ & $\mathbf{-0.233\ (\times0.85)}^{***}$\\
+Survey (6) & $\mathbf{+4.9\ (+19.6\%)}^{***}$ & $\mathbf{-0.047\ (-5.9\%)}^{**}$ & $\mathbf{-1277.2\ (-99.9\%)}^{***}$ & $\mathbf{+0.159\ (+36.3\%)}^{***}$ & $\mathbf{-2.790\ (-39.1\%)}^{***}$ & $-12.728\ (\times0.19)$\\
+Asia (8) & $\mathbf{+21.8\ (+20.6\%)}^{***}$ & $\mathbf{+0.082\ (+9.2\%)}^{***}$ & $\mathbf{-10821.5\ (-100.0\%)}^{***}$ & $\mathbf{+0.313\ (+139.7\%)}^{***}$ & $\mathbf{-10.507\ (-73.1\%)}^{***}$ & $\mathbf{-28.904\ (\times0.70)}^{*}$\\
+ER (5) & $\mathbf{+1.3\ (+4.1\%)}^{***}$ & $\mathbf{+0.016\ (+1.6\%)}^{**}$ & $\mathbf{-5.2\ (-63.6\%)}^{***}$ & $\mathbf{+0.027\ (+4.9\%)}^{*}$ & $\mathbf{-0.792\ (-27.5\%)}^{**}$ & $\mathbf{-0.106\ (\times0.90)}^{***}$\\
+ER (8) & $\mathbf{+15.4\ (+21.5\%)}^{***}$ & $\mathbf{+0.082\ (+9.5\%)}^{***}$ & $\mathbf{-3835.3\ (-99.9\%)}^{***}$ & $\mathbf{+0.150\ (+31.3\%)}^{***}$ & $\mathbf{-4.661\ (-56.9\%)}^{***}$ & $\mathbf{+91.044\ (\times2.90)}^{***}$\\
+SF (5) & $\mathbf{+1.7\ (+6.0\%)}^{***}$ & $\mathbf{+0.034\ (+3.6\%)}^{***}$ & $\mathbf{-3.3\ (-3.7\%)}^{**}$ & $\mathbf{+0.067\ (+10.1\%)}^{**}$ & $\mathbf{-0.741\ (-26.8\%)}^{**}$ & $\mathbf{-0.094\ (\times0.95)}^{***}$\\
+SF (8) & $\mathbf{+21.1\ (+29.2\%)}^{***}$ & $\mathbf{+0.093\ (+11.1\%)}^{***}$ & $\mathbf{-2937.8\ (-94.5\%)}^{***}$ & $\mathbf{+0.131\ (+26.3\%)}^{***}$ & $\mathbf{-3.725\ (-45.7\%)}^{***}$ & $\mathbf{+56.807\ (\times2.34)}^{**}$\\
 \bottomrule
 \end{tabular}
-\caption{Compact paired effect sizes for OptABA-PC versus ABA-PC on the seven primary datasets with at least one distinguishable core outcome. Each entry is the mean within-seed difference $\Delta=\mathrm{OptABA\mbox{-}PC}-\mathrm{ABA\mbox{-}PC}$; parentheses give the change relative to the matched ABA-PC mean, except runtime, which gives $t_{\mathrm{Opt}}/t_{\mathrm{ABA}}$. Positive values favour OptABA-PC for upward metrics, while negative values favour it for \#CPDAG, SHD, and time. $\Delta n_{\mathrm{acc}}^{T}$ is the change in retained true CI facts, and \#CPDAG counts equivalence classes satisfying all retained post-repair facts. Statistical annotations and absolute mean $\pm$ standard deviation for all eight datasets are retained in Table~\ref{tab:absolute-results}; Earthquake is omitted here because its core fact, compatibility, and graph-accuracy outcomes do not differ.}
+}
+\caption{Paired OptABA-PC--ABA-PC effects on seven fixed-network and synthetic benchmarks (number of nodes in brackets). Entries are mean within-seed differences $\Delta$; parentheses give change relative to ABA-PC, except runtime ($t_{\mathrm{Opt}}/t_{\mathrm{ABA}}$). Positive values favour upward metrics and negative values favour \#CPDAG, SHD, and time. $\Delta n_{\mathrm{acc}}^{T}$ counts additional retained true CI facts; \#CPDAG counts MECs satisfying all retained facts. Bold effects are statistically significant: one, two, and three stars denote BH-adjusted paired $p<0.05$, $0.01$, and $0.001$; the sign identifies the favoured method. The supplementary absolute-results table gives absolute mean $\pm$ standard deviation for all eight datasets; Earthquake is omitted here because its core outcomes do not differ significantly.}
 \label{tab:main-results}
 \end{table*}

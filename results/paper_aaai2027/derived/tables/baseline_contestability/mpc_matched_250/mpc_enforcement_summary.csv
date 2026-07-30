@@ -1,0 +1,6 @@
+dataset,dataset_label,outputs,valid_outputs,fully_enforcing_outputs,enforcement_failure_outputs,enforcement_failure_proportion,tests_mean_valid,contradicted_tests_mean_valid,contradicted_tests_median_valid,contradicted_tests_max_valid,contradiction_rate_mean_valid,contradicted_independence_mean_valid,contradicted_dependence_mean_valid
+cancer,Cancer (5),50,50,0,50,1.0,33.08,4.76,5.0,9.0,0.14613239240320822,3.74,1.02
+earthquake,Earthquake (5),50,50,47,3,0.06,54.34,0.08,0.0,2.0,0.0014187068424356558,0.08,0.0
+survey,Survey (6),50,38,0,50,1.0,53.78947368421053,14.868421052631579,14.5,26.0,0.2701556148575623,11.657894736842104,3.210526315789474
+er5,ER (5),50,50,48,2,0.04,70.3,0.1,0.0,4.0,0.0016229260935143289,0.04,0.06
+sf5,SF (5),50,50,31,19,0.38,51.78,1.1,0.0,8.0,0.02287198250303844,0.68,0.42

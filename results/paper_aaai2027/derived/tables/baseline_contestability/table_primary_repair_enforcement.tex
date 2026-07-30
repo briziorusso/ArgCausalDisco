@@ -1,0 +1,26 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+& Input status & \multicolumn{3}{c}{Saved OptABA-PC repair vs. ABA-PC} & \multicolumn{2}{c}{MPC output} \\
+\cmidrule(lr){2-2}\cmidrule(lr){3-5}\cmidrule(l){6-7}
+Dataset & Feasible / inputs & Lower / inconsistent & Same cost & Median saving & Full trace / inputs & Gap / feasible \\
+\midrule
+Cancer (5) & 0/50 & 50/50 & 0 & 40.2\% & 0/50 & -- \\
+Earthquake (5) & 47/50 & 1/3 & 2 & 61.8\% & 47/50 & 0/47 \\
+Survey (6) & 0/50 & 50/50 & 0 & 57.1\% & 0/50 & -- \\
+Asia (8) & 0/50 & 50/50 & 0 & 73.0\% & 0/50 & -- \\
+ER (5) & 16/50 & 26/34 & 8 & 48.4\% & 11/50 & 5/16 \\
+ER (8) & 3/50 & 46/47 & 1 & 66.4\% & 3/50 & 0/3 \\
+SF (5) & 20/50 & 23/30 & 7 & 60.9\% & 17/50 & 3/20 \\
+SF (8) & 2/50 & 48/48 & 0 & 71.6\% & 2/50 & 0/2 \\
+\midrule
+\textbf{Total} & 88/400 & \textbf{294/312} & 18 & 63.4\% & 80/400 & \textbf{8/88} \\
+\bottomrule
+\end{tabular}
+\caption{Repair quality and MPC enforcement on the same 400 primary $G^2$ traces. Feasible inputs admit a DAG satisfying the entire trace; all other inputs require a repair. \emph{Lower/inconsistent} counts saved OptABA-PC repairs with lower release cost than ABA-PC among the inconsistent inputs, and \emph{same cost} is the complementary count; ABA-PC is never cheaper. Median saving is conditional on a lower saved cost. Thirty-two OptABA-PC rows are valid timeout incumbents, so this full-coverage comparison is descriptive; Table~\ref{tab:contestability-margin-comparison} separately gives the 250-instance exact audit with proved optima. MPC \emph{full trace} counts returned classes satisfying every input test, and \emph{gap} counts feasible traces that MPC nevertheless fails to satisfy.}
+\label{tab:primary-repair-enforcement}
+\label{tab:abapc-optimality-by-dataset}
+\label{tab:mpc-enforcement-gap}
+\end{table*}

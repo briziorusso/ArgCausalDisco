@@ -55,12 +55,17 @@
   "sample_size": 5000,
   "ci_alpha": 0.01,
   "mcs_results_dir": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked",
+  "mcs_recovery_dir": "results/paper_aaai2027/frozen/results/recovery_optaba_runs",
   "baseline_versions": [
     "paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
     "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
-    "paper_er_sf_alpha001_nowrong_noweight_50rep_fgs"
+    "paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
+    "paper_fgs_bdeu_alpha001_n5000_50rep"
   ],
-  "corrected_aspcr_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+  "corrected_aspcr_versions": [
+    "paper_aspcr_dag_alpha001_n5000_50rep",
+    "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep"
+  ],
   "aspcr_selection": {
     "cancer": {
       "status": "corrected_dag_complete",
@@ -87,32 +92,30 @@
       "selected_rows": 0
     },
     "er5": {
-      "status": "unavailable",
-      "source_version": null,
-      "corrected_successful_seeds": 0,
-      "selected_rows": 0,
-      "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting."
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
     },
     "er8": {
       "status": "unavailable",
       "source_version": null,
       "corrected_successful_seeds": 0,
       "selected_rows": 0,
-      "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting."
+      "note": "No complete corrected ASPCR-DAG artifact is available for the primary synthetic setting."
     },
     "sf5": {
-      "status": "unavailable",
-      "source_version": null,
-      "corrected_successful_seeds": 0,
-      "selected_rows": 0,
-      "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting."
+      "status": "corrected_dag_complete",
+      "source_version": "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
+      "corrected_successful_seeds": 50,
+      "selected_rows": 50
     },
     "sf8": {
       "status": "unavailable",
       "source_version": null,
       "corrected_successful_seeds": 0,
       "selected_rows": 0,
-      "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting."
+      "note": "No complete corrected ASPCR-DAG artifact is available for the primary synthetic setting."
     }
   },
   "all_corrected_aspcr_artifacts": {
@@ -142,7 +145,7 @@
     },
     "er5": {
       "status": "corrected_dag_complete",
-      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "source_version": "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
       "corrected_successful_seeds": 50,
       "selected_rows": 50
     },
@@ -154,7 +157,7 @@
     },
     "sf5": {
       "status": "corrected_dag_complete",
-      "source_version": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "source_version": "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
       "corrected_successful_seeds": 50,
       "selected_rows": 50
     },
@@ -285,14 +288,10 @@
       "missing_graph_evaluation_seed_ids": []
     },
     "asia/OptABA-PC": {
-      "saved_seeds": 49,
-      "graph_evaluations": 49,
-      "missing_saved_seed_ids": [
-        2047
-      ],
-      "missing_graph_evaluation_seed_ids": [
-        2047
-      ]
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
     },
     "asia/MPC": {
       "saved_seeds": 50,
@@ -325,6 +324,12 @@
       "missing_graph_evaluation_seed_ids": []
     },
     "er5/FGS": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "er5/ASPCR-DAG": {
       "saved_seeds": 50,
       "graph_evaluations": 50,
       "missing_saved_seed_ids": [],
@@ -375,16 +380,16 @@
       "missing_graph_evaluation_seed_ids": []
     },
     "sf5/FGS": {
-      "saved_seeds": 48,
-      "graph_evaluations": 48,
-      "missing_saved_seed_ids": [
-        2037,
-        2057
-      ],
-      "missing_graph_evaluation_seed_ids": [
-        2037,
-        2057
-      ]
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
+    },
+    "sf5/ASPCR-DAG": {
+      "saved_seeds": 50,
+      "graph_evaluations": 50,
+      "missing_saved_seed_ids": [],
+      "missing_graph_evaluation_seed_ids": []
     },
     "sf8/ABA-PC": {
       "saved_seeds": 50,
@@ -453,16 +458,18 @@
       "missing_fact_audit_seed_ids": []
     },
     "asia/OptABA-PC": {
-      "fact_audits": 49,
-      "missing_fact_audit_seed_ids": [
-        2047
-      ]
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
     },
     "er5/ABA-PC": {
       "fact_audits": 50,
       "missing_fact_audit_seed_ids": []
     },
     "er5/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "er5/ASPCR-DAG": {
       "fact_audits": 50,
       "missing_fact_audit_seed_ids": []
     },
@@ -479,6 +486,10 @@
       "missing_fact_audit_seed_ids": []
     },
     "sf5/OptABA-PC": {
+      "fact_audits": 50,
+      "missing_fact_audit_seed_ids": []
+    },
+    "sf5/ASPCR-DAG": {
       "fact_audits": 50,
       "missing_fact_audit_seed_ids": []
     },
@@ -502,6 +513,6 @@
   "compatibility_identities_validated": true,
   "compatibility_audit_csv": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/final_compatibility_audit.csv",
   "compatibility_summary_csv": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/final_compatibility_summary.csv",
-  "graph_rows": 1747,
-  "fact_rows": 949
+  "graph_rows": 1850,
+  "fact_rows": 1050
 }

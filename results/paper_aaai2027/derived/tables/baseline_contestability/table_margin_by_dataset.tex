@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+ & \multicolumn{3}{c}{OptABA-PC contestations} & \multicolumn{2}{c}{ASPCR-DAG sensitivity probes} \\
+\cmidrule(lr){2-4}\cmidrule(l){5-6}
+Dataset & Proved & Median $\mu/w_f$ $[Q_1,Q_3]$ & Median $\mu/c^*$ & Proved & Median $\mu_{\rm ASP}/w_f$ $[Q_1,Q_3]$ \\
+\midrule
+Cancer (5) & 207/207 & 0.297 [0.158,0.609] & 0.072 & 959/959 & 4.041 [1.615,7.946] \\
+Earthquake (5) & 4/4 & 4.170 [1.628,6.332] & 3.544 & 80/80 & 3.625 [0.990,6.349] \\
+Survey (6) & 507/507 & 0.517 [0.200,1.026] & 0.051 & 2094/2094 & 2.376 [0.537,14.074] \\
+ER (5) & 0/0 & -- & -- & 503/503 & 2.163 [0.773,5.555] \\
+SF (5) & 24/24 & 0.734 [0.308,1.344] & 0.182 & 694/694 & 2.437 [0.958,6.108] \\
+\midrule
+\textbf{Total} & 742/742 & 0.455 [0.182,0.912] & 0.057 & 4330/4330 & 2.828 [0.890,8.647] \\
+\bottomrule
+\end{tabular}
+\caption{Dataset-level forced-fact evidence over 250 validated baselines per method (50 per dataset). Each target is a fact rejected by the baseline optimum; all re-solves prove optimality and none has zero gap. OptABA-PC's $\mu(f)/w_f$ is an exact user-contestation threshold; $c^*$ denotes the complete baseline optimum repair cost. ASPCR-DAG's $\mu_{\rm ASP}(f)/w_f$ is instead a post-hoc sensitivity gap for its soft graph-disagreement objective. These are not paired effect sizes: the methods use different traces, weights, and objectives, and their synthetic audits use different graph densities.}
+\label{tab:margin-by-dataset}
+\end{table*}

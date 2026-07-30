@@ -1484,6 +1484,16 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--full-dump-timeout",
+        type=float,
+        default=300.0,
+        help=(
+            "Wall-clock budget in seconds for emitting the full, non-skeleton-reduced "
+            "incremental program required by MUS optimisation. This is separate from "
+            "the optimisation and graph-evaluation limits (default: 300)."
+        ),
+    )
+    parser.add_argument(
         "--threads",
         type=int,
         default=8,
@@ -3169,8 +3179,9 @@ def main() -> None:
                     path=str(base_program_inc_full_path),
                 )
                 # The source dump is written *before* grounding/solving in causalaba_increm.
-                # Use a tight wall budget: enough to build and dump, not necessarily to finish solving.
-                dump_wall_budget = min(10.0, max(1.0, float(timeout_sec) * 0.25))
+                # Dump construction has its own explicit wall budget.  It is an
+                # artifact-emission step, not part of the optimisation limit.
+                dump_wall_budget = max(1.0, float(args.full_dump_timeout))
                 try:
                     _run_abapc_inc_with_wall_timeout(
                         n_nodes,

@@ -1,0 +1,106 @@
+{
+  "generated_at": "2026-07-30T18:06:36",
+  "methods": [
+    {
+      "enc": "inc",
+      "id": "inc|lex|bb|optN|mus",
+      "obj": "lex",
+      "opt_mode": "optN",
+      "reif": "mus",
+      "strategy": "bb"
+    }
+  ],
+  "metric_defs": [
+    {
+      "higher_is_better": false,
+      "name": "timeR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "timeBSR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "solveR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "toR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "nATR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "wATR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "nDR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "shdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "F1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "adjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "ahR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "factR"
+    },
+    {
+      "higher_is_better": false,
+      "name": "cshdR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cF1R"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cadjR"
+    },
+    {
+      "higher_is_better": true,
+      "name": "cahR"
+    }
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "ranks_avg": {
+    "inc|lex|bb|optN|mus": {
+      "F1R": 1.0,
+      "adjR": 1.0,
+      "ahR": 1.0,
+      "cF1R": 1.0,
+      "cadjR": 1.0,
+      "cahR": 1.0,
+      "cshdR": 1.0,
+      "factR": 1.0,
+      "nATR": 1.0,
+      "nDR": 1.0,
+      "shdR": 1.0,
+      "solveR": 1.0,
+      "timeBSR": 1.0,
+      "timeR": 1.0,
+      "toR": 1.0,
+      "wATR": 1.0
+    }
+  },
+  "reps": [
+    1
+  ],
+  "results_dir": "results/paper_aaai2027/frozen/results/recovery_asia2047_optaba_alpha001_n5000_20260730_180615"
+}

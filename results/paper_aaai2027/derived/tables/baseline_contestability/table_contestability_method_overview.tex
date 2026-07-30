@@ -1,16 +1,17 @@
 \begin{table*}[t]
 \centering
-\scriptsize
-\caption{Comparison of four empirical properties: satisfaction of the complete input trace, satisfaction of the subset declared retained (or not failed), objective optimality, and the response of the optimized objective after one rejected fact is made mandatory. \emph{Full-trace compatibility} permits no exclusions as released or failed; \emph{declared set} tests the method's stated post-repair commitments. ABA-PC and OptABA-PC share the 250 proved-audit G$^2$ instances, so their objective comparison is paired: ABA-PC matches the proved minimum on 142 and OptABA-PC is strictly cheaper on the other 108. MPC is audited on all 400 matched G$^2$ outputs; its bold compatibility rate is called out for discussion and does not denote a winner. ASPCR-DAG uses the same saved samples on three datasets but a different exhaustive Bayesian trace, log weights, and single-DAG graph-disagreement objective. Each hard-retention re-solve targets one rejected fact. For OptABA-PC, the re-solve instantiates a user contestation and $\mu(f)$ is the proved contestability response; for ASPCR-DAG, $\mu_{\mathrm{ASP}}(f)$ is a post-hoc sensitivity gap, not a method-level redress guarantee. Zero $\mu$/gap counts proved re-solves for which hard retention does not increase the optimum. The normalized quantities are $\mu(f)/w_f$ and $\mu_{\mathrm{ASP}}(f)/w_f$; $Q_1$ and $Q_3$ denote their first and third quartiles. The two methods' target counts and normalized values are not paired or numerically commensurate cross-method effects.}
-\label{tab:contestability-overview}
-\begin{tabular}{@{}lrrrrrr@{}}
+\small
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{4.1cm}>{\centering\arraybackslash}p{1.7cm}>{\centering\arraybackslash}p{1.9cm}>{\centering\arraybackslash}p{1.7cm}>{\centering\arraybackslash}p{2.2cm}@{}}
 \toprule
-Method & Full-trace compat. & Declared set & Objective evidence & Hard re-solves & Zero $\mu$/gap & Normalized $\mu$/gap median [$Q_1,Q_3$] \\
+Method & Run status & Feasible traces & Full-trace matches & Explicit repairs & Selected repair enforced \\
 \midrule
-ABA-PC & 139/250 (56\%) & 250/250 (100\%) & Opt lower 108/250 (43\%) & -- & -- & -- \\
-MPC & \textbf{80/400 (20\%)} & -- & -- & -- & -- & -- \\
-ASPCR-DAG & 22/150 (15\%) & 150/150 (100\%) & min. 150/150 (100\%) & 3133/3133 (100\%) & 0/3133 (0\%) & 3.113 [0.889,10.215] \\
-OptABA-PC & 139/250 (56\%) & 250/250 (100\%) & min. 250/250 (100\%) & 742/742 (100\%) & 0/742 (0\%) & 0.455 [0.182,0.912] \\
+OptABA-PC & \textbf{400/400 saved}: 368 completed, 32 timeout incumbents & 88/400 & 88/400 & \textbf{312/312} & \textbf{400/400} \\
+ABA-PC & \textbf{400/400 saved and completed} & 88/400 & 88/400 & \textbf{312/312} & \textbf{400/400} \\
+ASPCR-DAG & \textbf{250/250 saved; all optima proved} & 32/250 & 32/250 & -- & -- \\
+MPC & \textbf{400/400 saved and completed} & 88/400 & 80/400 & -- & -- \\
+FGS & \textbf{400/400 saved and completed} & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}
+\caption{Evidence correspondence, run completion, and repair coverage. A trace is feasible if some DAG satisfies every recorded CI outcome; a full-trace output is the method's returned graph or class satisfying all of them. Thus MPC has 88 feasible inputs but only 80 matching outputs. A timeout incumbent is a valid saved repair whose optimality was not proved before the limit. An explicit repair names excluded facts, and selected-repair enforcement verifies every retained fact against the output. ASPCR-DAG uses its primary matched run set; FGS has no CI trace. A dash denotes an undefined object; bold marks complete audited coverage, not significance.}
+\label{tab:contestability-overview}
 \end{table*}

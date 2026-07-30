@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from scripts import build_final_experiment_tables as tables
+from scripts import build_minimal_anonymised_archive as minimal
 from scripts import prepare_release_artifacts as release
 
 
@@ -18,9 +19,12 @@ def test_portable_text_rewrites_repository_and_external_paths() -> None:
 
 
 def test_aspcr_release_scope_excludes_unreported_synthetic_runs() -> None:
-    assert release._aspcr_include(Path("results/aspcr/results/trace_cancer_2026.csv"))
-    assert not release._aspcr_include(Path("results/aspcr/results/trace_er5_2026.csv"))
-    assert not release._aspcr_include(Path("results/estimated/er5/run_2026.npz"))
+    fixed = release._aspcr_include_for(("cancer", "earthquake", "survey"))
+    synthetic = release._aspcr_include_for(("er5", "sf5"))
+    assert fixed(Path("results/aspcr/results/trace_cancer_2026.csv"))
+    assert not fixed(Path("results/aspcr/results/trace_er5_2026.csv"))
+    assert synthetic(Path("results/aspcr/results/trace_er5_2026.csv"))
+    assert not synthetic(Path("results/estimated/cancer/run_2026.npz"))
 
 
 def test_final_record_sort_is_dataset_method_seed_stable() -> None:
@@ -39,3 +43,14 @@ def test_final_record_sort_is_dataset_method_seed_stable() -> None:
         ("cancer", "OptABA-PC", 2027),
         ("survey", "OptABA-PC", 2027),
     ]
+
+
+def test_minimal_archive_scope_is_anonymised_and_contains_final_builders() -> None:
+    payloads = minimal._payloads()
+    assert "scripts/build_encoding_ablation_table.py" in payloads
+    assert "scripts/build_eight_node_contestability_table.py" not in payloads
+    assert "results" not in {Path(name).parts[0] for name in payloads}
+    assert not any(
+        minimal.FORBIDDEN_RE.search(payload.decode("utf-8", "ignore"))
+        for payload in payloads.values()
+    )

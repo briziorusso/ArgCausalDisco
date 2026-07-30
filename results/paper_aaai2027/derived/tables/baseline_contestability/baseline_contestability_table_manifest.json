@@ -1,19 +1,84 @@
 {
   "allow_partial_aspcr": false,
+  "aspcr_primary_accounting": {
+    "baselines": 250,
+    "failed_facts": 4161,
+    "full_trace": 32,
+    "satisfied_facts": 23839,
+    "trace_facts": 28000
+  },
   "aspcr_status": "complete",
-  "created_at_utc": "2026-07-28T14:47:01.395383+00:00",
+  "aspcr_trace_accounting": [
+    {
+      "baselines": 50,
+      "dataset": "cancer",
+      "failed_facts": 959,
+      "satisfied_facts": 3041,
+      "satisfied_proportion": 0.76025,
+      "trace_facts": 4000
+    },
+    {
+      "baselines": 50,
+      "dataset": "earthquake",
+      "failed_facts": 80,
+      "satisfied_facts": 3920,
+      "satisfied_proportion": 0.98,
+      "trace_facts": 4000
+    },
+    {
+      "baselines": 50,
+      "dataset": "survey",
+      "failed_facts": 2094,
+      "satisfied_facts": 9906,
+      "satisfied_proportion": 0.8255,
+      "trace_facts": 12000
+    },
+    {
+      "baselines": 50,
+      "dataset": "er5",
+      "failed_facts": 503,
+      "satisfied_facts": 3497,
+      "satisfied_proportion": 0.87425,
+      "trace_facts": 4000
+    },
+    {
+      "baselines": 50,
+      "dataset": "sf5",
+      "failed_facts": 694,
+      "satisfied_facts": 3306,
+      "satisfied_proportion": 0.8265,
+      "trace_facts": 4000
+    }
+  ],
+  "created_at_utc": "2026-07-30T17:13:42.674955+00:00",
   "inputs": {
     "aspcr": {
       "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/aspcr_contestability_summary.csv",
-      "sha256": "722830bbf52297bc86a2ac0a31cfdc16d8c0908aa9e695d293b367509149f873"
+      "sha256": "ebffe9cabd780fdf2465322dac874c2a4340e9221d73e3e5ec11e47398507ab4"
     },
     "aspcr_challenges": {
       "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/aspcr_native/aspcr_contestability_challenges.csv",
-      "sha256": "e1a68d28725b91667ca749add80c4ff83dcfbcabf07c5767be0dc4ec55621ea0"
+      "sha256": "5c4a025d6c5d2dc993fbffce78828bc13f127411de59b129f8acf77423e37b37"
+    },
+    "final_fact_records": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/final_fact_records.csv",
+      "sha256": "52d31ca21c3e9ccbfb27dfa52fa859607acd37abe025f72018a1fd1244777e68"
+    },
+    "final_graph_records": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/final_graph_records.csv",
+      "sha256": "fda82c0c2b13d0a49339882629fcf033b2e79ec62dfed3f25be8fd2128fbb0ec"
     },
     "mpc": {
-      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_enforcement_summary.csv",
-      "sha256": "4bd62b00c1f09c242ff59017f3b58928e8e3e860130cfe97534045e87e1e0a82"
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_matched_250/mpc_enforcement_summary.csv",
+      "sha256": "9db993dc77063b9221e08882c76e1efe2d6129d0849c00ba9ea01d494184ad54"
+    },
+    "mpc_matched_audit": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_matched_250/mpc_enforcement_audit.csv",
+      "sha256": "e9a33d3a8e3b8a54b0ba6389bc2fe729e87fc91a59a64deba5cba0ac7212dbce"
+    },
+    "mpc_primary_audit": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_enforcement_audit.csv",
+      "sha256": "e46d1319e3b2f77cfb559f810062a86c9ce8db28c689d5413e5b752b543a818b"
     },
     "optaba": {
       "path": "results/paper_aaai2027/frozen/results/tables/paper_current_alpha001_nowrong_noweight_50rep_preview/contestability_dataset_summary.csv",
@@ -28,23 +93,164 @@
       "sha256": "d0f5d637a0384616f733f0d4c04d86bbb55822c65a04058c81e8e7c233380823"
     }
   },
+  "mpc_matched_accounting": {
+    "avoidable_gaps": 13,
+    "baselines": 250,
+    "full_trace_feasible": 139,
+    "full_trace_returned": 126
+  },
   "outputs": {
     "abapc_summary": {
       "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/abapc_optimality_summary.csv",
-      "sha256": "2bf71cdcd4e2f3b45b81cc5cebc0e66276371bcf2e3022f00f66becb94706e9c"
+      "sha256": "ca335e6a866db0206e488e69eefcd1e8232686200a76d904154b5219cd505509"
     },
-    "mpc_table": {
-      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/table_mpc_enforcement_gap.tex",
-      "sha256": "06bd6ebacaf4039e204d2935c6f60a47e884826a45fb07655853f1b080cc5f51"
+    "margin_dataset_table": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/table_margin_by_dataset.tex",
+      "sha256": "70164f6adc31dbcfc9ed4606225742d512df1776ac21f4d2e55f98b789cbe655"
+    },
+    "margin_insights": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/margin_insight_summary.csv",
+      "sha256": "0ff8cce82215c0b7601a9ad3b3f4f2210e956e0815f7a74aa1f77ca9c999950b"
     },
     "overview_table": {
       "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/table_contestability_method_overview.tex",
-      "sha256": "3c6f87a7948b5941ca8b5318be849ceb94596679751b9ddf1358d03677419a93"
+      "sha256": "6ccfe819868e09bebb1395bfd76009e1677d90be6b0023a436dd25b3d6cd636c"
+    },
+    "primary_repair_enforcement_table": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/table_primary_repair_enforcement.tex",
+      "sha256": "2aa0afd0b8c738043866b9af9d609a5ce748176cf07de277e675b0726441bf7d"
     },
     "repair_table": {
       "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/table_contestability_margin_comparison.tex",
-      "sha256": "2f98d1ca6084d78ddd0a13025fc664f143a199bf6b02cedf9a55fc5900f3dc1f"
+      "sha256": "e2b3350355b37ca9d9c2b36fb1f55508e123b999d33f0591d4be0b960a6cc819"
     }
+  },
+  "primary_decision_accounting": {
+    "aba_inconsistent_repairs": 312,
+    "aba_outputs": 400,
+    "avoidable_gaps": 8,
+    "feasible": 88,
+    "improved_relative_cost_reduction_median": 0.6342307591383874,
+    "inconsistent": 312,
+    "inputs": 400,
+    "mpc_compatible": 80,
+    "opt_completed": 368,
+    "opt_inconsistent_repairs": 312,
+    "opt_lower_cost": 294,
+    "opt_missing": 0,
+    "opt_outputs": 400,
+    "opt_skipped": 0,
+    "opt_solver_timeouts": 32,
+    "opt_solver_timeouts_by_dataset": {
+      "asia": 2,
+      "cancer": 0,
+      "earthquake": 0,
+      "er5": 0,
+      "er8": 19,
+      "sf5": 0,
+      "sf8": 11,
+      "survey": 0
+    },
+    "per_dataset": [
+      {
+        "avoidable_gaps": 0,
+        "dataset": "cancer",
+        "feasible": 0,
+        "improved_relative_cost_reduction_median": 0.40158060275621354,
+        "inconsistent": 50,
+        "inputs": 50,
+        "mpc_compatible": 0,
+        "opt_lower_cost": 50,
+        "opt_outputs": 50,
+        "same_cost_inconsistent": 0
+      },
+      {
+        "avoidable_gaps": 0,
+        "dataset": "earthquake",
+        "feasible": 47,
+        "improved_relative_cost_reduction_median": 0.6183086376738244,
+        "inconsistent": 3,
+        "inputs": 50,
+        "mpc_compatible": 47,
+        "opt_lower_cost": 1,
+        "opt_outputs": 50,
+        "same_cost_inconsistent": 2
+      },
+      {
+        "avoidable_gaps": 0,
+        "dataset": "survey",
+        "feasible": 0,
+        "improved_relative_cost_reduction_median": 0.5706941382533224,
+        "inconsistent": 50,
+        "inputs": 50,
+        "mpc_compatible": 0,
+        "opt_lower_cost": 50,
+        "opt_outputs": 50,
+        "same_cost_inconsistent": 0
+      },
+      {
+        "avoidable_gaps": 0,
+        "dataset": "asia",
+        "feasible": 0,
+        "improved_relative_cost_reduction_median": 0.7303620893869096,
+        "inconsistent": 50,
+        "inputs": 50,
+        "mpc_compatible": 0,
+        "opt_lower_cost": 50,
+        "opt_outputs": 50,
+        "same_cost_inconsistent": 0
+      },
+      {
+        "avoidable_gaps": 5,
+        "dataset": "er5",
+        "feasible": 16,
+        "improved_relative_cost_reduction_median": 0.48363421523016614,
+        "inconsistent": 34,
+        "inputs": 50,
+        "mpc_compatible": 11,
+        "opt_lower_cost": 26,
+        "opt_outputs": 50,
+        "same_cost_inconsistent": 8
+      },
+      {
+        "avoidable_gaps": 0,
+        "dataset": "er8",
+        "feasible": 3,
+        "improved_relative_cost_reduction_median": 0.663762825428847,
+        "inconsistent": 47,
+        "inputs": 50,
+        "mpc_compatible": 3,
+        "opt_lower_cost": 46,
+        "opt_outputs": 50,
+        "same_cost_inconsistent": 1
+      },
+      {
+        "avoidable_gaps": 3,
+        "dataset": "sf5",
+        "feasible": 20,
+        "improved_relative_cost_reduction_median": 0.6087966752298013,
+        "inconsistent": 30,
+        "inputs": 50,
+        "mpc_compatible": 17,
+        "opt_lower_cost": 23,
+        "opt_outputs": 50,
+        "same_cost_inconsistent": 7
+      },
+      {
+        "avoidable_gaps": 0,
+        "dataset": "sf8",
+        "feasible": 2,
+        "improved_relative_cost_reduction_median": 0.7158647912733072,
+        "inconsistent": 48,
+        "inputs": 50,
+        "mpc_compatible": 2,
+        "opt_lower_cost": 48,
+        "opt_outputs": 50,
+        "same_cost_inconsistent": 0
+      }
+    ],
+    "same_cost": 106,
+    "same_cost_inconsistent": 18
   },
   "script": "./scripts/build_baseline_contestability_tables.py"
 }

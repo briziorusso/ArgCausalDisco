@@ -55,10 +55,13 @@ DEFAULT_SPARSE_MCS_ROOT = (
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT / "results" / "tables" / "paper_final_matched_50rep" / "baseline_contestability"
 )
+CONTESTABILITY_BNLEARN_VERSION = "paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs"
+CONTESTABILITY_SYNTHETIC_VERSION = "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc"
 
 BNLEARN_DATASETS = ("cancer", "earthquake", "survey", "asia")
 SYNTHETIC_DATASETS = ("er5", "er8", "sf5", "sf8")
 DATASET_ORDER = BNLEARN_DATASETS + SYNTHETIC_DATASETS
+CONTESTABILITY_DATASETS = ("cancer", "earthquake", "survey", "er5", "sf5")
 DATASET_LABELS = {
     "cancer": "Cancer (5)",
     "earthquake": "Earthquake (5)",
@@ -124,6 +127,36 @@ def _raw_fact_paths(dense_root: Path, sparse_root: Path) -> dict[tuple[str, int]
             "expected": int(row.total_facts),
         }
     return paths
+
+
+def _contestability_graph_records() -> pd.DataFrame:
+    """Load MPC outputs matched to the five-dataset exact contestability audit."""
+
+    rows: list[pd.DataFrame] = []
+    expected_seeds = set(range(2026, 2076))
+    progress_root = REPO_ROOT / "results" / "progress"
+    for dataset in CONTESTABILITY_DATASETS:
+        version = (
+            CONTESTABILITY_BNLEARN_VERSION
+            if dataset in BNLEARN_DATASETS
+            else CONTESTABILITY_SYNTHETIC_VERSION
+        )
+        path = progress_root / version / f"{dataset}__mpc_cpdag.csv"
+        if not path.exists():
+            raise FileNotFoundError(path)
+        frame = pd.read_csv(path)
+        frame = frame[frame["status"] == "ok"].copy()
+        if len(frame) != 50 or set(frame["seed"].astype(int)) != expected_seeds:
+            raise RuntimeError(
+                f"Incomplete contestability-matched MPC outputs for {dataset}: "
+                f"rows={len(frame)}, seeds={frame['seed'].nunique()}"
+            )
+        frame["method"] = "MPC"
+        rows.append(frame[["dataset", "seed", "method", "raw_graph_path"]])
+    selected = pd.concat(rows, ignore_index=True)
+    if selected.duplicated(["dataset", "seed"]).any():
+        raise RuntimeError("Duplicate contestability-matched MPC dataset/seed identities")
+    return selected
 
 
 def audit_dag_against_facts(
@@ -275,6 +308,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dense-mcs-root", default=str(DEFAULT_DENSE_MCS_ROOT))
     parser.add_argument("--sparse-mcs-root", default=str(DEFAULT_SPARSE_MCS_ROOT))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
+    parser.add_argument(
+        "--scope",
+        choices=("primary-400", "contestability-250"),
+        default="primary-400",
+        help=(
+            "primary-400 audits all primary MPC outputs; contestability-250 selects "
+            "the exact five datasets, seeds, graph-density setting, and G2 traces used "
+            "by the proved OptABA-PC contestability audit"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -284,6 +327,12 @@ def main() -> int:
     dense_root = _resolve(args.dense_mcs_root)
     sparse_root = _resolve(args.sparse_mcs_root)
     output_dir = _resolve(args.output_dir)
+    if args.scope == "contestability-250":
+        output_dir.mkdir(parents=True, exist_ok=True)
+        graph_records = output_dir / "mpc_graph_records.csv"
+        _atomic_dataframe(graph_records, _contestability_graph_records())
+        # The exact contestability audit uses the dense ER(5)/SF(5) traces.
+        sparse_root = dense_root
     audit, summary = run_audit(
         graph_records_path=graph_records,
         dense_root=dense_root,
@@ -300,6 +349,7 @@ def main() -> int:
             "schema_version": 1,
             "created_at_utc": _utc_now(),
             "script": str(Path(__file__).resolve()),
+            "scope": args.scope,
             "semantics": (
                 "Enforcement gap: contradictions between the returned MPC Markov class and "
                 "the full recorded matched G2 CI trace; this is not a repair margin."

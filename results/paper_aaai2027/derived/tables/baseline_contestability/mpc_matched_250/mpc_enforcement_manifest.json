@@ -1,0 +1,31 @@
+{
+  "counts": {
+    "fully_enforcing_outputs": 126,
+    "outputs": 250,
+    "outputs_with_enforcement_gap": 124,
+    "valid_outputs": 238
+  },
+  "created_at_utc": "2026-07-29T21:02:47.781512+00:00",
+  "inputs": {
+    "dense_mcs_root": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked",
+    "graph_records": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_matched_250/mpc_graph_records.csv",
+      "sha256": "829c2a974bd70e3d1a9e4a6cd115e38a887e68dcf366bcec459867804a49dc8c"
+    },
+    "sparse_mcs_root": "results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked"
+  },
+  "outputs": {
+    "audit": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_matched_250/mpc_enforcement_audit.csv",
+      "sha256": "e9a33d3a8e3b8a54b0ba6389bc2fe729e87fc91a59a64deba5cba0ac7212dbce"
+    },
+    "summary": {
+      "path": "results/paper_aaai2027/frozen/results/tables/paper_final_matched_50rep/baseline_contestability/mpc_matched_250/mpc_enforcement_summary.csv",
+      "sha256": "9db993dc77063b9221e08882c76e1efe2d6129d0849c00ba9ea01d494184ad54"
+    }
+  },
+  "schema_version": 1,
+  "scope": "contestability-250",
+  "script": "./scripts/audit_mpc_test_enforcement.py",
+  "semantics": "Enforcement gap: contradictions between the returned MPC Markov class and the full recorded matched G2 CI trace; this is not a repair margin."
+}

@@ -54,8 +54,14 @@ BASELINE_VERSIONS = (
     "paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
     "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
     "paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
+    "paper_fgs_bdeu_alpha001_n5000_50rep",
 )
-CORRECTED_ASPCR_VERSION = "paper_aspcr_dag_alpha001_n5000_50rep"
+CORRECTED_ASPCR_VERSIONS = (
+    "paper_aspcr_dag_alpha001_n5000_50rep",
+    "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
+)
+CORRECTED_ASPCR_VERSION = CORRECTED_ASPCR_VERSIONS[0]
+FGS_BDEU_VERSION = "paper_fgs_bdeu_alpha001_n5000_50rep"
 SPARSE_MCS_DIRNAME = "final_mcs_experiments_er_sf_sparse_alpha001_noweight_50rep"
 SPARSE_BASELINE_VERSION = "paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs"
 CONTESTABILITY_TABLE_DIRNAME = "paper_current_alpha001_nowrong_noweight_50rep_preview"
@@ -83,6 +89,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--mcs-results-dir",
         default="results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked",
+    )
+    parser.add_argument(
+        "--mcs-recovery-dir",
+        default="results/recovery_optaba_runs",
+        help="Optional completed ABA/OptABA-PC recovery runs, overlaid by dataset and seed.",
     )
     parser.add_argument("--out-dir", default=f"results/tables/{VERSION}")
     return parser.parse_args()
@@ -143,8 +154,8 @@ def _load_progress(results_dir: Path, versions: tuple[str, ...]) -> pd.DataFrame
     return out.drop(columns=["_priority"])
 
 
-def _corrected_aspcr_counts(results_dir: Path) -> dict[str, int]:
-    progress_dir = results_dir / "progress" / CORRECTED_ASPCR_VERSION
+def _corrected_aspcr_counts(results_dir: Path, version: str) -> dict[str, int]:
+    progress_dir = results_dir / "progress" / version
     counts: dict[str, int] = {}
     for dataset in DATASET_ORDER:
         path = progress_dir / f"{dataset}__aspcr_log_dag_dag.csv"
@@ -158,17 +169,35 @@ def _corrected_aspcr_counts(results_dir: Path) -> dict[str, int]:
 
 
 def _select_aspcr(results_dir: Path) -> tuple[pd.DataFrame, dict[str, dict[str, Any]]]:
-    corrected = _load_progress(results_dir, (CORRECTED_ASPCR_VERSION,))
-    counts = _corrected_aspcr_counts(results_dir)
+    corrected = _load_progress(results_dir, CORRECTED_ASPCR_VERSIONS)
+    counts_by_version = {
+        version: _corrected_aspcr_counts(results_dir, version)
+        for version in CORRECTED_ASPCR_VERSIONS
+    }
     selected: list[pd.DataFrame] = []
     manifest: dict[str, dict[str, Any]] = {}
     for dataset in DATASET_ORDER:
-        corrected_dataset = corrected[corrected.get("dataset", "") == dataset].copy() if not corrected.empty else pd.DataFrame()
+        eligible_versions = (
+            {CORRECTED_ASPCR_VERSIONS[0]}
+            if dataset in BNLEARN_DATASETS
+            else {CORRECTED_ASPCR_VERSIONS[1]}
+        )
+        corrected_dataset = (
+            corrected[
+                (corrected.get("dataset", "") == dataset)
+                & corrected.get("source_version", pd.Series(index=corrected.index, dtype=str)).isin(eligible_versions)
+            ].copy()
+            if not corrected.empty
+            else pd.DataFrame()
+        )
         corrected_seeds = set(pd.to_numeric(corrected_dataset.get("seed"), errors="coerce").dropna().astype(int))
         if corrected_seeds == set(EXPECTED_SEEDS):
             chosen = corrected_dataset
             status = "corrected_dag_complete"
-            source = CORRECTED_ASPCR_VERSION
+            sources = sorted(set(chosen.get("source_version", pd.Series(dtype=str)).dropna().astype(str)))
+            if len(sources) != 1:
+                raise RuntimeError(f"ASPCR {dataset} rows mix source versions: {sources}")
+            source = sources[0]
         else:
             chosen = pd.DataFrame()
             status = "unavailable"
@@ -179,18 +208,20 @@ def _select_aspcr(results_dir: Path) -> tuple[pd.DataFrame, dict[str, dict[str, 
         manifest[dataset] = {
             "status": status,
             "source_version": source,
-            "corrected_successful_seeds": counts.get(dataset, 0),
+            "corrected_successful_seeds": (
+                counts_by_version.get(str(source), {}).get(dataset, 0) if source else 0
+            ),
             "selected_rows": int(len(chosen)),
         }
     return (pd.concat(selected, ignore_index=True) if selected else pd.DataFrame()), manifest
 
 
 def _load_corrected_aspcr_facts(results_dir: Path, selected_manifest: dict[str, dict[str, Any]]) -> pd.DataFrame:
-    progress_dir = results_dir / "progress" / CORRECTED_ASPCR_VERSION
     rows: list[dict[str, Any]] = []
     for dataset, entry in selected_manifest.items():
         if entry["status"] != "corrected_dag_complete":
             continue
+        progress_dir = results_dir / "progress" / str(entry["source_version"])
         path = progress_dir / f"{dataset}__aspcr_log_dag_dag.csv"
         frame = pd.read_csv(path)
         frame = frame[frame["status"] == "ok"].copy()
@@ -223,6 +254,19 @@ def _load_repair_records(root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     graph = graph[graph["method"].isin(("ABA-PC", "OptABA-PC"))].copy()
     facts = facts[facts["method"].isin(("ABA-PC", "OptABA-PC"))].copy()
     return graph, facts
+
+
+def _overlay_repair_recoveries(
+    primary: pd.DataFrame,
+    recoveries: pd.DataFrame,
+) -> pd.DataFrame:
+    """Overlay explicitly rerun repair rows without duplicating an identity."""
+
+    if recoveries.empty:
+        return primary
+    recoveries = recoveries[recoveries["method"].isin(("ABA-PC", "OptABA-PC"))].copy()
+    combined = pd.concat([primary, recoveries], ignore_index=True)
+    return combined.drop_duplicates(["dataset", "method", "seed"], keep="last")
 
 
 def _load_raw_fact_records(root: Path) -> pd.DataFrame:
@@ -728,7 +772,7 @@ def _render_main(
         r"\bottomrule",
         r"\end{tabular}",
         r"}%",
-        r"\caption{Complete absolute scale-and-variability view of the compact primary paired comparison (mean $\pm$ standard deviation over up to 50 matched seeds, $N=5000$, $\alpha=0.01$). This table reports all eight primary datasets, including Earthquake, which is omitted from the compact main table because the two repair methods do not differ significantly on its core fact, compatibility, or graph-accuracy outcomes. Both methods repair the same recorded CI tests. Correct retained is the number of facts agreeing with $d$-separation in the generating DAG; Fact F1 scores retained-fact classification; \#CPDAGs counts equivalence classes satisfying every retained post-repair fact. Arrows give the preferred direction. Only a statistically significant winner is bold and marked: one, two, and three stars denote BH-adjusted $p<0.05$, $0.01$, and $0.001$ from paired two-sided Wilcoxon tests. Non-significant pairs are plain; Table~\ref{tab:final-runtime-completion} reports runtime, output-set size, CI compatibility, and paired sample-size subscripts whenever fewer than 50 pairs contribute.}",
+        r"\caption{Complete absolute scale-and-variability view of the compact primary paired comparison (mean $\pm$ standard deviation over 50 matched seeds, $N=5000$, $\alpha=0.01$). This table reports all eight primary datasets, including Earthquake, which is omitted from the compact main table because the two repair methods do not differ significantly on its core fact, compatibility, or graph-accuracy outcomes. Both methods repair the same recorded CI tests. Correct retained is the number of facts agreeing with $d$-separation in the generating DAG; Fact F1 scores retained-fact classification; \#CPDAGs counts equivalence classes satisfying every retained post-repair fact. Arrows give the preferred direction. Only a statistically significant winner is bold and marked: one, two, and three stars denote BH-adjusted $p<0.05$, $0.01$, and $0.001$ from paired two-sided Wilcoxon tests. Non-significant pairs are plain.}",
         r"\label{tab:absolute-results}",
         r"\end{table*}",
     ])
@@ -752,6 +796,9 @@ def _delta_relative_cell(
     else:
         relative_text = "--" if math.isclose(comparator, 0.0) else rf"{100.0 * delta / comparator:+.1f}\%"
     body = rf"{delta_text}\ ({relative_text})"
+    marker = _star_marker(test)
+    if marker:
+        body = rf"\mathbf{{{body}}}^{{{marker}}}"
     return rf"${body}$"
 
 
@@ -769,6 +816,7 @@ def _render_main_delta(tests: pd.DataFrame) -> str:
         r"\centering",
         r"\footnotesize",
         r"\setlength{\tabcolsep}{2pt}",
+        r"\resizebox{\textwidth}{!}{%",
         r"\begin{tabular}{lcccccc}",
         r"\toprule",
         "Dataset & " + " & ".join(label for _, label, _, _ in metric_specs) + r"\\",
@@ -789,7 +837,8 @@ def _render_main_delta(tests: pd.DataFrame) -> str:
     lines.extend([
         r"\bottomrule",
         r"\end{tabular}",
-        r"\caption{Compact paired effect sizes for OptABA-PC versus ABA-PC on the seven primary datasets with at least one distinguishable core outcome. Each entry is the mean within-seed difference $\Delta=\mathrm{OptABA\mbox{-}PC}-\mathrm{ABA\mbox{-}PC}$; parentheses give the change relative to the matched ABA-PC mean, except runtime, which gives $t_{\mathrm{Opt}}/t_{\mathrm{ABA}}$. Positive values favour OptABA-PC for upward metrics, while negative values favour it for \#CPDAG, SHD, and time. $\Delta n_{\mathrm{acc}}^{T}$ is the change in retained true CI facts, and \#CPDAG counts equivalence classes satisfying all retained post-repair facts. Statistical annotations and absolute mean $\pm$ standard deviation for all eight datasets are retained in Table~\ref{tab:absolute-results}; Earthquake is omitted here because its core fact, compatibility, and graph-accuracy outcomes do not differ.}",
+        r"}",
+        r"\caption{Paired OptABA-PC--ABA-PC effects on seven fixed-network and synthetic benchmarks (number of nodes in brackets). Entries are mean within-seed differences $\Delta$; parentheses give change relative to ABA-PC, except runtime ($t_{\mathrm{Opt}}/t_{\mathrm{ABA}}$). Positive values favour upward metrics and negative values favour \#CPDAG, SHD, and time. $\Delta n_{\mathrm{acc}}^{T}$ counts additional retained true CI facts; \#CPDAG counts MECs satisfying all retained facts. Bold effects are statistically significant: one, two, and three stars denote BH-adjusted paired $p<0.05$, $0.01$, and $0.001$; the sign identifies the favoured method. The supplementary absolute-results table gives absolute mean $\pm$ standard deviation for all eight datasets; Earthquake is omitted here because its core outcomes do not differ significantly.}",
         r"\label{tab:main-results}",
         r"\end{table*}",
     ])
@@ -822,7 +871,7 @@ def _render_graph_metrics(
             lines.append(r"\midrule")
     lines.extend([
         r"\bottomrule", r"\end{tabular}",
-        r"\caption{Graph reconstruction and CI-compatible equivalence classes on the matched primary experiments (mean $\pm$ standard deviation over seeds). ABA-PC and OptABA-PC CPDAG values average over every equivalence class admitted by the selected repair; MPC, FGS, and ASPCR-DAG return one graph per run. DAG columns average reconstruction over all structurally consistent extensions of those CPDAGs, exposing orientation quality within each represented class. The final column counts CPDAGs satisfying the enforced evidence: retained post-repair facts for ABA-PC/OptABA-PC and every recorded test for MPC/ASPCR-DAG; it is undefined for score-based FGS (`--'). Stars identify the significant ABA-PC--OptABA-PC winner. Daggers on an external method indicate a paired difference from OptABA-PC; bold daggers favour that external method, whereas unbold daggers favour OptABA-PC. One, two, and three symbols denote BH-adjusted $p<0.05$, $0.01$, and $0.001$; a subscript gives paired $n<50$.}",
+        r"\caption{Graph reconstruction and CI-compatible equivalence classes on the matched primary experiments (mean $\pm$ standard deviation over seeds). ABA-PC and OptABA-PC CPDAG values average over every equivalence class admitted by the selected repair; MPC and FGS return one CPDAG when their output is structurally valid, and ASPCR-DAG returns one DAG whose equivalence class supplies its CPDAG score. DAG columns average every compatible DAG for ABA-PC/OptABA-PC and every consistent extension of a valid MPC/FGS CPDAG; ASPCR-DAG is scored on its returned DAG. The final column counts CPDAGs satisfying the enforced evidence: retained post-repair facts for ABA-PC/OptABA-PC and every recorded test for MPC/ASPCR-DAG; it is undefined for score-based FGS (`--'). Stars identify the significant ABA-PC--OptABA-PC winner. Daggers on an external method indicate a paired difference from OptABA-PC; bold daggers favour that external method, whereas unbold daggers favour OptABA-PC. One, two, and three symbols denote BH-adjusted $p<0.05$, $0.01$, and $0.001$. Subscripts occur only for MPC DAG-extension metrics when its endpoint output is invalid: $n=38$ on Survey and $n=49$ on ER(8).}",
         r"\label{tab:final-graph-metrics}", r"\end{table*}",
     ])
     return "\n".join(lines) + "\n"
@@ -840,7 +889,7 @@ def _render_fact_metrics(summary: pd.DataFrame, tests: pd.DataFrame) -> str:
             lines.append(" & ".join([
                 DATASET_LABELS[dataset] if method_index == 0 else "",
                 METHOD_LABELS.get(row.method, row.method),
-                _mean_std(row.correct_facts_mean, row.correct_facts_std),
+                _mean_std(row.correct_facts_mean, row.correct_facts_std, digits=1),
                 _annotated_mean_std(row, "accepted_correct_facts", row.method, dataset, tests, digits=1),
                 _annotated_mean_std(row, "accepted_wrong_facts", row.method, dataset, tests, digits=1),
                 _annotated_mean_std(row, "fact_precision", row.method, dataset, tests, digits=3),
@@ -852,7 +901,7 @@ def _render_fact_metrics(summary: pd.DataFrame, tests: pd.DataFrame) -> str:
             lines.append(r"\midrule")
     lines.extend([
         r"\bottomrule", r"\end{tabular}",
-        r"\caption{CI-fact accounting on the matched primary experiments (mean $\pm$ standard deviation). Correct available is the number of recorded tests agreeing with $d$-separation in the generating DAG; correct/false kept split the facts retained after repair. Precision, recall, and Fact F1 treat a retained correct test as a true positive, a retained false test as a false positive, and a released correct test as a false negative. The final column $n$ is the number of successful runs contributing to that row. ABA-PC and OptABA-PC repair the identical test set, so stars identify their significant paired winner at BH-adjusted $p<0.05$, $0.01$, and $0.001$; only the winner is bold and marked. ASPCR-DAG reports descriptive accounting for its different native Bayesian trace. MPC and FGS are omitted because neither exposes a comparable retained-fact set.}",
+        r"\caption{CI-fact accounting on the matched primary experiments (mean $\pm$ standard deviation). Correct available is the number of recorded tests agreeing with $d$-separation in the generating DAG; correct/false kept split the facts retained after repair. Precision, recall, and Fact F1 treat a retained correct test as a true positive, a retained false test as a false positive, and a released correct test as a false negative. The final column $n$ is the number of successful runs contributing to that row. ABA-PC and OptABA-PC repair the identical test set, so stars identify their significant paired winner at BH-adjusted $p<0.05$, $0.01$, and $0.001$; only the winner is bold and marked. For ASPCR-DAG only, \emph{kept} means that the returned DAG satisfies a native soft test relation; this is descriptive graph--test agreement, not an explicit accepted or retained CI set. MPC and FGS are omitted because neither exposes comparable fact accounting.}",
         r"\label{tab:final-fact-metrics}", r"\end{table*}",
     ])
     return "\n".join(lines) + "\n"
@@ -903,11 +952,15 @@ def _render_range(
         r"\bottomrule", r"\end{tabular}", r"}%",
         rf"\caption{{Average, best, and worst {label} reconstruction within each run of the matched primary experiments (mean $\pm$ standard deviation over seeds). "
         + (
-            r"ABA-PC and OptABA-PC can return several CPDAG equivalence classes satisfying their selected facts; MPC, FGS, and ASPCR-DAG return a single graph, so their average, best, and worst CPDAG values coincide within a run. Compat. CPDAGs counts classes satisfying the retained facts for ABA-PC/OptABA-PC or every recorded native CI test for MPC/ASPCR-DAG; compatibility is undefined for score-based FGS (`--')."
+            r"ABA-PC and OptABA-PC can return several CPDAG equivalence classes satisfying their selected facts; MPC and FGS return one CPDAG when structurally valid, and ASPCR-DAG's returned DAG determines one CPDAG, so their average, best, and worst CPDAG values coincide within a run. Compat. CPDAGs counts classes satisfying the retained facts for ABA-PC/OptABA-PC or every recorded native CI test for MPC/ASPCR-DAG; compatibility is undefined for score-based FGS (`--')."
             if is_cpdag else
-            r"ABA-PC and OptABA-PC are scored over every DAG satisfying their selected facts. Because MPC natively returns a CPDAG, we enumerate its structurally consistent DAG extensions (and do the same for other single-CPDAG outputs) to assess orientation quality throughout the represented equivalence class. DAGs in one CPDAG share the same CI model but can have different orientation error against the generating DAG. Compat. DAGs counts extensions also satisfying the method's recorded CI evidence; compatibility is undefined for score-based FGS (`--')."
+            r"ABA-PC and OptABA-PC are scored over every DAG satisfying their selected facts. For MPC and FGS, we enumerate the structurally consistent extensions of each valid returned CPDAG to assess orientation quality throughout its equivalence class; ASPCR-DAG is scored on its single returned DAG, so its average, best, and worst values coincide. DAGs in one CPDAG share the same CI model but can have different orientation error against the generating DAG. Compat. DAGs counts extensions also satisfying the method's recorded CI evidence; compatibility is undefined for score-based FGS (`--')."
         )
-        + r" Stars identify the significant ABA-PC--OptABA-PC winner. Daggers on an external method indicate a paired difference from OptABA-PC; bold daggers favour that external method and unbold daggers favour OptABA-PC. One, two, and three symbols denote BH-adjusted $p<0.05$, $0.01$, and $0.001$; subscripts give paired $n<50$.}",
+        + r" Stars identify the significant ABA-PC--OptABA-PC winner. Daggers on an external method indicate a paired difference from OptABA-PC; bold daggers favour that external method and unbold daggers favour OptABA-PC. One, two, and three symbols denote BH-adjusted $p<0.05$, $0.01$, and $0.001$."
+        + (
+            "}" if is_cpdag else
+            r" Subscripts occur only for MPC's endpoint-valid DAG extensions: $n=38$ on Survey and $n=49$ on ER(8).}"
+        ),
         rf"\label{{tab:final-{prefix}-ranges}}", r"\end{table*}",
     ])
     return "\n".join(lines) + "\n"
@@ -940,7 +993,7 @@ def _render_runtime_completion(
             lines.append(r"\midrule")
     lines.extend([
         r"\bottomrule", r"\end{tabular}", r"}%",
-        r"\caption{Runtime, structural output size, and CI compatibility for the matched primary experiments (mean $\pm$ standard deviation over up to 50 seeds). Returned CPDAGs and DAGs are structural output/extension counts. CI-compatible counts additionally require all retained post-repair facts for ABA-PC/OptABA-PC or every recorded native test for MPC/ASPCR-DAG; compatibility is undefined for score-based FGS (`--'). Stars identify the significant ABA-PC--OptABA-PC winner. Daggers on an external method indicate a paired runtime difference from OptABA-PC; bold daggers favour that method and unbold daggers favour OptABA-PC. One, two, and three symbols denote BH-adjusted $p<0.05$, $0.01$, and $0.001$; subscripts give paired $n<50$. No missing value is imputed.}",
+        r"\caption{Timing, structural output size, and CI compatibility for the matched primary experiments (mean $\pm$ standard deviation over 50 seeds for each reported method--dataset pair). Returned CPDAGs and DAGs are structural output/extension counts. CI-compatible counts additionally require all retained post-repair facts for ABA-PC/OptABA-PC or every recorded native test for MPC/ASPCR-DAG; compatibility is undefined for score-based FGS (`--'). ABA-PC and OptABA-PC times include construction, solving, and compatible-set evaluation and are directly paired. MPC/FGS time the learner call, while ASPCR-DAG reports its native end-to-end R run; their values and paired daggers describe implementations with different timing scopes and are not a controlled cross-family speed ranking. Stars identify the significant ABA-PC--OptABA-PC winner. Bold daggers favour the external method and unbold daggers favour OptABA-PC. One, two, and three symbols denote BH-adjusted $p<0.05$, $0.01$, and $0.001$.}",
         r"\label{tab:final-runtime-completion}", r"\end{table*}",
     ])
     return "\n".join(lines) + "\n"
@@ -1064,15 +1117,15 @@ def _story(
 - **Primary claim: optimal repair improves heuristic repair.** The primary study uses the four fixed bnlearn networks and sparse one-edge-per-node ER/SF graphs. OptABA-PC retains significantly more correct facts on {len(correct_sig)}/8 datasets ({label(correct_sig)}) and has significantly higher fact recall on {len(recall_sig)}/8. It significantly lowers CPDAG SHD and raises CPDAG F1 on {len(shd_aba_sig)}/8 and {len(f1_aba_sig)}/8 datasets, respectively; no dataset significantly favours ABA-PC structurally.
 - **Why ABA-PC can have higher Fact F1.** Fact F1 treats a retained correct test as a true positive, a retained wrong test as a false positive, and a released correct test as a false negative. ABA-PC's more aggressive release raises precision but sacrifices recall. OptABA-PC optimises release cost and coherence, not truth-labelled Fact F1, so its recall gain can be offset by retaining more false tests. In the primary results, {label(fact_f1_loss)} significantly favours ABA-PC on Fact F1, whereas {label(fact_f1_gain)} significantly favours OptABA-PC; the remaining {8 - len(fact_f1_gain) - len(fact_f1_loss)} differences are not significant.
 - **Sparsity matters.** On all {len(sparse_fact_sig)}/4 primary sparse ER/SF datasets ({label(sparse_fact_sig)}), OptABA-PC significantly improves Fact F1 and lowers CPDAG SHD. The recall benefit dominates the precision cost in this regime. The two-edge-per-node results remain in the appendix as a density sensitivity analysis rather than being mixed into the primary table.
-- **External baselines are graph-only references.** OptABA-PC significantly beats FGS in both CPDAG SHD and F1 on {len(shd_fgs_sig)}/8 and {len(f1_fgs_sig)}/8 datasets. Corrected ASPCR-DAG is matched to {len(asp_available)} primary bnlearn datasets; OptABA-PC significantly lowers SHD on {len(shd_asp_sig)}/{len(asp_available)} ({label(shd_asp_sig)}) and raises F1 on {len(f1_asp_sig)}/{len(asp_available)} ({label(f1_asp_sig)}). MPC is especially strong on the sparse synthetic graphs because Majority-PC targets one CPDAG using majority evidence across separating sets, whereas OptABA-PC optimises coherent fact retention and can admit several CPDAGs. MPC is not significantly better than OptABA-PC's best class on ER(5), ER(8), or SF(5), and most synthetic MPC outputs do not satisfy their complete recorded trace; its structural margins should therefore not be turned into a fact-level claim.
-- **ASPCR is appendix-only.** Validated corrected ASPCR-DAG results are included only for the matched primary datasets on which they are available; no result is reported for {', '.join(unavailable) if unavailable else 'none'}. The synthetic ASPCR artifacts use a different graph-density setting and are therefore excluded from the primary comparison.
-- **Recommended framing.** The paper should claim optimal, contestable CI-fact repair that improves correct-fact retention and heuristic-repair reconstruction, with especially clear gains on sparse graphs, plus consistent graph-level gains over FGS and strong gains over validated ASPCR. It should not claim uniform dominance of MPC or equate its returned CPDAG with enforcement of all tested CI facts.
+- **External baselines are graph-only references.** OptABA-PC significantly beats FGS in both CPDAG SHD and F1 on {len(shd_fgs_sig)}/8 and {len(f1_fgs_sig)}/8 datasets. Corrected ASPCR-DAG is matched to {len(asp_available)} primary datasets; OptABA-PC significantly lowers SHD on {len(shd_asp_sig)}/{len(asp_available)} ({label(shd_asp_sig)}) and raises F1 on {len(f1_asp_sig)}/{len(asp_available)} ({label(f1_asp_sig)}). MPC is especially strong on the sparse synthetic graphs because Majority-PC targets one CPDAG using majority evidence across separating sets, whereas OptABA-PC optimises coherent fact retention and can admit several CPDAGs. MPC is not significantly better than OptABA-PC's best class on ER(5), ER(8), or SF(5), and most synthetic MPC outputs do not satisfy their complete recorded trace; its structural margins should therefore not be turned into a fact-level claim.
+- **ASPCR is appendix-only.** Validated corrected ASPCR-DAG results are included on the {len(asp_available)} matched primary datasets for which they are available; no result is reported for {', '.join(unavailable) if unavailable else 'none'}. The completed ER(5)/SF(5) artifacts use the matched one-edge-per-node synthetic setting and are included in the primary appendix comparison.
+- **Recommended framing.** The paper should claim optimal, contestable CI-fact repair that improves correct-fact retention and heuristic-repair reconstruction, with especially clear gains on sparse graphs. Native discrete FGS is a competitive graph-only reference, while OptABA-PC has strong gains over validated ASPCR-DAG. The paper should not claim uniform graph-reconstruction dominance over MPC or FGS, or equate either method's structural accuracy with repair of the tested CI facts.
 """
     latex = (
         rf"Relative to heuristic ABA-PC, OptABA-PC retains significantly more correct facts on {len(correct_sig)}/8 datasets and significantly improves CPDAG SHD and F1 on {len(shd_aba_sig)}/8 and {len(f1_aba_sig)}/8, with no significant structural loss. "
         rf"Its primary Fact F1 is significantly higher on {label(fact_f1_gain)} and lower on {label(fact_f1_loss)} because optimal cost repair raises recall while sometimes retaining additional false tests. "
         rf"On the sparse ER/SF graphs, this recall gain dominates: Fact F1 and CPDAG SHD improve significantly on all four datasets; denser synthetic results are reported as sensitivity evidence. "
-        rf"At graph level, OptABA-PC significantly improves both SHD and F1 over FGS on all eight datasets, and improves F1 over validated ASPCR-DAG on all {len(asp_available)} matched primary datasets. Majority-PC is especially strong on the sparse synthetic graphs because it targets one CPDAG using majority evidence across separating sets; OptABA-PC instead optimises coherent fact retention and may admit several CPDAGs. MPC remains a graph-only reference because its returned CPDAG does not define a comparable retained CI-fact set."
+        rf"At graph level, native discrete FGS is competitive: it significantly outperforms OptABA-PC on at least one mean CPDAG metric on six datasets, whereas OptABA-PC is significantly better on both metrics for Earthquake and on SHD for Asia. OptABA-PC improves F1 over validated ASPCR-DAG on all {len(asp_available)} matched primary datasets. Majority-PC is especially strong on the sparse synthetic graphs because it targets one CPDAG using majority evidence across separating sets; OptABA-PC instead optimises coherent fact retention and may admit several CPDAGs. MPC and FGS remain graph-only references because neither defines a comparable retained CI-fact set."
     )
     return markdown, latex + "\n"
 
@@ -1081,10 +1134,15 @@ def main() -> int:
     args = parse_args()
     results_dir = Path(args.results_dir).expanduser().resolve()
     mcs_dir = Path(args.mcs_results_dir).expanduser().resolve()
+    mcs_recovery_dir = Path(args.mcs_recovery_dir).expanduser().resolve()
     out_dir = Path(args.out_dir).expanduser().resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     mcs_graph = collector._load_mcs_records(mcs_dir, include_partial=False, allow_injected_wrong_facts=False)
+    recovery_graph = collector._load_mcs_records(
+        mcs_recovery_dir, include_partial=False, allow_injected_wrong_facts=False
+    )
+    mcs_graph = _overlay_repair_recoveries(mcs_graph, recovery_graph)
     mcs_graph["method"] = mcs_graph["method"].map(_normalise_method)
     baseline_graph = _load_progress(results_dir, BASELINE_VERSIONS)
     baseline_graph = enrich_progress_records(baseline_graph, repo_root=REPO_ROOT)
@@ -1099,6 +1157,11 @@ def main() -> int:
     ].copy()
 
     mcs_facts = collector._load_mcs_fact_records(mcs_dir, include_partial=False, allow_injected_wrong_facts=False)
+    recovery_facts = collector._load_mcs_fact_records(
+        mcs_recovery_dir, include_partial=False, allow_injected_wrong_facts=False
+    )
+    recovery_facts = recovery_facts[recovery_facts["method"] != "Raw PC facts"].copy()
+    mcs_facts = _overlay_repair_recoveries(mcs_facts, recovery_facts)
     repair_facts = mcs_facts[mcs_facts["method"].isin(("ABA-PC", "OptABA-PC"))].copy()
     aspcr_facts = _load_corrected_aspcr_facts(results_dir, aspcr_manifest)
     dense_fact_records = pd.concat(
@@ -1112,12 +1175,18 @@ def main() -> int:
     # sensitivity analysis.
     sparse_graph, sparse_facts = _load_repair_records(results_dir / SPARSE_MCS_DIRNAME)
     sparse_raw_facts = _load_raw_fact_records(results_dir / SPARSE_MCS_DIRNAME)
-    sparse_baseline_graph = _load_progress(results_dir, (SPARSE_BASELINE_VERSION,))
+    sparse_baseline_graph = _load_progress(
+        results_dir, (SPARSE_BASELINE_VERSION, FGS_BDEU_VERSION)
+    )
     sparse_baseline_graph = enrich_progress_records(sparse_baseline_graph, repo_root=REPO_ROOT)
+    primary_synthetic_aspcr = aspcr_graph[
+        aspcr_graph["dataset"].isin(SYNTHETIC_DATASETS)
+    ].copy() if not aspcr_graph.empty else pd.DataFrame()
     graph_records = pd.concat([
         dense_graph_records[dense_graph_records["dataset"].isin(BNLEARN_DATASETS)],
         sparse_graph[sparse_graph["dataset"].isin(SYNTHETIC_DATASETS)],
         sparse_baseline_graph[sparse_baseline_graph["dataset"].isin(SYNTHETIC_DATASETS)],
+        primary_synthetic_aspcr,
     ], ignore_index=True)
     graph_records = graph_records[
         graph_records["dataset"].isin(DATASET_ORDER)
@@ -1126,6 +1195,10 @@ def main() -> int:
     fact_records = pd.concat([
         dense_fact_records[dense_fact_records["dataset"].isin(BNLEARN_DATASETS)],
         sparse_facts[sparse_facts["dataset"].isin(SYNTHETIC_DATASETS)],
+        dense_fact_records[
+            (dense_fact_records["method"] == "ASPCR-DAG")
+            & dense_fact_records["dataset"].isin(SYNTHETIC_DATASETS)
+        ],
     ], ignore_index=True)
     raw_fact_records = pd.concat([
         mcs_facts[
@@ -1140,13 +1213,10 @@ def main() -> int:
 
     primary_aspcr_manifest = json.loads(json.dumps(aspcr_manifest))
     for dataset in SYNTHETIC_DATASETS:
-        primary_aspcr_manifest[dataset] = {
-            "status": "unavailable",
-            "source_version": None,
-            "corrected_successful_seeds": 0,
-            "selected_rows": 0,
-            "note": "Dense ASPCR artifact excluded from the sparse primary synthetic setting.",
-        }
+        if primary_aspcr_manifest[dataset]["status"] != "corrected_dag_complete":
+            primary_aspcr_manifest[dataset]["note"] = (
+                "No complete corrected ASPCR-DAG artifact is available for the primary synthetic setting."
+            )
 
     _validate_inputs(graph_records, fact_records)
     graph_summary = _summarise(graph_records, GRAPH_METRICS)
@@ -1209,8 +1279,8 @@ def main() -> int:
     (out_dir / "table_final_runtime_completion.tex").write_text(_render_runtime_completion(graph_summary, tests, primary_aspcr_manifest))
     (out_dir / "table_final_paired_tests.tex").write_text(
         "% Inferential details are exported to final_paired_wilcoxon_tests.csv; "
-        "significance indicators are retained in the appendix tables and intentionally "
-        "omitted from the compact main effect-size table.\n"
+        "significance indicators are retained in both the compact main table and "
+        "the absolute appendix tables.\n"
     )
     (out_dir / "table_final_sensitivity.tex").write_text(
         _render_sensitivity(
@@ -1255,8 +1325,9 @@ def main() -> int:
         "sample_size": 5000,
         "ci_alpha": 0.01,
         "mcs_results_dir": _portable_path(mcs_dir),
+        "mcs_recovery_dir": _portable_path(mcs_recovery_dir),
         "baseline_versions": list(BASELINE_VERSIONS),
-        "corrected_aspcr_version": CORRECTED_ASPCR_VERSION,
+        "corrected_aspcr_versions": list(CORRECTED_ASPCR_VERSIONS),
         "aspcr_selection": primary_aspcr_manifest,
         "all_corrected_aspcr_artifacts": aspcr_manifest,
         "primary_synthetic_setting": {

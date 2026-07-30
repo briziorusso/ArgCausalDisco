@@ -74,10 +74,8 @@ def _validate_completion(manifest: dict, table_manifest: dict) -> None:
     expected = manifest["completion_exceptions"]
     graph = table_manifest["graph_completion"]
     checks = {
-        "asia/OptABA-PC": graph["asia/OptABA-PC"]["missing_saved_seed_ids"],
         "survey/MPC": graph["survey/MPC"]["missing_graph_evaluation_seed_ids"],
         "er8/MPC": graph["er8/MPC"]["missing_graph_evaluation_seed_ids"],
-        "sf5/FGS": graph["sf5/FGS"]["missing_saved_seed_ids"],
     }
     expected_values = {
         key: value.get("missing_saved_seeds", value.get("missing_graph_evaluation_seeds", []))
@@ -85,6 +83,10 @@ def _validate_completion(manifest: dict, table_manifest: dict) -> None:
     }
     if checks != expected_values:
         raise RuntimeError(f"Completion exceptions changed: actual={checks}, expected={expected_values}")
+    for identity in ("asia/OptABA-PC", "sf5/FGS"):
+        record = graph[identity]
+        if record["missing_saved_seed_ids"]:
+            raise RuntimeError(f"Recovered primary output is missing again: {identity}: {record}")
 
 
 def validate() -> dict[str, int]:

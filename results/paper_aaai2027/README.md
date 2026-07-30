@@ -12,10 +12,9 @@ This directory is the curated empirical release for the OptABA-PC paper.
 - `FROZEN_SHA256SUMS` covers every per-seed frozen input.
 - `SHA256SUMS` covers the complete curated release except itself.
 
-The primary synthetic reconstruction results use one edge per node. Dense
-two-edge-per-node results are retained because the paper reports density
-sensitivity and uses the five-node dense instances in its bounded exact
-contestation audit. See `CONTESTABILITY_SCOPE.md`.
+The primary synthetic reconstruction results use one edge per node. The
+two-edge-per-node five-node repair inputs are retained only because the bounded
+exact contestability audit uses them. See `CONTESTABILITY_SCOPE.md`.
 
 No corrupted-fact, Shapley-PC, smoke, 10-repetition, or development-alpha run
 is part of this directory.
@@ -32,5 +31,6 @@ Regenerate the final tables into a separate directory:
 python scripts/build_final_experiment_tables.py \
   --results-dir results/paper_aaai2027/frozen/results \
   --mcs-results-dir results/paper_aaai2027/frozen/results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked \
+  --mcs-recovery-dir results/paper_aaai2027/frozen/results/recovery_optaba_runs \
   --out-dir results/paper_aaai2027/recomputed/tables
 ```

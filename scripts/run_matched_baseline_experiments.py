@@ -30,6 +30,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import types
 from dataclasses import dataclass
 from datetime import datetime
@@ -66,6 +67,7 @@ ASPCR_PROVENANCE_COLUMNS = [
 ]
 PROGRESS_COLUMNS = DAG_BASE_COLUMNS + [
     "run_idx", "rep", "seed", "status", "error",
+    "runner_wall_elapsed",
     "raw_graph_path", "true_graph_path",
 ] + FACT_COUNT_COLUMNS + FACT_METRIC_COLUMNS + ASPCR_PROVENANCE_COLUMNS
 SUMMARY_METRICS = [
@@ -90,9 +92,20 @@ DISPLAY_NAMES = {
     "mpc": "MPC",
     "spc": "Shapley-PC",
     "fgs": "FGS",
+    "fgs_bdeu": "FGS",
     "aspcr_log": "ASPCR-log",
     "aspcr_log_dag": "ASPCR-DAG-log",
     "random_edge": "Random (match |E|)",
+}
+FGS_BDEU_CONFIG = {
+    "algorithm": "Tetrad FGES",
+    "score": "bdeu-score",
+    "data_type": "discrete",
+    "sample_prior": 15.0,
+    "structure_prior": 1.0,
+    "max_degree": -1,
+    "faithfulness_assumed": True,
+    "symmetric_first_step": False,
 }
 DEFAULT_RSCRIPT = Path(os.environ.get("RSCRIPT") or shutil.which("Rscript") or "Rscript")
 DEFAULT_CLINGO_BIN_DIR = Path(
@@ -153,6 +166,67 @@ def _install_notears_stub() -> None:
     notears_module.nonlinear = notears_nonlinear_module
     sys.modules["notears"] = notears_module
     sys.modules["notears.nonlinear"] = notears_nonlinear_module
+
+
+def _run_fgs_bdeu(X: np.ndarray) -> tuple[np.ndarray, float]:
+    """Run Tetrad FGES with its native discrete BDeu score.
+
+    Tetrad emits CPDAG edges as strings.  We preserve directed and undirected
+    endpoints in the same {-1, 0, 1} convention accepted by the metric code:
+    A --> B is (A,B)=1,(B,A)=-1 and A --- B is -1 in both directions.
+    """
+
+    from pycausal.pycausal import pycausal as pyc
+    from pycausal import search as tetrad_search
+
+    values = np.asarray(X)
+    columns = [f"X{index}" for index in range(1, values.shape[1] + 1)]
+    discrete = pd.DataFrame(index=np.arange(values.shape[0]))
+    for index, column in enumerate(columns):
+        codes, _ = pd.factorize(values[:, index], sort=True)
+        if (codes < 0).any():
+            raise ValueError("FGS-BDeu does not accept missing categorical values")
+        discrete[column] = codes.astype(int)
+
+    bridge = pyc()
+    try:
+        bridge.start_vm()
+    except Exception:
+        # A preceding seed in this process may already have started the JVM.
+        pass
+    fitted = tetrad_search.tetradrunner()
+    started = time.perf_counter()
+    fitted.run(
+        algoId="fges",
+        dfs=discrete,
+        scoreId=str(FGS_BDEU_CONFIG["score"]),
+        dataType=str(FGS_BDEU_CONFIG["data_type"]),
+        samplePrior=float(FGS_BDEU_CONFIG["sample_prior"]),
+        structurePrior=float(FGS_BDEU_CONFIG["structure_prior"]),
+        maxDegree=int(FGS_BDEU_CONFIG["max_degree"]),
+        faithfulnessAssumed=bool(FGS_BDEU_CONFIG["faithfulness_assumed"]),
+        symmetricFirstStep=bool(FGS_BDEU_CONFIG["symmetric_first_step"]),
+        verbose=False,
+    )
+    elapsed = time.perf_counter() - started
+
+    node_to_index = {node: index for index, node in enumerate(columns)}
+    estimate = np.zeros((len(columns), len(columns)), dtype=int)
+    edge_pattern = re.compile(r"^(X\d+)\s+(-->|---)\s+(X\d+)$")
+    for raw_edge in fitted.getEdges():
+        edge = str(raw_edge).strip()
+        match = edge_pattern.fullmatch(edge)
+        if not match:
+            raise RuntimeError(f"Unexpected FGES endpoint syntax: {edge!r}")
+        left, endpoint, right = match.groups()
+        i, j = node_to_index[left], node_to_index[right]
+        if endpoint == "-->":
+            estimate[i, j] = 1
+            estimate[j, i] = -1
+        else:
+            estimate[i, j] = -1
+            estimate[j, i] = -1
+    return estimate, elapsed
 
 
 def _is_number(value: Any) -> bool:
@@ -321,6 +395,17 @@ def _successful_seed_ids(dag_progress: pd.DataFrame, cpdag_progress: pd.DataFram
         return set(pd.to_numeric(ok, errors="coerce").dropna().astype(int))
 
     return successful(dag_progress) & successful(cpdag_progress)
+
+
+def _format_duration(seconds: float) -> str:
+    """Format an elapsed duration for compact, readable progress logs."""
+
+    if not math.isfinite(seconds) or seconds < 0:
+        return "NA"
+    total_seconds = int(round(seconds))
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, secs = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
 
 def _write_summary(path: Path, progress: pd.DataFrame) -> None:
@@ -968,6 +1053,7 @@ def _metadata(args: argparse.Namespace, specs: list[DatasetSpec], out_dir: Path)
         "aspcr_method_configs": {
             method: ASPCR_METHODS[method] for method in args.methods if method in ASPCR_METHODS
         },
+        "fgs_bdeu_config": FGS_BDEU_CONFIG if "fgs_bdeu" in args.methods else None,
         "datasets": [s.__dict__ for s in specs],
         "n_runs": args.n_runs,
         "seeds": [args.seed_start + i for i in range(args.n_runs)],
@@ -982,6 +1068,16 @@ def _metadata(args: argparse.Namespace, specs: list[DatasetSpec], out_dir: Path)
         "synthetic_standardise": args.synthetic_standardise,
         "aspcr_max_nodes": args.aspcr_max_nodes,
         "progress_columns": PROGRESS_COLUMNS,
+        "timing_semantics": {
+            "elapsed": (
+                "Method-native elapsed seconds. For ASPCR this is the R-side end-to-end "
+                "time, with testing, encoding, and solving components in the provenance columns."
+            ),
+            "runner_wall_elapsed": (
+                "Outer Python wall-clock seconds for one seed, including data preparation, "
+                "method execution, validation, artifact writing, and metric computation."
+            ),
+        },
         "aspcr_graph_convention": (
             "NPZ W_est/G_directed use row->column; R directed CSV uses G[child,parent]"
         ),
@@ -997,7 +1093,7 @@ def _metadata(args: argparse.Namespace, specs: list[DatasetSpec], out_dir: Path)
 
 def _assert_metadata_compatible(existing: dict[str, Any], proposed: dict[str, Any]) -> None:
     identity_fields = [
-        "version", "methods", "aspcr_method_configs", "datasets", "n_runs", "seeds",
+        "version", "methods", "aspcr_method_configs", "fgs_bdeu_config", "datasets", "n_runs", "seeds",
         "sample_size", "test_alpha", "test_name", "edge_per_node",
         "synthetic_sim_type", "noise_type", "bn_data_path", "bn_standardise",
         "synthetic_standardise", "aspcr_max_nodes",
@@ -1024,7 +1120,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--version", default="paper_aspcr_dag_alpha001_n5000_50rep")
     parser.add_argument(
         "--methods", nargs="+", default=list(DEFAULT_METHODS),
-        choices=["mpc", "spc", "fgs", "aspcr_log", "aspcr_log_dag", "random_edge"],
+        choices=["mpc", "spc", "fgs", "fgs_bdeu", "aspcr_log", "aspcr_log_dag", "random_edge"],
     )
     parser.add_argument(
         "--datasets", nargs="+", default=list(DEFAULT_EXPERIMENT_DATASETS),
@@ -1061,6 +1157,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    experiment_wall_started = time.perf_counter()
     if args.fresh and args.resume:
         raise SystemExit("Use either --fresh or --resume, not both.")
     specs = _dataset_specs(args.datasets)
@@ -1090,7 +1187,10 @@ def main() -> int:
         metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
 
     run_method = None
-    if any(method not in ASPCR_METHODS and method != "random_edge" for method in args.methods):
+    if any(
+        method not in ASPCR_METHODS and method not in {"random_edge", "fgs_bdeu"}
+        for method in args.methods
+    ):
         _install_notears_stub()
         from cd_algorithms.models import run_method as imported_run_method
 
@@ -1126,6 +1226,7 @@ def main() -> int:
             for run_idx, seed in enumerate(seeds):
                 if seed in successful_seeds:
                     continue
+                run_wall_started = time.perf_counter()
                 raw_path = graph_dir / ds_safe / safe_filename(display) / f"run_{run_idx:04d}_seed_{seed}.npz"
                 true_path: Path | None = None
                 progress_extra: dict[str, Any] = {}
@@ -1139,6 +1240,8 @@ def main() -> int:
                         start = datetime.now()
                         W_est = simulate_dag(d=B_true.shape[0], s0=int(np.asarray(B_true).sum()), graph_type="ER")
                         elapsed = (datetime.now() - start).total_seconds()
+                    elif method == "fgs_bdeu":
+                        W_est, elapsed = _run_fgs_bdeu(X)
                     elif method in ASPCR_METHODS:
                         data_path, true_path = _write_aspcr_inputs(aspcr_data_dir, spec, seed, X, B_true)
                         progress_extra = _aspcr_progress_fields(data_path=data_path, method=method)
@@ -1192,6 +1295,8 @@ def main() -> int:
                             "edge_per_node": args.edge_per_node,
                             "synthetic_sim_type": args.synthetic_sim_type,
                         }
+                        if method == "fgs_bdeu":
+                            artifact_metadata["fgs_bdeu"] = FGS_BDEU_CONFIG
                         if aspcr_result is not None:
                             artifact_metadata["aspcr"] = {
                                 "diagnostics": aspcr_result.diagnostics,
@@ -1253,11 +1358,19 @@ def main() -> int:
                     )
                     cpdag_row = dict(dag_row)
 
+                runner_wall_elapsed = time.perf_counter() - run_wall_started
+                dag_row["runner_wall_elapsed"] = runner_wall_elapsed
+                cpdag_row["runner_wall_elapsed"] = runner_wall_elapsed
                 _upsert_progress(dag_path, dag_row)
                 _upsert_progress(cpdag_path, cpdag_row)
+                method_elapsed = float(dag_row["elapsed"])
+                total_wall_elapsed = time.perf_counter() - experiment_wall_started
                 print(
                     f"[saved] dataset={spec.name} method={method} rep={run_idx + 1}/{args.n_runs} "
-                    f"status={dag_row['status']}",
+                    f"status={dag_row['status']} "
+                    f"method_elapsed={_format_duration(method_elapsed)} "
+                    f"runner_wall={_format_duration(runner_wall_elapsed)} "
+                    f"total_wall={_format_duration(total_wall_elapsed)}",
                     flush=True,
                 )
 
@@ -1270,6 +1383,7 @@ def main() -> int:
     all_cpdag = pd.concat([_read_progress(p) for p in sorted(progress_dir.glob("*__*_cpdag.csv"))], ignore_index=True)
     _write_summary(out_dir / f"stored_results_{args.version}.csv", all_dag)
     _write_summary(out_dir / f"stored_results_{args.version}_cpdag.csv", all_cpdag)
+    print(f"[done] total wall time: {_format_duration(time.perf_counter() - experiment_wall_started)}", flush=True)
     print(f"[done] progress: {progress_dir}", flush=True)
     print(f"[done] graphs: {graph_dir}", flush=True)
     print(f"[done] DAG summary: {out_dir / f'stored_results_{args.version}.csv'}", flush=True)

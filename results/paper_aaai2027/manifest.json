@@ -1,19 +1,8 @@
 {
   "completion_exceptions": {
-    "asia/OptABA-PC": {
-      "missing_saved_seeds": [
-        2047
-      ]
-    },
     "er8/MPC": {
       "missing_graph_evaluation_seeds": [
         2030
-      ]
-    },
-    "sf5/FGS": {
-      "missing_saved_seeds": [
-        2037,
-        2057
       ]
     },
     "survey/MPC": {
@@ -44,12 +33,13 @@
     "path": "scripts/verify_formal_properties.py",
     "sha256": "ca1db3ffb863fa2e262df92b3e3142edcb1ee6894935b9913126af472d15faca"
   },
-  "frozen_bytes": 121744730,
-  "frozen_file_count": 6364,
-  "frozen_tree_sha256": "fc50e1026526dd8861f9f2e38e0d3c84b782b1c7dd6cf6c11ba906dce5ed02fb",
+  "frozen_bytes": 128843227,
+  "frozen_file_count": 7493,
+  "frozen_tree_sha256": "ba613ab2dd82d7236e772d7e2256fb6baeb87b606840ceb1dfdccfcab0e95f7d",
   "included_source_paths": [
     "results/final_mcs_experiments_er_sf_alpha001_nowrong_noweight_50rep_chunked",
     "results/final_mcs_experiments_er_sf_sparse_alpha001_noweight_50rep",
+    "results/recovery_optaba_runs",
     "results/tables/paper_current_alpha001_nowrong_noweight_50rep_preview",
     "results/metadata_paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs.json",
     "results/stored_results_paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs.csv",
@@ -66,17 +56,23 @@
     "results/stored_results_paper_er_sf_alpha001_nowrong_noweight_50rep_mpc_cpdag.csv",
     "results/progress/paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
     "results/estimated_graphs/paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
-    "results/metadata_paper_er_sf_alpha001_nowrong_noweight_50rep_fgs.json",
-    "results/stored_results_paper_er_sf_alpha001_nowrong_noweight_50rep_fgs.csv",
-    "results/stored_results_paper_er_sf_alpha001_nowrong_noweight_50rep_fgs_cpdag.csv",
-    "results/progress/paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
-    "results/estimated_graphs/paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
+    "results/metadata_paper_fgs_bdeu_alpha001_n5000_50rep.json",
+    "results/stored_results_paper_fgs_bdeu_alpha001_n5000_50rep.csv",
+    "results/stored_results_paper_fgs_bdeu_alpha001_n5000_50rep_cpdag.csv",
+    "results/progress/paper_fgs_bdeu_alpha001_n5000_50rep",
+    "results/estimated_graphs/paper_fgs_bdeu_alpha001_n5000_50rep",
     "results/metadata_paper_aspcr_dag_alpha001_n5000_50rep.json",
     "results/stored_results_paper_aspcr_dag_alpha001_n5000_50rep.csv",
     "results/stored_results_paper_aspcr_dag_alpha001_n5000_50rep_cpdag.csv",
     "results/progress/paper_aspcr_dag_alpha001_n5000_50rep",
     "results/estimated_graphs/paper_aspcr_dag_alpha001_n5000_50rep",
-    "results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep"
+    "results/aspcr_matched/paper_aspcr_dag_alpha001_n5000_50rep",
+    "results/metadata_paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep.json",
+    "results/stored_results_paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep.csv",
+    "results/stored_results_paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep_cpdag.csv",
+    "results/progress/paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
+    "results/estimated_graphs/paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
+    "results/aspcr_matched/paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep"
   ],
   "protocol": {
     "aspcr_dag": {
@@ -85,7 +81,9 @@
       "datasets_reported": [
         "cancer",
         "earthquake",
-        "survey"
+        "survey",
+        "er5",
+        "sf5"
       ],
       "encoding": "new_wmaxsat_acyclic_sufficient.pl",
       "model_space": "dag_sufficient",
@@ -96,6 +94,7 @@
       "weight": "log"
     },
     "datasets": {
+      "exact_audit_edges_per_node": 2,
       "fixed": [
         "cancer",
         "earthquake",
@@ -103,7 +102,6 @@
         "asia"
       ],
       "primary_edges_per_node": 1,
-      "sensitivity_edges_per_node": 2,
       "synthetic_primary": [
         "er5",
         "er8",
@@ -119,9 +117,14 @@
       "development_alpha_0.05"
     ],
     "fgs": {
+      "algorithm": "tetrad_fges",
+      "data_type": "discrete",
       "faithfulness_assumed": true,
       "maximum_degree": -1,
-      "score": "sem-bic"
+      "sample_prior": 15.0,
+      "score": "bdeu-score",
+      "structure_prior": 1.0,
+      "symmetric_first_step": false
     },
     "mpc": {
       "conditioning_depth_limit": null,
@@ -157,11 +160,12 @@
       "test": "gsq"
     },
     "versions": {
-      "aspcr": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "aspcr_fixed": "paper_aspcr_dag_alpha001_n5000_50rep",
+      "aspcr_synthetic_primary": "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
+      "baseline_exact_audit_mpc": "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
       "baseline_fixed": "paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
-      "baseline_synthetic_dense_fgs": "paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
-      "baseline_synthetic_dense_mpc": "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
       "baseline_synthetic_primary": "paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs",
+      "fgs_bdeu": "paper_fgs_bdeu_alpha001_n5000_50rep",
       "tables": "paper_final_matched_50rep"
     }
   },
@@ -169,6 +173,8 @@
   "reported_aspcr_datasets": [
     "cancer",
     "earthquake",
-    "survey"
+    "survey",
+    "er5",
+    "sf5"
   ]
 }

@@ -1,0 +1,88 @@
+{
+  "baseline_results": [],
+  "encodings": [
+    "inc"
+  ],
+  "is_partial": true,
+  "n_nodes": 8,
+  "objectives": [
+    "lex"
+  ],
+  "opt_modes": [
+    "optN"
+  ],
+  "pct_wrong_facts": null,
+  "reifications": [
+    "mus"
+  ],
+  "reps": 1,
+  "reps_completed": 1,
+  "reps_planned": 1,
+  "seed": 2047,
+  "strategies": [
+    "bb"
+  ],
+  "timeout_sec": 300,
+  "total_weight": 1577318849,
+  "wc_results": [
+    {
+      "accepted_fact_f1": 0.9937106918238994,
+      "accepted_weight": 1511871121.0,
+      "adjacency_f1_avg": 0.8006535947712418,
+      "adjacency_f1_best": 0.823529411764706,
+      "adjacency_f1_worst": 0.7777777777777777,
+      "arrowhead_f1_avg": 0.6672113289760349,
+      "arrowhead_f1_best": 0.823529411764706,
+      "arrowhead_f1_worst": 0.5555555555555556,
+      "build_time_sec": 0.010688899084925652,
+      "cpdag_adjacency_f1_avg": 0.8006535947712419,
+      "cpdag_adjacency_f1_best": 0.823529411764706,
+      "cpdag_adjacency_f1_worst": 0.7777777777777777,
+      "cpdag_arrowhead_f1_avg": 0.6333333333333333,
+      "cpdag_arrowhead_f1_best": 0.6666666666666665,
+      "cpdag_arrowhead_f1_worst": 0.6,
+      "cpdag_f1_avg": 0.5719,
+      "cpdag_f1_best": 0.5882,
+      "cpdag_f1_worst": 0.5556,
+      "cpdag_shd_avg": 3.5,
+      "cpdag_shd_best": 3.0,
+      "cpdag_shd_worst": 4.0,
+      "encoding": "inc",
+      "eval_time_sec": 1.6739614764228463,
+      "f1_avg": 0.6672211902875493,
+      "f1_best": 0.8235418683446273,
+      "f1_worst": 0.5555555555555556,
+      "graph_eval_cache_hit": false,
+      "graph_eval_timed_out": true,
+      "method_time_sec": 18.46427282691002,
+      "n_cpdags_compat": 2,
+      "n_dags_compat": 12,
+      "n_tests_accepted": 159,
+      "n_tests_accepted_true": 158,
+      "n_tests_total": 170,
+      "n_tests_true": 159,
+      "objective": "lex",
+      "opt_mode": "optN",
+      "opt_strategy": "bb",
+      "reification": "mus",
+      "rep": 1,
+      "selected_count": 159,
+      "shd_avg": 4.666666666666667,
+      "shd_best": 3.0,
+      "shd_worst": 6.0,
+      "solve_time_sec": 16.779622451402247,
+      "status": "SAT",
+      "timed_out": false,
+      "true_cpdag_in_compat": 0,
+      "true_dag_in_compat": 0,
+      "wall_time_sec": 18.46427282691002,
+      "weight_accepted": 1511871121,
+      "weight_accepted_true": 1501871122,
+      "weight_total": 1577318849,
+      "weight_true": 1509079189
+    }
+  ],
+  "wrong_fact_counts": [
+    11
+  ]
+}

@@ -1,0 +1,6 @@
+dataset,baselines,trace_facts,satisfied_facts,failed_facts,satisfied_proportion
+cancer,50,4000,3041,959,0.76025
+earthquake,50,4000,3920,80,0.98
+survey,50,12000,9906,2094,0.8255
+er5,50,4000,3497,503,0.87425
+sf5,50,4000,3306,694,0.8265

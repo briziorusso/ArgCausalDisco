@@ -10,7 +10,7 @@
     "fixed": ["cancer", "earthquake", "survey", "asia"],
     "synthetic_primary": ["er5", "er8", "sf5", "sf8"],
     "primary_edges_per_node": 1,
-    "sensitivity_edges_per_node": 2
+    "exact_audit_edges_per_node": 2
   },
   "shared_ci": {
     "methods": ["ABA-PC", "OptABA-PC", "MPC"],
@@ -35,12 +35,17 @@
     "conditioning_depth_limit": null
   },
   "fgs": {
-    "score": "sem-bic",
+    "algorithm": "tetrad_fges",
+    "score": "bdeu-score",
+    "data_type": "discrete",
+    "sample_prior": 15.0,
+    "structure_prior": 1.0,
     "maximum_degree": -1,
-    "faithfulness_assumed": true
+    "faithfulness_assumed": true,
+    "symmetric_first_step": false
   },
   "aspcr_dag": {
-    "datasets_reported": ["cancer", "earthquake", "survey"],
+    "datasets_reported": ["cancer", "earthquake", "survey", "er5", "sf5"],
     "test": "bayes",
     "weight": "log",
     "prior_independence": 0.4,
@@ -54,9 +59,10 @@
   "versions": {
     "baseline_fixed": "paper_bnlearn_alpha001_nowrong_noweight_50rep_mpc_fgs",
     "baseline_synthetic_primary": "paper_er_sf_sparse_alpha001_noweight_50rep_mpc_fgs",
-    "baseline_synthetic_dense_mpc": "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
-    "baseline_synthetic_dense_fgs": "paper_er_sf_alpha001_nowrong_noweight_50rep_fgs",
-    "aspcr": "paper_aspcr_dag_alpha001_n5000_50rep",
+    "baseline_exact_audit_mpc": "paper_er_sf_alpha001_nowrong_noweight_50rep_mpc",
+    "fgs_bdeu": "paper_fgs_bdeu_alpha001_n5000_50rep",
+    "aspcr_fixed": "paper_aspcr_dag_alpha001_n5000_50rep",
+    "aspcr_synthetic_primary": "paper_aspcr_dag_er_sf_e1_alpha001_n5000_50rep",
     "tables": "paper_final_matched_50rep"
   },
   "excluded": [
