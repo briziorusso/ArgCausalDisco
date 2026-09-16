@@ -133,3 +133,15 @@ dmypy.json
 
 *.pkl
 outputs/
+
+# Reproducible AIJ evaluation/build outputs and server runs.
+/results/aij_evaluation/
+/results/aij_sources/
+/results/tables/aij/
+/results/matched10/
+/results/logs/
+/results/progress/aij_*/
+/results/estimated_graphs/aij_*/
+/results/aspcr_matched/aij_*/
+/results/metadata_aij_*.json
+/results/stored_results_aij_*.csv
