@@ -435,7 +435,7 @@ def metric_panels(tables: Tables, summary: pd.DataFrame, name: str, specs: list[
                 rows.append(None)
         suffix = f"_{start//3+1}" if len(datasets) > 3 else ""
         tables.write(name+suffix, ["Dataset", "Method", *[x[1] for x in specs]], rows,
-                     caption + (" Each cell shows the mean above its SD." if len(specs)>=5 else "")
+                     caption
                      + (" Bold indicates the best mean, including ties." if bold else "")
                      + (r" $\dagger$ and $\ddagger$ indicate significantly worse and better performance, respectively, than ABAPC (bb-nor), using paired two-sided $t$-tests with Holm correction across five comparisons per dataset and metric ($p<0.05$)." if tests is not None else ""))
 
@@ -454,27 +454,27 @@ def noninformative_arrowhead_scores(sizes: pd.DataFrame) -> set[tuple[str, str]]
 
 def make_primary_tables(tables: Tables, primary: pd.DataFrame, tests: pd.DataFrame, sizes: pd.DataFrame) -> None:
     noninformative = noninformative_arrowhead_scores(sizes)
-    common = r"Results use ten matched seeds and 5000 observations per run. Entries report means and sample standard deviations; subscripts indicate fewer than ten defined measurements, and -- denotes an unavailable value. FGS uses SEM-BIC and its archived DAG representation."
+    common = r"Results use ten matched seeds and 5000 observations per run. Entries report means above sample standard deviations; subscripts indicate fewer than ten defined measurements, and -- denotes an unavailable value."
     cp = primary[primary.kind == "cpdag"]
     specs = [("nsid_low", r"NSID$_{\min}\downarrow$", 2, "min"), ("nsid_high", r"NSID$_{\max}\downarrow$", 2, "min"),
              ("adjacency_F1", r"Sk-F1 $\uparrow$", 3, "max"), ("arrowhead_F1", r"AH-F1 $\uparrow$", 3, "max"),
              ("nshd", r"NSHD $\downarrow$", 2, "min"), ("F1", r"F1 $\uparrow$", 3, "max")]
     summary = aggregate(cp, ["dataset", "method"], [s[0] for s in specs])
-    metric_panels(tables, summary, "table_aij_cpdag_core", specs, r"Graph reconstruction relative to the reference CPDAG. " + common + r" NSID and NSHD divide distances by the number of true DAG edges. SID bounds are the minimum and maximum over DAGs in the estimated equivalence class; five Survey MPC outputs admit no consistent extension and contribute only edge-based scores. F1 matches edge types and directions; Sk-F1 measures skeleton recovery and AH-F1 arrowhead recovery. AH scores are n/a when the reference has no compelled arrowheads.", bold=True, noninformative=noninformative, tests=tests)
+    metric_panels(tables, summary, "table_aij_cpdag_core", specs, r"Graph reconstruction relative to the true CPDAG. " + common + r" NSID and NSHD divide Structural Interventional (Hamming, respectively) Distance by the number of true DAG edges. Sk-F1 measures skeleton recovery and AH-F1 arrowhead recovery. AH scores are n/a when the true CPDAG has no compelled arrowheads.", bold=True, noninformative=noninformative, tests=tests)
     specs = [(metric, title, 3, "max") for metric, title in (
         ("precision", r"P $\uparrow$"), ("recall", r"R $\uparrow$"),
         ("adjacency_precision", r"Sk-P $\uparrow$"), ("adjacency_recall", r"Sk-R $\uparrow$"),
         ("arrowhead_precision", r"AH-P $\uparrow$"), ("arrowhead_recall", r"AH-R $\uparrow$"))]
     metric_panels(tables, aggregate(cp, ["dataset", "method"], [s[0] for s in specs]), "table_aij_cpdag_precision_recall", specs,
-                  r"Precision (P) and recall (R) relative to the reference CPDAG: matching edge types and directions, skeleton adjacencies (Sk), and directed arrowheads (AH). " + common + r" All returned graphs contribute where the metric is defined, including Survey MPC outputs that are not valid CPDAGs. Precision is undefined for an empty predicted edge set. AH comparisons are n/a when the reference has no compelled arrowheads.", noninformative=noninformative, bold=True, tests=tests)
+                  r"Precision (P) and recall (R) relative to the true CPDAG, for edges, skeleton adjacencies (Sk), and arrowheads (AH). " + common + r" AH scores are n/a when the true CPDAG has no compelled arrowheads.", noninformative=noninformative, bold=True, tests=tests)
     dag = primary[primary.kind == "dag"]
     specs = [("nsid", r"NSID $\downarrow$", 2, "min"), ("nshd", r"NSHD $\downarrow$", 2, "min"),
              ("F1", r"F1 $\uparrow$", 3, "max"), ("precision", r"P $\uparrow$", 3, "max"), ("recall", r"R $\uparrow$", 3, "max")]
     metric_panels(tables, aggregate(dag, ["dataset", "method"], [s[0] for s in specs]), "table_aij_dag", specs,
-                  r"DAG reconstruction. DAG outputs are evaluated directly; CPDAG outputs use a reproducible, seed-dependent consistent extension. " + common + r" NSID and NSHD divide distances by the number of true DAG edges. Five Survey MPC outputs have no consistent extension and are excluded from DAG evaluation.", bold=True, tests=tests, kind='dag')
+                  r"Graph reconstruction relative to the true DAG. " + common + r" NSID and NSHD divide Structural Interventional (Hamming, respectively) Distance by the number of true DAG edges. P and R denote precision and recall.", bold=True, tests=tests, kind='dag')
     specs = [("directed", "Directed", 1, "max"), ("undirected", "Undirected", 1, "max"), ("dag_edges", "DAG edges", 1, "max")]
     metric_panels(tables, aggregate(sizes, ["dataset", "method"], [s[0] for s in specs]), "table_aij_graph_size", specs,
-                  r"Numbers of directed and undirected edges in the estimated partially directed graphs, and edges in their DAG representatives; mean $\pm$ sample standard deviation over ten matched runs. Each undirected adjacency is counted once. Reference rows give the true CPDAG and DAG sizes. Five Survey MPC outputs have no consistent DAG extension; their partially directed edge counts are retained. Subscripts indicate fewer than ten defined measurements.", methods=("Reference", *METHODS))
+                  r"Graph sizes: numbers of directed and undirected edges in the estimated partially directed graphs, and edges in their DAG representatives. Entries report means $\pm$ sample standard deviations over ten matched runs; subscripts indicate fewer than ten defined measurements. Reference rows give the true CPDAG and DAG sizes.", methods=("Reference", *METHODS))
     rows = []
     for dataset in DATASETS:
         vals = []
@@ -486,7 +486,7 @@ def make_primary_tables(tables: Tables, primary: pd.DataFrame, tests: pd.DataFra
         vals.append(rf"$\times {time.left_mean/time.right_mean:.3g}$")
         rows.append([dataset.title(), *vals])
     tables.write("table_aij_main_delta", ["Dataset", r"$\Delta$NSID$_{\min}\downarrow$", r"$\Delta$NSID$_{\max}\downarrow$", r"$\Delta$Sk-F1$\uparrow$", r"$\Delta$AH-F1$\uparrow$", r"$\Delta$NSHD$\downarrow$", r"$t$ ratio$\downarrow$"], rows,
-                 r"Comparison of ABAPC (bb-nor) and ABAPC (bb): mean within-seed differences, bb-nor minus bb, over ten matched runs with 5000 observations. Distances are normalised by the number of true DAG edges. Negative distance differences and positive F1 differences favour bb-nor. The final column is the ratio of mean runtimes, bb-nor divided by bb. Subscripts indicate fewer than ten available pairs; n/a marks an arrowhead comparison with no reference arrowheads, and -- denotes an unavailable value.")
+                 r"Mean within-seed differences, ABAPC (bb-nor) minus ABAPC (bb), over ten matched runs with 5000 observations. Distances are normalised by the number of true DAG edges; negative distance differences and positive F1 differences favour bb-nor. The runtime ratio is bb-nor divided by bb. Subscripts indicate fewer than ten defined pairs; n/a marks AH comparisons with no compelled arrowheads in the true CPDAG, and -- denotes an unavailable value.")
 
 
 def make_legacy_tables(tables: Tables, legacy: pd.DataFrame, semantics: pd.DataFrame) -> None:
@@ -507,7 +507,7 @@ def make_legacy_tables(tables: Tables, legacy: pd.DataFrame, semantics: pd.DataF
             if dataset != DATASETS[start+2]:
                 rows.append(None)
         tables.write(f"table_aij_runtime_{start//3+1}", ["Dataset", "Method", "Cohort / samples / runs", "Time (s)"], rows,
-                     r"Execution time in seconds, mean $\pm$ sample standard deviation. The cohort column identifies the experiment collection, number of observations and number of runs. AIJ rows use ten matched seeds and 5000 observations; legacy results use the reported sample sizes and run counts. A dash denotes an unavailable run count. Comparisons across cohorts are descriptive because the experimental settings differ.")
+                     r"Execution times in seconds, reported as means $\pm$ sample standard deviations. The cohort column gives the experiment collection, sample size and run count; -- denotes an unavailable run count. Comparisons across cohorts are descriptive.")
     rows = []
     for dataset in DATASETS[:3]:
         for i, method in enumerate(("ASPforABA", "ABAPC (orig)", *VARIANTS)):
@@ -516,11 +516,11 @@ def make_legacy_tables(tables: Tables, legacy: pd.DataFrame, semantics: pd.DataF
         if dataset != DATASETS[2]:
             rows.append(None)
     tables.write("table_aij_variants", ["Dataset", "Implementation", "Cohort / samples / runs", r"DAG NSID $\downarrow$"], rows,
-                 r"DAG reconstruction across implementations and encoding variants, measured by SID divided by the number of true DAG edges; lower is better. Entries are means $\pm$ sample standard deviations. The cohort column reports the experiment collection, sample size and run count; comparisons across different cohorts are descriptive. A dash denotes an unavailable run count.")
+                 r"DAG reconstruction across implementations and encoding variants. NSID is SID divided by the number of true DAG edges. Entries report means $\pm$ sample standard deviations. The cohort column gives the experiment collection, sample size and run count; -- denotes an unavailable run count. Comparisons across cohorts are descriptive.")
     order = (*METHODS[:4], "Causal ABA (Original)", "Causal ABA (Alt. ST)", "Causal ABA (Alt. CO)", "Causal ABA (Alt. CO-max)")
     specs = [("nsid_low", r"NSID$_{L}\downarrow$", 3, "min"), ("nsid_high", r"NSID$_{U}\downarrow$", 3, "min")]
     metric_panels(tables, semantics, "table_aij_semantics", specs,
-                  r"Comparison of argumentation semantics over the separate 50-run cohort. Entries are means $\pm$ standard deviations of the reported lower and upper SID bounds, divided by the number of true DAG edges. These legacy bounds need not be attained by a compatible DAG and are not included in the matched-seed significance tests.", methods=order, datasets=DATASETS[:3])
+                  r"Comparison of argumentation semantics over 50 runs. Entries report means $\pm$ standard deviations of lower and upper SID bounds, normalised by the number of true DAG edges. These historical bounds need not be attained by a compatible DAG.", methods=order, datasets=DATASETS[:3])
 
 
 def make_fact_tables(tables: Tables, src: Sources, output: Path) -> None:
@@ -549,7 +549,7 @@ def make_fact_tables(tables: Tables, src: Sources, output: Path) -> None:
         if dataset != DATASETS[-1]:
             rows.append(None)
     tables.write("table_aij_alpha_methods", ["Dataset", "Method", r"$\Delta$DAG F1 $\uparrow$", r"$\Delta$DAG SHD $\downarrow$"], rows,
-                 r"Sensitivity to the CI-test significance threshold: mean $\pm$ sample standard deviation of within-seed differences, $\alpha=0.01$ minus $\alpha=0.05$, over ten matched runs. Positive F1 differences and negative SHD differences favour the lower threshold. SHD is unnormalised. Subscripts indicate fewer than ten defined pairs.")
+                 r"Effect of the CI-test significance threshold: within-seed differences, $\alpha=0.01$ minus $\alpha=0.05$, reported as means $\pm$ sample standard deviations over ten matched runs. Positive F1 and negative SHD differences favour $\alpha=0.01$. SHD is unnormalised; subscripts indicate fewer than ten defined pairs.")
 
 
 def ranking_table(tables: Tables, src: Sources, csv_path: str | None) -> bool:
