@@ -93,15 +93,14 @@ def SHD(*args: Any, **kwargs: Any) -> Any:
 
 
 def SID(*args: Any, **kwargs: Any) -> Any:
-    _ensure_cdt_loaded()
-    assert _CDT_SID is not None
-    return _CDT_SID(*args, **kwargs)
+    from utils.aij_graph_metrics import dag_sid
+    return np.asarray([dag_sid(*args, **kwargs)])
 
 
 def SID_CPDAG(*args: Any, **kwargs: Any) -> Any:
-    _ensure_cdt_loaded()
-    assert _CDT_SID_CPDAG is not None
-    return _CDT_SID_CPDAG(*args, **kwargs)
+    from utils.aij_graph_metrics import exact_sid_bounds
+    result = exact_sid_bounds(*args, **kwargs)
+    return np.asarray([result['sid_low']]), np.asarray([result['sid_high']])
 
 
 def _normalize_metric_timeout(timeout_sec: float | None) -> float | None:
@@ -418,42 +417,16 @@ def dag2skel(G, unique=False):
     return C
 
 def dag2cpdag(G, cdt_method=False):
-    """Convert a DAG to a CPDAG.
-
-    Args:
-        G (np.ndarray): [d, d] binary adj matrix of DAG
-
-    Returns:
-        C (np.ndarray): [d, d] binary adj matrix of CPDAG
-    """
-    ### handle results from PC methods
-    edges_removed = False
-    if not is_dag(G):
-        ### get undirected edges and remove them from G
-        undirected_edges = [(v1, v2) for v1 in range(len(G)) for v2 in range(len(G)) if G[v1, v2] == 1 and G[v2, v1] == 1]
-        if len(undirected_edges) > 0:
-            edges_removed = True
-            for v1, v2 in undirected_edges:
-                G[v1, v2] = 0
-                G[v2, v1] = 0
-            
-    assert is_dag(G), 'Input graph is not a DAG'
-    ###only leave the arrows that are part of a v-structure
-    C = dag2skel(G)
-    immoralities = get_immoralities(mount_adjacency_list(G))
-    for v1, v3, v2 in immoralities:
-        C[v1, v3] = 1
-        C[v3, v1] = 0
-        C[v2, v3] = 1
-        C[v3, v2] = 0
-    if edges_removed:
-        for v1, v2 in undirected_edges:
-            ## reintroduce undirected edges
-            C[v1, v2] = 1
-            C[v2, v1] = 1
+    """Complete conversion; preserve every compelled orientation."""
+    from utils.aij_graph_metrics import adjacency, complete_cpdag, consistent_extension
+    graph = adjacency(G)
+    dag = consistent_extension(graph) if (graph * graph.T).any() else graph
+    result = complete_cpdag(dag)
     if cdt_method:
-        C = (C != 0).astype(int)
-    return C
+        return result
+    result = result.copy()
+    result[(result == 1) & (result.T == 1)] = -1
+    return result
 
 
 def matrix_adjacency_set(B: np.ndarray) -> set[tuple[int, int]]:
@@ -471,19 +444,9 @@ def matrix_adjacency_set(B: np.ndarray) -> set[tuple[int, int]]:
 
 
 def matrix_arrowhead_set(B: np.ndarray) -> set[tuple[int, int]]:
-    """Return directed arrowheads, ignoring undirected CPDAG edges."""
-    arrows: set[tuple[int, int]] = set()
-    n = int(B.shape[0])
-    for i in range(n):
-        for j in range(n):
-            if i == j:
-                continue
-            try:
-                if int(B[i, j]) != 0 and int(B[j, i]) == 0:
-                    arrows.add((i, j))
-            except Exception:
-                continue
-    return arrows
+    """Directed edges only; a one-sided -1 remains an undirected edge."""
+    from utils.aij_graph_metrics import graph_sets
+    return graph_sets(B)[1]
 
 
 def set_precision_recall_f1(
@@ -503,21 +466,13 @@ def set_precision_recall_f1(
 class DAGMetrics(object):
     """
     Compute various accuracy metrics for B_est.
-    true positive(TP): an edge estimated with correct direction.
-    true nagative(TN): an edge that is neither in estimated graph nor in true graph.
-    false positive(FP): an edge that is in estimated graph but not in the true graph.
-    false negative(FN): an edge that is not in estimated graph but in the true graph.
-    reverse = an edge estimated with reversed direction.
-
-    fdr: (reverse + FP) / (TP + FP)
-    tpr: TP/(TP + FN)
-    fpr: (reverse + FP) / (TN + FP)
-    shd: undirected extra + undirected missing + reverse
-    nnz: TP + FP
-    precision: TP/(TP + FP)
-    recall: TP/(TP + FN)
-    F1: 2*(recall*precision)/(recall+precision)
-    gscore: max(0, (TP-FP))/(TP+FN), A score ranges from 0 to 1
+    Precision, recall and F1 match edge states (including orientation).
+    In CPDAG mode the reference is the completed CPDAG of the true DAG.
+    Skeleton and arrowhead scores are also reported separately.
+    fdr is 1 - precision; tpr is recall. For compatibility, fpr retains
+    the legacy denominator: incorrect edge states divided by the number
+    of absent reference adjacencies (bounded below by one).
+    SHD counts one edit for each differing unordered pair state.
 
     Parameters
     ----------
@@ -527,7 +482,7 @@ class DAGMetrics(object):
         [d, d] ground truth graph, {0, 1}.
     """
 
-    def __init__(self, B_est, B_true, sid=True, metric_timeout: float | None = None):
+    def __init__(self, B_est, B_true, sid=True, metric_timeout: float | None = None, evaluation_kind=None):
         
         if not isinstance(B_est, np.ndarray):
             raise TypeError("Input B_est is not numpy.ndarray!")
@@ -543,186 +498,40 @@ class DAGMetrics(object):
             self.B_true,
             sid,
             metric_timeout=self.metric_timeout,
+            evaluation_kind=evaluation_kind,
         )
 
     @staticmethod
-    def _count_accuracy(B_est, B_true, sid=True, decimal_num=4, metric_timeout: float | None = None):
-        """
-        Parameters
-        ----------
-        B_est: np.ndarray
-            [d, d] estimate, {0, 1, -1}, -1 is undirected edge in CPDAG.
-        B_true: np.ndarray
-            [d, d] ground truth graph, {0, 1}.
-        sid: bool
-            If True, compute SID.
-        decimal_num: int
-            Result decimal numbers.
-
-
-        Return
-        ------
-        metrics: dict
-            fdr: float
-                (reverse + FP) / (TP + FP)
-            tpr: float
-                TP/(TP + FN)
-            fpr: float
-                (reverse + FP) / (TN + FP)
-            shd: int
-                undirected extra + undirected missing + reverse
-            nnz: int
-                TP + FP
-            precision: float
-                TP/(TP + FP)
-            recall: float
-                TP/(TP + FN)
-            F1: float
-                2*(recall*precision)/(recall+precision)
-            gscore: float
-                max(0, (TP-FP))/(TP+FN), A score ranges from 0 to 1
-        """
-
-        ## Do not allow self loops
-        if (np.diag(B_est)).any():
-            raise ValueError('Graph contains self loops')
-        ## Only allow 0, 1, -1
-        if not ((B_est == 0) | (B_est == 1) | (B_est == -1)).all():
-            raise ValueError('B_est should take value in {0,1,-1}')
-        
-        B_est_unique = deepcopy(B_est)
-        # trans cpdag [0, 1] to [-1, 0, 1], -1 is undirected edge in CPDAG
-        if ((B_est_unique == 1) & (B_est_unique.T == 1)).any():
-            cpdag = True
-            for i in range(len(B_est_unique)):
-                for j in range(len(B_est_unique[i])):
-                    if B_est_unique[i, j] == B_est_unique[j, i] == 1:
-                        B_est_unique[i, j] = -1
-                        B_est_unique[j, i] = 0
-        if (B_est_unique == -1).any():  # cpdag
-            cpdag = True
-            ## only one entry in the pair of undirected edges should be -1
-            if ((B_est_unique == -1) & (B_est_unique.T == -1)).any():
-                for i in range(len(B_est_unique)):
-                    for j in range(len(B_est_unique[i])):
-                        if B_est_unique[i, j] == B_est_unique[j, i] == -1:
-                            B_est_unique[i, j] = -1
-                            B_est_unique[j, i] = 0
-                assert not ((B_est_unique == -1) & (B_est_unique.T == -1)).any()
-                assert not ((B_est_unique == -1) & (B_est_unique.T == -1)).any()
-        else:  # dag
-            cpdag = False
-            if not ((B_est == 0) | (B_est == 1)).all():
-                raise ValueError('B_est should take value in {0,1}')
-            if not is_dag(B_est):
-                raise ValueError('B_est should be a DAG')
-        d = B_true.shape[0]
-        
-        # linear index of nonzeros
-        pred_und = np.flatnonzero(B_est_unique == -1)
-        pred = np.flatnonzero(B_est_unique == 1)
-        cond = np.flatnonzero(B_true)
-        cond_reversed = np.flatnonzero(B_true.T)
-        cond_skeleton = np.concatenate([cond, cond_reversed])
-        # true pos
-        true_pos = np.intersect1d(pred, cond, assume_unique=True) if len(pred) > 0 else np.array([])
-        # treat undirected edge favorably
-        true_pos_und = np.intersect1d(pred_und, cond_skeleton, assume_unique=True) if len(pred_und) > 0 else np.array([])
-        true_pos = np.concatenate([true_pos, true_pos_und])
-        # false pos
-        false_pos = np.setdiff1d(pred, cond_skeleton, assume_unique=True)
-        false_pos_und = np.setdiff1d(pred_und, cond_skeleton, assume_unique=True)
-        false_pos = np.concatenate([false_pos, false_pos_und])
-        # reverse
-        extra = np.setdiff1d(pred, cond, assume_unique=True)
-        reverse = np.intersect1d(extra, cond_reversed, assume_unique=True) if len(extra) > 0 else np.array([])
-        # compute ratio
-        pred_size = len(pred) + len(pred_und)
-        cond_neg_size = 0.5 * d * (d - 1) - len(cond)
-        fdr = float(len(reverse) + len(false_pos)) / max(pred_size, 1)
-        tpr = float(len(true_pos)) / max(len(cond), 1)
-        fpr = float(len(reverse) + len(false_pos)) / max(cond_neg_size, 1)
-        # structural hamming distance 
-        # pred_lower = np.flatnonzero(np.tril(B_est_unique + B_est.T))
-        # cond_lower = np.flatnonzero(np.tril(B_true + B_true.T))
-        # extra_lower = np.setdiff1d(pred_lower, cond_lower, assume_unique=True)
-        # missing_lower = np.setdiff1d(cond_lower, pred_lower, assume_unique=True)
-        # shd = len(extra_lower) + len(missing_lower) + len(reverse)        
-        ### this, although standard in some packages,
-        ### treats undirected edge as a present edge in the CPDAG 
-        ### Replacing with SHD from cdt
-        eval_status: dict[str, dict[str, Any]] = {}
-        if cpdag:
-            shd_result = _run_metric_with_timeout(
-                "shd_cpdag",
-                B_est=B_est,
-                B_true=B_true,
-                timeout_sec=metric_timeout,
-            )
-        else:
-            shd_result = _run_metric_with_timeout(
-                "shd_dag",
-                B_est=B_est,
-                B_true=B_true,
-                timeout_sec=metric_timeout,
-            )
-        eval_status["shd"] = {k: v for k, v in shd_result.items() if k != "value"}
-        shd = shd_result.get("value", np.nan) if shd_result.get("status") == "ok" else np.nan
-
-        W_p = pd.DataFrame(B_est_unique)
-        W_true = pd.DataFrame(B_true)
-
-        # gscore = DAGMetrics._cal_gscore(W_p, W_true)
-        precision, recall, F1 = DAGMetrics._cal_precision_recall(W_p, W_true)
-
-        if cpdag:
-            B_ref = dag2cpdag(B_true.copy())
-            pred_adj = matrix_adjacency_set(B_est_unique)
-            true_adj = matrix_adjacency_set(B_ref)
-            pred_arrows = matrix_arrowhead_set(B_est_unique)
-            true_arrows = matrix_arrowhead_set(B_ref)
-        else:
-            pred_adj = matrix_adjacency_set(B_est)
-            true_adj = matrix_adjacency_set(B_true)
-            pred_arrows = matrix_arrowhead_set(B_est)
-            true_arrows = matrix_arrowhead_set(B_true)
-
-        adjacency_precision, adjacency_recall, adjacency_F1 = set_precision_recall_f1(pred_adj, true_adj)
-        arrowhead_precision, arrowhead_recall, arrowhead_F1 = set_precision_recall_f1(pred_arrows, true_arrows)
-
-        mt = {'nnz': pred_size, 'fdr': fdr, 'tpr': tpr, 'fpr': fpr,  
-              'precision': precision, 'recall': recall, 'F1': F1,
-              'adjacency_precision': adjacency_precision, 'adjacency_recall': adjacency_recall, 'adjacency_F1': adjacency_F1,
-              'arrowhead_precision': arrowhead_precision, 'arrowhead_recall': arrowhead_recall, 'arrowhead_F1': arrowhead_F1,
-              'shd': shd}
-
-        for i in mt:
-            mt[i] = round(mt[i], decimal_num)   
-
-        if sid and not cpdag:
-            sid_result = _run_metric_with_timeout(
-                "sid_dag",
-                B_est=B_est,
-                B_true=B_true,
-                timeout_sec=metric_timeout,
-            )
-            eval_status["sid"] = {k: v for k, v in sid_result.items() if k != "value"}
-            if sid_result.get("status") != "ok":
-                raise RuntimeError(f"SID computation failed: {sid_result.get('error')}")
-            mt['sid'] = sid_result["value"]
-        elif sid and cpdag:
-            sid_result = _run_metric_with_timeout(
-                "sid_cpdag",
-                B_est=B_est,
-                B_true=B_true,
-                timeout_sec=metric_timeout,
-            )
-            eval_status["sid"] = {k: v for k, v in sid_result.items() if k != "value"}
-            if sid_result.get("status") != "ok":
-                raise RuntimeError(f"SID computation failed: {sid_result.get('error')}")
-            mt['sid'] = sid_result["value"]
-
-        return mt, eval_status
+    def _count_accuracy(B_est, B_true, sid=True, decimal_num=4, metric_timeout=None, evaluation_kind=None):
+        from utils.aij_graph_metrics import adjacency, complete_cpdag, structural_scores, graph_sets, require_dag, dag_sid, exact_sid_bounds, InvalidGraph
+        estimated = adjacency(B_est)
+        kind = evaluation_kind or ('cpdag' if (estimated * estimated.T).any() else 'dag')
+        if kind not in {'dag', 'cpdag'}:
+            raise ValueError('evaluation_kind must be dag or cpdag')
+        reference = complete_cpdag(B_true) if kind == 'cpdag' else adjacency(B_true)
+        if kind == 'dag':
+            require_dag(estimated)
+            require_dag(reference)
+        metrics = structural_scores(estimated, reference)
+        pred_edges, true_edges = graph_sets(estimated)[2], graph_sets(reference)[2]
+        nonedges = len(reference) * (len(reference)-1) // 2 - len(true_edges)
+        metrics.update(fdr=1-metrics['precision'], tpr=metrics['recall'],
+                       fpr=len(pred_edges-true_edges)/max(nonedges, 1))
+        status = {'shd': {'status': 'ok', 'timed_out': False}}
+        if sid:
+            try:
+                if kind == 'cpdag':
+                    result = exact_sid_bounds(B_true, estimated, timeout=metric_timeout or 60.)
+                    metrics['sid'] = (result['sid_low'], result['sid_high'])
+                    status['sid'] = {'status': 'ok' if result['sid_status']=='exact' else result['sid_status'],
+                                     'exact': result['sid_status']=='exact', 'timed_out': result['sid_status']!='exact'}
+                else:
+                    metrics['sid'] = dag_sid(B_true, estimated)
+                    status['sid'] = {'status':'ok', 'exact':True, 'timed_out':False}
+            except InvalidGraph as exc:
+                metrics['sid'] = (np.nan,np.nan) if kind=='cpdag' else np.nan
+                status['sid'] = {'status':'error', 'error':str(exc), 'timed_out':False}
+        return metrics, status
 
     @staticmethod
     def _cal_gscore(W_p, W_true):
@@ -753,39 +562,13 @@ class DAGMetrics(object):
 
     @staticmethod
     def _cal_precision_recall(W_p, W_true):
-        """
-        Parameters
-        ----------
-        W_p: pd.DataDrame
-            [d, d] estimate, {0, 1, -1}, -1 is undirected edge in CPDAG.
-        W_true: pd.DataDrame
-            [d, d] ground truth graph, {0, 1}.
-        
-        Return
-        ------
-        precision: float
-            TP/(TP + FP)
-        recall: float
-            TP/(TP + FN)
-        F1: float
-            2*(recall*precision)/(recall+precision)
-        """
+        from utils.aij_graph_metrics import adjacency, complete_cpdag, structural_scores
+        estimated, reference = adjacency(np.asarray(W_p)), adjacency(np.asarray(W_true))
+        if (estimated * estimated.T).any() and not (reference * reference.T).any():
+            reference = complete_cpdag(reference)
+        scores = structural_scores(estimated, reference)
+        return scores['precision'], scores['recall'], scores['F1']
 
-        assert(W_p.shape==W_true.shape and W_p.shape[0]==W_p.shape[1])
-        if (W_p == -1).any().any():
-            W_p = pd.DataFrame((W_p != 0).astype(int))
-        if (W_true == -1).any().any():
-            W_true = pd.DataFrame((W_true != 0).astype(int))
-
-        TP = (W_p + W_true).map(lambda elem:1 if elem==2 else 0).sum(axis=1).sum()
-        TP_FP = W_p.sum(axis=1).sum()
-        TP_FN = W_true.sum(axis=1).sum()
-        precision = TP/TP_FP
-        recall = TP/TP_FN
-        F1 = 2*(recall*precision)/(recall+precision)
-        
-        return precision, recall, F1
-    
     @staticmethod
     def _cal_SID(B_est, B_true):
         """

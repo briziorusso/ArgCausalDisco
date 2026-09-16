@@ -22,6 +22,7 @@ import pandas as pd
 from datetime import datetime
 from cd_algorithms.models import run_method
 from utils.graph_utils import DAGMetrics, dag2cpdag
+from utils.aij_graph_metrics import prepare_estimate
 from utils.helpers import random_stability, logger_setup
 from utils.data_utils import load_bnlearn_data_dag, simulate_dag
 import warnings
@@ -105,7 +106,7 @@ for dataset_name in dataset_list:
                 else:
                     B_est = simulate_dag(d=B_true.shape[1], s0=B_true.sum().astype(int), graph_type='ER')
                 elapsed = (datetime.now()-start).total_seconds()
-                mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true).metrics
+                mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true, evaluation_kind="cpdag").metrics
                 mt_dag = DAGMetrics(B_est, B_true).metrics
             else:
                 W_est, elapsed = run_method(X_s, method, seed, test_alpha=0.01, test_name='fisherz', device=device, scenario=f"{method}_{version}_{dataset_name}")
@@ -116,10 +117,9 @@ for dataset_name in dataset_list:
                     mt_cpdag = {'nnz':np.nan, 'fdr':np.nan, 'tpr':np.nan, 'fpr':np.nan, 'precision':np.nan, 'recall':np.nan, 'F1':np.nan, 'shd':np.nan, 'sid':np.nan}
                     mt_dag = {'nnz':np.nan, 'fdr':np.nan, 'tpr':np.nan, 'fpr':np.nan, 'precision':np.nan, 'recall':np.nan, 'F1':np.nan, 'shd':np.nan, 'sid':np.nan}
                 else:
-                    B_est = (W_est != 0).astype(int)
-                    mt_cpdag = DAGMetrics(dag2cpdag(B_est), B_true).metrics
-                    B_est = (W_est > 0).astype(int)
-                    mt_dag = DAGMetrics(B_est, B_true).metrics
+                    B_est, C_est = prepare_estimate(W_est, method, seed)
+                    mt_cpdag = DAGMetrics(C_est, B_true, evaluation_kind="cpdag").metrics
+                    mt_dag = DAGMetrics(B_est, B_true, evaluation_kind="dag").metrics
             # calculate metrics
             logging.info({'dataset':dataset_name, 'model':names_dict[method], 'elapsed':elapsed , **mt_dag})
             logging.info({'dataset':dataset_name, 'model':names_dict[method], 'elapsed':elapsed , **mt_cpdag})
