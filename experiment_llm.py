@@ -559,6 +559,7 @@ from typing import Iterable
 
 import abapc
 from utils.graph_utils import DAGMetrics, dag2cpdag
+from utils.metric_protocol import GRAPH_METRIC_PROTOCOL, ensure_metric_protocol
 
 
 repeats = 50
@@ -668,6 +669,7 @@ def run_experiment(
                 all_runs.append(
                     {
                         "dataset": bif_name,
+                        "graph_metric_protocol": GRAPH_METRIC_PROTOCOL,
                         "num_nodes": bn.size(),
                         "num_edges": bn.sizeArcs(),
                         "impl": impl_name,
@@ -729,6 +731,9 @@ def run_dataset_experiment(
     prior_json = Path(prior_json) if prior_json is not None else Path(f"results/llm_constraints/{type_}-consensus.json")
     prior_df = pd.read_json(prior_json)
     
+    results_path = Path(results_path) if results_path is not None else Path(f"results/ABAPC-LLM/{type_}-results.csv")
+    ensure_metric_protocol(results_path.with_suffix('.metrics.json'), existing_paths=[results_path])
+
     # Run experiment
     res_df, skipped = run_experiment(
         prior_df=prior_df, 
@@ -738,7 +743,6 @@ def run_dataset_experiment(
     )
     
     # Save results
-    results_path = Path(results_path) if results_path is not None else Path(f"results/ABAPC-LLM/{type_}-results.csv")
     results_path.parent.mkdir(parents=True, exist_ok=True)
     res_df.to_csv(results_path, index=False)
     

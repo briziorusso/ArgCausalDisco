@@ -1873,6 +1873,10 @@ def main() -> None:
     else:
         out_dir = base_out_dir.parent / f"{base_out_dir.name}_{ts}"
         out_dir.mkdir(parents=True, exist_ok=True)
+    from utils.metric_protocol import GRAPH_METRIC_PROTOCOL, ensure_metric_protocol, require_metric_protocol
+    ensure_metric_protocol(out_dir / "metric_protocol.json", existing_paths=[
+        out_dir / "summary.partial.json", out_dir / "summary.json",
+    ])
     reps = max(1, int(args.reps))
 
     # Import locally so this script doesn't break `--help` if optional deps missing.
@@ -1904,6 +1908,8 @@ def main() -> None:
             d = json.loads(resume_path.read_text())
         except Exception as e:
             raise SystemExit(f"Failed to read resume state from {resume_path}: {e}")
+
+        require_metric_protocol(d, source=resume_path)
 
         # Restore total_weight if present so summary writing works even when
         # the sweep has nothing new to do on resume.
@@ -2313,6 +2319,7 @@ def main() -> None:
             reps_completed = 0
 
         payload: dict[str, Any] = {
+            "graph_metric_protocol": GRAPH_METRIC_PROTOCOL,
             "n_nodes": n_nodes,
             "seed": seed,
             "timeout_sec": timeout_sec,
@@ -4602,6 +4609,7 @@ def main() -> None:
     out_json.write_text(
         json.dumps(
             {
+                "graph_metric_protocol": GRAPH_METRIC_PROTOCOL,
                 "n_nodes": n_nodes,
                 "seed": seed,
                 "timeout_sec": timeout_sec,

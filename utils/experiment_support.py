@@ -37,8 +37,8 @@ CPDAG_BASE_COLUMNS = [
     "arrowhead_precision", "arrowhead_recall", "arrowhead_F1",
     "shd", "sid_low", "sid_high",
 ]
-DAG_PROGRESS_COLUMNS = DAG_BASE_COLUMNS + ["run_idx", "seed"]
-CPDAG_PROGRESS_COLUMNS = CPDAG_BASE_COLUMNS + ["run_idx", "seed"]
+DAG_PROGRESS_COLUMNS = DAG_BASE_COLUMNS + ["run_idx", "seed", "graph_metric_protocol"]
+CPDAG_PROGRESS_COLUMNS = CPDAG_BASE_COLUMNS + ["run_idx", "seed", "graph_metric_protocol"]
 
 DAG_METRIC_MAP = [
     ("elapsed", "elapsed"),

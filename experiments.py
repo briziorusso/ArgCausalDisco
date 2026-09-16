@@ -14,6 +14,7 @@ try:
     from .cd_algorithms.models import run_method
     from .utils.graph_utils import is_dag
     from .utils.graph_evaluation import evaluate_estimate
+    from .utils.metric_protocol import GRAPH_METRIC_PROTOCOL, ensure_metric_protocol
     from .utils.helpers import random_stability, logger_setup
     from .utils.experiment_support import (
         CPDAG_BASE_COLUMNS,
@@ -52,6 +53,7 @@ except ImportError:  # pragma: no cover
     from cd_algorithms.models import run_method
     from utils.graph_utils import is_dag
     from utils.graph_evaluation import evaluate_estimate
+    from utils.metric_protocol import GRAPH_METRIC_PROTOCOL, ensure_metric_protocol
     from utils.helpers import random_stability, logger_setup
     from utils.experiment_support import (
         CPDAG_BASE_COLUMNS,
@@ -209,6 +211,13 @@ args = parser.parse_args()
 version = args.version
 results_path = Path(args.results_dir)
 results_path.mkdir(parents=True, exist_ok=True)
+ensure_metric_protocol(results_path / f'metric_protocol_{version}.json', existing_paths=[
+    results_path / f'run_config_{version}.json',
+    results_path / f'stored_results_{version}.npy',
+    results_path / f'stored_results_{version}_cpdag.npy',
+    results_path / 'progress' / version,
+])
+args.graph_metric_protocol = GRAPH_METRIC_PROTOCOL
 logger_setup(str(results_path / f'log_{version}.log'))
 run_manifest_path = record_run_manifest(
     results_path=results_path,
@@ -724,7 +733,8 @@ for dataset_name, src, info in datasets:
                 )
                 raise SystemExit(1)
 
-            dag_row = {'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_dag, 'run_idx': idx, 'seed': seed}
+            dag_row = {'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_dag, 'run_idx': idx, 'seed': seed,
+                       'graph_metric_protocol': GRAPH_METRIC_PROTOCOL}
             if isinstance(mt_cpdag.get('sid'), tuple):
                 mt_sid_low, mt_sid_high = mt_cpdag['sid']
             else:
@@ -733,7 +743,8 @@ for dataset_name, src, info in datasets:
             mt_cpdag.pop('sid', None)
             mt_cpdag['sid_low'] = mt_sid_low
             mt_cpdag['sid_high'] = mt_sid_high
-            cpdag_row = {'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_cpdag, 'run_idx': idx, 'seed': seed}
+            cpdag_row = {'dataset': dataset_name, 'model': display_name, 'elapsed': elapsed, **mt_cpdag, 'run_idx': idx, 'seed': seed,
+                       'graph_metric_protocol': GRAPH_METRIC_PROTOCOL}
 
             run_summary = build_run_summary(
                 dataset_name=dataset_name,
