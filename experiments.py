@@ -12,8 +12,8 @@ import pandas as pd
 # different checkout (e.g., ArgCausalDisco-1) when PYTHONPATH is set broadly.
 try:
     from .cd_algorithms.models import run_method
-    from .utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
-    from .utils.aij_graph_metrics import prepare_estimate
+    from .utils.graph_utils import is_dag
+    from .utils.graph_evaluation import evaluate_estimate
     from .utils.helpers import random_stability, logger_setup
     from .utils.experiment_support import (
         CPDAG_BASE_COLUMNS,
@@ -50,8 +50,8 @@ try:
     from .priors.schema import Constraints, build_mpc_background_knowledge
 except ImportError:  # pragma: no cover
     from cd_algorithms.models import run_method
-    from utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
-    from utils.aij_graph_metrics import prepare_estimate
+    from utils.graph_utils import is_dag
+    from utils.graph_evaluation import evaluate_estimate
     from utils.helpers import random_stability, logger_setup
     from utils.experiment_support import (
         CPDAG_BASE_COLUMNS,
@@ -181,7 +181,7 @@ parser.add_argument('--adaptive_satcheck_threads', type=str_to_bool, default=Fal
 parser.add_argument('--satcheck_min_threads', type=int, default=1, help='ABAPC/CausalABA: lower bound for adaptive satcheck thread tuning')
 parser.add_argument('--satcheck_increase_step', type=int, default=2, help='ABAPC/CausalABA: additive thread increase used by the adaptive satcheck tuner after low-memory timeouts')
 parser.add_argument('--abapc_solver', choices=['incremental', 'baseline'], default='incremental', help='Use incremental or baseline CausalABA inside ABAPC')
-parser.add_argument('--eval_timeout', type=float, default=600.0, help='Maximum wall-time budget in seconds for each individual expensive evaluation metric (currently SHD and SID); use 0 to disable')
+parser.add_argument('--eval_timeout', type=float, default=600.0, help='Time budget in seconds for exact CPDAG SID search; use 0 to disable the time limit (the state cap still applies)')
 
 # Bounded Causal ABA parameters
 parser.add_argument('--max_path_length', type=int, default=None, help='Bound: maximum simple path length |p| (lp)')
@@ -286,7 +286,7 @@ sz_ratio = args.sz_ratio
 lb_ratio = args.lb_ratio
 lcyc_ratio = args.lcyc_ratio
 abapc_solver = args.abapc_solver
-eval_timeout = None if args.eval_timeout is None or float(args.eval_timeout) <= 0 else float(args.eval_timeout)
+eval_timeout = float('inf') if args.eval_timeout is None or float(args.eval_timeout) <= 0 else float(args.eval_timeout)
 
 logging.info(f"ABAPC solver selection: {abapc_solver}")
 logging.info(f"Evaluation metric timeout: {eval_timeout if eval_timeout is not None else 'disabled'}")
@@ -674,28 +674,18 @@ for dataset_name, src, info in datasets:
                 graph_artifacts['graph_est_raw'] = W_est.copy()
                 B_est_binary = (W_est != 0).astype(int)
                 graph_artifacts['graph_est_binary'] = B_est_binary.copy()
-                try:
-                    B_est_dag_eval, B_est_cpdag_eval = prepare_estimate(W_est, method, seed)
-                    graph_artifacts['graph_est_cpdag_eval'] = B_est_cpdag_eval.copy()
-                    cpdag_metrics = DAGMetrics(B_est_cpdag_eval, B_true, metric_timeout=eval_timeout, evaluation_kind='cpdag')
-                    mt_cpdag = cpdag_metrics.metrics
-                    cpdag_eval_status = getattr(cpdag_metrics, 'eval_status', {}) or {}
-                except Exception as e:
-                    raise RuntimeError(f'DAGMetrics computation failed for CPDAG: {e}') from e
-
+                evaluation = evaluate_estimate(W_est, B_true, method, seed=seed,
+                                               metric_timeout=eval_timeout)
+                B_est_dag_eval, B_est_cpdag_eval = evaluation['dag'], evaluation['cpdag']
+                mt_dag, mt_cpdag = evaluation['dag_metrics'], evaluation['cpdag_metrics']
+                dag_eval_status = evaluation['dag_status']
+                cpdag_eval_status = evaluation['cpdag_status']
+                graph_artifacts['graph_est_cpdag_eval'] = B_est_cpdag_eval.copy()
                 if B_est_dag_eval is not None:
                     graph_artifacts['graph_est_dag_eval'] = B_est_dag_eval.copy()
-                if B_est_dag_eval is not None and is_dag(B_est_dag_eval):
-                    try:
-                        dag_metrics = DAGMetrics(B_est_dag_eval, B_true, metric_timeout=eval_timeout)
-                        mt_dag = dag_metrics.metrics
-                        dag_eval_status = getattr(dag_metrics, 'eval_status', {}) or {}
-                    except Exception as e:
-                        raise RuntimeError(f'DAGMetrics computation failed for DAG: {e}') from e
-                else:
-                    logging.warning('Estimated graph is not a DAG after bidirected edge removal; skipping DAG metrics for this run.')
-                    mt_dag = empty_metric_result()
-                    dag_eval_status = {'graph_eval': {'status': 'skipped_non_dag', 'timed_out': False}}
+                if 'graph_eval' in cpdag_eval_status:
+                    logging.warning('Native PDAG edge scores retained; SID unavailable: %s',
+                                    cpdag_eval_status['graph_eval']['error'])
             else:
                 mt_cpdag = empty_metric_result()
                 mt_dag = empty_metric_result()
@@ -729,7 +719,7 @@ for dataset_name, src, info in datasets:
             if idx == completed_runs and mt_cpdag.get('sid') is None and method not in ['random', 'rnd-dir', 'random_edge']:
                 logging.error(
                     f"SID is null for {display_name} on {dataset_name} (first run). "
-                    f"This likely means R SID package is not installed or DAGMetrics is failing. "
+                    f"Check the learner output and the gadjid evaluation backend. "
                     f"Stopping to avoid wasting time on {n_runs} runs with missing metrics."
                 )
                 raise SystemExit(1)

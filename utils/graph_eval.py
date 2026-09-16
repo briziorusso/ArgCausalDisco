@@ -157,78 +157,10 @@ def graph_eval_from_accepted(
     except Exception:
         B_true_cpdag = None
 
-    # Precompute true directed edges + skeleton.
-    true_arrows: set[tuple[int, int]] = set()
-    true_skel: set[tuple[int, int]] = set()
-    for i in range(n_nodes):
-        for j in range(n_nodes):
-            if i == j:
-                continue
-            try:
-                if int(B_true[i, j]) == 1:
-                    true_arrows.add((i, j))
-                    a, b = (i, j) if i < j else (j, i)
-                    true_skel.add((a, b))
-            except Exception:
-                continue
-
-    def _f1_from_pr(p: float, r: float) -> float:
-        return (2.0 * p * r / (p + r)) if (p + r) > 0 else 0.0
-
-    def _f1_from_sets(pred: set[tuple[int, int]], true: set[tuple[int, int]]) -> float:
-        tp = len(pred & true)
-        fp = len(pred - true)
-        fn = len(true - pred)
-        p = (tp / (tp + fp)) if (tp + fp) > 0 else 0.0
-        r = (tp / (tp + fn)) if (tp + fn) > 0 else 0.0
-        return float(_f1_from_pr(float(p), float(r)))
-
-    # True CPDAG skeleton + directed arrows
-    true_cp_skel: set[tuple[int, int]] = set()
-    true_cp_arrows: set[tuple[int, int]] = set()
-    if B_true_cpdag is not None:
-        # Only count compelled orientations (directed edges) as arrowheads.
-        for i in range(n_nodes):
-            for j in range(n_nodes):
-                if i == j:
-                    continue
-                try:
-                    if int(B_true_cpdag[i, j]) == 1 and int(B_true_cpdag[j, i]) == 0:
-                        true_cp_arrows.add((i, j))
-                except Exception:
-                    continue
-        for i in range(n_nodes):
-            for j in range(i + 1, n_nodes):
-                try:
-                    if int(B_true_cpdag[i, j]) != 0 or int(B_true_cpdag[j, i]) != 0:
-                        true_cp_skel.add((i, j))
-                except Exception:
-                    continue
-
-    def _cpdag_skeleton(C: "np.ndarray") -> set[tuple[int, int]]:
-        s: set[tuple[int, int]] = set()
-        for i in range(n_nodes):
-            for j in range(i + 1, n_nodes):
-                try:
-                    if int(C[i, j]) != 0 or int(C[j, i]) != 0:
-                        s.add((i, j))
-                except Exception:
-                    continue
-        return s
-
-    def _cpdag_directed_arrows(C: "np.ndarray") -> set[tuple[int, int]]:
-        """Return only directed CPDAG edges i->j (ignore undirected edges)."""
-        arrows: set[tuple[int, int]] = set()
-        for i in range(n_nodes):
-            for j in range(n_nodes):
-                if i == j:
-                    continue
-                try:
-                    if int(C[i, j]) == 1 and int(C[j, i]) == 0:
-                        arrows.add((i, j))
-                except Exception:
-                    continue
-        return arrows
+    def _append_metric(values: list[float], metrics: dict, name: str) -> None:
+        value = float(metrics.get(name, float("nan")))
+        if math.isfinite(value):
+            values.append(value)
 
     def _canonical_cpdag_key(C: "np.ndarray") -> tuple[int, ...]:
         """Canonicalize CPDAG matrix to a hashable key.
@@ -344,7 +276,7 @@ def graph_eval_from_accepted(
         adj_f1s: list[float] = []
         ah_f1s: list[float] = []
 
-        true_dag_key = frozenset((int(a), int(b)) for (a, b) in true_arrows)
+        true_dag_key = frozenset(zip(*np.nonzero(B_true)))
         true_dag_in_compat = 0
 
         cp_seen: set[tuple[int, ...]] = set()
@@ -469,40 +401,13 @@ def graph_eval_from_accepted(
                 if 0 <= a < n_nodes and 0 <= b < n_nodes:
                     B_est[a, b] = 1
             try:
-                mt = DAGMetrics(B_est, B_true, sid=False).metrics
+                mt = DAGMetrics(B_est, B_true, sid=False, evaluation_kind="dag").metrics
             except Exception:
                 return
-            shd = mt.get("shd", None)
-            p = mt.get("precision", None)
-            r = mt.get("recall", None)
-            try:
-                shd_f = float(shd)
-            except Exception:
-                shd_f = float("nan")
-            try:
-                p_f = float(p)
-            except Exception:
-                p_f = float("nan")
-            try:
-                r_f = float(r)
-            except Exception:
-                r_f = float("nan")
-            f1_f = _f1_from_pr(p_f, r_f) if (math.isfinite(p_f) and math.isfinite(r_f)) else float("nan")
-            if math.isfinite(shd_f):
-                shds.append(shd_f)
-            if math.isfinite(f1_f):
-                f1s.append(f1_f)
-
-            # Skeleton (adjacency) F1
-            pred_arrows = set((int(a), int(b)) for (a, b) in dag_key if a != b)
-            pred_skel: set[tuple[int, int]] = set()
-            for (a, b) in pred_arrows:
-                x, y = (a, b) if a < b else (b, a)
-                pred_skel.add((x, y))
-            adj_f1s.append(_f1_from_sets(pred_skel, true_skel))
-
-            # Orientation (arrowhead) F1
-            ah_f1s.append(_f1_from_sets(pred_arrows, true_arrows))
+            _append_metric(shds, mt, "shd")
+            _append_metric(f1s, mt, "F1")
+            _append_metric(adj_f1s, mt, "adjacency_F1")
+            _append_metric(ah_f1s, mt, "arrowhead_F1")
 
             # CPDAG-level metrics
             if B_true_cpdag is not None:
@@ -515,28 +420,13 @@ def graph_eval_from_accepted(
                 if C_est is not None and cp_key is not None and cp_key not in cp_seen:
                     cp_seen.add(cp_key)
                     try:
-                        mt_cp = DAGMetrics(C_est, B_true, sid=False).metrics
+                        mt_cp = DAGMetrics(C_est, B_true, sid=False, evaluation_kind="cpdag").metrics
                     except Exception:
                         mt_cp = {}
-                    try:
-                        cp_shd_f = float(mt_cp.get("shd", float("nan")))
-                    except Exception:
-                        cp_shd_f = float("nan")
-                    try:
-                        cp_f1_f = float(mt_cp.get("F1", float("nan")))
-                    except Exception:
-                        cp_f1_f = float("nan")
-                    if math.isfinite(cp_shd_f):
-                        cp_shds.append(cp_shd_f)
-                    if math.isfinite(cp_f1_f):
-                        cp_f1s.append(cp_f1_f)
-
-                    pred_cp_skel = _cpdag_skeleton(C_est)
-                    pred_cp_arrows = _cpdag_directed_arrows(C_est)
-                    # Always compute these (even when the true set is empty), so
-                    # we don't emit missing values for valid cases.
-                    cp_adj_f1s.append(_f1_from_sets(pred_cp_skel, true_cp_skel))
-                    cp_ah_f1s.append(_f1_from_sets(pred_cp_arrows, true_cp_arrows))
+                    _append_metric(cp_shds, mt_cp, "shd")
+                    _append_metric(cp_f1s, mt_cp, "F1")
+                    _append_metric(cp_adj_f1s, mt_cp, "adjacency_F1")
+                    _append_metric(cp_ah_f1s, mt_cp, "arrowhead_F1")
 
             _emit(
                 "graph_eval_dag_done",

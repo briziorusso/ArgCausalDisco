@@ -79,7 +79,7 @@ def consistent_extension(pdag, seed=None):
 
 def decode_estimate(raw,method):
     """Decode the learner's recorded representation before any binarization."""
-    if method in {'mpc','pc','pc_max','cpc','spc'}:
+    if method in {'mpc','mpc_llm','pc','pc_max','cpc','spc'}:
         p=adjacency(raw,endpoints=True)
     elif method=='ges':
         p=adjacency(np.asarray(raw).T,endpoints=True)

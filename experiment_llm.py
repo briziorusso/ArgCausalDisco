@@ -650,7 +650,7 @@ def run_experiment(
                     B_est_cpdag = (model != 0).astype(int)
                     cpdag = dag2cpdag(B_est_cpdag)
                     cpdag_hashes.add(cpdag.tobytes())
-                    mt_cpdag = DAGMetrics(cpdag, B_true).metrics
+                    mt_cpdag = DAGMetrics(cpdag, B_true, evaluation_kind="cpdag").metrics
                     cpdag_sid = mt_cpdag.pop("sid")
                     if not isinstance(cpdag_sid, tuple):
                         cpdag_sid = (cpdag_sid, cpdag_sid)

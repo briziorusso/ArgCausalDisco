@@ -1010,7 +1010,7 @@ class TestMetricsDAG(unittest.TestCase):
         self.assertEqual(metrics['sid'], 0)
         
         ## calculate metrics for CPDAG
-        metrics = DAGMetrics(dag2cpdag(B_est), B_true).metrics
+        metrics = DAGMetrics(dag2cpdag(B_est), B_true, evaluation_kind="cpdag").metrics
         ## test metrics
         self.assertEqual(metrics['fdr'], 0)
         self.assertEqual(metrics['tpr'], 1)
@@ -1022,7 +1022,7 @@ class TestMetricsDAG(unittest.TestCase):
         self.assertEqual(metrics['F1'], 1)
 
         self.assertEqual(metrics['sid'][0], 0)
-        self.assertEqual(metrics['sid'][1], 12)
+        self.assertEqual(metrics['sid'][1], 7)  # Three DAGs in the completed MEC.
 
     def test_metrics_errors(self):
         ## true DAG
@@ -1043,7 +1043,7 @@ class TestMetricsDAG(unittest.TestCase):
         ## calculate metrics
         metrics = DAGMetrics(B_est, B_true).metrics
         ## test metrics
-        self.assertEqual(metrics['fdr'], 0.2) #1/5
+        self.assertAlmostEqual(metrics['fdr'], 0.2) #1/5
         self.assertEqual(metrics['tpr'], 0.8) #4/5
         self.assertEqual(metrics['fpr'], 0.2) #1/5
         self.assertEqual(metrics['shd'], 2)
@@ -1054,16 +1054,16 @@ class TestMetricsDAG(unittest.TestCase):
         self.assertEqual(metrics['sid'], 2)
         
         ## calculate metrics for CPDAG
-        metrics = DAGMetrics(dag2cpdag(B_est), B_true).metrics
+        metrics = DAGMetrics(dag2cpdag(B_est), B_true, evaluation_kind="cpdag").metrics
         ## test metrics
-        self.assertEqual(metrics['fdr'], 0.2) #1/5
-        self.assertEqual(metrics['tpr'], 0.8) #4/5
-        self.assertEqual(metrics['fpr'], 0.2) #1/5
-        self.assertEqual(metrics['shd'], 3)
+        self.assertAlmostEqual(metrics['fdr'], 0.6) #3/5 edge-state errors
+        self.assertEqual(metrics['tpr'], 0.4) #2/5
+        self.assertEqual(metrics['fpr'], 0.6) #3/5
+        self.assertEqual(metrics['shd'], 4)
         self.assertEqual(metrics['nnz'], 5)
-        self.assertEqual(metrics['precision'], 0.8)
-        self.assertEqual(metrics['recall'], 0.8)
-        self.assertEqual(metrics['F1'], 0.8)
+        self.assertEqual(metrics['precision'], 0.4)
+        self.assertEqual(metrics['recall'], 0.4)
+        self.assertEqual(metrics['F1'], 0.4)
 
         self.assertEqual(metrics['sid'][0], 2)
         self.assertEqual(metrics['sid'][1], 15)

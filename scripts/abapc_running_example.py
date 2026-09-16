@@ -597,7 +597,7 @@ def _evaluate_instance(
             undirected=pc_undir,
         )
         try:
-            pc_metrics = DAGMetrics(pc_cpdag.copy(), B_TRUE.copy(), sid=False).metrics
+            pc_metrics = DAGMetrics(pc_cpdag.copy(), B_TRUE.copy(), sid=False, evaluation_kind="cpdag").metrics
         except Exception:
             pc_metrics = {}
 
@@ -620,7 +620,7 @@ def _evaluate_instance(
                 directed=ab_cpdag_dir,
                 undirected=ab_cpdag_undir,
             )
-            ab_cpdag_metrics = DAGMetrics(ab_cpdag.copy(), B_TRUE.copy(), sid=False).metrics
+            ab_cpdag_metrics = DAGMetrics(ab_cpdag.copy(), B_TRUE.copy(), sid=False, evaluation_kind="cpdag").metrics
         except Exception:
             ab_cpdag_dir, ab_cpdag_undir, ab_cpdag_metrics = [], [], {}
 

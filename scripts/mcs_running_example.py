@@ -2308,19 +2308,6 @@ def _try_seed_for_demo(seed_val, sample_size_override=None, solve_timeout=20):
 
                 # True adjacency for metrics.
                 B_true = nx.to_numpy_array(G_true, nodelist=nodes_internal, dtype=int)
-                B_true_cp = dag2cpdag(B_true.copy(), cdt_method=True)
-
-                def _skel_edge_set(M: np.ndarray) -> set[tuple[int, int]]:
-                    S = ((M + M.T) > 0).astype(int)
-                    out: set[tuple[int, int]] = set()
-                    for i in range(n_nodes):
-                        for j in range(i + 1, n_nodes):
-                            if int(S[i, j]) == 1:
-                                out.add((i, j))
-                    return out
-
-                true_cp_skel = _skel_edge_set(np.array(B_true_cp, dtype=int, copy=False))
-
                 dag_shd: list[float] = []
                 dag_f1: list[float] = []
                 cp_shd: list[float] = []
@@ -2352,7 +2339,8 @@ def _try_seed_for_demo(seed_val, sample_size_override=None, solve_timeout=20):
                         try:
                             met = DAGMetrics(B_est=B, B_true=B_true, sid=False).metrics
                             dag_shd.append(float(met.get("shd", 0)))
-                            dag_f1.append(float(met.get("F1", 0.0)))
+                            if np.isfinite(met["F1"]):
+                                dag_f1.append(float(met["F1"]))
                         except Exception:
                             pass
                         try:
@@ -2360,14 +2348,10 @@ def _try_seed_for_demo(seed_val, sample_size_override=None, solve_timeout=20):
                             kkey = _cp_key(C)
                             if kkey not in unique_cp_keys:
                                 unique_cp_keys.add(kkey)
-                                est_cp_skel = _skel_edge_set(np.array(C, dtype=int, copy=False))
-                                tp = len(est_cp_skel & true_cp_skel)
-                                fp = len(est_cp_skel - true_cp_skel)
-                                fn = len(true_cp_skel - est_cp_skel)
-                                cp_shd.append(float(fp + fn))
-                                prec = (tp / (tp + fp)) if (tp + fp) > 0 else 0.0
-                                rec = (tp / (tp + fn)) if (tp + fn) > 0 else 0.0
-                                cp_f1.append((2.0 * prec * rec / (prec + rec)) if (prec + rec) > 0 else 0.0)
+                                met_cp = DAGMetrics(C, B_true, sid=False, evaluation_kind="cpdag").metrics
+                                cp_shd.append(float(met_cp["shd"]))
+                                if np.isfinite(met_cp["F1"]):
+                                    cp_f1.append(float(met_cp["F1"]))
                         except Exception:
                             pass
 
