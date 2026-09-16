@@ -13,6 +13,7 @@ import pandas as pd
 try:
     from .cd_algorithms.models import run_method
     from .utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
+    from .utils.aij_graph_metrics import prepare_estimate
     from .utils.helpers import random_stability, logger_setup
     from .utils.experiment_support import (
         CPDAG_BASE_COLUMNS,
@@ -49,6 +50,7 @@ try:
 except ImportError:  # pragma: no cover
     from cd_algorithms.models import run_method
     from utils.graph_utils import DAGMetrics, dag2cpdag, is_dag
+    from utils.aij_graph_metrics import prepare_estimate
     from utils.helpers import random_stability, logger_setup
     from utils.experiment_support import (
         CPDAG_BASE_COLUMNS,
@@ -598,9 +600,9 @@ for dataset_name, src, info in datasets:
                 B_est_binary = (W_est != 0).astype(int)
                 graph_artifacts['graph_est_binary'] = B_est_binary.copy()
                 try:
-                    B_est_cpdag_eval = dag2cpdag(B_est_binary.copy())
+                    B_est_dag_eval, B_est_cpdag_eval = prepare_estimate(W_est, method, seed)
                     graph_artifacts['graph_est_cpdag_eval'] = B_est_cpdag_eval.copy()
-                    cpdag_metrics = DAGMetrics(B_est_cpdag_eval, B_true, metric_timeout=eval_timeout)
+                    cpdag_metrics = DAGMetrics(B_est_cpdag_eval, B_true, metric_timeout=eval_timeout, evaluation_kind='cpdag')
                     mt_cpdag = cpdag_metrics.metrics
                     cpdag_eval_status = getattr(cpdag_metrics, 'eval_status', {}) or {}
                 except Exception as e:
@@ -608,13 +610,9 @@ for dataset_name, src, info in datasets:
                     mt_cpdag = empty_metric_result()
                     cpdag_eval_status = {'graph_eval': {'status': 'error', 'error': str(e), 'timed_out': False}}
 
-                B_est_dag_eval = (W_est > 0).astype(int)
-                bidirected_mask = (B_est_dag_eval == 1) & (B_est_dag_eval.T == 1)
-                if bidirected_mask.any():
-                    logging.warning('Estimated graph contains bidirected edges; removing them before DAG metrics computation.')
-                    B_est_dag_eval[bidirected_mask] = 0
-                graph_artifacts['graph_est_dag_eval'] = B_est_dag_eval.copy()
-                if is_dag(B_est_dag_eval):
+                if B_est_dag_eval is not None:
+                    graph_artifacts['graph_est_dag_eval'] = B_est_dag_eval.copy()
+                if B_est_dag_eval is not None and is_dag(B_est_dag_eval):
                     try:
                         dag_metrics = DAGMetrics(B_est_dag_eval, B_true, metric_timeout=eval_timeout)
                         mt_dag = dag_metrics.metrics
