@@ -134,6 +134,19 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
                             save_figs=False, output_name="bar_chart.html", rect_exp=0.02, debug=False):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     second_ticks = not all('SID' in var for var in vars_to_plot)
+    # SID bounds have the same units. Hiding a separately scaled right axis
+    # can make an upper bound appear smaller than its own lower bound.
+    shared_sid_range = None
+    if not second_ticks:
+        supplied = [r for r in (range_y1, range_y2) if r is not None]
+        if len(supplied) == 2 and list(supplied[0]) != list(supplied[1]):
+            raise ValueError("SID lower and upper bounds require the same axis range")
+        if supplied:
+            shared_sid_range = supplied[0]
+        else:
+            upper = max(float((all_sum[v + '_mean'] + all_sum[v + '_std'].fillna(0)).max())
+                        for v in vars_to_plot)
+            shared_sid_range = [0, max(1, upper * 1.08)]
 
     for n, var_to_plot in enumerate(vars_to_plot):
         for m, method in enumerate(methods):
@@ -183,7 +196,7 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
         margin=dict(l=40, r=40, b=70, t=top_margin),
         hovermode='x unified',
         font=dict(size=font_size, family='Serif', color='black'),
-        yaxis2=dict(scaleanchor=0, showline=False, showgrid=False, showticklabels=second_ticks, zeroline=True),
+        yaxis2=dict(showline=False, showgrid=False, showticklabels=second_ticks, zeroline=True),
     )
 
     # fig.update_traces(width=0.36, selector=dict(type='bar'))
@@ -201,7 +214,9 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
     # )
 
     for n, var_to_plot in enumerate(vars_to_plot):
-        if vars_to_plot in (
+        if shared_sid_range is not None:
+            range_y = shared_sid_range
+        elif vars_to_plot in (
             ['precision', 'recall'],
             ['adjacency_precision', 'adjacency_recall'],
             ['arrowhead_precision', 'arrowhead_recall'],
@@ -236,6 +251,9 @@ def double_bar_chart_plotly(all_sum, vars_to_plot, names_dict, colors_dict,
             fig.update_yaxes(title={'text': _pretty_metric_name(var_to_plot), 'font': {'size': font_size}}, secondary_y=n == 1, range=range_y)
         else:
             fig.update_yaxes(title={'text': _pretty_metric_name(var_to_plot), 'font': {'size': font_size}}, secondary_y=n == 1)
+
+    if shared_sid_range is not None:
+        fig.update_yaxes(matches='y', secondary_y=True)
 
     label_config = {
         ('precision', 'recall'): ('Precision', 'Recall', 0.65, 0.15),

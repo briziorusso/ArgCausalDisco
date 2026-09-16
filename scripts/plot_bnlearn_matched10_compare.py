@@ -1596,7 +1596,7 @@ def main() -> None:
         cpdag_eval_df, ["p_SID_low", "p_SID_high"], NAMES_DICT, COLORS_DICT, cpdag_methods,
         save_figs=True, font_size=23,
         output_name=str(_apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix)),
-        debug=False, range_y1=[0, 6], range_y2=[0, 6], rect_exp=0.01,
+        debug=False, rect_exp=0.01,
     )
     generated_html_paths.append(_apply_output_suffix(FIGS_DIR / "Fig.2_SID_cpdag_matched10.html", output_suffix))
     double_bar_chart_plotly(
