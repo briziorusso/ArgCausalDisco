@@ -6,10 +6,40 @@ import json
 import time
 from pathlib import Path
 
-import networkx as nx
 import numpy as np
 import pandas as pd
-import pydot  # type: ignore
+
+FGS_BDEU_CONFIG = {
+    'algorithm': 'Tetrad FGES', 'score': 'bdeu-score', 'data_type': 'discrete',
+    'sample_prior': 15.0, 'structure_prior': 1.0, 'max_degree': -1,
+    'faithfulness_assumed': True, 'symmetric_first_step': False,
+}
+
+
+def categorical_frame(values):
+    """Encode observed categories, never bin continuous values implicitly."""
+    values=np.asarray(values)
+    frame=pd.DataFrame(index=range(len(values)))
+    for i in range(values.shape[1]):
+        codes,_=pd.factorize(values[:,i],sort=True)
+        if (codes<0).any():
+            raise ValueError('FGS-BDeu does not accept missing categories')
+        frame[f'X{i+1}']=codes.astype(int)
+    return frame
+
+
+def tetrad_adjacency(edges, names):
+    """Preserve Tetrad endpoints and the input column order; DOT drops both."""
+    index={name:i for i,name in enumerate(names)}
+    result=np.zeros((len(names),len(names)),dtype=int)
+    for edge in edges:
+        left,kind,right=str(edge).strip().split()
+        i,j=index[left],index[right]
+        if kind=='-->':result[i,j]=1
+        elif kind=='<--':result[j,i]=1
+        elif kind=='---':result[i,j]=result[j,i]=-1
+        else:raise ValueError(f'Unexpected FGES edge: {edge}')
+    return result
 
 
 def main() -> None:
@@ -17,6 +47,7 @@ def main() -> None:
     parser.add_argument("--input", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--meta", required=True)
+    parser.add_argument("--score", choices=['sem-bic','bdeu-score'], default='sem-bic')
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -35,25 +66,25 @@ def main() -> None:
         jm.start_vm()
         try:
             fitted = s.tetradrunner()
+            frame=categorical_frame(X) if args.score=='bdeu-score' else pd.DataFrame(X, columns=[f'X{i+1}' for i in range(X.shape[1])])
+            score_options=({'samplePrior':FGS_BDEU_CONFIG['sample_prior'],
+                            'structurePrior':FGS_BDEU_CONFIG['structure_prior'],
+                            'symmetricFirstStep':False} if args.score=='bdeu-score' else {})
+            search_start=time.perf_counter()
             fitted.run(
                 algoId="fges",
-                dfs=pd.DataFrame(X, columns=[f"X{c}" for c in range(1, X.shape[1] + 1)]),
-                scoreId="sem-bic",
-                dataType="continuous",
+                dfs=frame,
+                scoreId=args.score,
+                dataType='discrete' if args.score=='bdeu-score' else 'continuous',
                 maxDegree=-1,
                 faithfulnessAssumed=True,
                 verbose=False,
+                **score_options,
             )
+            meta['search_elapsed']=time.perf_counter()-search_start
+            meta['score']=args.score
 
-            graph = fitted.getTetradGraph()
-            dot_str = jm.tetradGraphToDot(graph)
-            graphs = pydot.graph_from_dot_data(dot_str)
-            W_est = nx.adjacency_matrix(nx.nx_pydot.from_pydot(graphs[0])).todense()
-
-            if W_est.shape[0] != X.shape[1]:
-                g = nx.nx_pydot.from_pydot(graphs[0])
-                g.add_nodes_from([f"X{d}" for d in range(1, X.shape[1] + 1)])
-                W_est = nx.adjacency_matrix(g).todense()
+            W_est = tetrad_adjacency(fitted.getEdges(), [f'X{i+1}' for i in range(X.shape[1])])
 
             np.save(output_path, np.asarray(W_est))
             meta["ok"] = True
