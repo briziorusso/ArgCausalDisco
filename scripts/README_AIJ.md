@@ -10,7 +10,7 @@ from the repository root in the existing experiment environment.
 | File | Purpose |
 | --- | --- |
 | `reevaluate_aij_graphs.py` | Reevaluate the 420 archived graphs without rerunning learners. |
-| `build_aij_tables.py` | Generate the 14 retained LaTeX tables, paired tests and provenance manifest. |
+| `build_aij_tables.py` | Generate 14 result tables, six statistical-comparison tables and their provenance manifest. |
 | `run_aij_baselines.py` | Preflight, launch/resume, validate and evaluate ASPCR-DAG or FGS-BDeu. |
 | `run_matched_baseline_experiments.py` | Per-seed experiment runner and raw artifact writer. |
 | `validate_matched_aspcr_results.py` | Check DAG constraints, native CI traces, objectives and matched inputs. |
@@ -131,9 +131,12 @@ the paper manifest links to the exact committed implementation.
 | 12 | `table_aij_variants.tex` | Encoding variants; cohort/sample sizes shown. |
 | 13 | `table_aij_semantics.tex` | Separate 50-run summaries, including saved notebook output for CO-max. |
 | 14 | `table_aij_alpha_methods.tex` | Archived within-seed threshold comparison. |
+| 15-16 | `table_aij_cpdag_core_tests_*.tex` | CPDAG core metrics: paired differences and BH-adjusted comparisons to the best mean. |
+| 17-18 | `table_aij_cpdag_precision_recall_tests_*.tex` | CPDAG precision/recall comparisons. |
+| 19-20 | `table_aij_dag_tests_*.tex` | DAG metric comparisons. |
 
-The initial review's tables 15–18 are retired: fact changes, two fact-quality
-tables, and the separate 50-seed ASPCR cohort. AP/NDCG source records for the
+The initial review's fact-change, fact-quality and separate 50-seed ASPCR
+tables remain retired; the six new tables report statistical comparisons. AP/NDCG source records for the
 ranking figure have not been recovered; no replacement values are invented.
 An optional `--ranking-csv` can generate that additional table from original
 per-run `dataset,method,seed,AP,NDCG` data, once available.
@@ -171,11 +174,46 @@ validity finding alone does not establish inconsistency of all input CI tests.
 Sachs has no compelled reference arrowheads, so its AH comparisons are `n/a`.
 `--` denotes an unavailable value; neither symbol replaces an observed zero.
 
-Primary tables bold the best mean. Dagger/double dagger indicate significantly
-worse/better performance than ABAPC (bb-nor), using paired two-sided t-tests and
-Holm correction across the five comparisons within each dataset/metric at 0.05.
-Absence of a marker does not assert equivalence. Historical cohorts are excluded
-from these tests. The historical FGS DOT export lacks endpoint/node-label
+Dataset labels give the number of nodes and edges in the true DAG beneath
+its name, for example `|V|=5, |E|=4`. Both counts are checked against the saved
+true adjacency matrices.
+
+Primary tables bold the best empirical mean (including exact ties) and methods
+not significantly worse than that best-mean reference. Each dataset, graph kind
+and metric has a **15-pair family** covering all unordered pairs of the six
+methods. We compute two-sided paired t-tests on finite, seed-aligned pairs, then
+apply Benjamini-Hochberg (BH) correction before selecting the best-mean
+reference. The significance threshold is `q < 0.05`. This replaces the previous
+five comparisons against bb-nor, Holm correction and dagger annotations.
+Missing tests retain their place in the declared family (equivalent to p=1 for
+adjustment), but their adjusted values remain unavailable. Fewer than two pairs
+do not support a test and do not receive nonsignificance-based highlighting.
+An exact best-mean tie still receives descriptive best-mean highlighting.
+
+A non-significant comparison does not establish equivalence. Highlighted
+methods need not be pairwise indistinguishable from one another: every
+comparison is with the named empirical best, without chaining through other
+non-significant methods. If several means tie, the first in the declared method
+order is the deterministic reference. With missing measurements, paired effects
+use the common finite subset, so they need not equal the difference of the two
+separately reported means.
+
+The six comparison tables mirror the core CPDAG, precision/recall and DAG panels.
+Their first row identifies the best-mean method for each column. Each remaining
+cell reports the mean paired difference (row minus reference) above its
+BH-adjusted q-value; bold q-values indicate `q < 0.05`. Subscripts show pair
+counts below ten. `ref.` identifies the comparison method, `n/a` an inapplicable
+metric, and `--` an unavailable test. No additional star/dagger system is used.
+`paired_tests.csv` retains all 1,620 comparisons, raw p-values, t statistics,
+paired counts and excluded seeds; `best_comparisons.csv` records the selected
+references and exact highlighting decisions. Both are reproducible build
+outputs, with hashes in the manifest. The BH implementation is cross-checked
+against [SciPy's reference implementation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.false_discovery_control.html).
+
+For example, Earthquake CPDAG F1 is 0.9667 for bb-nor and 0.9444 for MPC.
+Their paired difference is 0.0222 and BH-adjusted q is 0.2289 in the 15-pair
+family, so both are highlighted. Historical cohorts are excluded from these
+matched-seed tests. The historical FGS DOT export lacks endpoint/node-label
 provenance; its native CPDAG cannot be recovered from those files.
 
 Tests check endpoint decoding, complete conversion, permutation-invariant F1,

@@ -14,6 +14,7 @@ import subprocess
 import sys
 import warnings
 from html.parser import HTMLParser
+from itertools import combinations
 from pathlib import Path
 
 import numpy as np
@@ -38,6 +39,12 @@ SPECS = {
     "ABAPC (bb-nor)": ("abapc", "bnlearn_abapc_bb_norapprox_matched10_others_gsq_searchv3_graphmetrics", "child_abapc_bb_norapprox_matched10_gsq_searchv3_graphmetrics"),
 }
 LEGACY_METRICS = ("elapsed", "nnz", "fdr", "tpr", "fpr", "precision", "recall", "F1", "shd", "sid")
+TEST_METRICS = {
+    "cpdag": ("nsid_low", "nsid_high", "nshd", "F1", "adjacency_F1", "arrowhead_F1",
+              "precision", "recall", "adjacency_precision", "adjacency_recall", "arrowhead_precision", "arrowhead_recall"),
+    "dag": ("nsid", "nshd", "F1", "elapsed", "precision", "recall"),
+}
+LOWER_IS_BETTER = {"nsid", "nsid_low", "nsid_high", "nshd", "elapsed"}
 
 
 def sha(data: bytes) -> str:
@@ -182,33 +189,97 @@ def paired_effect(left: pd.DataFrame, right: pd.DataFrame, metric: str) -> dict:
             "t_statistic": stat, "p_value_unadjusted": p}
 
 
+def adjust_bh(values) -> np.ndarray:
+    """BH adjusted p-values, retaining unavailable tests in the declared family.
+
+    Missing p-values act as 1 for multiplicity and remain unavailable in output.
+    """
+    values = np.asarray(values, dtype=float)
+    valid = np.flatnonzero(np.isfinite(values))
+    result = np.full(values.shape, np.nan)
+    if not len(valid):
+        return result
+    if np.any((values[valid] < 0) | (values[valid] > 1)):
+        raise ValueError("p-values must be in [0, 1]")
+    order = valid[np.argsort(values[valid], kind="stable")]
+    adjusted = values[order] * len(values) / np.arange(1, len(order) + 1)
+    result[order] = np.minimum(1., np.minimum.accumulate(adjusted[::-1])[::-1])
+    return result
+
+
 def make_tests(primary: pd.DataFrame, noninformative=frozenset()) -> pd.DataFrame:
     rows = []
-    metrics = {"cpdag": ("nsid_low", "nsid_high", "nshd", "F1", "adjacency_F1", "arrowhead_F1",
-                         "precision", "recall", "adjacency_precision", "adjacency_recall", "arrowhead_precision", "arrowhead_recall"),
-               "dag": ("nsid", "nshd", "F1", "elapsed", "precision", "recall")}
     for dataset in DATASETS:
-        for kind, names in metrics.items():
+        for kind, names in TEST_METRICS.items():
             part = primary[(primary.dataset == dataset) & (primary.kind == kind)]
-            for reference in METHODS[:-1]:
+            for reference, method in combinations(METHODS, 2):
                 for metric in names:
-                    effect = paired_effect(part[part.method == "ABAPC (bb-nor)"], part[part.method == reference], metric)
+                    effect = paired_effect(part[part.method == method], part[part.method == reference], metric)
                     applicable = not (kind == "cpdag" and (dataset, metric) in noninformative)
                     if not applicable:
                         for field in ("left_mean", "right_mean", "delta_mean", "delta_std", "t_statistic", "p_value_unadjusted"):
                             effect[field] = np.nan
-                    rows.append({"dataset": dataset, "kind": kind, "method": "ABAPC (bb-nor)", "reference": reference, "metric": metric,
-                                 "applicable": applicable, "analysis_status": "not_applicable_no_reference_arrowheads" if not applicable else "available" if effect["n"] else "unavailable",
+                    rows.append({"dataset": dataset, "kind": kind, "method": method, "reference": reference, "metric": metric,
+                                 "applicable": applicable, "analysis_status": "not_applicable_no_reference_arrowheads" if not applicable else "available" if effect["n"] >= 2 else "insufficient_pairs",
                                  **effect})
     out = pd.DataFrame(rows)
-    # Holm correction across the five comparisons within each dataset/metric.
-    out["p_value_holm"] = np.nan
+    # All 15 pairs are declared before choosing the best empirical mean.
+    out["p_value_bh"] = np.nan
     for _, idx in out.groupby(["dataset", "kind", "metric"]).groups.items():
-        ordered = out.loc[idx].dropna(subset=["p_value_unadjusted"]).sort_values("p_value_unadjusted").index
-        # Keep the declared five-comparison family even when a test is unavailable.
-        adjusted = np.maximum.accumulate(out.loc[ordered, "p_value_unadjusted"].to_numpy() * (len(idx)-np.arange(len(ordered))))
-        out.loc[ordered, "p_value_holm"] = np.minimum(adjusted, 1.0)
+        out.loc[idx, "p_value_bh"] = adjust_bh(out.loc[idx, "p_value_unadjusted"])
     return out
+
+
+def pairwise_result(tests, dataset, kind, method, reference, metric) -> dict:
+    """Retrieve either ordering; differences always mean method minus reference."""
+    group = tests[(tests.dataset == dataset) & (tests.kind == kind) & (tests.metric == metric)]
+    direct = group[(group.method == method) & (group.reference == reference)]
+    if len(direct) == 1:
+        return direct.iloc[0].to_dict()
+    reverse = group[(group.method == reference) & (group.reference == method)]
+    if len(reverse) != 1:
+        raise ValueError(f"Expected one paired comparison: {dataset}, {kind}, {metric}, {method}, {reference}")
+    row = reverse.iloc[0].to_dict()
+    row.update(method=method, reference=reference,
+               left_mean=row['right_mean'], right_mean=row['left_mean'],
+               delta_mean=-row['delta_mean'], t_statistic=-row['t_statistic'])
+    return row
+
+
+def best_comparisons(primary, tests, noninformative=frozenset()) -> pd.DataFrame:
+    """Choose the best mean, then use the precomputed all-pairs BH family.
+
+    Tied means use METHODS order for a deterministic reference. A missing test
+    does not establish a nonsignificant difference. Nonsignificance is not an
+    equivalence claim or a transitive grouping of all highlighted methods.
+    """
+    rows = []
+    for dataset in DATASETS:
+        for kind, metrics in TEST_METRICS.items():
+            part = primary[(primary.dataset == dataset) & (primary.kind == kind)]
+            for metric in metrics:
+                means = part.groupby('method')[metric].mean().reindex(METHODS)
+                applicable = not (kind == 'cpdag' and (dataset, metric) in noninformative)
+                best = (means.idxmin() if metric in LOWER_IS_BETTER else means.idxmax()) if applicable and means.notna().any() else None
+                for method in METHODS:
+                    own = part[part.method == method]
+                    if best is None or method == best:
+                        row = paired_effect(own, own, metric)
+                        row.update(dataset=dataset, kind=kind, method=method, reference=best,
+                                   metric=metric, applicable=applicable, p_value_bh=np.nan,
+                                   analysis_status='reference' if best else 'not_applicable' if not applicable else 'unavailable')
+                    else:
+                        row = pairwise_result(tests, dataset, kind, method, best, metric)
+                    tied_mean = best is not None and math.isclose(means[method], means[best], rel_tol=0, abs_tol=1e-12)
+                    row['is_best_mean'] = tied_mean
+                    worse_difference = row['delta_mean'] > 0 if metric in LOWER_IS_BETTER else row['delta_mean'] < 0
+                    row['significantly_worse'] = bool(np.isfinite(row['p_value_bh']) and row['p_value_bh'] < .05 and worse_difference)
+                    row['highlight'] = bool(applicable and (tied_mean or (np.isfinite(row['p_value_bh']) and not row['significantly_worse'])))
+                    if not applicable:
+                        for field in ('left_mean', 'right_mean', 'delta_mean', 'delta_std', 't_statistic', 'p_value_unadjusted'):
+                            row[field] = np.nan
+                    rows.append(row)
+    return pd.DataFrame(rows)
 
 
 def count_edges(matrix: np.ndarray) -> tuple[int, int]:
@@ -249,8 +320,8 @@ def load_sizes(src: Sources, primary: pd.DataFrame) -> pd.DataFrame:
                 if reference is not None and not np.array_equal(reference, true):
                     raise ValueError(f"Reference graph changes within {dataset}")
                 reference = true
-        if int(np.count_nonzero(reference)) != EDGES[dataset]:
-            raise ValueError(f"Unexpected true edge count: {dataset}")
+        if reference.shape != (NODES[dataset], NODES[dataset]) or int(np.count_nonzero(reference)) != EDGES[dataset]:
+            raise ValueError(f"Unexpected true graph size: {dataset}")
         d, u = count_edges(dag2cpdag(reference.copy()))
         for seed in SEEDS:
             rows.append(dict(dataset=dataset, method="Reference", seed=seed, directed=d, undirected=u, dag_edges=EDGES[dataset]))
@@ -347,6 +418,11 @@ def tex_escape(value: str) -> str:
     return str(value).replace("&", r"\&").replace("_", r"\_").replace("%", r"\%")
 
 
+def dataset_cell(dataset: str) -> str:
+    return (r"\shortstack[l]{" + dataset.title() + r"\\[-1pt]{\scriptsize $|V|="
+            + str(NODES[dataset]) + r",\ |E|=" + str(EDGES[dataset]) + "$}}")
+
+
 def cell(mean, std=None, digits=3, signed=False, bold=False, stacked=False, count=None, applicable=True, marker='') -> str:
     if not applicable:
         return r"\textnormal{n/a}"
@@ -382,15 +458,19 @@ class Tables:
     def __init__(self, output: Path):
         self.output = output
         self.names: list[str] = []
+        self.test_panels: list[tuple] = []
 
     def write(self, name: str, headers: list[str], rows: list[list[str] | None], caption: str) -> None:
+        padding = '1.5pt' if len(headers) >= 7 else '3pt'
         lines = ["% Generated by scripts/build_aij_tables.py; do not edit.",
                  "% Source revisions and input/output hashes: table_build_manifest.json",
                  r"\begin{table}[p]", r"\centering", r"\footnotesize",
-                 r"\setlength{\tabcolsep}{3pt}", r"\renewcommand{\arraystretch}{1.12}",
+                 r"\setlength{\tabcolsep}{" + padding + "}", r"\renewcommand{\arraystretch}{1.12}",
                  r"\begin{tabular}{@{}" + "l" * min(2, len(headers)) + "c" * (len(headers)-min(2,len(headers))) + "@{}}",
                  r"\toprule", " & ".join(headers) + r" \\", r"\midrule"]
         for row in rows:
+            if row is not None and row[0].lower() in NODES:
+                row = [dataset_cell(row[0].lower()), *row[1:]]
             lines.append(r"\midrule" if row is None else " & ".join(row) + r" \\")
         lines.extend([r"\bottomrule", r"\end{tabular}", r"\caption{" + caption + "}",
                       r"\label{tab:aij-" + name.replace("table_aij_", "").replace("_", "-") + "}", r"\end{table}", ""])
@@ -399,22 +479,16 @@ class Tables:
         self.names.append(filename)
 
 
-def significance_marker(tests, dataset, kind, method, metric, direction):
-    if tests is None or method == 'ABAPC (bb-nor)': return ''
-    rows=tests[(tests.dataset==dataset)&(tests.kind==kind)&(tests.reference==method)&(tests.metric==metric)]
-    if rows.empty: return ''
-    row=rows.iloc[0]
-    if not row.applicable or pd.isna(row.p_value_holm) or row.p_value_holm>=.05: return ''
-    target_better=row.delta_mean<0 if direction=='min' else row.delta_mean>0
-    return r'\dagger' if target_better else r'\ddagger'
-
-
-def metric_panels(tables: Tables, summary: pd.DataFrame, name: str, specs: list[tuple], caption: str, methods=METHODS, datasets=DATASETS, bold=False, noninformative=frozenset(), tests=None, kind='cpdag') -> None:
+def metric_panels(tables: Tables, summary: pd.DataFrame, name: str, specs: list[tuple], caption: str, methods=METHODS, datasets=DATASETS, bold=False, noninformative=frozenset(), comparisons=None, kind='cpdag') -> None:
+    if comparisons is not None:
+        tables.test_panels.append((name, specs, methods, datasets, kind))
     for start in range(0, len(datasets), 3):
         subset = datasets[start:start+3]
         rows = []
         for dataset in subset:
             group = summary[(summary.dataset == dataset) & summary.method.isin(methods)]
+            selected = (comparisons[(comparisons.dataset == dataset) & (comparisons.kind == kind)]
+                        .set_index(['method', 'metric']) if comparisons is not None else None)
             for i, method in enumerate(methods):
                 found = group[group.method == method]
                 if found.empty:
@@ -425,19 +499,71 @@ def metric_panels(tables: Tables, summary: pd.DataFrame, name: str, specs: list[
                     optimum = group[f"{metric}_mean"].min() if direction == "min" else group[f"{metric}_mean"].max()
                     count = row.get(f"{metric}_count", 10)
                     value = cell(row[f"{metric}_mean"], row[f"{metric}_std"], digits,
-                                 bold=bold and pd.notna(optimum) and math.isclose(row[f"{metric}_mean"], optimum, abs_tol=1e-10),
+                                 bold=bold and (bool(selected.loc[(method, metric), 'highlight']) if selected is not None
+                                                else pd.notna(optimum) and math.isclose(row[f"{metric}_mean"], optimum, abs_tol=1e-10)),
                                  stacked=len(specs)>=5, count=int(count) if 0<count<10 else None,
-                                 applicable=(dataset, metric) not in noninformative,
-                                 marker=significance_marker(tests,dataset,kind,method,metric,direction))
+                                 applicable=(dataset, metric) not in noninformative)
                     vals.append(value)
                 rows.append([dataset.title() if i == 0 else "", tex_escape(method), *vals])
             if dataset != subset[-1]:
                 rows.append(None)
         suffix = f"_{start//3+1}" if len(datasets) > 3 else ""
+        test_label = 'tab:aij-' + (name.replace('table_aij_', '') + '_tests' + suffix).replace('_', '-')
+        legend = (r" Bold marks the best mean and methods not significantly worse than it (BH-adjusted paired $t$-tests; Table~\ref{"
+                  + test_label + "}).") if comparisons is not None else " Bold indicates the best mean, including ties." if bold else ""
         tables.write(name+suffix, ["Dataset", "Method", *[x[1] for x in specs]], rows,
-                     caption
-                     + (" Bold indicates the best mean, including ties." if bold else "")
-                     + (r" $\dagger$ and $\ddagger$ indicate significantly worse and better performance, respectively, than ABAPC (bb-nor), using paired two-sided $t$-tests with Holm correction across five comparisons per dataset and metric ($p<0.05$)." if tests is not None else ""))
+                     caption + legend)
+
+
+def test_cell(row: dict, digits: int) -> str:
+    if not row['applicable']:
+        return r"\textnormal{n/a}"
+    if row['analysis_status'] == 'reference':
+        return r"\textnormal{ref.}"
+    if pd.isna(row['delta_mean']):
+        return '--'
+    count = int(row['n']) if row['n'] < len(SEEDS) else None
+    difference = cell(row['delta_mean'], digits=digits, signed=True, count=count)
+    q = row['p_value_bh']
+    if pd.isna(q):
+        q_text = r"\text{--}"
+    else:
+        value = '<0.001' if q < .001 else '<0.050' if q < .05 and round(q, 3) >= .05 else f'{q:.3f}'
+        q_text = 'q' + ('' if value.startswith('<') else '=') + value
+        if q < .05:
+            q_text = r"\mathbf{" + q_text + "}"
+    return r"\shortstack{" + difference + r"\\[-1pt]$\scriptstyle " + q_text + "$}"
+
+
+def make_test_tables(tables: Tables, comparisons: pd.DataFrame) -> None:
+    """Mirror the accuracy panels with compact effect/q cells and explicit references."""
+    for name, specs, methods, datasets, kind in tables.test_panels:
+        for start in range(0, len(datasets), 3):
+            subset = datasets[start:start+3]
+            rows = []
+            for dataset in subset:
+                group = comparisons[(comparisons.dataset == dataset) & (comparisons.kind == kind)].set_index(['method', 'metric'])
+                references = []
+                for metric, _, _, _ in specs:
+                    reference = group.loc[(methods[0], metric), 'reference']
+                    if reference is None or pd.isna(reference):
+                        references.append('n/a' if not group.loc[(methods[0], metric), 'applicable'] else '--')
+                    elif reference.startswith('ABAPC '):
+                        references.append(r'\shortstack{ABAPC\\' + reference.removeprefix('ABAPC ') + '}')
+                    elif reference == 'NOTEARS-MLP':
+                        references.append(r'\shortstack{NOTEARS\\MLP}')
+                    else:
+                        references.append(tex_escape(reference))
+                rows.append([dataset.title(), 'Best mean', *references])
+                for method in methods:
+                    values = [test_cell(group.loc[(method, metric)].to_dict(), digits) for metric, _, digits, _ in specs]
+                    rows.append(['', tex_escape(method), *values])
+                if dataset != subset[-1]:
+                    rows.append(None)
+            suffix = f'_{start//3+1}' if len(datasets) > 3 else ''
+            result_label = 'tab:aij-' + (name.replace('table_aij_', '') + suffix).replace('_', '-')
+            tables.write(name+'_tests'+suffix, ['Dataset', 'Method', *[s[1] for s in specs]], rows,
+                         r"Paired comparisons for Table~\ref{" + result_label + r"} with each column's best-mean method. Cells show mean differences (row minus best) above BH-adjusted $q$-values; bold $q<0.05$ indicates a difference. Tests are two-sided paired $t$-tests, with BH correction across all 15 method pairs per dataset and metric. Subscripts give pair counts below ten; ref. denotes the comparison method, n/a an inapplicable metric, and -- an unavailable test. Non-significance does not establish equivalence.")
 
 
 def noninformative_arrowhead_scores(sizes: pd.DataFrame) -> set[tuple[str, str]]:
@@ -452,7 +578,7 @@ def noninformative_arrowhead_scores(sizes: pd.DataFrame) -> set[tuple[str, str]]
             for metric in ("arrowhead_precision", "arrowhead_recall", "arrowhead_F1")}
 
 
-def make_primary_tables(tables: Tables, primary: pd.DataFrame, tests: pd.DataFrame, sizes: pd.DataFrame) -> None:
+def make_primary_tables(tables: Tables, primary: pd.DataFrame, tests: pd.DataFrame, sizes: pd.DataFrame, comparisons: pd.DataFrame) -> None:
     noninformative = noninformative_arrowhead_scores(sizes)
     common = r"Results use ten matched seeds and 5000 observations per run. Entries report means above sample standard deviations; subscripts indicate fewer than ten defined measurements, and -- denotes an unavailable value."
     cp = primary[primary.kind == "cpdag"]
@@ -460,18 +586,18 @@ def make_primary_tables(tables: Tables, primary: pd.DataFrame, tests: pd.DataFra
              ("adjacency_F1", r"Sk-F1 $\uparrow$", 3, "max"), ("arrowhead_F1", r"AH-F1 $\uparrow$", 3, "max"),
              ("nshd", r"NSHD $\downarrow$", 2, "min"), ("F1", r"F1 $\uparrow$", 3, "max")]
     summary = aggregate(cp, ["dataset", "method"], [s[0] for s in specs])
-    metric_panels(tables, summary, "table_aij_cpdag_core", specs, r"Graph reconstruction relative to the true CPDAG. " + common + r" NSID and NSHD divide Structural Interventional (Hamming, respectively) Distance by the number of true DAG edges. Sk-F1 measures skeleton recovery and AH-F1 arrowhead recovery. AH scores are n/a when the true CPDAG has no compelled arrowheads.", bold=True, noninformative=noninformative, tests=tests)
+    metric_panels(tables, summary, "table_aij_cpdag_core", specs, r"Graph reconstruction relative to the true CPDAG. " + common + r" NSID and NSHD divide Structural Interventional (Hamming, respectively) Distance by the number of true DAG edges. Sk-F1 measures skeleton recovery and AH-F1 arrowhead recovery. AH scores are n/a when the true CPDAG has no compelled arrowheads.", bold=True, noninformative=noninformative, comparisons=comparisons)
     specs = [(metric, title, 3, "max") for metric, title in (
         ("precision", r"P $\uparrow$"), ("recall", r"R $\uparrow$"),
         ("adjacency_precision", r"Sk-P $\uparrow$"), ("adjacency_recall", r"Sk-R $\uparrow$"),
         ("arrowhead_precision", r"AH-P $\uparrow$"), ("arrowhead_recall", r"AH-R $\uparrow$"))]
     metric_panels(tables, aggregate(cp, ["dataset", "method"], [s[0] for s in specs]), "table_aij_cpdag_precision_recall", specs,
-                  r"Precision (P) and recall (R) relative to the true CPDAG, for edges, skeleton adjacencies (Sk), and arrowheads (AH). " + common + r" AH scores are n/a when the true CPDAG has no compelled arrowheads.", noninformative=noninformative, bold=True, tests=tests)
+                  r"Precision (P) and recall (R) relative to the true CPDAG, for edges, skeleton adjacencies (Sk), and arrowheads (AH). " + common + r" AH scores are n/a when the true CPDAG has no compelled arrowheads.", noninformative=noninformative, bold=True, comparisons=comparisons)
     dag = primary[primary.kind == "dag"]
     specs = [("nsid", r"NSID $\downarrow$", 2, "min"), ("nshd", r"NSHD $\downarrow$", 2, "min"),
              ("F1", r"F1 $\uparrow$", 3, "max"), ("precision", r"P $\uparrow$", 3, "max"), ("recall", r"R $\uparrow$", 3, "max")]
     metric_panels(tables, aggregate(dag, ["dataset", "method"], [s[0] for s in specs]), "table_aij_dag", specs,
-                  r"Graph reconstruction relative to the true DAG. " + common + r" NSID and NSHD divide Structural Interventional (Hamming, respectively) Distance by the number of true DAG edges. P and R denote precision and recall.", bold=True, tests=tests, kind='dag')
+                  r"Graph reconstruction relative to the true DAG. " + common + r" NSID and NSHD divide Structural Interventional (Hamming, respectively) Distance by the number of true DAG edges. P and R denote precision and recall.", bold=True, comparisons=comparisons, kind='dag')
     specs = [("directed", "Directed", 1, "max"), ("undirected", "Undirected", 1, "max"), ("dag_edges", "DAG edges", 1, "max")]
     metric_panels(tables, aggregate(sizes, ["dataset", "method"], [s[0] for s in specs]), "table_aij_graph_size", specs,
                   r"Graph sizes: numbers of directed and undirected edges in the estimated partially directed graphs, and edges in their DAG representatives. Entries report means $\pm$ sample standard deviations over ten matched runs; subscripts indicate fewer than ten defined measurements. Reference rows give the true CPDAG and DAG sizes.", methods=("Reference", *METHODS))
@@ -479,10 +605,10 @@ def make_primary_tables(tables: Tables, primary: pd.DataFrame, tests: pd.DataFra
     for dataset in DATASETS:
         vals = []
         for metric in ("nsid_low", "nsid_high", "adjacency_F1", "arrowhead_F1", "nshd"):
-            row = tests[(tests.dataset == dataset) & (tests.kind == "cpdag") & (tests.reference == "ABAPC (bb)") & (tests.metric == metric)].iloc[0]
+            row = tests[(tests.dataset == dataset) & (tests.kind == "cpdag") & (tests.method == "ABAPC (bb-nor)") & (tests.reference == "ABAPC (bb)") & (tests.metric == metric)].iloc[0]
             vals.append(cell(row.delta_mean, digits=3, signed=True, count=int(row.n) if 0<row.n<10 else None,
                              applicable=(dataset, metric) not in noninformative))
-        time = tests[(tests.dataset == dataset) & (tests.kind == "dag") & (tests.reference == "ABAPC (bb)") & (tests.metric == "elapsed")].iloc[0]
+        time = tests[(tests.dataset == dataset) & (tests.kind == "dag") & (tests.method == "ABAPC (bb-nor)") & (tests.reference == "ABAPC (bb)") & (tests.metric == "elapsed")].iloc[0]
         vals.append(rf"$\times {time.left_mean/time.right_mean:.3g}$")
         rows.append([dataset.title(), *vals])
     tables.write("table_aij_main_delta", ["Dataset", r"$\Delta$NSID$_{\min}\downarrow$", r"$\Delta$NSID$_{\max}\downarrow$", r"$\Delta$Sk-F1$\uparrow$", r"$\Delta$AH-F1$\uparrow$", r"$\Delta$NSHD$\downarrow$", r"$t$ ratio$\downarrow$"], rows,
@@ -598,14 +724,16 @@ def main() -> None:
     sizes = load_sizes(src, primary)
     noninformative = noninformative_arrowhead_scores(sizes)
     tests = make_tests(primary, noninformative)
+    comparisons = best_comparisons(primary, tests, noninformative)
     semantics = load_semantics(src)
     legacy = legacy_summaries(src, primary)
     tables = Tables(output)
-    make_primary_tables(tables, primary, tests, sizes)
+    make_primary_tables(tables, primary, tests, sizes, comparisons)
     make_legacy_tables(tables, legacy, semantics)
     make_fact_tables(tables, src, output)
+    make_test_tables(tables, comparisons)
     have_ranking = ranking_table(tables, src, args.ranking_csv)
-    for name, frame in (("primary_records", primary), ("paired_tests", tests), ("graph_size_records", sizes),
+    for name, frame in (("primary_records", primary), ("paired_tests", tests), ("best_comparisons", comparisons), ("graph_size_records", sizes),
                         ("legacy_summaries", legacy), ("semantics_summaries", semantics)):
         frame.to_csv(output/f"{name}.csv", index=False, lineterminator="\n")
     metrics = ["elapsed", "nnz", "precision", "recall", "F1", "adjacency_precision", "adjacency_recall", "adjacency_F1",
@@ -617,19 +745,21 @@ def main() -> None:
     for name in ("scripts/build_aij_tables.py", "scripts/plot_bnlearn_matched10_compare.py", "scripts/generate_bnlearn_matched10_ttest_tables.py",
                  "scripts/analyze_bnlearn_matched10_alpha_facts.py", "utils/experiment_support.py", "scripts/README_AIJ.md"):
         src.use(name, "Generator, experiment-selection evidence or source-map documentation")
-    generated_names = set(tables.names) | {"preview.tex", "primary_records.csv", "paired_tests.csv", "graph_size_records.csv", "legacy_summaries.csv",
+    generated_names = set(tables.names) | {"preview.tex", "primary_records.csv", "paired_tests.csv", "best_comparisons.csv", "graph_size_records.csv", "legacy_summaries.csv",
         "semantics_summaries.csv", "primary_summary.csv", "metric_coverage.csv", "alpha_paired_effects.csv"}
     manifest = dict(schema_version=1, generator="scripts/build_aij_tables.py", git_commit=git("rev-parse", "HEAD"),
                     git_branch=git("branch", "--show-current"), generator_sha256=sha(Path(__file__).read_bytes()),
                     generator_tracked_at_commit=subprocess.run(["git", "cat-file", "-e", "HEAD:scripts/build_aij_tables.py"], cwd=ROOT, capture_output=True).returncode == 0,
                     dependencies={"python":sys.version.split()[0], "numpy":np.__version__, "pandas":pd.__version__},
-                    datasets=list(DATASETS), seeds=list(SEEDS), sample_size=5000, ci_test="gsq", alpha=0.05,
+                    datasets=list(DATASETS), dataset_sizes={d:{"nodes":NODES[d],"edges":EDGES[d]} for d in DATASETS}, seeds=list(SEEDS), sample_size=5000, ci_test="gsq", alpha=0.05,
                     standard_deviation="sample, ddof=1", normalisation="SID and SHD divided by true DAG edge count; exact zeros preserved",
                     display_not_applicable=[{"dataset":d,"kind":"cpdag","metric":m,"reason":"No reference arrowheads; non-informative recovery comparison"} for d,m in sorted(noninformative)],
                     display_legend={"n/a":"Not applicable/non-informative for the reference graph", "--":"No available numerical value (missing, undefined in archived computation, or unverified); see table caption"},
                     evaluation_protocol="aij_v2: complete CPDAG conversion, explicit endpoints, exact edge-type F1, exact SID extrema with DAG witnesses",
                     evaluation_caveats=["Five Survey MPC outputs have no consistent extension: retain edge scores, omit SID and DAG scores", "FGS historical DOT export lacks original endpoint/node-label provenance; native comparison requires rerunning the corrected exporter", "Historical supplementary cohorts remain separately labelled"],
-                    tests="two-sided paired t-test on finite matched pairs, omitted seeds recorded; Holm across five reference methods within each dataset/metric; separate from legacy unpaired t-tests",
+                    tests="two-sided paired t-test on finite matched pairs, omitted seeds recorded; BH across all 15 method pairs within each dataset/kind/metric; unavailable tests remain in the family",
+                    highlighting="best empirical mean (ties included), plus methods not significantly worse than it at BH q<0.05; unavailable tests do not imply a tie; non-significance does not establish equivalence",
+                    test_tables="mean paired difference (row minus best), BH q-value, pair count if below ten; full 15-pair results in paired_tests.csv and selected references in best_comparisons.csv",
                     unresolved=[] if have_ranking else ["ranking.png: original 50-run AP/NDCG data and generating script not found; no replacement numbers invented"],
                     historical_caveats=["Original-encoding plot fallbacks mix 2000- and 5000-sample experiments", "ASPforABA uses a historical 50-run summary", "CO-max semantics aggregates recovered from saved notebook output; raw CO_MAX field missing"],
                     inputs=src.files, tables=tables.names,
@@ -644,7 +774,7 @@ def main() -> None:
            "The JSON manifest records input and output SHA-256 hashes. Generated CSVs and evaluation caches are reproduced in the code checkout; they are not duplicated in the paper repository.", "",
            "| Table | LaTeX input |", "| --- | --- |"]
     links += [f"| {i} | [{name}]({name}) |" for i,name in enumerate(tables.names,1)]
-    links += ["", "Tables 15--18 from the initial review have been retired. The retained set contains 14 tables. Historical cohorts remain labelled; matched ASPCR-DAG and discrete-score FGS reruns are not substituted before validation.", "",
+    links += ["", "The initial review's fact-change, fact-quality and separate-cohort ASPCR tables remain retired. This collection contains 14 result tables and six compact statistical-comparison tables. Historical cohorts remain labelled; matched ASPCR-DAG and discrete-score FGS reruns are not substituted before validation.", "",
               "Include a table with `\\input{tables/aij/<filename>.tex}`; compile `preview.tex` to review the collection."]
     (output/'SOURCES.md').write_text('\n'.join(links)+'\n',encoding='utf-8')
     if args.paper_dir:
