@@ -47,8 +47,9 @@ python experiments.py --source bnlearn --names cancer --models random --n_runs 1
 ```
 
 Add `--resume` to that command to resume the corrected version. The runner
-records the protocol in its manifest, progress CSVs, archived metric records,
-and a `metric_protocol_<version>.json` sidecar. WC sweeps also record it in
+records the protocol in its manifest, progress CSVs,
+and a `metric_protocol_<version>.json` sidecar. Keep these alongside archived
+graphs and metric summaries when transferring results. WC sweeps also record it in
 their JSON summaries; `experiment_llm.py` records it in its result rows and a
 sidecar. Choose new output paths for those entry points too.
 
