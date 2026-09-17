@@ -5,6 +5,11 @@ This directory contains the entry points for reevaluating existing graphs,
 building the paper tables, and running the missing baselines. Run commands
 from the repository root in the existing experiment environment.
 
+The [matched rerun plan](AIJ_MATCHED_RERUN_PLAN.md) covers all methods on shared
+saved inputs, including ASPforABA and original ABAPC. It includes Linux commands
+for the `abaenv` conda environment and distinguishes the existing launchers from
+the common-input adapters still to be implemented.
+
 ## Files and outputs
 
 | File | Purpose |
@@ -15,6 +20,7 @@ from the repository root in the existing experiment environment.
 | `run_matched_baseline_experiments.py` | Per-seed experiment runner and raw artifact writer. |
 | `validate_matched_aspcr_results.py` | Check DAG constraints, native CI traces, objectives and matched inputs. |
 | `run_fgs_once.py` | Run one FGES search in an isolated JVM and preserve edge endpoints and node order. |
+| `AIJ_MATCHED_RERUN_PLAN.md` | Shared-data experiment design, implementation steps and Linux/`abaenv` run commands. |
 | `../utils/aij_graph_metrics.py` | Explicit graph decoding, complete CPDAG conversion, edge metrics and exact SID bounds. |
 
 The ASPCR runner and R wrapper derive from the corrected MCS implementation at
@@ -28,6 +34,8 @@ not bundled.
 After the branch has been pushed, update the server checkout:
 
 ```bash
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate abaenv
 git fetch origin
 git switch AIJ                         # first use: git switch --track origin/AIJ
 git pull --ff-only origin AIJ

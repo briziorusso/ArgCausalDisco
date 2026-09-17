@@ -736,7 +736,8 @@ def main() -> None:
     for name in RETIRED_TABLES:
         (output/name).unlink(missing_ok=True)
     for name in ("scripts/build_aij_tables.py", "scripts/plot_bnlearn_matched10_compare.py", "scripts/generate_bnlearn_matched10_ttest_tables.py",
-                 "scripts/analyze_bnlearn_matched10_alpha_facts.py", "utils/experiment_support.py", "scripts/README_AIJ.md"):
+                 "scripts/analyze_bnlearn_matched10_alpha_facts.py", "utils/experiment_support.py", "scripts/README_AIJ.md",
+                 "scripts/AIJ_MATCHED_RERUN_PLAN.md"):
         src.use(name, "Generator, experiment-selection evidence or source-map documentation")
     generated_names = set(tables.names) | {"preview.tex", "primary_records.csv", "paired_tests.csv", "best_comparisons.csv", "graph_size_records.csv", "legacy_summaries.csv",
         "semantics_summaries.csv", "primary_summary.csv", "metric_coverage.csv", "alpha_paired_effects.csv"}
@@ -762,6 +763,7 @@ def main() -> None:
     base=f"https://github.com/briziorusso/ArgCausalDisco/blob/{commit}"
     links=["# AIJ table provenance", "", f"Code branch: `AIJ`; exact revision: [{commit}]({base.replace('/blob/','/commit/')}).", "",
            f"[Build and server instructions]({base}/scripts/README_AIJ.md).", "",
+           f"[Matched rerun plan and Linux/abaenv commands]({base}/scripts/AIJ_MATCHED_RERUN_PLAN.md).", "",
            f"Generator: [build_aij_tables.py]({base}/scripts/build_aij_tables.py).",
            f"Evaluation: [reevaluate_aij_graphs.py]({base}/scripts/reevaluate_aij_graphs.py) and [graph metrics]({base}/utils/aij_graph_metrics.py).", "",
            "The JSON manifest records input and output SHA-256 hashes. Generated CSVs and evaluation caches are reproduced in the code checkout; they are not duplicated in the paper repository.", "",
