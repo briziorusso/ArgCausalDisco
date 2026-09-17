@@ -85,8 +85,8 @@ class TableDataTests(unittest.TestCase):
 
     def test_dataset_label_uses_true_graph_sizes(self):
         self.assertIn(r'Cancer\\', dataset_cell('cancer'))
-        self.assertIn(r'|V|=5,\ |E|=4', dataset_cell('cancer'))
-        self.assertIn(r'|V|=20,\ |E|=25', dataset_cell('child'))
+        self.assertIn(r'|V|=5$}\\[-1pt]{\scriptsize $|E|=4', dataset_cell('cancer'))
+        self.assertIn(r'|V|=20$}\\[-1pt]{\scriptsize $|E|=25', dataset_cell('child'))
 
     def test_test_cells_keep_missing_tests_distinct_from_nonsignificance(self):
         row = dict(applicable=True, analysis_status='insufficient_pairs', delta_mean=.1, n=1, p_value_bh=np.nan)

@@ -10,7 +10,7 @@ from the repository root in the existing experiment environment.
 | File | Purpose |
 | --- | --- |
 | `reevaluate_aij_graphs.py` | Reevaluate the 420 archived graphs without rerunning learners. |
-| `build_aij_tables.py` | Generate 14 result tables, six statistical-comparison tables and their provenance manifest. |
+| `build_aij_tables.py` | Generate 13 result tables, six statistical-comparison tables and their provenance manifest. |
 | `run_aij_baselines.py` | Preflight, launch/resume, validate and evaluate ASPCR-DAG or FGS-BDeu. |
 | `run_matched_baseline_experiments.py` | Per-seed experiment runner and raw artifact writer. |
 | `validate_matched_aspcr_results.py` | Check DAG constraints, native CI traces, objectives and matched inputs. |
@@ -126,17 +126,19 @@ the paper manifest links to the exact committed implementation.
 | 3–4 | `table_aij_cpdag_precision_recall_*.tex` | Same graphs; edge, skeleton and arrowhead scores. |
 | 5–6 | `table_aij_dag_*.tex` | Native DAGs or seeded consistent extensions. |
 | 7–8 | `table_aij_graph_size_*.tex` | Evaluated estimates and reference graphs. |
-| 9 | `table_aij_main_delta.tex` | Within-seed bb-nor minus bb effects. |
-| 10–11 | `table_aij_runtime_*.tex` | Matched-ten timings plus explicitly labelled legacy cohorts. |
-| 12 | `table_aij_variants.tex` | Encoding variants; cohort/sample sizes shown. |
-| 13 | `table_aij_semantics.tex` | Separate 50-run summaries, including saved notebook output for CO-max. |
-| 14 | `table_aij_alpha_methods.tex` | Archived within-seed threshold comparison. |
-| 15-16 | `table_aij_cpdag_core_tests_*.tex` | CPDAG core metrics: paired differences and BH-adjusted comparisons to the best mean. |
-| 17-18 | `table_aij_cpdag_precision_recall_tests_*.tex` | CPDAG precision/recall comparisons. |
-| 19-20 | `table_aij_dag_tests_*.tex` | DAG metric comparisons. |
+| 9–10 | `table_aij_runtime_*.tex` | Matched-ten timings plus explicitly labelled legacy cohorts. |
+| 11 | `table_aij_variants.tex` | Encoding variants; cohort/sample sizes shown. |
+| 12 | `table_aij_semantics.tex` | Separate 50-run summaries, including saved notebook output for CO-max. |
+| 13 | `table_aij_alpha_methods.tex` | Archived within-seed threshold comparison. |
+| 14–15 | `table_aij_cpdag_core_tests_*.tex` | CPDAG core metrics: paired differences and BH-adjusted comparisons to the best mean. |
+| 16–17 | `table_aij_cpdag_precision_recall_tests_*.tex` | CPDAG precision/recall comparisons. |
+| 18–19 | `table_aij_dag_tests_*.tex` | DAG metric comparisons. |
 
 The initial review's fact-change, fact-quality and separate 50-seed ASPCR
-tables remain retired; the six new tables report statistical comparisons. AP/NDCG source records for the
+tables remain retired. The bb-nor minus bb summary (former Table 9) is also
+retired; its underlying effects remain in `paired_tests.csv`. The builder removes
+only its named TeX file from the output and paper directories on regeneration.
+The six test tables report statistical comparisons. AP/NDCG source records for the
 ranking figure have not been recovered; no replacement values are invented.
 An optional `--ranking-csv` can generate that additional table from original
 per-run `dataset,method,seed,AP,NDCG` data, once available.
@@ -175,8 +177,11 @@ Sachs has no compelled reference arrowheads, so its AH comparisons are `n/a`.
 `--` denotes an unavailable value; neither symbol replaces an observed zero.
 
 Dataset labels give the number of nodes and edges in the true DAG beneath
-its name, for example `|V|=5, |E|=4`. Both counts are checked against the saved
-true adjacency matrices.
+its name, on separate lines: `|V|=5`, then `|E|=4`. Both counts are checked against
+the saved true adjacency matrices. CPDAG columns are NSID_B, NSID_W, NSHD, Sk-F1,
+AH-F1 and F1, in that order. B/W mean best/worst; internal CSV keys remain
+`nsid_low`/`nsid_high`. Historical semantics bounds use the same display labels
+but retain the caveat that the bounds need not be attained.
 
 Primary tables bold the best empirical mean (including exact ties) and methods
 not significantly worse than that best-mean reference. Each dataset, graph kind

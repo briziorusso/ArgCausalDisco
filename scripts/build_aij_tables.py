@@ -29,6 +29,7 @@ EDGES = dict(zip(DATASETS, (4, 4, 6, 8, 17, 25)))
 SEEDS = (7816, 3578, 2656, 2688, 2494, 183, 7977, 3199, 316, 8266)
 METHODS = ("Random", "FGS", "NOTEARS-MLP", "MPC", "ABAPC (bb)", "ABAPC (bb-nor)")
 VARIANTS = ("ABAPC (nor)", "ABAPC (bb)", "ABAPC (bb-nor)")
+RETIRED_TABLES = ("table_aij_main_delta.tex",)
 SPECS = {
     "Random": ("random", "bnlearn_random_matched10_gsq_graphmetrics", None),
     "FGS": ("fgs", "bnlearn_fgs_matched10_gsq_graphmetrics", None),
@@ -419,8 +420,9 @@ def tex_escape(value: str) -> str:
 
 
 def dataset_cell(dataset: str) -> str:
-    return (r"\shortstack[l]{" + dataset.title() + r"\\[-1pt]{\scriptsize $|V|="
-            + str(NODES[dataset]) + r",\ |E|=" + str(EDGES[dataset]) + "$}}")
+    # Extend into the empty dataset cells of the following method rows.
+    return (r"\smash{\begin{tabular}[t]{@{}l@{}}" + dataset.title() + r"\\[-1pt]{\scriptsize $|V|="
+            + str(NODES[dataset]) + r"$}\\[-1pt]{\scriptsize $|E|=" + str(EDGES[dataset]) + r"$}\end{tabular}}")
 
 
 def cell(mean, std=None, digits=3, signed=False, bold=False, stacked=False, count=None, applicable=True, marker='') -> str:
@@ -578,15 +580,16 @@ def noninformative_arrowhead_scores(sizes: pd.DataFrame) -> set[tuple[str, str]]
             for metric in ("arrowhead_precision", "arrowhead_recall", "arrowhead_F1")}
 
 
-def make_primary_tables(tables: Tables, primary: pd.DataFrame, tests: pd.DataFrame, sizes: pd.DataFrame, comparisons: pd.DataFrame) -> None:
+def make_primary_tables(tables: Tables, primary: pd.DataFrame, sizes: pd.DataFrame, comparisons: pd.DataFrame) -> None:
     noninformative = noninformative_arrowhead_scores(sizes)
     common = r"Results use ten matched seeds and 5000 observations per run. Entries report means above sample standard deviations; subscripts indicate fewer than ten defined measurements, and -- denotes an unavailable value."
     cp = primary[primary.kind == "cpdag"]
-    specs = [("nsid_low", r"NSID$_{\min}\downarrow$", 2, "min"), ("nsid_high", r"NSID$_{\max}\downarrow$", 2, "min"),
+    specs = [("nsid_low", r"NSID$_{B}\downarrow$", 2, "min"), ("nsid_high", r"NSID$_{W}\downarrow$", 2, "min"),
+             ("nshd", r"NSHD $\downarrow$", 2, "min"),
              ("adjacency_F1", r"Sk-F1 $\uparrow$", 3, "max"), ("arrowhead_F1", r"AH-F1 $\uparrow$", 3, "max"),
-             ("nshd", r"NSHD $\downarrow$", 2, "min"), ("F1", r"F1 $\uparrow$", 3, "max")]
+             ("F1", r"F1 $\uparrow$", 3, "max")]
     summary = aggregate(cp, ["dataset", "method"], [s[0] for s in specs])
-    metric_panels(tables, summary, "table_aij_cpdag_core", specs, r"Graph reconstruction relative to the true CPDAG. " + common + r" NSID and NSHD divide Structural Interventional (Hamming, respectively) Distance by the number of true DAG edges. Sk-F1 measures skeleton recovery and AH-F1 arrowhead recovery. AH scores are n/a when the true CPDAG has no compelled arrowheads.", bold=True, noninformative=noninformative, comparisons=comparisons)
+    metric_panels(tables, summary, "table_aij_cpdag_core", specs, r"Graph reconstruction relative to the true CPDAG. " + common + r" NSID and NSHD divide Structural Interventional (Hamming, respectively) Distance by the number of true DAG edges; B/W denote best/worst compatible DAGs. Sk-F1 measures skeleton recovery and AH-F1 arrowhead recovery. AH scores are n/a when the true CPDAG has no compelled arrowheads.", bold=True, noninformative=noninformative, comparisons=comparisons)
     specs = [(metric, title, 3, "max") for metric, title in (
         ("precision", r"P $\uparrow$"), ("recall", r"R $\uparrow$"),
         ("adjacency_precision", r"Sk-P $\uparrow$"), ("adjacency_recall", r"Sk-R $\uparrow$"),
@@ -601,18 +604,6 @@ def make_primary_tables(tables: Tables, primary: pd.DataFrame, tests: pd.DataFra
     specs = [("directed", "Directed", 1, "max"), ("undirected", "Undirected", 1, "max"), ("dag_edges", "DAG edges", 1, "max")]
     metric_panels(tables, aggregate(sizes, ["dataset", "method"], [s[0] for s in specs]), "table_aij_graph_size", specs,
                   r"Graph sizes: numbers of directed and undirected edges in the estimated partially directed graphs, and edges in their DAG representatives. Entries report means $\pm$ sample standard deviations over ten matched runs; subscripts indicate fewer than ten defined measurements. Reference rows give the true CPDAG and DAG sizes.", methods=("Reference", *METHODS))
-    rows = []
-    for dataset in DATASETS:
-        vals = []
-        for metric in ("nsid_low", "nsid_high", "adjacency_F1", "arrowhead_F1", "nshd"):
-            row = tests[(tests.dataset == dataset) & (tests.kind == "cpdag") & (tests.method == "ABAPC (bb-nor)") & (tests.reference == "ABAPC (bb)") & (tests.metric == metric)].iloc[0]
-            vals.append(cell(row.delta_mean, digits=3, signed=True, count=int(row.n) if 0<row.n<10 else None,
-                             applicable=(dataset, metric) not in noninformative))
-        time = tests[(tests.dataset == dataset) & (tests.kind == "dag") & (tests.method == "ABAPC (bb-nor)") & (tests.reference == "ABAPC (bb)") & (tests.metric == "elapsed")].iloc[0]
-        vals.append(rf"$\times {time.left_mean/time.right_mean:.3g}$")
-        rows.append([dataset.title(), *vals])
-    tables.write("table_aij_main_delta", ["Dataset", r"$\Delta$NSID$_{\min}\downarrow$", r"$\Delta$NSID$_{\max}\downarrow$", r"$\Delta$Sk-F1$\uparrow$", r"$\Delta$AH-F1$\uparrow$", r"$\Delta$NSHD$\downarrow$", r"$t$ ratio$\downarrow$"], rows,
-                 r"Mean within-seed differences, ABAPC (bb-nor) minus ABAPC (bb), over ten matched runs with 5000 observations. Distances are normalised by the number of true DAG edges; negative distance differences and positive F1 differences favour bb-nor. The runtime ratio is bb-nor divided by bb. Subscripts indicate fewer than ten defined pairs; n/a marks AH comparisons with no compelled arrowheads in the true CPDAG, and -- denotes an unavailable value.")
 
 
 def make_legacy_tables(tables: Tables, legacy: pd.DataFrame, semantics: pd.DataFrame) -> None:
@@ -644,9 +635,9 @@ def make_legacy_tables(tables: Tables, legacy: pd.DataFrame, semantics: pd.DataF
     tables.write("table_aij_variants", ["Dataset", "Implementation", "Cohort / samples / runs", r"DAG NSID $\downarrow$"], rows,
                  r"DAG reconstruction across implementations and encoding variants. NSID is SID divided by the number of true DAG edges. Entries report means $\pm$ sample standard deviations. The cohort column gives the experiment collection, sample size and run count; -- denotes an unavailable run count. Comparisons across cohorts are descriptive.")
     order = (*METHODS[:4], "Causal ABA (Original)", "Causal ABA (Alt. ST)", "Causal ABA (Alt. CO)", "Causal ABA (Alt. CO-max)")
-    specs = [("nsid_low", r"NSID$_{L}\downarrow$", 3, "min"), ("nsid_high", r"NSID$_{U}\downarrow$", 3, "min")]
+    specs = [("nsid_low", r"NSID$_{B}\downarrow$", 3, "min"), ("nsid_high", r"NSID$_{W}\downarrow$", 3, "min")]
     metric_panels(tables, semantics, "table_aij_semantics", specs,
-                  r"Comparison of argumentation semantics over 50 runs. Entries report means $\pm$ standard deviations of lower and upper SID bounds, normalised by the number of true DAG edges. These historical bounds need not be attained by a compatible DAG.", methods=order, datasets=DATASETS[:3])
+                  r"Comparison of argumentation semantics over 50 runs. Entries report means $\pm$ standard deviations of best (B) and worst (W) SID bounds, normalised by the number of true DAG edges. These historical bounds need not be attained by a compatible DAG.", methods=order, datasets=DATASETS[:3])
 
 
 def make_fact_tables(tables: Tables, src: Sources, output: Path) -> None:
@@ -728,7 +719,7 @@ def main() -> None:
     semantics = load_semantics(src)
     legacy = legacy_summaries(src, primary)
     tables = Tables(output)
-    make_primary_tables(tables, primary, tests, sizes, comparisons)
+    make_primary_tables(tables, primary, sizes, comparisons)
     make_legacy_tables(tables, legacy, semantics)
     make_fact_tables(tables, src, output)
     make_test_tables(tables, comparisons)
@@ -742,6 +733,8 @@ def main() -> None:
     summary.to_csv(output/"primary_summary.csv", index=False)
     summary[["dataset", "method", "kind", *[c for c in summary if c.endswith("_count")]]].to_csv(output/"metric_coverage.csv", index=False)
     write_preview(output, tables.names)
+    for name in RETIRED_TABLES:
+        (output/name).unlink(missing_ok=True)
     for name in ("scripts/build_aij_tables.py", "scripts/plot_bnlearn_matched10_compare.py", "scripts/generate_bnlearn_matched10_ttest_tables.py",
                  "scripts/analyze_bnlearn_matched10_alpha_facts.py", "utils/experiment_support.py", "scripts/README_AIJ.md"):
         src.use(name, "Generator, experiment-selection evidence or source-map documentation")
@@ -774,7 +767,7 @@ def main() -> None:
            "The JSON manifest records input and output SHA-256 hashes. Generated CSVs and evaluation caches are reproduced in the code checkout; they are not duplicated in the paper repository.", "",
            "| Table | LaTeX input |", "| --- | --- |"]
     links += [f"| {i} | [{name}]({name}) |" for i,name in enumerate(tables.names,1)]
-    links += ["", "The initial review's fact-change, fact-quality and separate-cohort ASPCR tables remain retired. This collection contains 14 result tables and six compact statistical-comparison tables. Historical cohorts remain labelled; matched ASPCR-DAG and discrete-score FGS reruns are not substituted before validation.", "",
+    links += ["", "The initial review's fact-change, fact-quality and separate-cohort ASPCR tables remain retired, as does the bb-nor minus bb summary (former Table 9); its paired results remain in paired_tests.csv. This collection contains 13 result tables and six compact statistical-comparison tables. Historical cohorts remain labelled; matched ASPCR-DAG and discrete-score FGS reruns are not substituted before validation.", "",
               "Include a table with `\\input{tables/aij/<filename>.tex}`; compile `preview.tex` to review the collection."]
     (output/'SOURCES.md').write_text('\n'.join(links)+'\n',encoding='utf-8')
     if args.paper_dir:
@@ -782,6 +775,8 @@ def main() -> None:
         destination.mkdir(parents=True,exist_ok=True)
         for name in set(tables.names)|{'preview.tex','table_build_manifest.json','SOURCES.md'}:
             shutil.copy2(output/name,destination/name)
+        for name in RETIRED_TABLES:
+            (destination/name).unlink(missing_ok=True)
     print(f"Wrote {len(tables.names)} tables to {output}; {len(primary)} primary records; {len(tests)} paired tests.")
     for issue in manifest["unresolved"]:
         print("UNRESOLVED:", issue)
